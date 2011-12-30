@@ -19,6 +19,7 @@
 /*jslint browser: true, sub: true, undef: true */
 /*global window */
 
+// TODO: Throw objects, not strings
 
 //----------------------------------------------------------------------
 function LogoInterpreter(turtle, stream)
@@ -70,7 +71,7 @@ function LogoInterpreter(turtle, stream)
     }
 
     /*jslint evil: true */
-    var f = eval('(function ' + func.name + '(' + parms.join(',') + ') { return func.apply(this, arguments); })');
+    var f = eval('f = (function ' + func.name + '(' + parms.join(',') + ') { return func.apply(this, arguments); })');
     /*jslint evil: false */
     return f;
   }
@@ -517,9 +518,20 @@ function LogoInterpreter(turtle, stream)
   //----------------------------------------------------------------------
   function lexpr(atom) {
     // TODO: If this is an input, output needs to be re-stringified
+
+    // NOTE: Array.prototype.map.call() fails in IE as "0 in string" fails
+    function stringToArray(string) {
+      string = String(string);
+      var result = [], i, length = string.length;
+      for (i = 0; i < length; i += 1) {
+        result[i] = string.charAt(i);
+      }
+      return result;
+    }
+
     if (atom === (void 0)) { throw __("Expected list"); }
-    if (Type(atom) === 'number') { return Array.prototype.map.call(String(atom), function(x) { return x; }); }
-    if (Type(atom) === 'word') { return Array.prototype.map.call(atom, function(x) { return x; }); }
+    if (Type(atom) === 'number') { return stringToArray(atom); }
+    if (Type(atom) === 'word') { return stringToArray(atom); }
     if (Type(atom) === 'list') { return atom; }
 
     throw __("Expected list");

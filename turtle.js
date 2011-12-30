@@ -3,13 +3,13 @@
 //
 
 // Copyright (C) 2011 Joshua Bell
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 // http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -17,6 +17,9 @@
 // limitations under the License.
 
 function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
+  width = Number(width);
+  height = Number(height);
+
   function deg2rad(d) { return d / 180 * Math.PI; }
   function rad2deg(r) { return r * 180 / Math.PI; }
 
@@ -281,11 +284,11 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
   this.setturtlemode('wrap');
   this.showturtle(true);
   this.pendown(true);
-   
+
   this.x = width / 2;
   this.y = height / 2;
   this.r = Math.PI / 2;
-  
+
   this.begin();
   this.end();
 }
