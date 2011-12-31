@@ -945,3 +945,7 @@ test("Error Messages", 51, function () {
   this.assert_error("reduce \"to [ 1 2 ]", "Can't apply REDUCE to special TO");
   this.assert_error("reduce \"while [ 1 2 ]", "Can't apply REDUCE to special WHILE");
 });
+
+test("Regression Tests", function() {
+  this.assert_equals('make "x 0  repeat 3 [ for [ i 1 4 ] [ make "x :x + 1 ] ]  :x', 12);
+});

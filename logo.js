@@ -532,7 +532,7 @@ function LogoInterpreter(turtle, stream)
     if (atom === (void 0)) { throw __("Expected list"); }
     if (Type(atom) === 'number') { return stringToArray(atom); }
     if (Type(atom) === 'word') { return stringToArray(atom); }
-    if (Type(atom) === 'list') { return atom; }
+    if (Type(atom) === 'list') { return atom.slice(); }
 
     throw __("Expected list");
   }
@@ -842,7 +842,7 @@ function LogoInterpreter(turtle, stream)
     }
   };
 
-  self.routines["reverse"] = function(list) { return lexpr(list).slice().reverse(); };
+  self.routines["reverse"] = function(list) { return lexpr(list).reverse(); };
 
   var gensym_index = 0;
   self.routines["gensym"] = function() {
