@@ -948,4 +948,5 @@ test("Error Messages", 51, function () {
 
 test("Regression Tests", function() {
   this.assert_equals('make "x 0  repeat 3 [ for [ i 1 4 ] [ make "x :x + 1 ] ]  :x', 12);
+  this.assert_equals('make "x 0  for [i 0 100 :i + 1] [make "x :x + :i]  :x', 120);
 });

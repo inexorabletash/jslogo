@@ -1736,12 +1736,15 @@ function LogoInterpreter(turtle, stream)
     var varname = sexpr(control.shift());
     var start = aexpr(self.evaluateExpression(control));
     var limit = aexpr(self.evaluateExpression(control));
-    var step = (control.length) ? aexpr(self.evaluateExpression(control)) : sign(limit - start);
 
-    var last;
-    for (var current = start; sign(current - limit) !== sign(step); current += step) {
+    var step, last;
+    var current = start;
+    while (sign(current - limit) !== sign(step)) {
       self.setvar(varname, current);
       last = self.execute(statements);
+
+      step = (control.length) ? aexpr(self.evaluateExpression(control.slice())) : sign(limit - start);
+      current += step;
     }
 
     return last;
