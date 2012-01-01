@@ -77,6 +77,31 @@ function LogoInterpreter(turtle, stream)
   }
 
 
+  // Adapted from:
+  // http://stackoverflow.com/questions/424292/how-to-create-my-own-javascript-random-number-generator-that-i-can-also-set-the-s
+  function PRNG(seed) {
+    var S = seed & 0x7fffffff, // seed
+        A = 48271, // const
+        M = 0x7fffffff, // const
+        Q = M / A, // const
+        R = M % A; // const
+
+    this.next = function PRNG_next() {
+      var hi = S / Q,
+          lo = S % Q,
+          t = A * lo - R * hi;
+      S = (t > 0) ? t : t + M;
+      this.last = S / M;
+      return this.last;
+    };
+    this.seed = function PRNG_seed(x) {
+      S = x & 0x7fffffff;
+    };
+    this.next();
+  }
+
+  this.prng = new PRNG(Math.random() * 0x7fffffff);
+
   //----------------------------------------------------------------------
   //
   // Parsing
@@ -882,7 +907,7 @@ function LogoInterpreter(turtle, stream)
 
   self.routines["pick"] = function(list) {
     list = lexpr(list);
-    var i = Math.floor(Math.random() * list.length);
+    var i = Math.floor(self.prng.next() * list.length);
     return list[i];
   };
 
@@ -937,7 +962,7 @@ function LogoInterpreter(turtle, stream)
   self.routines["listp"] = self.routines["list?"] = function(thing) { return Type(thing) === 'list' ? 1 : 0; };
   // Not Supported: arrayp
   self.routines["numberp"] = self.routines["number?"] = function(thing) { return Type(thing) === 'number' ? 1 : 0; };
-  self.routines["numberwang"] = function(thing) { return Math.random() < 0.5 ? 1 : 0; };
+  self.routines["numberwang"] = function(thing) { return self.prng.next() < 0.5 ? 1 : 0; };
 
   self.routines["equalp"] = self.routines["equal?"] = function(a, b) { return self.equal(a, b) ? 1 : 0; };
   self.routines["notequalp"] = self.routines["notequal?"] = function(a, b) { return !self.equal(a, b) ? 1 : 0; };
@@ -1182,10 +1207,13 @@ function LogoInterpreter(turtle, stream)
 
   self.routines["random"] = function(max) {
     max = aexpr(max);
-    return Math.floor(Math.random() * max);
+    return Math.floor(self.prng.next() * max);
   };
 
-  // Not Supported: rerandom
+  self.routines["rerandom"] = function() {
+    var seed = (arguments.length > 0) ? aexpr(arguments[0]) : 2345678901;
+    return self.prng.seed(seed);
+  };
 
   // 4.4 Print Formatting
 

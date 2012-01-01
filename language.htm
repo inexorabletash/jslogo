@@ -2,9 +2,9 @@
 <html>
 <head>
     <title>Logo Language Guide</title>
-    <link rel="Alternate" type="application/atom+xml" href="feed.xml" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    
+  <link rel="Alternate" type="application/atom+xml" href="feed.xml" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  
 <style type="text/css">
 h1, h2, h3, h4, p { margin-bottom: 6pt; margin-top: 6pt; }
 body, p, h1, h2, h3 { font-family: sans-serif; }
@@ -13,9 +13,9 @@ p, dt, dd, ol, li { font-size: 8pt; }
 code { font-family: monospace; }
 body
 {
-    width: 270px;
-    color: black;
-    background-color: white;
+  width: 270px;
+  color: black;
+  background-color: white;
 }
 </style>
 </head>
@@ -26,189 +26,189 @@ body
 of comparison.</p>
 
 <ol>
-    <li><a href="#types">Data Types</a></li>
-    <li><a href="#sec2">Data Structure Primitives</a></li>
-    <li><a href="#sec3">Communication</a></li>
-    <li><a href="#sec4">Arithmetic</a></li>
-    <li><a href="#sec5">Logical Operations</a></li>
-    <li><a href="#sec6">Graphics</a></li>
-    <li><a href="#sec7">Workspace Management</a></li>
-    <li><a href="#sec8">Control Structures</a></li>
+  <li><a href="#types">Data Types</a>
+  <li><a href="#sec2">Data Structure Primitives</a>
+  <li><a href="#sec3">Communication</a>
+  <li><a href="#sec4">Arithmetic</a>
+  <li><a href="#sec5">Logical Operations</a>
+  <li><a href="#sec6">Graphics</a>
+  <li><a href="#sec7">Workspace Management</a>
+  <li><a href="#sec8">Control Structures</a>
 </ol>
 
  
 <h3 id="types">Types</h3>
 <dl>
-    <dt><code>"<var>word</var></code></dt>
-    <dd>Text string (terminated by whitespace)</dd>
-    <dt><code>:<var>variable</var></code></dt>
-    <dd>Input definition/variable reference</dd>
-    <dt><code>[ <var>item ...</var> ]</code></dt>
-    <dd>List</dd>
-    <dt><code> ( <var>expression</var> )</code></dt>
-    <dd>Parenthesis can be used to group expressions</dd>
-    <dt><code><var>procedure</var> <var>input</var> ...</code></dt>
-    <dd>Call procedure with default number of inputs</dd>
-    <dt><code> ( <var>procedure</var> <var>input</var> ... )</code></dt>
-    <dd>Call procedure with an arbitrary number of inputs</dd>
+  <dt><code>"<var>word</var></code>
+  <dd>Text string (terminated by whitespace)
+  <dt><code>:<var>variable</var></code>
+  <dd>Input definition/variable reference
+  <dt><code>[ <var>item ...</var> ]</code>
+  <dd>List
+  <dt><code> ( <var>expression</var> )</code>
+  <dd>Parenthesis can be used to group expressions
+  <dt><code><var>procedure</var> <var>input</var> ...</code>
+  <dd>Call procedure with default number of inputs
+  <dt><code> ( <var>procedure</var> <var>input</var> ... )</code>
+  <dd>Call procedure with an arbitrary number of inputs
 </dl>
 
 <h3 id="sec2">2. Data Structure Primitives</h3>
 <h4>2.1 Constructors</h4>
 
 <dl>
-    <dt><code>word <var>expr</var> <var>expr</var></code></dt>
-    <dt><code>(word <var>expr</var> <var>...</var>)</code></dt>
-    <dd>Concatenate two (or more) words into one word, separated with spaces</dd>
+  <dt><code>word <var>expr</var> <var>expr</var></code>
+  <dt><code>(word <var>expr</var> <var>...</var>)</code>
+  <dd>Concatenate two (or more) words into one word, separated with spaces
 
-    <dt><code>list thing1 thing2</code></dt>
-    <dt><code>(list thing1 thing2 ...)</code></dt>
-    <dd>Create a new list from the inputs</dd>
+  <dt><code>list thing1 thing2</code>
+  <dt><code>(list thing1 thing2 ...)</code>
+  <dd>Create a new list from the inputs
 
-    <dt><code>sentence thing1 thing2</code></dt>
-    <dt><code>(sentence thing1 thing2 ...)</code></dt>
-    <dt><code>se thing1 thing2</code></dt>
-    <dt><code>(se thing1 thing2 ...)</code></dt>
-    <dd>Create a new list from the inputs (if non-lists) or members of the inputs (if lists)</dd>
+  <dt><code>sentence thing1 thing2</code>
+  <dt><code>(sentence thing1 thing2 ...)</code>
+  <dt><code>se thing1 thing2</code>
+  <dt><code>(se thing1 thing2 ...)</code>
+  <dd>Create a new list from the inputs (if non-lists) or members of the inputs (if lists)
 
-    <dt><code>fput <var>thing</var> <var>list</var></code></dt>
-    <dt><code>lput <var>thing</var> <var>list</var></code></dt>
-    <dd>Outputs list, but with thing added as a new first/last item</dd>
+  <dt><code>fput <var>thing</var> <var>list</var></code>
+  <dt><code>lput <var>thing</var> <var>list</var></code>
+  <dd>Outputs list, but with thing added as a new first/last item
 
-    <dt><code>combine thing1 thing2</code></dt>
-    <dd>If thing2 is a word, like <code>word</code>; otherwise, like <code>fput</code></dd>
+  <dt><code>combine thing1 thing2</code>
+  <dd>If thing2 is a word, like <code>word</code>; otherwise, like <code>fput</code>
 
-    <dt><code>reverse <var>list</var></code></dt>
-    <dd>Outputs a list with the items in reverse order</dd>
+  <dt><code>reverse <var>list</var></code>
+  <dd>Outputs a list with the items in reverse order
    
-    <dt><code>gensym</code></dt>
-    <dd>Outputs a unique string, e.g. <samp>G1</samp>, <samp>G2</samp>, etc.</dd>
+  <dt><code>gensym</code>
+  <dd>Outputs a unique string, e.g. <samp>G1</samp>, <samp>G2</samp>, etc.
 </dl>
 
 <h4>2.2 Data Selectors</h4>
 <dl>
-    <dt><code>first <var>list</var></code></dt>
-    <dt><code>last <var>list</var></code></dt>
-    <dd>Outputs the first or last item from the list, respectively</dd>
+  <dt><code>first <var>list</var></code>
+  <dt><code>last <var>list</var></code>
+  <dd>Outputs the first or last item from the list, respectively
 
-    <dt><code>butfirst <var>list</var></code></dt>
-    <dt><code>bf <var>list</var></code></dt>
-    <dt><code>butlast <var>list</var></code></dt>
-    <dt><code>bl <var>list</var></code></dt>
-    <dd>Outputs the list, except for the first/last item</dd>
+  <dt><code>butfirst <var>list</var></code>
+  <dt><code>bf <var>list</var></code>
+  <dt><code>butlast <var>list</var></code>
+  <dt><code>bl <var>list</var></code>
+  <dd>Outputs the list, except for the first/last item
 
-    <dt><code>firsts <var>listoflists</var></code></dt>
-    <dd>Outputs a list of the first item of each sublist</dd>
-    
-    <dt><code>butfirsts <var>listoflists</var></code></dt>
-    <dt><code>bfs <var>listoflists</var></code></dt>
-    <dd>Outputs a list of sublists without the first item</dd>
+  <dt><code>firsts <var>listoflists</var></code>
+  <dd>Outputs a list of the first item of each sublist
+  
+  <dt><code>butfirsts <var>listoflists</var></code>
+  <dt><code>bfs <var>listoflists</var></code>
+  <dd>Outputs a list of sublists without the first item
 
-    <dt><code>pick <var>list</var></code></dt>
-    <dd>Outputs one item from a list, at random</dd>
+  <dt><code>pick <var>list</var></code>
+  <dd>Outputs one item from a list, at random
 
-    <dt><code>item <var>index</var> <var>list</var></code></dt>
-    <dd>Outputs the indexth item of the list</dd>
+  <dt><code>item <var>index</var> <var>list</var></code>
+  <dd>Outputs the indexth item of the list
 
-    <dt><code>remove <var>thing</var> <var>list</var></code></dt>
-    <dd>Outputs the list with any occurences of thing removed</dd>
+  <dt><code>remove <var>thing</var> <var>list</var></code>
+  <dd>Outputs the list with any occurences of thing removed
 
-    <dt><code>remdup <var>list</var></code></dt>
-    <dd>Outputs the list with duplicates removed</dd>
+  <dt><code>remdup <var>list</var></code>
+  <dd>Outputs the list with duplicates removed
 </dl>
 
 <h4>2.3 Data Mutators</h4>
 <dl>
-    <dt><code>push <var>stackname</var> <var>thing</var></code></dt>
-    <dt><code>pop <var>stackname</var></code></dt>
-    <dd>Push to/pop from a stack i.e. list variable, e.g. <code>make &quot;s []</code> then <code>push &quot;s 1</code>. Stacks grow from the front.</dd>
+  <dt><code>push <var>stackname</var> <var>thing</var></code>
+  <dt><code>pop <var>stackname</var></code>
+  <dd>Push to/pop from a stack i.e. list variable, e.g. <code>make &quot;s []</code> then <code>push &quot;s 1</code>. Stacks grow from the front.
 
-    <dt><code>queue <var>stackname</var> <var>thing</var></code></dt>
-    <dt><code>dequeue <var>stackname</var></code></dt>
-    <dd>Add/remove from a queue i.e. list variable, e.g. <code>make &quot;q []</code> then <code>queue &quot;q 1</code>. Queues grow from the end</dd>
-    
+  <dt><code>queue <var>stackname</var> <var>thing</var></code>
+  <dt><code>dequeue <var>stackname</var></code>
+  <dd>Add/remove from a queue i.e. list variable, e.g. <code>make &quot;q []</code> then <code>queue &quot;q 1</code>. Queues grow from the end
+  
 </dl>
 
 <h4>2.4 Predicates</h4>
 <p>Predicates return 1 (true) or 0 (false) </p>
 <dl>
-    <dt><code>wordp <var>thing</var></code></dt>
-    <dt><code>word? <var>thing</var></code></dt>
-    <dt><code>listp <var>thing</var></code></dt>
-    <dt><code>list? <var>thing</var></code></dt>
-    <dt><code>numberp <var>thing</var></code></dt>
-    <dt><code>number? <var>thing</var></code></dt>
-    <dd>Test if thing is a word, list, or number respectively.</dd>
-    
-    <dt><code>equalp <var>expr</var> <var>expr</var></code></dt>
-    <dt><code>equal? <var>expr</var> <var>expr</var></code></dt>
-    <dt><code><var>expr</var> = <var>expr</var></code></dt>
-    <dt><code>notequalp <var>expr</var> <var>expr</var></code></dt>
-    <dt><code>notequal? <var>expr</var> <var>expr</var></code></dt>
-    <dt><code><var>expr</var> &lt;&gt; <var>expr</var></code></dt>
-    <dd>Equality/inequality tests. Compares strings, numbers, or lists (equal if length and all members are equal).</dd>
+  <dt><code>wordp <var>thing</var></code>
+  <dt><code>word? <var>thing</var></code>
+  <dt><code>listp <var>thing</var></code>
+  <dt><code>list? <var>thing</var></code>
+  <dt><code>numberp <var>thing</var></code>
+  <dt><code>number? <var>thing</var></code>
+  <dd>Test if thing is a word, list, or number respectively.
+  
+  <dt><code>equalp <var>expr</var> <var>expr</var></code>
+  <dt><code>equal? <var>expr</var> <var>expr</var></code>
+  <dt><code><var>expr</var> = <var>expr</var></code>
+  <dt><code>notequalp <var>expr</var> <var>expr</var></code>
+  <dt><code>notequal? <var>expr</var> <var>expr</var></code>
+  <dt><code><var>expr</var> &lt;&gt; <var>expr</var></code>
+  <dd>Equality/inequality tests. Compares strings, numbers, or lists (equal if length and all members are equal).
 
-    <dt><code>emptyp <var>expr</var></code></dt>
-    <dt><code>empty? <var>expr</var></code></dt>
-    <dd>Test if thing is an empty list or empty string.</dd>
+  <dt><code>emptyp <var>expr</var></code>
+  <dt><code>empty? <var>expr</var></code>
+  <dd>Test if thing is an empty list or empty string.
 
-    <dt><code>beforep <var>thing1</var> <var>thing2</var></code></dt>
-    <dt><code>before? <var>thing1</var> <var>thing2</var></code></dt>
-    <dd>Test string collation order.</dd>
+  <dt><code>beforep <var>thing1</var> <var>thing2</var></code>
+  <dt><code>before? <var>thing1</var> <var>thing2</var></code>
+  <dd>Test string collation order.
 
-    <dt><code>memberp <var>thing</var> <var>list</var></code></dt>
-    <dt><code>member? <var>thing</var> <var>list</var></code></dt>
-    <dd>Test if thing is equal to any member of list.</dd>
+  <dt><code>memberp <var>thing</var> <var>list</var></code>
+  <dt><code>member? <var>thing</var> <var>list</var></code>
+  <dd>Test if thing is equal to any member of list.
 
-    <dt><code>substringp <var>thing1</var> <var>thing2</var></code></dt>
-    <dt><code>substring? <var>thing1</var> <var>thing2</var></code></dt>
-    <dd>Test if thing1 is a substring of thing2.</dd>
+  <dt><code>substringp <var>thing1</var> <var>thing2</var></code>
+  <dt><code>substring? <var>thing1</var> <var>thing2</var></code>
+  <dd>Test if thing1 is a substring of thing2.
 
 </dl>
 
 <h4>2.5 Queries</h4>
 <dl>
-    <dt><code>count <var>thing</var></code></dt>
-    <dd>Outputs length of a list or number of characters in a string</dd>
+  <dt><code>count <var>thing</var></code>
+  <dd>Outputs length of a list or number of characters in a string
 
-    <dt><code>ascii <var>expr</var></code></dt>
-    <dd>Outputs ASCII (actually, Unicode) code point for first character of string</dd>
+  <dt><code>ascii <var>expr</var></code>
+  <dd>Outputs ASCII (actually, Unicode) code point for first character of string
 
-    <dt><code>char <var>expr</var></code></dt>
-    <dd>Outputs Unicode character at specified code point</dd>
+  <dt><code>char <var>expr</var></code>
+  <dd>Outputs Unicode character at specified code point
 
-    <dt><code>uppercase <var>expr</var></code></dt>
-    <dt><code>lowercase <var>expr</var></code></dt>
-    <dd>Outputs string converted to upper/lowercase</dd>
+  <dt><code>uppercase <var>expr</var></code>
+  <dt><code>lowercase <var>expr</var></code>
+  <dd>Outputs string converted to upper/lowercase
 </dl>
 
 
 <h3 id="sec3">3. Communication</h3>
 <h4>3.1 Transmitters</h4>
 <dl>
-    <dt><code>print <var>thing</var></code></dt>
-    <dt><code>pr <var>thing</var></code></dt>
-    <dt>(<code>print <var>thing1</var> <var>thing2</var> ...)</code></dt>
-    <dt>(<code>pr <var>thing1</var> <var>thing2</var> ...)</code></dt>
-    <dd>Print inputs to the text screen, separated by spaces, and followed by a newline. 
-    Square brackets are only put around sublists.</dd>
+  <dt><code>print <var>thing</var></code>
+  <dt><code>pr <var>thing</var></code>
+  <dt>(<code>print <var>thing1</var> <var>thing2</var> ...)</code>
+  <dt>(<code>pr <var>thing1</var> <var>thing2</var> ...)</code>
+  <dd>Print inputs to the text screen, separated by spaces, and followed by a newline. 
+  Square brackets are only put around sublists.
 
-    <dt><code>type <var>thing</var></code></dt>
-    <dt>(<code>type <var>thing1</var> <var>thing2</var> ...)</code></dt>
-    <dd>Like <code>print</code> but with no trailing newline.</dd>
+  <dt><code>type <var>thing</var></code>
+  <dt>(<code>type <var>thing1</var> <var>thing2</var> ...)</code>
+  <dd>Like <code>print</code> but with no trailing newline.
 
-    <dt><code>show <var>thing</var></code></dt>
-    <dt>(<code>show <var>thing1</var> <var>thing2</var> ...)</code></dt>
-    <dd>Like <code>print</code> but with square brackets around list inputs.</dd>
+  <dt><code>show <var>thing</var></code>
+  <dt>(<code>show <var>thing1</var> <var>thing2</var> ...)</code>
+  <dd>Like <code>print</code> but with square brackets around list inputs.
 
 </dl>
 
 
 <h4>3.2 Receivers</h4>
 <dl>
-    <dt><code>readword</code></dt>
-    <dt><code>(readword <var>promptstr</var>)</code></dt>
-    <dd>Prompt the user for a line of input. The result (including spaces) is the single word output.</dd>
+  <dt><code>readword</code>
+  <dt><code>(readword <var>promptstr</var>)</code>
+  <dd>Prompt the user for a line of input. The result (including spaces) is the single word output.
 </dl>
 
 <!--
@@ -219,9 +219,9 @@ of comparison.</p>
 
 <h4>3.4 Terminal Access</h4>
 <dl>
-    <dt><code>cleartext</code></dt>
-    <dt><code>ct</code></dt>
-    <dd>Clear the text screen.</dd>
+  <dt><code>cleartext</code>
+  <dt><code>ct</code>
+  <dd>Clear the text screen.
 </dl>
 
 <h3 id="sec4">4. Arithmetic</h3>
@@ -229,139 +229,143 @@ of comparison.</p>
 <p>Inputs are numbers or numeric expressions, output is a number.</p>
 
 <dl>
-    <dt><code>sum <var>expr</var> <var>expr</var></code></dt>
-    <dt><code>(sum <var>expr</var> <var>...</var>)</code></dt>
-    <dt><code><var>expr</var> + <var>expr</var></code></dt>
-    <dt><code>difference <var>expr</var> <var>expr</var></code></dt>
-    <dt><code><var>expr</var> - <var>expr</var></code></dt>
-    <dt><code>product <var>expr</var> <var>expr</var></code></dt>
-    <dt><code>(product <var>expr</var> <var>...</var>)</code></dt>
-    <dt><code><var>expr</var> * <var>expr</var></code></dt>
-    <dt><code>quotient <var>expr</var> <var>expr</var></code></dt>
-    <dt><code>(quotient <var>expr</var>)</code></dt>
-    <dt><code><var>expr</var> / <var>expr</var></code></dt>
-    <dt><code>power <var>expr</var> <var>expr</var></code></dt>
-    <dt><code><var>expr</var> ^ <var>expr</var></code></dt>
-    <dd>
-            Add, subtract, multiply, divide, and raise-to-the-power-of respectively. 
-            A single input to quotient returns the reciprocal.
-    </dd>
+  <dt><code>sum <var>expr</var> <var>expr</var></code>
+  <dt><code>(sum <var>expr</var> <var>...</var>)</code>
+  <dt><code><var>expr</var> + <var>expr</var></code>
+  <dt><code>difference <var>expr</var> <var>expr</var></code>
+  <dt><code><var>expr</var> - <var>expr</var></code>
+  <dt><code>product <var>expr</var> <var>expr</var></code>
+  <dt><code>(product <var>expr</var> <var>...</var>)</code>
+  <dt><code><var>expr</var> * <var>expr</var></code>
+  <dt><code>quotient <var>expr</var> <var>expr</var></code>
+  <dt><code>(quotient <var>expr</var>)</code>
+  <dt><code><var>expr</var> / <var>expr</var></code>
+  <dt><code>power <var>expr</var> <var>expr</var></code>
+  <dt><code><var>expr</var> ^ <var>expr</var></code>
+  <dd>
+      Add, subtract, multiply, divide, and raise-to-the-power-of respectively. 
+      A single input to quotient returns the reciprocal.
+  
 
-    <dt><code>remainder <var>expr</var> <var>expr</var></code></dt>
-    <dt><code><var>expr</var> % <var>expr</var></code></dt>
-    <dt><code>modulo <var>expr</var> <var>expr</var></code></dt>
-    <dd>
-        Outputs the remainder (modulus). For <code>remainder</code> and <code>%</code>
-        the result has the same sign as the first input; for <code>modulo</code> the
-        result has the same sign as a the second input.
-    </dd>
-    
-    <dt><code>minus <var>expr</var></code></dt>
-    <dt><code>- <var>expr</var></code></dt>
-    <dd>
-        Unary minus sign must begin a top-level expression, follow an infix
-        operator, or have a leading space and no trailing space.
-    </dd>
+  <dt><code>remainder <var>expr</var> <var>expr</var></code>
+  <dt><code><var>expr</var> % <var>expr</var></code>
+  <dt><code>modulo <var>expr</var> <var>expr</var></code>
+  <dd>
+    Outputs the remainder (modulus). For <code>remainder</code> and <code>%</code>
+    the result has the same sign as the first input; for <code>modulo</code> the
+    result has the same sign as a the second input.
+  
+  
+  <dt><code>minus <var>expr</var></code>
+  <dt><code>- <var>expr</var></code>
+  <dd>
+    Unary minus sign must begin a top-level expression, follow an infix
+    operator, or have a leading space and no trailing space.
+  
 
-    <dt><code>abs <var>num</var></code></dt>
-    <dd>Absolute value</dd>
-    
-    <dt><code>int <var>num</var></code></dt>
-    <dt><code>round <var>num</var></code></dt>
-    <dd>Truncate or round a number, respectively.</dd>
+  <dt><code>abs <var>num</var></code>
+  <dd>Absolute value
+  
+  <dt><code>int <var>num</var></code>
+  <dt><code>round <var>num</var></code>
+  <dd>Truncate or round a number, respectively.
 
-    <dt><code>sqrt <var>expr</var></code></dt>
-    <dt><code>exp <var>expr</var></code></dt>
-    <dt><code>log10 <var>expr</var></code></dt>
-    <dt><code>ln <var>expr</var></code></dt>
-    <dd>Square root, <i>e</i> to the power of, common logarithm, and natural logarithm, respectively.</dd>
+  <dt><code>sqrt <var>expr</var></code>
+  <dt><code>exp <var>expr</var></code>
+  <dt><code>log10 <var>expr</var></code>
+  <dt><code>ln <var>expr</var></code>
+  <dd>Square root, <i>e</i> to the power of, common logarithm, and natural logarithm, respectively.
 
-    <dt><code>arctan <var>expr</var></code></dt>
-    <dt><code>(arctan <var>x</var> <var>y</var>)</code></dt>
-    <dt><code>sin <var>expr</var></code></dt>
-    <dt><code>cos <var>expr</var></code></dt>
-    <dt><code>tan <var>expr</var></code></dt>
-    <dd>The usual trig functions. Angles are in degrees.</dd>
+  <dt><code>arctan <var>expr</var></code>
+  <dt><code>(arctan <var>x</var> <var>y</var>)</code>
+  <dt><code>sin <var>expr</var></code>
+  <dt><code>cos <var>expr</var></code>
+  <dt><code>tan <var>expr</var></code>
+  <dd>The usual trig functions. Angles are in degrees.
 
-    <dt><code>radarctan <var>expr</var></code></dt>
-    <dt><code>(radarctan <var>x</var> <var>y</var>)</code></dt>
-    <dt><code>radsin <var>expr</var></code></dt>
-    <dt><code>radcos <var>expr</var></code></dt>
-    <dt><code>radtan <var>expr</var></code></dt>
-    <dd>The usual trig functions. Angles are in radians.</dd>
+  <dt><code>radarctan <var>expr</var></code>
+  <dt><code>(radarctan <var>x</var> <var>y</var>)</code>
+  <dt><code>radsin <var>expr</var></code>
+  <dt><code>radcos <var>expr</var></code>
+  <dt><code>radtan <var>expr</var></code>
+  <dd>The usual trig functions. Angles are in radians.
 
-    <dt><code>iseq <var>first</var> <var>last</var></code></dt>
-    <dd>Outputs a list with integers from <var>first</var> to <var>last</var>, inclusive</dd>
+  <dt><code>iseq <var>first</var> <var>last</var></code>
+  <dd>Outputs a list with integers from <var>first</var> to <var>last</var>, inclusive
 
-    <dt><code>rseq <var>first</var> <var>last</var> <var>count</var></code></dt>
-    <dd>Outputs a list of <var>count</var> numbers from <var>first</var> to <var>last</var>, inclusive</dd>
+  <dt><code>rseq <var>first</var> <var>last</var> <var>count</var></code>
+  <dd>Outputs a list of <var>count</var> numbers from <var>first</var> to <var>last</var>, inclusive
 </dl>
 
 <h4>4.2 Numeric Predicates</h4>
 <dl>
-    <dt><code>greaterp <var>expr</var> <var>expr</var></code></dt>
-    <dt><code>greater? <var>expr</var> <var>expr</var></code></dt>
-    <dt><code><var>expr</var> &gt; <var>expr</var></code></dt>
-    <dt><code>greaterequalp <var>expr</var> <var>expr</var></code></dt>
-    <dt><code>greaterequal? <var>expr</var> <var>expr</var></code></dt>
-    <dt><code><var>expr</var> &gt;= <var>expr</var></code></dt>
-    <dt><code>lessp <var>expr</var> <var>expr</var></code></dt>
-    <dt><code>less? <var>expr</var> <var>expr</var></code></dt>
-    <dt><code><var>expr</var> &lt;= <var>expr</var></code></dt>
-    <dt><code>lessequalp <var>expr</var> <var>expr</var></code></dt>
-    <dt><code>lessequal? <var>expr</var> <var>expr</var></code></dt>
-    <dt><code><var>expr</var> &lt;= <var>expr</var></code></dt>
-    <dd>Greater than, greater than or equal to, less than, less than or equal to,
-    respectively. Inputs are numbers or numeric expressions, output is 1 (true) or 0 (false).</dd>
+  <dt><code>greaterp <var>expr</var> <var>expr</var></code>
+  <dt><code>greater? <var>expr</var> <var>expr</var></code>
+  <dt><code><var>expr</var> &gt; <var>expr</var></code>
+  <dt><code>greaterequalp <var>expr</var> <var>expr</var></code>
+  <dt><code>greaterequal? <var>expr</var> <var>expr</var></code>
+  <dt><code><var>expr</var> &gt;= <var>expr</var></code>
+  <dt><code>lessp <var>expr</var> <var>expr</var></code>
+  <dt><code>less? <var>expr</var> <var>expr</var></code>
+  <dt><code><var>expr</var> &lt;= <var>expr</var></code>
+  <dt><code>lessequalp <var>expr</var> <var>expr</var></code>
+  <dt><code>lessequal? <var>expr</var> <var>expr</var></code>
+  <dt><code><var>expr</var> &lt;= <var>expr</var></code>
+  <dd>Greater than, greater than or equal to, less than, less than or equal to,
+  respectively. Inputs are numbers or numeric expressions, output is 1 (true) or 0 (false).
 </dl>
 
 <h4>4.3 Random Numbers</h4>
 <dl>
-    <dt><code>random <var>expr</var></code></dt>
-    <dd>Outputs a random number from 0 through one less than <var>expr</var></dd>
+  <dt><code>random <var>expr</var></code>
+  <dd>Outputs a random number from 0 through one less than <var>expr</var>
+
+  <dt><code>rerandom</code>
+  <dt>(<code>rerandom <var>expr</var>)</code>
+  <dd>Reseeds the random number generator, either to a fixed value or the specified seed.
 </dl>
 
 <h4>4.4 Print Formatting</h4>
 <dl>
-    <dt><code>form <var>expr</var> <var>width</var> <var>precision</var></code>
-    <dd>Returns a formatted string with the result of a numeric expression with <var>precision</var> decimal places and
-    padded on the left with spaces (if necessary) to be at least <var>width</width> characters long.
+  <dt><code>form <var>expr</var> <var>width</var> <var>precision</var></code>
+  <dd>Returns a formatted string with the result of a numeric expression with <var>precision</var> decimal places and
+  padded on the left with spaces (if necessary) to be at least <var>width</width> characters long.
 </dl>
 
 <h4>4.5 Bitwise Operations</h4>
 <dl>
-    <dt><code>bitand <var>expr</var> <var>expr</var></code></dt>
-    <dt><code>(bitand <var>expr</var> ...)</code></dt>
-    <dt><code>bitor <var>expr</var> <var>expr</var></code></dt>
-    <dt><code>(bitor <var>expr</var> ...)</code></dt>
-    <dt><code>bitxor <var>expr</var> <var>expr</var></code></dt>
-    <dt><code>(bitxor <var>expr</var> ...)</code></dt>
-    <dt><code>bitnot <var>expr</var></code></dt>
-    <dd>Bitwise and, or, exclusive-or, and not, respectively.</dd>
+  <dt><code>bitand <var>expr</var> <var>expr</var></code>
+  <dt><code>(bitand <var>expr</var> ...)</code>
+  <dt><code>bitor <var>expr</var> <var>expr</var></code>
+  <dt><code>(bitor <var>expr</var> ...)</code>
+  <dt><code>bitxor <var>expr</var> <var>expr</var></code>
+  <dt><code>(bitxor <var>expr</var> ...)</code>
+  <dt><code>bitnot <var>expr</var></code>
+  <dd>Bitwise and, or, exclusive-or, and not, respectively.
 
-    <dt><code>ashift <var>expr</var> <var>bitcount</var></code></dt>
-    <dd>Arithmetic bit shift. If bitcount is negative, shifts to the right, preserving sign.</dd>
+  <dt><code>ashift <var>expr</var> <var>bitcount</var></code>
+  <dd>Arithmetic bit shift. If bitcount is negative, shifts to the right, preserving sign.
 
-    <dt><code>lshift <var>expr</var> <var>bitcount</var></code></dt>
-    <dd>Logical bit shift. If bitcount is negative, shifts to the right, zero-filling.</dd>
+  <dt><code>lshift <var>expr</var> <var>bitcount</var></code>
+  <dd>Logical bit shift. If bitcount is negative, shifts to the right, zero-filling.
 </dl>
 
 <h3 id="sec5">5. Logical Operations</h3>
 <dl>
-    <dt><code>true</code></dt>
-    <dd>Outputs 1</dd>
-    <dt><code>false</code></dt>
-    <dd>Outputs 0</dd>
+  <dt><code>true</code>
+  <dd>Outputs 1
+  <dt><code>false</code>
+  <dd>Outputs 0
 
-    <dt><code>and <var>expr</var> <var>expr</var></code></dt>
-    <dt><code>(and <var>expr</var> <var>...</var>)</code></dt>
-    <dt><code>or  <var>expr</var> <var>expr</var></code></dt>
-    <dt><code>(or <var>expr</var> <var>...</var>)</code></dt>
-    <dt><code>xor <var>expr</var> <var>expr</var></code></dt>
-    <dt><code>(xor <var>expr</var> <var>...</var>)</code></dt>
-    <dt><code>not <var>expr</var></code></dt>
-    <dd>Logical &quot;and&quot;, &quot;or&quot;, &quot;exclusive-or&quot;, and &quot;not&quot;, respectively.
-    Inputs are numbers or numeric expressions, output is 1 (true) or 0 (false).</dd>
+  <dt><code>and <var>expr</var> <var>expr</var></code>
+  <dt><code>(and <var>expr</var> <var>...</var>)</code>
+  <dt><code>or  <var>expr</var> <var>expr</var></code>
+  <dt><code>(or <var>expr</var> <var>...</var>)</code>
+  <dt><code>xor <var>expr</var> <var>expr</var></code>
+  <dt><code>(xor <var>expr</var> <var>...</var>)</code>
+  <dt><code>not <var>expr</var></code>
+  <dd>Logical &quot;and&quot;, &quot;or&quot;, &quot;exclusive-or&quot;, and &quot;not&quot;, respectively.
+  Inputs are numbers or numeric expressions, output is 1 (true) or 0 (false).
 </dl>
 
 <h3 id="sec6">6. Graphics</h3>
@@ -370,149 +374,149 @@ of comparison.</p>
 
 <h4>6.1 Turtle Motion</h4>
 <dl>
-    <dt><code>forward <var>expr</var></code></dt>
-    <dt><code>fd <var>expr</var></code></dt>
-    <dd>Move turtle forward <var>expr</var> pixels</dd>
+  <dt><code>forward <var>expr</var></code>
+  <dt><code>fd <var>expr</var></code>
+  <dd>Move turtle forward <var>expr</var> pixels
 
-    <dt><code>back <var>expr</var></code></dt>
-    <dt><code>bk <var>expr</var></code></dt>
-    <dd>Move turtle backward <var>expr</var> pixels</dd>
+  <dt><code>back <var>expr</var></code>
+  <dt><code>bk <var>expr</var></code>
+  <dd>Move turtle backward <var>expr</var> pixels
 
-    <dt><code>left <var>expr</var></code></dt>
-    <dt><code>lt <var>expr</var></code></dt>
-    <dd>Rotate <var>expr</var> degrees counterclockwise</dd>
+  <dt><code>left <var>expr</var></code>
+  <dt><code>lt <var>expr</var></code>
+  <dd>Rotate <var>expr</var> degrees counterclockwise
 
-    <dt><code>right <var>expr</var></code></dt>
-    <dt><code>rt <var>expr</var></code></dt>
-    <dd>Rotate <var>expr</var> degrees clockwise</dd>
+  <dt><code>right <var>expr</var></code>
+  <dt><code>rt <var>expr</var></code>
+  <dd>Rotate <var>expr</var> degrees clockwise
 
-    <dt><code>setpos [ <var>expr</var> <var>expr</var> ]</code></dt>
-    <dt><code>setxy <var>expr</var> <var>expr</var></code></dt>
-    <dt><code>setx <var>expr</var></code></dt>
-    <dt><code>sety <var>expr</var></code></dt>
-    <dd>Move turtle to the specified location without drawing</dd>
+  <dt><code>setpos [ <var>expr</var> <var>expr</var> ]</code>
+  <dt><code>setxy <var>expr</var> <var>expr</var></code>
+  <dt><code>setx <var>expr</var></code>
+  <dt><code>sety <var>expr</var></code>
+  <dd>Move turtle to the specified location without drawing
 
-    <dt><code>setheading <var>expr</var></code></dt>
-    <dt><code>seth <var>expr</var></code></dt>
-    <dd>Rotate the turtle to the specified heading</dd>
+  <dt><code>setheading <var>expr</var></code>
+  <dt><code>seth <var>expr</var></code>
+  <dd>Rotate the turtle to the specified heading
 
-    <dt><code>home</code></dt>
-    <dd>Moves the turtle to center, pointing upwards</dd>
-    
-    <dt><code>arc <var>angle</var> <var>radius</var></code></dt>
-    <dd>Without moving the turtle, draws an arc centered on the turtle, starting at the turtle&apos;s heading.</dd>
+  <dt><code>home</code>
+  <dd>Moves the turtle to center, pointing upwards
+  
+  <dt><code>arc <var>angle</var> <var>radius</var></code>
+  <dd>Without moving the turtle, draws an arc centered on the turtle, starting at the turtle&apos;s heading.
 </dl>
 
 <h4>6.2 Turtle Motion Queries</h4>
 <dl>
-    <dt><code>pos</code></dt>
-    <dt><code>xcor</code></dt>
-    <dt><code>ycor</code></dt>
-    <dd>Outputs the current turtle position as [ x y ], x or y respectively</dd>
+  <dt><code>pos</code>
+  <dt><code>xcor</code>
+  <dt><code>ycor</code>
+  <dd>Outputs the current turtle position as [ x y ], x or y respectively
 
-    <dt><code>heading</code></dt>
-    <dd>Outputs the current turtle heading</dd>
+  <dt><code>heading</code>
+  <dd>Outputs the current turtle heading
 
-    <dt><code>towards [ <var>expr</var> <var>expr</var> ]</code></dt>
-    <dd>Outputs the heading towards the specified [ x y ] coordinates</dd>
+  <dt><code>towards [ <var>expr</var> <var>expr</var> ]</code>
+  <dd>Outputs the heading towards the specified [ x y ] coordinates
 </dl>
 
 <h4>6.3 Turtle and Window Control</h4>
 <dl>
-    <dt><code>showturtle</code></dt>
-    <dt><code>st</code></dt>
-    <dd>Show the turtle</dd>
+  <dt><code>showturtle</code>
+  <dt><code>st</code>
+  <dd>Show the turtle
 
-    <dt><code>hideturtle</code></dt>
-    <dt><code>ht</code></dt>
-    <dd>Hide the turtle</dd>
-    
-    <dt><code>clean</code></dt>
-    <dd>Clear the drawing area</dd>
+  <dt><code>hideturtle</code>
+  <dt><code>ht</code>
+  <dd>Hide the turtle
+  
+  <dt><code>clean</code>
+  <dd>Clear the drawing area
 
-    <dt><code>clearscreen</code></dt>
-    <dt><code>cs</code></dt>
-    <dd>Same as clean and home together</dd>
+  <dt><code>clearscreen</code>
+  <dt><code>cs</code>
+  <dd>Same as clean and home together
 
-    <dt><code>wrap</code></dt>
-    <dd>If the turtle moves off the edge of the screen it will continue on the other side.
-    (default)</dd>
+  <dt><code>wrap</code>
+  <dd>If the turtle moves off the edge of the screen it will continue on the other side.
+  (default)
 
-    <dt><code>window</code></dt>
-    <dd>The turtle can move past the edges of the screen, unbounded.</dd>
+  <dt><code>window</code>
+  <dd>The turtle can move past the edges of the screen, unbounded.
 
-    <dt><code>fence</code></dt>
-    <dd>The turtle attempts to move past the edge of the screen it will stop.</dd>
+  <dt><code>fence</code>
+  <dd>The turtle attempts to move past the edge of the screen it will stop.
 
-    <dt><code>label <var>expr</var></code></dt>
-    <dd>Draw a word (same logic as <code>print</code>) on the graphics display at the turtle location</dd>
+  <dt><code>label <var>expr</var></code>
+  <dd>Draw a word (same logic as <code>print</code>) on the graphics display at the turtle location
 
-    <dt><code>setlabelheight <var>expr</var></code></dt>
-    <dd>Set the height for text drawn by <code>label</code>, in pixels</dd>
+  <dt><code>setlabelheight <var>expr</var></code>
+  <dd>Set the height for text drawn by <code>label</code>, in pixels
 
 </dl>
 
 <h4>6.4 Turtle and Window Queries</h4>
 <dl>
-    <dt><code>shownp</code></dt>
-    <dt><code>shown?</code></dt>
-    <dd>Outputs 1 if the turtle is shown, 0 if the turtle is hidden</dd>
+  <dt><code>shownp</code>
+  <dt><code>shown?</code>
+  <dd>Outputs 1 if the turtle is shown, 0 if the turtle is hidden
 
-    <dt><code>turtlemode</code></dt>
-    <dd>Outputs <code>WRAP</code>, <code>WINDOW</code> or <code>FENCE</code></dd>
+  <dt><code>turtlemode</code>
+  <dd>Outputs <code>WRAP</code>, <code>WINDOW</code> or <code>FENCE</code>
 
-    <dt><code>labelsize</code></dt>
-    <dd>Outputs the height of text drawn by <code>label</code>, in pixels</dd>
+  <dt><code>labelsize</code>
+  <dd>Outputs the height of text drawn by <code>label</code>, in pixels
 </dl>
 
 <h4>6.5 Pen and Background Control</h4>
 <dl>
-    <dt><code>pendown</code></dt>
-    <dt><code>pd</code></dt>
-    <dd>Turtle resumes leaving a trail</dd>
+  <dt><code>pendown</code>
+  <dt><code>pd</code>
+  <dd>Turtle resumes leaving a trail
 
-    <dt><code>penup</code></dt>
-    <dt><code>pu</code></dt>
-    <dd>Turtle stops leaving a trail</dd>
+  <dt><code>penup</code>
+  <dt><code>pu</code>
+  <dd>Turtle stops leaving a trail
 
-    <dt><code>penpaint</code></dt>
-    <dt><code>penerase</code></dt>
-    <dt><code>penreverse</code></dt>
-    <dd>Change the turtle drawing mode - paint (the default) leaves a colored trail, erase
-    restores the background, reverse inverts the background.</dd>
+  <dt><code>penpaint</code>
+  <dt><code>penerase</code>
+  <dt><code>penreverse</code>
+  <dd>Change the turtle drawing mode - paint (the default) leaves a colored trail, erase
+  restores the background, reverse inverts the background.
 
-    <dt><code>setpencolor <var>logocolor</var></code></dt>
-    <dt><code>setpencolor <var>csscolor</var></code></dt>
-    <dt><code>(setpencolor <var>expr</var> <var>expr</var> <var>expr</var>)</code></dt>
-    <dd>
-    <p>Set pen/text color. Color can be a standard Logo color number (0-15), CSS color string (<a target="_blank" href="http://www.w3.org/TR/CSS21/syndata.html#value-def-color">CSS color names or #rrggbb</a>), or in the 3-input version, r/g/b values in 0...99.</p>
-    <p>The standard Logo colors are:</p>
-    <table>
-        <tr><td style="background-color: black; color: white;">0: black</td><td style="background-color: blue;">1: blue</td><td style="background-color: lime;">2: green</td><td style="background-color: cyan;">3: cyan</td></tr>
-        <tr><td style="background-color: red;">4: red</td><td style="background-color: magenta;">5: magenta</td><td style="background-color: yellow;">6: yellow</td><td style="background-color: white;">7: white</td></tr>
-        <tr><td style="background-color: brown;">8: brown</td><td style="background-color: tan;">9: tan</td><td style="background-color: green;">10: green</td><td style="background-color: aquamarine;">11: aqua</td></tr>
-        <tr><td style="background-color: salmon;">12: salmon</td><td style="background-color: purple;">13: purple</td><td style="background-color: orange;">14: orange</td><td style="background-color: gray;">15: gray</td></tr>
-    </table>
-    </dd>
+  <dt><code>setpencolor <var>logocolor</var></code>
+  <dt><code>setpencolor <var>csscolor</var></code>
+  <dt><code>(setpencolor <var>expr</var> <var>expr</var> <var>expr</var>)</code>
+  <dd>
+  <p>Set pen/text color. Color can be a standard Logo color number (0-15), CSS color string (<a target="_blank" href="http://www.w3.org/TR/CSS21/syndata.html#value-def-color">CSS color names or #rrggbb</a>), or in the 3-input version, r/g/b values in 0...99.</p>
+  <p>The standard Logo colors are:</p>
+  <table>
+    <tr><td style="background-color: black; color: white;">0: black</td><td style="background-color: blue;">1: blue</td><td style="background-color: lime;">2: green</td><td style="background-color: cyan;">3: cyan</td></tr>
+    <tr><td style="background-color: red;">4: red</td><td style="background-color: magenta;">5: magenta</td><td style="background-color: yellow;">6: yellow</td><td style="background-color: white;">7: white</td></tr>
+    <tr><td style="background-color: brown;">8: brown</td><td style="background-color: tan;">9: tan</td><td style="background-color: green;">10: green</td><td style="background-color: aquamarine;">11: aqua</td></tr>
+    <tr><td style="background-color: salmon;">12: salmon</td><td style="background-color: purple;">13: purple</td><td style="background-color: orange;">14: orange</td><td style="background-color: gray;">15: gray</td></tr>
+  </table>
+  
 
-    <dt><code>setpensize <var>expr</var></code></dt>
-    <dd>Set pen width in pixels. If <var>expr</var> is a list, the first member is used.</dd>
+  <dt><code>setpensize <var>expr</var></code>
+  <dd>Set pen width in pixels. If <var>expr</var> is a list, the first member is used.
 </dl>
 
 <h4>6.6 Pen Queries</h4>
 <dl>
-    <dt><code>pendownp</code></dt>
-    <dt><code>pendown?</code></dt>
-    <dd>Outputs 1 if the pen is down, 0 otherwise</dd>
+  <dt><code>pendownp</code>
+  <dt><code>pendown?</code>
+  <dd>Outputs 1 if the pen is down, 0 otherwise
 
-    <dt><code>penmode</code></dt>
-    <dd>Outputs <code>PAINT</code>, <code>ERASE</code> or <code>REVERSE</code></dd>
+  <dt><code>penmode</code>
+  <dd>Outputs <code>PAINT</code>, <code>ERASE</code> or <code>REVERSE</code>
 
-    <dt><code>pencolor</code></dt>
-    <dd>Outputs the current pen color. This will be a CSS color string, not necessarily the value passed in.</dd>
+  <dt><code>pencolor</code>
+  <dd>Outputs the current pen color. This will be a CSS color string, not necessarily the value passed in.
 
-    <dt><code>pensize</code></dt>
-    <dd>Outputs a two element list with the pen width and height (usually the same).</dd>
+  <dt><code>pensize</code>
+  <dd>Outputs a two element list with the pen width and height (usually the same).
 </dl>
 
 <!--
@@ -528,38 +532,38 @@ of comparison.</p>
 <h3 id="sec7">7. Workspace Management</h3>
 <h4>7.1 Procedure Definition</h4>
 <dl>
-    <dt><code>to <var>procname</var> <var>inputs ...</var> <var>statements ...</var> end</code></dt>
-    <dd>Define a new named procedure with optional inputs</dd>
+  <dt><code>to <var>procname</var> <var>inputs ...</var> <var>statements ...</var> end</code>
+  <dd>Define a new named procedure with optional inputs
 
-    <dt><code>def <var>procname</var></code></dt>
-    <dd>Outputs the definition of a named procedure as a string</dd>
-    
-    <dt><code>copydef <var>newname</var> <var>oldname</var></code></dt>
-    <dd>Copy a procedure. If a procedure <var>newname</var> already existed it will
-    be overridden. Primitive procedures can&apos;t be overridden unless <code>REDEFP</code> is <code>TRUE</code>.</dd>
+  <dt><code>def <var>procname</var></code>
+  <dd>Outputs the definition of a named procedure as a string
+  
+  <dt><code>copydef <var>newname</var> <var>oldname</var></code>
+  <dd>Copy a procedure. If a procedure <var>newname</var> already existed it will
+  be overridden. Primitive procedures can&apos;t be overridden unless <code>REDEFP</code> is <code>TRUE</code>.
 </dl>
 
 <h4>7.2 Variable Definition</h4>
 <dl>
-    <dt><code>make <var>varname</var> <var>expr</var></code></dt>
-    <dd>Update a variable or define a new global variable. The variable name must
-    be quoted, e.g. <code>make &quot;foo 5</code></dd>
-    
-    <dt><code>name <var>expr</var> <var>varname</var></code></dt>
-    <dd>Like <code>make</code> but with the inputs reversed</dd>
-    
-    <dt><code>local <var>varname</var></code></dt>
-    <dt><code>(local <var>varname</var> ...)</code></dt>
-    <dd>A subsequent <code>make</code> will create the variable(s) in the local scope instead of the global scope</dd>
+  <dt><code>make <var>varname</var> <var>expr</var></code>
+  <dd>Update a variable or define a new global variable. The variable name must
+  be quoted, e.g. <code>make &quot;foo 5</code>
+  
+  <dt><code>name <var>expr</var> <var>varname</var></code>
+  <dd>Like <code>make</code> but with the inputs reversed
+  
+  <dt><code>local <var>varname</var></code>
+  <dt><code>(local <var>varname</var> ...)</code>
+  <dd>A subsequent <code>make</code> will create the variable(s) in the local scope instead of the global scope
 
-    <dt><code>localmake <var>varname</var> <var>expr</var></code></dt>
-    <dd>Define a variable in the local scope (shortcut for <code>local</code> then <code>make</code></dd>
-    
-    <dt><code>thing <var>varname</var></code></dt>
-    <dd>Outputs the value of variable. <code>:foo</code> is a shortcut for <code>thing &quot;foo</code></dd>
-    
-    <dt><code>global <var>varname</var></code></dt>
-    <dd>Reserve the variable at the global scope. This doesn&apos;t do anything useful.</dd>
+  <dt><code>localmake <var>varname</var> <var>expr</var></code>
+  <dd>Define a variable in the local scope (shortcut for <code>local</code> then <code>make</code>
+  
+  <dt><code>thing <var>varname</var></code>
+  <dd>Outputs the value of variable. <code>:foo</code> is a shortcut for <code>thing &quot;foo</code>
+  
+  <dt><code>global <var>varname</var></code>
+  <dd>Reserve the variable at the global scope. This doesn&apos;t do anything useful.
 </dl>
 
 <!--
@@ -571,43 +575,43 @@ of comparison.</p>
 <h4>7.4 Workspace Predicates</h4>
 <p>Predicates return 1 (true) or 0 (false) </p>
 <dl>
-    <dt><code>procedurep <var>name</var></code></dt>
-    <dt><code>procedure? <var>name</var></code></dt>
-    <dd>Test if there is a procedure with the given name.</dd>
+  <dt><code>procedurep <var>name</var></code>
+  <dt><code>procedure? <var>name</var></code>
+  <dd>Test if there is a procedure with the given name.
 
-    <dt><code>primitivep <var>name</var></code></dt>
-    <dt><code>primitive? <var>name</var></code></dt>
-    <dd>Test if there is a built-in procedure with the given name.</dd>
+  <dt><code>primitivep <var>name</var></code>
+  <dt><code>primitive? <var>name</var></code>
+  <dd>Test if there is a built-in procedure with the given name.
 
-    <dt><code>definedp <var>name</var></code></dt>
-    <dt><code>defined? <var>name</var></code></dt>
-    <dd>Test if there is a user-defined procedure with the given name.</dd>
+  <dt><code>definedp <var>name</var></code>
+  <dt><code>defined? <var>name</var></code>
+  <dd>Test if there is a user-defined procedure with the given name.
 
-    <dt><code>namep <var>name</var></code></dt>
-    <dt><code>name? <var>name</var></code></dt>
-    <dd>Test if there is a variable with the given name.</dd>
+  <dt><code>namep <var>name</var></code>
+  <dt><code>name? <var>name</var></code>
+  <dd>Test if there is a variable with the given name.
 </dl>
 
 
 <h4>7.5 Workspace Queries</h4>
 <dl>
-    <dt><code>contents</code></dt>
-    <dd>Outputs a list with two members. The first is a list of user-defined procedure names.
-    The second is a list of defined variables.</dd>
-    
-    <dt><code>procedures</code></dt>
-    <dd>Outputs a list of user-defined procedure names.</dd>
-    
-    <dt><code>primitives</code></dt>
-    <dd>Outputs a list of primitive procedure names.</dd>
-    
-    <dt><code>globals</code></dt>
-    <dd>Outputs a list of defined global variables.</dd>
-    
-    <dt><code>names</code></dt>
-    <dd>Outputs a list with two members. The first is an empty list.
-    The second is a list of defined variables.</dd>
-    
+  <dt><code>contents</code>
+  <dd>Outputs a list with two members. The first is a list of user-defined procedure names.
+  The second is a list of defined variables.
+  
+  <dt><code>procedures</code>
+  <dd>Outputs a list of user-defined procedure names.
+  
+  <dt><code>primitives</code>
+  <dd>Outputs a list of primitive procedure names.
+  
+  <dt><code>globals</code>
+  <dd>Outputs a list of defined global variables.
+  
+  <dt><code>names</code>
+  <dd>Outputs a list with two members. The first is an empty list.
+  The second is a list of defined variables.
+  
 </dl>
 
 <!--
@@ -619,83 +623,83 @@ of comparison.</p>
 
 <h4>7.7 Workspace Control</h4>
 <dl>
-    <dt><code>erase <var>contentslist</var></code></dt>
-    <dd>Takes a two member list, where the first is a list of user-defined procedure names to erase,
-    and the second is a list of defined variables to erase. Primitive procedures can&apos;t be
-    erased unless <code>REDEFP</code> is <code>TRUE</code>.</dd>
-    
-    <dt><code>erall</code></dt>
-    <dd>Erase all user-defined procedures and variables.</dd>
+  <dt><code>erase <var>contentslist</var></code>
+  <dd>Takes a two member list, where the first is a list of user-defined procedure names to erase,
+  and the second is a list of defined variables to erase. Primitive procedures can&apos;t be
+  erased unless <code>REDEFP</code> is <code>TRUE</code>.
+  
+  <dt><code>erall</code>
+  <dd>Erase all user-defined procedures and variables.
 </dl>
 
 <h3 id="sec8">8. Control Structures</h3>
 <h4>8.1 Control</h4>
 <dl>
-    <dt><code>run [ <var>statements ...</var> ]</code></dt>
-    <dd>Run the specified statements once</dd>
+  <dt><code>run [ <var>statements ...</var> ]</code>
+  <dd>Run the specified statements once
 
-    <dt><code>runresult [ <var>statements ...</var> ]</code></dt>
-    <dd>Run the specified statements once. If the statements return a value, the result is a 
-    list with the value as a single member. Otherwise, the result is an empty list.</dd>
+  <dt><code>runresult [ <var>statements ...</var> ]</code>
+  <dd>Run the specified statements once. If the statements return a value, the result is a 
+  list with the value as a single member. Otherwise, the result is an empty list.
 
-    <dt><code>repeat <var>expr</var> [ <var>statements ...</var> ]</code></dt>
-    <dd>Repeat statements <var>expr</var> times</dd>
+  <dt><code>repeat <var>expr</var> [ <var>statements ...</var> ]</code>
+  <dd>Repeat statements <var>expr</var> times
 
-    <dt><code>forever [ <var>statements ...</var> ]</code></dt>
-    <dd>Repeat statements forever. Used inside a user-defined procedure 
-    that terminates with <code>output</code> or <code>stop</code></dd>
+  <dt><code>forever [ <var>statements ...</var> ]</code>
+  <dd>Repeat statements forever. Used inside a user-defined procedure 
+  that terminates with <code>output</code> or <code>stop</code>
 
-    <dt><code>repcount</code></dt>
-    <dd>Outputs the current iteration number of the current <code>repeat</code> or <code>forever</code></dd>
+  <dt><code>repcount</code>
+  <dd>Outputs the current iteration number of the current <code>repeat</code> or <code>forever</code>
 
-    <dt><code>if <var>expr</var> [ <var>statements ...</var> ]</code></dt>
-    <dd>Execute statements if the expression is non-zero</dd>
+  <dt><code>if <var>expr</var> [ <var>statements ...</var> ]</code>
+  <dd>Execute statements if the expression is non-zero
 
-    <dt><code>ifelse <var>expr</var> [ <var>statements ...</var> ] [ <var>statements ...</var> ]</code></dt>
-    <dd>Execute first set of statements if the expression is non-zero, otherwise execute the second set</dd>
+  <dt><code>ifelse <var>expr</var> [ <var>statements ...</var> ] [ <var>statements ...</var> ]</code>
+  <dd>Execute first set of statements if the expression is non-zero, otherwise execute the second set
 
-    <dt><code>test <var>expr</var></code></dt>
-    <dd>Test the specified expression, save the result in the local scope for subsequent use by <code>iftrue</code> or <code>iffalse</code></dd>
-    
-    <dt><code>iftrue [ <var>statements ...</var>]</code></dt>
-    <dt><code>ift [ <var>statements ...</var>]</code></dt>
-    <dt><code>iffalse [ <var>statements ...</var>]</code></dt>
-    <dt><code>iff [ <var>statements ...</var>]</code></dt>
-    <dd>Run the statements if the result of the last local <code>test</code> was non-zero (true) or zero (false) respectively.</dd>
+  <dt><code>test <var>expr</var></code>
+  <dd>Test the specified expression, save the result in the local scope for subsequent use by <code>iftrue</code> or <code>iffalse</code>
+  
+  <dt><code>iftrue [ <var>statements ...</var>]</code>
+  <dt><code>ift [ <var>statements ...</var>]</code>
+  <dt><code>iffalse [ <var>statements ...</var>]</code>
+  <dt><code>iff [ <var>statements ...</var>]</code>
+  <dd>Run the statements if the result of the last local <code>test</code> was non-zero (true) or zero (false) respectively.
 
-    <dt><code>stop</code></dt>
-    <dd>End the running procedure with no output value</dd>
-    
-    <dt><code>output <var>expr</var></code></dt>
-    <dt><code>op <var>expr</var></code></dt>
-    <dd>End the running procedure and output the specified value</dd>
+  <dt><code>stop</code>
+  <dd>End the running procedure with no output value
+  
+  <dt><code>output <var>expr</var></code>
+  <dt><code>op <var>expr</var></code>
+  <dd>End the running procedure and output the specified value
 
-    <dt><code>bye</code></dt>
-    <dd>Terminate the program</dd>
+  <dt><code>bye</code>
+  <dd>Terminate the program
 
-    <dt><code>.maybeoutput <var>expr</var></code></dt>
-    <dd>Like <code>output</code> if <var>expr</var> returns a value, like <code>stop</code> otherwise</dd>
+  <dt><code>.maybeoutput <var>expr</var></code>
+  <dd>Like <code>output</code> if <var>expr</var> returns a value, like <code>stop</code> otherwise
 
 
-    <dt><code>ignore <var>expr</var></code></dt>
-    <dd>Evaluate and ignore results of the expression</dd>
-    
-    <dt><code>for <var>controllist</var> [ <var>statements ...</var>]</code></dt>
-    <dd>Typical <code>for</code> loop. The <var>controllist</var> specifies three or four members:
-    the local <var>varname</var>, <var>start</var> value, <var>limit</var> value, 
-    and optional <var>step</var> size. </dd>
-    
-    <dt><code>do.while [ <var>statements ...</var>] <var>expr</var></code></dt>
-    <dd>Runs the specified statements at least once, and repeats while the expression is non-zero (true).</dd>
+  <dt><code>ignore <var>expr</var></code>
+  <dd>Evaluate and ignore results of the expression
+  
+  <dt><code>for <var>controllist</var> [ <var>statements ...</var>]</code>
+  <dd>Typical <code>for</code> loop. The <var>controllist</var> specifies three or four members:
+  the local <var>varname</var>, <var>start</var> value, <var>limit</var> value, 
+  and optional <var>step</var> size. 
+  
+  <dt><code>do.while [ <var>statements ...</var>] <var>expr</var></code>
+  <dd>Runs the specified statements at least once, and repeats while the expression is non-zero (true).
 
-    <dt><code>while <var>expr</var> [ <var>statements ...</var>]</code></dt>
-    <dd>Runs the specified statements only while the expression remains non-zero (true).</dd>
+  <dt><code>while <var>expr</var> [ <var>statements ...</var>]</code>
+  <dd>Runs the specified statements only while the expression remains non-zero (true).
 
-    <dt><code>do.until[ <var>statements ...</var>] <var>expr</var></code></dt>
-    <dd>Runs the specified statements at least once, and repeats while the expression is zero (false).</dd>
+  <dt><code>do.until[ <var>statements ...</var>] <var>expr</var></code>
+  <dd>Runs the specified statements at least once, and repeats while the expression is zero (false).
 
-    <dt><code>until <var>expr</var> [ <var>statements ...</var>]</code></dt>
-    <dd>Runs the specified statements only while the expression remains zero (false).</dd>
+  <dt><code>until <var>expr</var> [ <var>statements ...</var>]</code>
+  <dd>Runs the specified statements only while the expression remains zero (false).
 
 </dl>
 
@@ -705,29 +709,29 @@ of comparison.</p>
 The first input is the name of a procedure to call.</p>
 
 <dl>
-    <dt><code>apply <var>procname</var> <var>list</var></code></dt>
-    <dd>Call <var>procname</var> with the members of <var>list</var> as inputs</dd>
+  <dt><code>apply <var>procname</var> <var>list</var></code>
+  <dd>Call <var>procname</var> with the members of <var>list</var> as inputs
 
-    <dt><code>invoke <var>procname</var> <var>input1</var></code></dt>
-    <dt><code>(invoke <var>procname</var> <var>input1</var> ...)</code></dt>
-    <dd>Call <var>procname</var> with the specified inputs as inputs</dd>
+  <dt><code>invoke <var>procname</var> <var>input1</var></code>
+  <dt><code>(invoke <var>procname</var> <var>input1</var> ...)</code>
+  <dd>Call <var>procname</var> with the specified inputs as inputs
 
-    <dt><code>foreach <var>procname</var> <var>list</var></code></dt>
-    <dd>call <var>procname</var> for each item in the list</dd>
+  <dt><code>foreach <var>procname</var> <var>list</var></code>
+  <dd>call <var>procname</var> for each item in the list
 
-    <dt><code>map <var>procname</var> <var>list</var></code></dt>
-    <dd>Outputs a list composed of the results of calling <var>procname</var> for each item in the list</dd>
+  <dt><code>map <var>procname</var> <var>list</var></code>
+  <dd>Outputs a list composed of the results of calling <var>procname</var> for each item in the list
 
-    <dt><code>filter <var>procname</var> <var>list</var></code></dt>
-    <dd>Outputs a list composed of the input list where procname called on the item returns non-zero (true)</dd>
+  <dt><code>filter <var>procname</var> <var>list</var></code>
+  <dd>Outputs a list composed of the input list where procname called on the item returns non-zero (true)
 
-    <dt><code>find <var>procname</var> <var>list</var></code></dt>
-    <dd>Outputs the first item in <var>list</var> for which calling <var>procname</var> on it returns non-zero (true). 
-    If not found, the empty list is returned.</dd>
+  <dt><code>find <var>procname</var> <var>list</var></code>
+  <dd>Outputs the first item in <var>list</var> for which calling <var>procname</var> on it returns non-zero (true). 
+  If not found, the empty list is returned.
 
-    <dt><code>reduce <var>procname</var> <var>list</var></code></dt>
-    <dt><code>(reduce <var>procname</var> <var>list</var> <var>initial</var>)</code></dt>
-    <dd>Call <var>procname</var> repeatedly with two inputs - the current value and the next list item. If <var>initial</var> is not specified, the first list element is used instead.</dd>
+  <dt><code>reduce <var>procname</var> <var>list</var></code>
+  <dt><code>(reduce <var>procname</var> <var>list</var> <var>initial</var>)</code>
+  <dd>Call <var>procname</var> repeatedly with two inputs - the current value and the next list item. If <var>initial</var> is not specified, the first list element is used instead.
 </dl>
 
 
