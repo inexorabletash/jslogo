@@ -16,9 +16,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*jslint browser: true, sub: true, undef: true */
-/*global window */
-
 // TODO: Throw objects, not strings
 
 //----------------------------------------------------------------------
@@ -120,20 +117,15 @@ function LogoInterpreter(turtle, stream)
   function Type(atom) {
     if (atom === (void 0)) {
       throw __("No output from procedure"); // TODO: Should be caught higher upstream than this
-    }
-    else if (typeof atom === 'string') {
+    } else if (typeof atom === 'string') {
       return 'word';
-    }
-    else if (typeof atom === 'number') {
+    } else if (typeof atom === 'number') {
       return 'number';
-    }
-    else if (Array.isArray(atom)) {
+    } else if (Array.isArray(atom)) {
       return 'list';
-    }
-    else if (!atom) {
+    } else if (!atom) {
       throw __("Unexpected value: null");
-    }
-    else {
+    } else {
       throw __("Unexpected value: unknown type");
     }
   } // Type
@@ -182,16 +174,14 @@ function LogoInterpreter(turtle, stream)
         // Word
         atom = RegExp.$1;
         string = RegExp.$2;
-      }
-      else if (string.match(regexNumberLiteral)) {
+      } else if (string.match(regexNumberLiteral)) {
         // Number literal
         atom = RegExp.$1;
         string = RegExp.$2;
 
         // The following dirties RegExp.$n so it is kept separate
         atom = parseFloat(atom.replace(/\s+/g, ''), 10);
-      }
-      else if (string.match(regexListDelimiter)) {
+      } else if (string.match(regexListDelimiter)) {
 
         if (RegExp.$1 === '[') {
           // Start of list - recurse!
@@ -199,14 +189,12 @@ function LogoInterpreter(turtle, stream)
           if (!r.list) { throw __("Expected ']'"); }
           atom = r.list;
           string = r.string;
-        }
-        else { // (RegExp.$1 === ']')
+        } else { // (RegExp.$1 === ']')
           // End of list - return list and the remaining input
           return { list: atoms, string: RegExp.$2 };
         }
 
-      }
-      else if (string.match(regexOperator)) {
+      } else if (string.match(regexOperator)) {
 
         atom = RegExp.$1;
         string = RegExp.$2;
@@ -234,11 +222,9 @@ function LogoInterpreter(turtle, stream)
           }
 
         }
-      }
-      else {
+      } else {
         throw format(__("Couldn't parse: '{string}'"), { string: string });
       }
-
 
       atoms.push(atom);
       prev = atom;
@@ -414,8 +400,7 @@ function LogoInterpreter(turtle, stream)
       op = list.shift();
       rhs = self.unaryExpression(list);
       return function() { return -aexpr(rhs()); };
-    }
-    else {
+    } else {
       return self.finalExpression(list);
     }
   };
@@ -441,13 +426,11 @@ function LogoInterpreter(turtle, stream)
           // string literal
           literal = atom.substring(1);
           return function() { return literal; };
-        }
-        else if (atom.charAt(0) === ':') {
+        } else if (atom.charAt(0) === ':') {
           // variable
           varname = atom.substring(1);
           return function() { return self.getvar(varname); };
-        }
-        else if (atom === '(') {
+        } else if (atom === '(') {
           // parenthesized expression/procedure call
           if (list.length && Type(list[0]) === 'word' &&
                         self.routines[String(list[0]).toLowerCase()]) {
@@ -455,22 +438,19 @@ function LogoInterpreter(turtle, stream)
             // Lisp-style (procedure input ...) calling syntax
             atom = list.shift();
             return self.dispatch(atom, list, false);
-          }
-          else {
+          } else {
             // Standard parenthesized expression
             result = self.expression(list);
 
             if (!list.length) {
               throw format(__("Expected ')'"));
-            }
-            else if (!peek(list, [')'])) {
+            } else if (!peek(list, [')'])) {
               throw format(__("Expected ')', saw {word}"), { word: list.shift() });
             }
             list.shift();
             return result;
           }
-        }
-        else {
+        } else {
           // Procedure dispatch
           return self.dispatch(atom, list, true);
         }
@@ -495,8 +475,7 @@ function LogoInterpreter(turtle, stream)
       for (var i = 0; i < procedure.length; ++i) {
         args.push(self.expression(tokenlist));
       }
-    }
-    else {
+    } else {
       // Caller specified argument count
       while (tokenlist.length && !peek(tokenlist, [')'])) {
         args.push(self.expression(tokenlist));
@@ -508,8 +487,7 @@ function LogoInterpreter(turtle, stream)
       return function() {
         return procedure.apply(null, args);
       };
-    }
-    else {
+    } else {
       return function() {
         return procedure.apply(null, args.map(function(a) { return a(); }));
       };
@@ -580,14 +558,11 @@ function LogoInterpreter(turtle, stream)
         }
       }
       return true;
-    }
-    else if (typeof a !== typeof b) {
+    } else if (typeof a !== typeof b) {
       return false;
-    }
-    else if (epsilon !== (void 0) && typeof a === 'number') {
+    } else if (epsilon !== (void 0) && typeof a === 'number') {
       return Math.abs(a - b) < epsilon;
-    }
-    else {
+    } else {
       return a === b;
     }
   };
@@ -627,17 +602,14 @@ function LogoInterpreter(turtle, stream)
 
       // And execute it!
       return self.execute(atoms);
-    }
-    catch (e) {
+    } catch (e) {
       if (e instanceof Bye) {
         // clean exit
         return;
-      }
-      else {
+      } else {
         throw e;
       }
-    }
-    finally {
+    } finally {
       if (self.turtle) { self.turtle.end(); }
     }
   };
@@ -707,8 +679,7 @@ function LogoInterpreter(turtle, stream)
     // NOTE: Uses Array.XXX format to handle array-like types: arguments and strings
     if (initial === (void 0)) {
       return Array.prototype.reduce.call(Array.prototype.map.call(list, mapfunc), reducefunc);
-    }
-    else {
+    } else {
       return Array.prototype.reduce.call(Array.prototype.map.call(list, mapfunc), reducefunc, initial);
     }
   }
@@ -717,8 +688,7 @@ function LogoInterpreter(turtle, stream)
 
     if (Type(thing) === 'list') {
       return "[ " + thing.map(stringify).join(" ") + " ]";
-    }
-    else {
+    } else {
       return sexpr(thing);
     }
   }
@@ -727,8 +697,7 @@ function LogoInterpreter(turtle, stream)
 
     if (Type(thing) === 'list') {
       return thing.map(stringify).join(" ");
-    }
-    else {
+    } else {
       return stringify(thing);
     }
   }
@@ -756,11 +725,9 @@ function LogoInterpreter(turtle, stream)
       var atom = list.shift();
       if (Type(atom) === 'word' && atom === 'end') {
         break;
-      }
-      else if (state_inputs && Type(atom) === 'word' && atom.charAt(0) === ':') {
+      } else if (state_inputs && Type(atom) === 'word' && atom.charAt(0) === ':') {
         inputs.push(atom.substring(1));
-      }
-      else {
+      } else {
         state_inputs = false;
         block.push(atom);
       }
@@ -780,18 +747,15 @@ function LogoInterpreter(turtle, stream)
         // Execute the block
         try {
           return self.execute(block);
-        }
-        catch (e) {
+        } catch (e) {
           // From OUTPUT
           if (e instanceof Output) {
             return e.output;
-          }
-          else {
+          } else {
             throw e;
           }
         }
-      }
-      finally {
+      } finally {
         // Close the scope
         self.scopes.shift();
       }
@@ -841,8 +805,7 @@ function LogoInterpreter(turtle, stream)
       if (Type(thing) === 'list') {
         thing = lexpr(thing);
         list = list.concat(thing);
-      }
-      else {
+      } else {
         list.push(thing);
       }
     }
@@ -861,8 +824,7 @@ function LogoInterpreter(turtle, stream)
   self.routines["combine"] = function(thing1, thing2) {
     if (Type(thing2) !== 'list') {
       return self.routines['word'](thing1, thing2);
-    }
-    else {
+    } else {
       return self.routines['fput'](thing1, thing2);
     }
   };
@@ -1029,8 +991,7 @@ function LogoInterpreter(turtle, stream)
   self.routines["readword"] = function() {
     if (arguments.length > 0) {
       return stream.read(sexpr(arguments[0]));
-    }
-    else {
+    } else {
       return stream.read();
     }
   };
@@ -1109,8 +1070,7 @@ function LogoInterpreter(turtle, stream)
   self.routines["quotient"] = function(a, b) {
     if (b !== (void 0)) {
       return aexpr(a) / aexpr(b);
-    }
-    else {
+    } else {
       return 1 / aexpr(a);
     }
   };
@@ -1139,8 +1099,7 @@ function LogoInterpreter(turtle, stream)
       var x = aexpr(arguments[0]);
       var y = aexpr(arguments[1]);
       return rad2deg(Math.atan2(y, x));
-    }
-    else {
+    } else {
       return rad2deg(Math.atan(aexpr(a)));
     }
   };
@@ -1154,8 +1113,7 @@ function LogoInterpreter(turtle, stream)
       var x = aexpr(arguments[0]);
       var y = aexpr(arguments[1]);
       return Math.atan2(y, x);
-    }
-    else {
+    } else {
       return Math.atan(aexpr(a));
     }
   };
@@ -1393,8 +1351,7 @@ function LogoInterpreter(turtle, stream)
       var gg = (g < 16 ? "0" : "") + g.toString(16);
       var bb = (b < 16 ? "0" : "") + b.toString(16);
       turtle.setcolor('#' + rr + gg + bb);
-    }
-    else {
+    } else {
       turtle.setcolor(sexpr(a));
     }
   };
@@ -1404,8 +1361,7 @@ function LogoInterpreter(turtle, stream)
   self.routines["setpensize"] = self.routines["setwidth"] = self.routines["setpw"] = function(a) {
     if (Type(a) === 'list') {
       turtle.setwidth(aexpr(a[0]));
-    }
-    else {
+    } else {
       turtle.setwidth(aexpr(a));
     }
   };
@@ -1536,8 +1492,7 @@ function LogoInterpreter(turtle, stream)
   self.routines["namep"] = self.routines["name?"] = function(varname) {
     try {
       return self.getvar(sexpr(varname)) !== (void 0) ? 1 : 0;
-    }
-    catch (e) {
+    } catch (e) {
       return 0;
     }
   };
@@ -1658,8 +1613,7 @@ function LogoInterpreter(turtle, stream)
     var result = self.execute(statements);
     if (result !== (void 0)) {
       return [result];
-    }
-    else {
+    } else {
       return [];
     }
   };
@@ -1687,8 +1641,7 @@ function LogoInterpreter(turtle, stream)
       self.repcount = i;
       try {
         self.execute(statements);
-      }
-      finally {
+      } finally {
         self.repcount = old_repcount;
       }
     }

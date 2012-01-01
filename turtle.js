@@ -57,15 +57,13 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
 
           if (x < 0) {
             fx = (self.x - 0) / (self.x - x);
-          }
-          else if (x >= width) {
+          } else if (x >= width) {
             fx = (self.x - width) / (self.x - x);
           }
 
           if (y < 0) {
             fy = (self.y - 0) / (self.y - y);
-          }
-          else if (y >= height) {
+          } else if (y >= height) {
             fy = (self.y - height) / (self.y - y);
           }
 
@@ -84,8 +82,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
             x += less ? width : -width;
             wx = less ? width : 0;
             wy = iy;
-          }
-          else if (fy < 1 && fy <= fx) {
+          } else if (fy < 1 && fy <= fx) {
             less = (y < 0);
             ix = self.x - fy * (self.x - x);
             iy = less ? 0 : height;
@@ -101,8 +98,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
             self.x = ix;
             self.y = iy;
             return;
-          }
-          else {
+          } else {
             // WRAP - keep going
             self.x = wx;
             self.y = wy;
@@ -167,8 +163,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
   this.setcolor = function(color) {
     if (STANDARD_COLORS[color] !== undefined) {
       this.color = STANDARD_COLORS[color];
-    }
-    else {
+    } else {
       this.color = color;
     }
     canvas_ctx.strokeStyle = this.color;
