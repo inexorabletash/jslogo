@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Logo Interpreter</title>
+<link rel="Alternate" type="application/atom+xml" href="feed.xml" />
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+
+<script type="text/javascript" src="feed.js"></script> <!-- Atom feed to HTML -->
+<script type="text/javascript" src="async.js?2011-12-31"></script>
+
+<style type="text/css">
+h1, h2, h3, p { margin-bottom: 6pt; margin-top: 6pt; }
+body, p, h1, h2, h3 { font-family: sans-serif; }
+dt, dd { font-size: 8pt; }
+code { font-family: monospace; }
+#guide {
+    position: absolute;
+    right:10px;
+    top: 10px;
+    width: 300px;
+    /*height: 400px;*/
+
+    padding: 5pt;
+    padding-top: 0px;
+
+    z-index: 10;
+
+    color: black;
+    background-color: white;
+    border: solid 1px black;
+}
+</style>
+
+</head>
+<body>
+
+
+<div id="title">
+<h1>Logo Interpreter</h1>
+<p>
+By <a href="mailto:inexorabletash@hotmail.com">Joshua Bell</a>
+| <a href="#examples">Examples</a>
+| <a href="#links">Links</a>
+| <a href="#todo">To Do</a>
+| <a href="tests.htm">Unit Tests</a>
+| <a href="#history">Change Log</a>
+</p>
+</div>
+
+<div id="display" style="width: 760px; height: 480px; position: relative;">
+    <canvas id="sandbox" width="760" height="480" style="position: absolute; border: solid 1px black; z-index: 0;">
+        <span style="color: red; background-color: yellow; font-weight: bold;">Your browser does not support the canvas element - sorry!</span>
+    </canvas>
+    <canvas id="turtle" width="760" height="480" style="position: absolute; border: solid 1px black; z-index: 1;"></canvas>
+    <div id="overlay" style="width: 740px; height: 460px; padding: 10px; margin: 0; position: absolute; z-index: 2; background-color: transparent; overflow: hidden; white-space: pre-wrap; font-family: Monospace;"></div>
+</div>
+
+<div id="input" style="width: 760px; padding: 0; padding-top: 5px;">
+    <input id="entry_single" type="text" style="width: 660px; font-family: monospace;" />
+    <textarea rows="20" cols="80" id="entry_multi" style="width: 660px; height: 200px; font-family: monospace; display: none;"></textarea>
+    <input id="run" type="button" value="run" title="Run the specified statements" />
+    <input id="toggle" type="button" value="+" title="Switch between a single line and multi-line entry area"/>
+</div>
+
+<div id="examples">
+<h2>Examples</h2>
+<pre><code>to star repeat 5 [ fd 100 rt 144 ] end
+star
+to square :length repeat 4 [ fd :length rt 90 ] end
+repeat 36 [ square 50 rt 10 ]
+to randomcolor setcolor pick [ red orange yellow green blue violet ] end
+repeat 36 [ randomcolor square random 200 rt 10 ]
+window pu repeat 72 [ setlabelheight repcount fd repcount * 2.5 label "Logo bk repcount * 2.5 rt 10 ]
+</code></pre>
+</div>
+
+<div id="links">
+<h2>Links</h2>
+<ul>
+    <li><a href="http://en.wikipedia.org/wiki/Logo_(programming_language)">Logo</a> according to the Wikipedia
+    <li><a href="http://www.amberfrog.com/logo/">Curly Logo</a> Another Logo interpreter w/ Turtle in Javascript (uses SVG), written by someone far smarter than I am.
+    <li><a href="http://el.media.mit.edu/logo-foundation/">The Logo Foundation</a> with links to learning resources and software
+    <li><a href="http://www.cs.berkeley.edu/~bh/logo.html">Berkeley Logo (UCBLogo)</a> is a well respected freeware interpreter
+    <li><a href="http://elica.net/download/papers/LogoTreeProject.pdf">The Logo Tree Project</a> analyzes Logo variants
+    <li><a href="http://blog.ianbicking.org/2007/10/19/logo/">Ian Bicking on Logo</a>
+    <li><a href="http://pylogo.sourceforge.net/">PyLogo</a> is a sweet interpreter in Python
+    <li><a href="http://www.bfoit.org/itp/itp.html">Introduction to Computer Programming</a> using Logo
+    <li><a href="http://groups.yahoo.com/group/LogoForum/">LogoForum</a> - a group for Logo programming discussions
+</ul>
+</div>
+
+<div id="todo">
+<h2>To Do</h2>
+<ul>
+    <li>Document deviations from UCB Logo standard
+    <li>Make these examples all work: <a href="http://www.mathcats.com/gallery/15wordcontest.html">Logo 15-word challenge</a>
+    <li>Use <a href="http://www.whatwg.org/specs/web-workers/current-work/">Web Workers</a>, so you can see the turtle moving in long-duration programs
+    <li>Efficient tail-end recursion
+</ul>
+</div>
+
+<div id="history">
+<h2>Change Log</h2>
+<div id="feed"></div>
+</div>
+
+<div id="guide">
+<table style="width: 100%;"><tr>
+<td><h2>Language Reference</h2></td>
+<td style="text-align: right;"><a id="toggle_link" href="#" onclick="var gb = document.getElementById('guide_body'); var show = (gb.style.display === 'none'); gb.style.display = show ? '' : 'none'; this.innerHTML = show ? 'hide' : 'show'; return false;">hide</a></td>
+</tr></table>
+
+<iframe src="language.htm" id="guide_body" style="height: 350px; border: none;"></iframe>
+
+</div>
+
+<pre id="log" style="display: none; border: 1px solid black; width: 760px; height: 400px; overflow: scroll;">
+</pre>
+
+</body>
+</html>

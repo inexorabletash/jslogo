@@ -372,7 +372,7 @@ test("Communication", 18, function () {
 });
 
 
-test("Arithmetic", 126, function () {
+test("Arithmetic", 135, function () {
 
   //
   // 4.1 Numeric Operations
@@ -503,7 +503,19 @@ test("Arithmetic", 126, function () {
     this.assert_predicate('random 10', function(x) { return 0 <= x && x < 10; });
   }
 
+  //
   // 4.4 Print Formatting
+  //
+
+  this.assert_stream('type form 123.456 10 0', '       123');
+  this.assert_stream('type form 123.456 10 1', '     123.5'); // note rounding
+  this.assert_stream('type form 123.456 10 2', '    123.46'); // note rounding
+  this.assert_stream('type form 123.456 10 3', '   123.456');
+  this.assert_stream('type form 123.456 10 4', '  123.4560');
+  this.assert_stream('type form 123.456 10 5', ' 123.45600');
+  this.assert_stream('type form 123.456 10 6', '123.456000');
+  this.assert_stream('type form 123.456 10 7', '123.4560000');
+  this.assert_stream('type form 123.456 10 8', '123.45600000');
 
   //
   // 4.5 Bitwise Operations

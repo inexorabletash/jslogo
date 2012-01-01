@@ -1189,7 +1189,17 @@ function LogoInterpreter(turtle, stream)
 
   // 4.4 Print Formatting
 
-  // Not Supported: form
+  self.routines["form"] = function(num, width, precision) {
+    num = aexpr(num);
+    width = aexpr(width);
+    precision = aexpr(precision);
+
+    var str = num.toFixed(precision);
+    if (str.length < width) {
+      str = Array(1 + width - str.length).join(' ') + str;
+    }
+    return str;
+  };
 
   // 4.5 Bitwise Operations
 

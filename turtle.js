@@ -117,9 +117,24 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
   }
 
   this.move = function(distance) {
-    var x = this.x + distance * Math.cos(this.r);
-    var y = this.y - distance * Math.sin(this.r);
+    var x, y, point, saved_x, saved_y, EPSILON = 1e-3;
+
+    point = Math.abs(distance) < EPSILON;
+
+    if (point) {
+      saved_x = this.x;
+      saved_y = this.y;
+      distance = EPSILON;
+    }
+
+    x = this.x + distance * Math.cos(this.r);
+    y = this.y - distance * Math.sin(this.r);
     moveto(x, y);
+
+    if (point) {
+      this.x = saved_x;
+      this.y = saved_y;
+    }
   };
 
   this.turn = function(angle) {

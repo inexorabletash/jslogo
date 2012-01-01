@@ -22,7 +22,7 @@ body
 <body>
 <div>
 
-<p>The section numbers are per the <a target="_blank" href="http://www.cs.berkeley.edu/~bh/v2ch14/manual.html">Berkeley Logo Reference Manual</a> in Brian Harvey's <cite>Computer Science Logo Style volume 2: Advanced Techniques</cite> for ease
+<p>The section numbers are per the <a target="_blank" href="http://www.cs.berkeley.edu/~bh/v2ch14/manual.html">Berkeley Logo Reference Manual</a> in Brian Harvey&apos;s <cite>Computer Science Logo Style volume 2: Advanced Techniques</cite> for ease
 of comparison.</p>
 
 <ol>
@@ -121,11 +121,11 @@ of comparison.</p>
 <dl>
     <dt><code>push <var>stackname</var> <var>thing</var></code></dt>
     <dt><code>pop <var>stackname</var></code></dt>
-    <dd>Push to/pop from a stack i.e. list variable, e.g. <code>make "s []</code> then <code>push "s 1</code>. Stacks grow from the front.</dd>
+    <dd>Push to/pop from a stack i.e. list variable, e.g. <code>make &quot;s []</code> then <code>push &quot;s 1</code>. Stacks grow from the front.</dd>
 
     <dt><code>queue <var>stackname</var> <var>thing</var></code></dt>
     <dt><code>dequeue <var>stackname</var></code></dt>
-    <dd>Add/remove from a queue i.e. list variable, e.g. <code>make "q []</code> then <code>queue "q 1</code>. Queues grow from the end</dd>
+    <dd>Add/remove from a queue i.e. list variable, e.g. <code>make &quot;q []</code> then <code>queue &quot;q 1</code>. Queues grow from the end</dd>
     
 </dl>
 
@@ -321,11 +321,12 @@ of comparison.</p>
     <dd>Outputs a random number from 0 through one less than <var>expr</var></dd>
 </dl>
 
-<!--
 <h4>4.4 Print Formatting</h4>
 <dl>
+    <dt><code>form <var>expr</var> <var>width</var> <var>precision</var></code>
+    <dd>Returns a formatted string with the result of a numeric expression with <var>precision</var> decimal places and
+    padded on the left with spaces (if necessary) to be at least <var>width</width> characters long.
 </dl>
--->
 
 <h4>4.5 Bitwise Operations</h4>
 <dl>
@@ -359,7 +360,7 @@ of comparison.</p>
     <dt><code>xor <var>expr</var> <var>expr</var></code></dt>
     <dt><code>(xor <var>expr</var> <var>...</var>)</code></dt>
     <dt><code>not <var>expr</var></code></dt>
-    <dd>Logical "and", "or", "exclusive-or", and "not", respectively.
+    <dd>Logical &quot;and&quot;, &quot;or&quot;, &quot;exclusive-or&quot;, and &quot;not&quot;, respectively.
     Inputs are numbers or numeric expressions, output is 1 (true) or 0 (false).</dd>
 </dl>
 
@@ -399,7 +400,7 @@ of comparison.</p>
     <dd>Moves the turtle to center, pointing upwards</dd>
     
     <dt><code>arc <var>angle</var> <var>radius</var></code></dt>
-    <dd>Without moving the turtle, draws an arc centered on the turtle, starting at the turtle's heading.</dd>
+    <dd>Without moving the turtle, draws an arc centered on the turtle, starting at the turtle&apos;s heading.</dd>
 </dl>
 
 <h4>6.2 Turtle Motion Queries</h4>
@@ -535,14 +536,14 @@ of comparison.</p>
     
     <dt><code>copydef <var>newname</var> <var>oldname</var></code></dt>
     <dd>Copy a procedure. If a procedure <var>newname</var> already existed it will
-    be overridden. Primitive procedures can't be overridden unless <code>REDEFP</code> is <code>TRUE</code>.</dd>
+    be overridden. Primitive procedures can&apos;t be overridden unless <code>REDEFP</code> is <code>TRUE</code>.</dd>
 </dl>
 
 <h4>7.2 Variable Definition</h4>
 <dl>
     <dt><code>make <var>varname</var> <var>expr</var></code></dt>
     <dd>Update a variable or define a new global variable. The variable name must
-    be quoted, e.g. <code>make "foo 5</code></dd>
+    be quoted, e.g. <code>make &quot;foo 5</code></dd>
     
     <dt><code>name <var>expr</var> <var>varname</var></code></dt>
     <dd>Like <code>make</code> but with the inputs reversed</dd>
@@ -555,10 +556,10 @@ of comparison.</p>
     <dd>Define a variable in the local scope (shortcut for <code>local</code> then <code>make</code></dd>
     
     <dt><code>thing <var>varname</var></code></dt>
-    <dd>Outputs the value of variable. <code>:foo</code> is a shortcut for <code>thing "foo</code></dd>
+    <dd>Outputs the value of variable. <code>:foo</code> is a shortcut for <code>thing &quot;foo</code></dd>
     
     <dt><code>global <var>varname</var></code></dt>
-    <dd>Reserve the variable at the global scope. This doesn't do anything useful.</dd>
+    <dd>Reserve the variable at the global scope. This doesn&apos;t do anything useful.</dd>
 </dl>
 
 <!--
@@ -620,7 +621,7 @@ of comparison.</p>
 <dl>
     <dt><code>erase <var>contentslist</var></code></dt>
     <dd>Takes a two member list, where the first is a list of user-defined procedure names to erase,
-    and the second is a list of defined variables to erase. Primitive procedures can't be
+    and the second is a list of defined variables to erase. Primitive procedures can&apos;t be
     erased unless <code>REDEFP</code> is <code>TRUE</code>.</dd>
     
     <dt><code>erall</code></dt>
@@ -700,7 +701,7 @@ of comparison.</p>
 
 <h4>8.2 Template-based Iteration</h4>
 
-<p>These higher-level procedures support only the "named procedure" form of template. 
+<p>These higher-level procedures support only the <em>named procedure</em> form of template. 
 The first input is the name of a procedure to call.</p>
 
 <dl>
