@@ -1302,7 +1302,7 @@ function LogoInterpreter(turtle, stream)
   // Not Supported: textscreen
   // Not Supported: fullscreen
   // Not Supported: splitscreen
-  // Not Supported: setcrunch
+  // Not Supported: setscrunch
   // Not Supported: refresh
   // Not Supported: norefresh
 
