@@ -64,7 +64,7 @@ function onenter() {
     try {
       g_logo.run(v);
     } catch (e) {
-      window.alert("Error: " + e);
+      window.alert("Error: " + e.message);
     }
   }
 }
@@ -214,7 +214,7 @@ window.onload = function() {
     try {
       g_logo.run(param);
     } catch (e) {
-      window.alert("Error: " + e);
+      window.alert("Error: " + e.message);
     }
   }
 };

@@ -81,7 +81,7 @@ module("Logo Unit Tests", {
     };
 
     this.assert_error = function(expression, expected) {
-      raises(function() { this.interpreter.run(expression); }.bind(this), function(e) { return e === expected; }, expression);
+      raises(function() { this.interpreter.run(expression); }.bind(this), function(e) { return e.message === expected; }, expression);
     };
   }
 });
@@ -372,7 +372,7 @@ test("Communication", 18, function () {
 });
 
 
-test("Arithmetic", 135, function () {
+test("Arithmetic", 137, function () {
 
   //
   // 4.1 Numeric Operations
@@ -502,6 +502,8 @@ test("Arithmetic", 135, function () {
   for (var i = 0; i < 10; i += 1) {
     this.assert_predicate('random 10', function(x) { return 0 <= x && x < 10; });
   }
+  this.assert_equals('rerandom  make "x random 100  rerandom  make "y random 100  :x - :y', 0);
+  this.assert_equals('(rerandom 123) make "x random 100  (rerandom 123)  make "y random 100  :x - :y', 0);
 
   //
   // 4.4 Print Formatting
@@ -812,16 +814,16 @@ test("Workspace Management", 50, function () {
   // 7.5 Workspace Queries
   //
 
-  this.assert_equals('erall  contents', [[], []]);
+  this.assert_equals('erall  contents', [[], [], []]);
 
-  this.assert_equals('erall  make "a 1  to b output 2 end  contents', [['b'], ['a']]);
+  this.assert_equals('erall  make "a 1  to b output 2 end  contents', [['b'], ['a'], []]);
   this.assert_equals('erall  make "a 1  to b output 2 end  procedures', ['b']);
   // TODO: primitives
   this.assert_equals('erall  make "a 1  to b output 2 end  globals', ['a']);
   this.assert_equals('erall  make "a 1  to b output 2 end  names', [[], ['a']]);
 
-  this.assert_equals('erall  make "a 1  make "b 2  to a output 1 end  to b output 2 end  erase [[a] [b]]  contents', [['b'], ['a']]);
-  this.assert_equals('erall  make "a 1  make "b 2  to a output 1 end  to b output 2 end  erall  contents', [[], []]);
+  this.assert_equals('erall  make "a 1  make "b 2  to a output 1 end  to b output 2 end  erase [[a] [b]]  contents', [['b'], ['a'], []]);
+  this.assert_equals('erall  make "a 1  make "b 2  to a output 1 end  to b output 2 end  erall  contents', [[], [], []]);
   // TODO: erase + redefp
 
 

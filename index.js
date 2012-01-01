@@ -64,7 +64,7 @@ function onenter() {
     try {
       g_logo.run(v);
     } catch (e) {
-      window.alert("Error: " + e);
+      window.alert("Error: " + e.message);
     }
   }
 }
@@ -155,12 +155,12 @@ window.onload = function() {
     }
   };
 
-  var canvas_element = document.getElementById("sandbox");
-  var turtle_element = document.getElementById("turtle");
+  var canvas_element = document.getElementById("sandbox"), canvas_ctx = canvas_element.getContext('2d'),
+      turtle_element = document.getElementById("turtle"), turtle_ctx = turtle_element.getContext('2d');
   var turtle = new CanvasTurtle(
-        canvas_element.getContext('2d'),
-        turtle_element.getContext('2d'),
-        canvas_element.width, canvas_element.height);
+    canvas_ctx,
+    turtle_ctx,
+    canvas_element.width, canvas_element.height);
 
   g_logo = new LogoInterpreter(turtle, stream);
 
@@ -181,7 +181,7 @@ window.onload = function() {
       try {
         g_logo.run(param);
       } catch (e) {
-        window.alert("Error: " + e);
+        window.alert("Error: " + e.message);
       }
     }
   }

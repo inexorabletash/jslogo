@@ -4,7 +4,7 @@
     <title>Logo Language Guide</title>
   <link rel="Alternate" type="application/atom+xml" href="feed.xml" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  
+
 <style type="text/css">
 h1, h2, h3, h4, p { margin-bottom: 6pt; margin-top: 6pt; }
 body, p, h1, h2, h3 { font-family: sans-serif; }
@@ -36,7 +36,7 @@ of comparison.</p>
   <li><a href="#sec8">Control Structures</a>
 </ol>
 
- 
+
 <h3 id="types">Types</h3>
 <dl>
   <dt><code>"<var>word</var></code>
@@ -80,7 +80,7 @@ of comparison.</p>
 
   <dt><code>reverse <var>list</var></code>
   <dd>Outputs a list with the items in reverse order
-   
+
   <dt><code>gensym</code>
   <dd>Outputs a unique string, e.g. <samp>G1</samp>, <samp>G2</samp>, etc.
 </dl>
@@ -99,7 +99,7 @@ of comparison.</p>
 
   <dt><code>firsts <var>listoflists</var></code>
   <dd>Outputs a list of the first item of each sublist
-  
+
   <dt><code>butfirsts <var>listoflists</var></code>
   <dt><code>bfs <var>listoflists</var></code>
   <dd>Outputs a list of sublists without the first item
@@ -126,7 +126,7 @@ of comparison.</p>
   <dt><code>queue <var>stackname</var> <var>thing</var></code>
   <dt><code>dequeue <var>stackname</var></code>
   <dd>Add/remove from a queue i.e. list variable, e.g. <code>make &quot;q []</code> then <code>queue &quot;q 1</code>. Queues grow from the end
-  
+
 </dl>
 
 <h4>2.4 Predicates</h4>
@@ -139,7 +139,7 @@ of comparison.</p>
   <dt><code>numberp <var>thing</var></code>
   <dt><code>number? <var>thing</var></code>
   <dd>Test if thing is a word, list, or number respectively.
-  
+
   <dt><code>equalp <var>expr</var> <var>expr</var></code>
   <dt><code>equal? <var>expr</var> <var>expr</var></code>
   <dt><code><var>expr</var> = <var>expr</var></code>
@@ -190,7 +190,7 @@ of comparison.</p>
   <dt><code>pr <var>thing</var></code>
   <dt>(<code>print <var>thing1</var> <var>thing2</var> ...)</code>
   <dt>(<code>pr <var>thing1</var> <var>thing2</var> ...)</code>
-  <dd>Print inputs to the text screen, separated by spaces, and followed by a newline. 
+  <dd>Print inputs to the text screen, separated by spaces, and followed by a newline.
   Square brackets are only put around sublists.
 
   <dt><code>type <var>thing</var></code>
@@ -243,9 +243,9 @@ of comparison.</p>
   <dt><code>power <var>expr</var> <var>expr</var></code>
   <dt><code><var>expr</var> ^ <var>expr</var></code>
   <dd>
-      Add, subtract, multiply, divide, and raise-to-the-power-of respectively. 
+      Add, subtract, multiply, divide, and raise-to-the-power-of respectively.
       A single input to quotient returns the reciprocal.
-  
+
 
   <dt><code>remainder <var>expr</var> <var>expr</var></code>
   <dt><code><var>expr</var> % <var>expr</var></code>
@@ -254,18 +254,18 @@ of comparison.</p>
     Outputs the remainder (modulus). For <code>remainder</code> and <code>%</code>
     the result has the same sign as the first input; for <code>modulo</code> the
     result has the same sign as a the second input.
-  
-  
+
+
   <dt><code>minus <var>expr</var></code>
   <dt><code>- <var>expr</var></code>
   <dd>
     Unary minus sign must begin a top-level expression, follow an infix
     operator, or have a leading space and no trailing space.
-  
+
 
   <dt><code>abs <var>num</var></code>
   <dd>Absolute value
-  
+
   <dt><code>int <var>num</var></code>
   <dt><code>round <var>num</var></code>
   <dd>Truncate or round a number, respectively.
@@ -402,7 +402,7 @@ of comparison.</p>
 
   <dt><code>home</code>
   <dd>Moves the turtle to center, pointing upwards
-  
+
   <dt><code>arc <var>angle</var> <var>radius</var></code>
   <dd>Without moving the turtle, draws an arc centered on the turtle, starting at the turtle&apos;s heading.
 </dl>
@@ -430,7 +430,7 @@ of comparison.</p>
   <dt><code>hideturtle</code>
   <dt><code>ht</code>
   <dd>Hide the turtle
-  
+
   <dt><code>clean</code>
   <dd>Clear the drawing area
 
@@ -497,7 +497,7 @@ of comparison.</p>
     <tr><td style="background-color: brown;">8: brown</td><td style="background-color: tan;">9: tan</td><td style="background-color: green;">10: green</td><td style="background-color: aquamarine;">11: aqua</td></tr>
     <tr><td style="background-color: salmon;">12: salmon</td><td style="background-color: purple;">13: purple</td><td style="background-color: orange;">14: orange</td><td style="background-color: gray;">15: gray</td></tr>
   </table>
-  
+
 
   <dt><code>setpensize <var>expr</var></code>
   <dd>Set pen width in pixels. If <var>expr</var> is a list, the first member is used.
@@ -537,7 +537,7 @@ of comparison.</p>
 
   <dt><code>def <var>procname</var></code>
   <dd>Outputs the definition of a named procedure as a string
-  
+
   <dt><code>copydef <var>newname</var> <var>oldname</var></code>
   <dd>Copy a procedure. If a procedure <var>newname</var> already existed it will
   be overridden. Primitive procedures can&apos;t be overridden unless <code>REDEFP</code> is <code>TRUE</code>.
@@ -548,20 +548,20 @@ of comparison.</p>
   <dt><code>make <var>varname</var> <var>expr</var></code>
   <dd>Update a variable or define a new global variable. The variable name must
   be quoted, e.g. <code>make &quot;foo 5</code>
-  
+
   <dt><code>name <var>expr</var> <var>varname</var></code>
   <dd>Like <code>make</code> but with the inputs reversed
-  
+
   <dt><code>local <var>varname</var></code>
   <dt><code>(local <var>varname</var> ...)</code>
   <dd>A subsequent <code>make</code> will create the variable(s) in the local scope instead of the global scope
 
   <dt><code>localmake <var>varname</var> <var>expr</var></code>
   <dd>Define a variable in the local scope (shortcut for <code>local</code> then <code>make</code>
-  
+
   <dt><code>thing <var>varname</var></code>
   <dd>Outputs the value of variable. <code>:foo</code> is a shortcut for <code>thing &quot;foo</code>
-  
+
   <dt><code>global <var>varname</var></code>
   <dd>Reserve the variable at the global scope. This doesn&apos;t do anything useful.
 </dl>
@@ -596,22 +596,22 @@ of comparison.</p>
 <h4>7.5 Workspace Queries</h4>
 <dl>
   <dt><code>contents</code>
-  <dd>Outputs a list with two members. The first is a list of user-defined procedure names.
-  The second is a list of defined variables.
-  
+  <dd>Outputs a list with three members. The first is a list of user-defined procedure names.
+  The second is a list of defined variables. The third is always an empty list.
+
   <dt><code>procedures</code>
   <dd>Outputs a list of user-defined procedure names.
-  
+
   <dt><code>primitives</code>
   <dd>Outputs a list of primitive procedure names.
-  
+
   <dt><code>globals</code>
   <dd>Outputs a list of defined global variables.
-  
+
   <dt><code>names</code>
   <dd>Outputs a list with two members. The first is an empty list.
   The second is a list of defined variables.
-  
+
 </dl>
 
 <!--
@@ -627,7 +627,7 @@ of comparison.</p>
   <dd>Takes a two member list, where the first is a list of user-defined procedure names to erase,
   and the second is a list of defined variables to erase. Primitive procedures can&apos;t be
   erased unless <code>REDEFP</code> is <code>TRUE</code>.
-  
+
   <dt><code>erall</code>
   <dd>Erase all user-defined procedures and variables.
 </dl>
@@ -639,14 +639,14 @@ of comparison.</p>
   <dd>Run the specified statements once
 
   <dt><code>runresult [ <var>statements ...</var> ]</code>
-  <dd>Run the specified statements once. If the statements return a value, the result is a 
+  <dd>Run the specified statements once. If the statements return a value, the result is a
   list with the value as a single member. Otherwise, the result is an empty list.
 
   <dt><code>repeat <var>expr</var> [ <var>statements ...</var> ]</code>
   <dd>Repeat statements <var>expr</var> times
 
   <dt><code>forever [ <var>statements ...</var> ]</code>
-  <dd>Repeat statements forever. Used inside a user-defined procedure 
+  <dd>Repeat statements forever. Used inside a user-defined procedure
   that terminates with <code>output</code> or <code>stop</code>
 
   <dt><code>repcount</code>
@@ -660,7 +660,7 @@ of comparison.</p>
 
   <dt><code>test <var>expr</var></code>
   <dd>Test the specified expression, save the result in the local scope for subsequent use by <code>iftrue</code> or <code>iffalse</code>
-  
+
   <dt><code>iftrue [ <var>statements ...</var>]</code>
   <dt><code>ift [ <var>statements ...</var>]</code>
   <dt><code>iffalse [ <var>statements ...</var>]</code>
@@ -669,7 +669,7 @@ of comparison.</p>
 
   <dt><code>stop</code>
   <dd>End the running procedure with no output value
-  
+
   <dt><code>output <var>expr</var></code>
   <dt><code>op <var>expr</var></code>
   <dd>End the running procedure and output the specified value
@@ -683,12 +683,12 @@ of comparison.</p>
 
   <dt><code>ignore <var>expr</var></code>
   <dd>Evaluate and ignore results of the expression
-  
+
   <dt><code>for <var>controllist</var> [ <var>statements ...</var>]</code>
   <dd>Typical <code>for</code> loop. The <var>controllist</var> specifies three or four members:
-  the local <var>varname</var>, <var>start</var> value, <var>limit</var> value, 
-  and optional <var>step</var> size. 
-  
+  the local <var>varname</var>, <var>start</var> value, <var>limit</var> value,
+  and optional <var>step</var> size.
+
   <dt><code>do.while [ <var>statements ...</var>] <var>expr</var></code>
   <dd>Runs the specified statements at least once, and repeats while the expression is non-zero (true).
 
@@ -705,7 +705,7 @@ of comparison.</p>
 
 <h4>8.2 Template-based Iteration</h4>
 
-<p>These higher-level procedures support only the <em>named procedure</em> form of template. 
+<p>These higher-level procedures support only the <em>named procedure</em> form of template.
 The first input is the name of a procedure to call.</p>
 
 <dl>
@@ -726,7 +726,7 @@ The first input is the name of a procedure to call.</p>
   <dd>Outputs a list composed of the input list where procname called on the item returns non-zero (true)
 
   <dt><code>find <var>procname</var> <var>list</var></code>
-  <dd>Outputs the first item in <var>list</var> for which calling <var>procname</var> on it returns non-zero (true). 
+  <dd>Outputs the first item in <var>list</var> for which calling <var>procname</var> on it returns non-zero (true).
   If not found, the empty list is returned.
 
   <dt><code>reduce <var>procname</var> <var>list</var></code>
