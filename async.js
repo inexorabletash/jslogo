@@ -2,7 +2,7 @@
 // Logo Interpreter in Javascript
 //
 
-// Copyright (C) 2011 Joshua Bell
+// Copyright 2009 Joshua Bell
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,14 +27,14 @@ var g_entry;
 
 function ontoggle() {
   var single = document.getElementById('entry_single');
-  var multi = document.getElementById('entry_multi');
+  var multi  = document.getElementById('entry_multi');
   var toggle = document.getElementById('toggle');
 
-  if (g_entry === multi) {
+  if( g_entry === multi ) {
     g_entry = single;
 
     single.style.display = '';
-    multi.style.display = 'none';
+    multi .style.display = 'none';
 
     single.value = multi.value;
     toggle.value = "+";
@@ -42,7 +42,7 @@ function ontoggle() {
     g_entry = multi;
 
     single.style.display = 'none';
-    multi.style.display = '';
+    multi .style.display = '';
 
     multi.value = single.value;
     toggle.value = "-";
@@ -53,9 +53,9 @@ function ontoggle() {
 function onenter() {
   var e = g_entry;
   var v = g_entry.value;
-  if (v !== "") {
+  if( v !== "" ) {
     e.value = '';
-    g_history.push(v);
+    g_history.push( v );
     g_historypos = -1;
 
     var log = document.getElementById("log");
@@ -82,13 +82,13 @@ var KEY = {
 
 function onkey(e) {
   e = e ? e : window.event;
-  var key = e.keyCode ? e.keyCode :
-              e.charCode ? e.charCode :
-              e.which ? e.which : 0;
+  var key = e.keyCode  ? e.keyCode :
+        e.charCode ? e.charCode :
+        e.which ? e.which : 0;
 
   var consume = false;
 
-  switch (key) {
+  switch( key ) {
     case KEY.RETURN:
     case KEY.ENTER:
       onenter();
@@ -96,40 +96,41 @@ function onkey(e) {
       break;
 
     case KEY.UP:
-      if (g_history.length > 0) {
-        if (g_historypos === -1) {
+      if( g_history.length > 0 ) {
+        if( g_historypos === -1 ) {
           g_historypos = g_history.length - 1;
         } else {
-          g_historypos = (g_historypos === 0) ? g_history.length - 1 : g_historypos - 1;
+          g_historypos = ( g_historypos === 0 ) ? g_history.length - 1 : g_historypos - 1;
         }
-        document.getElementById('entry_single').value = g_history[g_historypos];
+        document.getElementById('entry_single').value = g_history[ g_historypos ];
       }
       consume = true;
       break;
 
     case KEY.DOWN:
-      if (g_history.length > 0) {
-        if (g_historypos === -1) {
+      if( g_history.length > 0 ) {
+        if( g_historypos === -1 ) {
           g_historypos = 0;
         } else {
-          g_historypos = (g_historypos === g_history.length - 1) ? 0 : g_historypos + 1;
+          g_historypos = ( g_historypos === g_history.length - 1 ) ? 0 : g_historypos + 1;
         }
-        document.getElementById('entry_single').value = g_history[g_historypos];
+        document.getElementById('entry_single').value = g_history[ g_historypos ];
       }
       consume = true;
       break;
   }
 
-  if (consume) {
+  if( consume ) {
     e.cancelBubble = true; // IE
     e.returnValue = false;
-    if (e.stopPropagation) { e.stopPropagation(); } // W3C
-    if (e.preventDefault) { e.preventDefault(); } // e.g. to block arrows from scrolling the page
+    if( e.stopPropagation ) { e.stopPropagation(); } // W3C
+    if( e.preventDefault  ) { e.preventDefault();  } // e.g. to block arrows from scrolling the page
     return false;
   } else {
     return true;
   }
 }
+
 
 
 window.onload = function() {
@@ -155,14 +156,45 @@ window.onload = function() {
     }
   };
 
-  var canvas_element = document.getElementById("sandbox");
-  var turtle_element = document.getElementById("turtle");
-  var turtle = new CanvasTurtle(
-        canvas_element.getContext('2d'),
-        turtle_element.getContext('2d'),
-        canvas_element.width, canvas_element.height);
+  var sandbox = document.getElementById("sandbox");
 
-  g_logo = new LogoInterpreter(turtle, stream);
+  var proxies = {
+    'stream': stream,
+    'sandbox': sandbox.getContext('2d'),
+    'turtle': document.getElementById("turtle").getContext('2d'),
+    'window': window
+  };
+
+  var worker = new Worker('worker.js?update=2011-12-31');
+  worker.onmessage = function(event) {
+    var obj;
+    if (event.data.call) {
+      obj = proxies[event.data.obj];
+      obj[event.data.call].apply(obj, event.data.args);
+    } else if (event.data.set) {
+      obj = proxies[event.data.obj];
+      obj[event.data.set] = event.data.value;
+    } else {
+      console.log("got this message, dunno what to do:", event.data);
+    }
+  };
+
+  g_logo = {
+    run: function(text) {
+      worker.postMessage({
+        command: 'run',
+        text: text
+      });
+    }
+  };
+
+  worker.postMessage({
+    command: 'init',
+    width: sandbox.width,
+    height: sandbox.height,
+    sleep: LOGO_SLEEP
+  });
+
 
   document.getElementById('toggle').onclick = ontoggle;
   document.getElementById('run').onclick = onenter;
@@ -173,20 +205,16 @@ window.onload = function() {
 
   atomToHtml('feed.xml', document.getElementById('feed'));
 
-  function demo(param) {
-    param = String(param);
-    if (param.length > 0) {
-      param = decodeURIComponent(param.substring(1).replace(/\_/g, ' '));
-      g_entry.value = param;
-      try {
-        g_logo.run(param);
-      } catch (e) {
-        window.alert("Error: " + e);
-      }
+  // Look for a program to run in the query string
+  var param = document.location.search;
+  if (typeof param === 'string' && param.length > 0) {
+    param = param.replace(/\_/g, ' ');
+    param = decodeURIComponent(param.substring(1));
+    g_entry.value = param;
+    try {
+      g_logo.run(param);
+    } catch (e) {
+      window.alert("Error: " + e);
     }
   }
-  // Look for a program to run in the query string / hash
-  var param = document.location.search || document.location.hash;
-  demo(param);
-  window.onhashchange = function(e) { demo(document.location.hash); };
 };

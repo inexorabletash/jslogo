@@ -1,14 +1,13 @@
-importScripts('../polyfill/polyfill.js?2011-12-24', 'logo.js?2011-12-31', 'turtle.js?2010-08-07');
+importScripts('../polyfill/polyfill.js?update=2011-12-24', 'logo.js?update=2011-12-31', 'turtle.js?update=2011-12-31');
 
-// Sleazy yield - make an HTTP request that will fail. This causes the JavaScript
-// thread to yield for a few milliseconds.
-var xhr = new XMLHttpRequest()
-function yield() {
+// Sleazy sleep - make an HTTP request that will fail. This causes the JavaScript
+// thread to sleep for a few milliseconds.
+var xhr = new XMLHttpRequest();
+function sleep() {
   try {
     xhr.open("GET", "does_not_exist/" + Math.random(), false); // synchronous
     xhr.send();
-  }
-  catch (e) {
+  } catch (e) {
     // ignore
   }
 }
@@ -77,37 +76,47 @@ function makeProxyClass(methods, properties, protofunc) {
   return ctor;
 }
 
+
+
 // Inject delay to let graphics operations be asynchronous
-function make_yield(obj, funcname) {
+function make_sleep(obj, funcname) {
   var func = obj[funcname];
-  obj[funcname] = function() { yield(); func.apply(this, arguments); };
+  obj[funcname] = function() { sleep(); func.apply(this, arguments); };
 }
-
-
-// Define CanvasProxy class
-var CanvasProxy = makeProxyClass(
-  ['beginPath', 'moveTo', 'lineTo', 'clearRect', 'fillText', 'stroke', 'fill',
-   'save', 'translate', 'rotate', 'restore', 'arc'],
-  ['lineCap', 'lineWidth', 'strokeStyle', 'fillStyle', 'globalCompositeOperation', 'font']/*,
-  function(proto) {
-    // Tweak the prototype to make drawing operations yield
-    make_yield(proto, 'stroke');
-  }*/
-);
-
-
-// Define StreamProxy class
-var StreamProxy = makeProxyClass(['read', 'write', 'clear']);
-// TODO: "read" will need to poll for a response message
 
 
 var g_logo;
 
+var CANVAS_METHODS = ['beginPath', 'moveTo', 'lineTo', 'clearRect', 'fillText',
+                      'stroke', 'fill', 'save', 'translate', 'rotate', 'restore',
+                      'arc'];
+var CANVAS_PROPERTIES = ['lineCap', 'lineWidth', 'strokeStyle', 'fillStyle',
+                         'globalCompositeOperation', 'font'];
+
 onmessage = function(event) {
+
+  var CanvasProxy, StreamProxy;
 
   switch (event.data.command) {
 
   case 'init':
+
+    // Define CanvasProxy class
+    if (event.data.sleep) {
+      CanvasProxy = makeProxyClass(
+        CANVAS_METHODS, CANVAS_PROPERTIES,
+        function(proto) {
+          make_sleep(proto, 'stroke');
+        }
+      );
+    } else {
+      CanvasProxy = makeProxyClass(CANVAS_METHODS, CANVAS_PROPERTIES);
+    }
+
+    // Define StreamProxy class
+    StreamProxy = makeProxyClass(['read', 'write', 'clear']);
+    // TODO: "read" will need to poll for a response message
+
     g_logo = new LogoInterpreter(
       new CanvasTurtle(new CanvasProxy('sandbox'),
                        new CanvasProxy('turtle'),
@@ -118,8 +127,7 @@ onmessage = function(event) {
   case 'run':
     try {
       g_logo.run(event.data.text);
-    }
-    catch (e) {
+    } catch (e) {
       remote_call('window', 'alert', ['Error: ' + e]);
     }
     break;
