@@ -83,6 +83,9 @@ function LogoInterpreter(turtle, stream)
     this.next();
   }
 
+  // TODO: Allow case-sensitive and case-insensitive lookup
+  // so CASEIGNOREDP can be implemented. Right now, callers
+  // must do case folding.
   function StringMap() {
     var map = Object.create(null);
     return {
@@ -258,21 +261,33 @@ function LogoInterpreter(turtle, stream)
 
 
   self.maybegetvar = function(name) {
+    window.scopes = self.scopes;
+    name = name.toLowerCase();
+    for (var i = self.scopes.length - 1; i >= 0; --i) {
+      if (self.scopes[i].has(name)) {
+        return self.scopes[i].get(name).value;
+      }
+    }
+    return (void 0);
+  };
+
+  self.getvar = function(name) {
+    name = name.toLowerCase();
+    var value = self.maybegetvar(name);
+    if (value !== (void 0)) {
+      return value;
+    }
+    throw new Error(format(__("Don't know about variable {name}"), { name: name.toUpperCase() }));
+  };
+
+  self.getlvalue = function(name) {
     name = name.toLowerCase();
     for (var i = self.scopes.length - 1; i >= 0; --i) {
       if (self.scopes[i].has(name)) {
         return self.scopes[i].get(name);
       }
     }
-  };
-
-  self.getvar = function(name) {
-    name = name.toLowerCase();
-    var value = self.maybegetvar(name);
-    if (value === (void 0)) {
-      throw new Error(format(__("Don't know about variable {name}"), { name: name.toUpperCase() }));
-    }
-    return value;
+    throw new Error(format(__("Don't know about variable {name}"), { name: name.toUpperCase() }));
   };
 
   self.setvar = function(name, value) {
@@ -281,13 +296,14 @@ function LogoInterpreter(turtle, stream)
     // Find the variable in existing scope
     for (var i = self.scopes.length - 1; i >= 0; --i) {
       if (self.scopes[i].has(name)) {
-        self.scopes[i].set(name, value);
+        self.scopes[i].get(name).value = value;
         return;
       }
     }
 
     // Otherwise, define a global
-    self.scopes[0].set(name, value);
+    var lvalue = {value: value};
+    self.scopes[0].set(name, lvalue);
   };
 
   //----------------------------------------------------------------------
@@ -771,7 +787,7 @@ function LogoInterpreter(turtle, stream)
       // Define a new scope
       var scope = new StringMap();
       for (var i = 0; i < inputs.length && i < arguments.length; i += 1) {
-        scope.set(inputs[i], arguments[i]);
+        scope.set(inputs[i], {value: arguments[i]});
       }
       self.scopes.push(scope);
 
@@ -1289,8 +1305,8 @@ function LogoInterpreter(turtle, stream)
 
   self.routines["setpos"] = function(l) { l = lexpr(l); turtle.setposition(aexpr(l[0]), aexpr(l[1])); };
   self.routines["setxy"] = function(x, y) { turtle.setposition(aexpr(x), aexpr(y)); };
-  self.routines["setx"] = function(x) { turtle.setposition(aexpr(x), undefined); }; // TODO: Replace with ...?
-  self.routines["sety"] = function(y) { turtle.setposition(undefined, aexpr(y)); };
+  self.routines["setx"] = function(x) { turtle.setposition(aexpr(x), (void 0)); }; // TODO: Replace with ...?
+  self.routines["sety"] = function(y) { turtle.setposition((void 0), aexpr(y)); };
   self.routines["setheading"] = self.routines["seth"] = function(a) { turtle.setheading(aexpr(a)); };
 
   self.routines["home"] = function() { turtle.home(); };
@@ -1475,12 +1491,12 @@ function LogoInterpreter(turtle, stream)
 
   self.routines["local"] = function(varname) {
     var localscope = self.scopes[self.scopes.length - 1];
-    Array.prototype.forEach.call(arguments, function(name) { localscope.set(sexpr(name).toLowerCase(), undefined); });
+    Array.prototype.forEach.call(arguments, function(name) { localscope.set(sexpr(name).toLowerCase(), {value: (void 0)}); });
   };
 
   self.routines["localmake"] = function(varname, value) {
     var localscope = self.scopes[self.scopes.length - 1];
-    localscope.set(sexpr(varname).toLowerCase(), value);
+    localscope.set(sexpr(varname).toLowerCase(), {value: value});
   };
 
   self.routines["thing"] = function(varname) {
@@ -1489,7 +1505,7 @@ function LogoInterpreter(turtle, stream)
 
   self.routines["global"] = function(varname) {
     var globalscope = self.scopes[0];
-    Array.prototype.forEach.call(arguments, function(name) { globalscope.set(sexpr(name).toLowerCase(), undefined); });
+    Array.prototype.forEach.call(arguments, function(name) { globalscope.set(sexpr(name).toLowerCase(), {value: (void 0)}); });
   };
 
   //
@@ -1681,8 +1697,25 @@ function LogoInterpreter(turtle, stream)
       scope.keys().forEach(function(name) { scope['delete'](name); });
     });
 
-    self.plists = new StringMap();
+    self.plists.keys().forEach(function (key) {
+      self.plists['delete'](key);
+    });
   };
+
+  // Not Supported: erps
+  // Not Supported: erns
+  // Not Supported: erpls
+  // Not Supported: ern
+  // Not Supported: erpl
+
+  // Not Supported: bury
+  // Not Supported: buryall
+  // Not Supported: buryname
+  // Not Supported: unbury
+  // Not Supported: unburyall
+  // Not Supported: unburyname
+  // Not Supported: buriedp
+
 
   //----------------------------------------------------------------------
   //
@@ -1760,6 +1793,7 @@ function LogoInterpreter(turtle, stream)
 
   self.routines["test"] = function(tf) {
     tf = aexpr(tf);
+    // NOTE: A property on the scope, not within the scope
     self.scopes[self.scopes.length - 1]._test = tf;
     return tf;
   };
