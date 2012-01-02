@@ -117,8 +117,8 @@ function LogoInterpreter(turtle, stream)
 
   self.turtle = turtle;
   self.stream = stream;
-  self.routines = {};
-  self.scopes = [{}];
+  self.routines = {}; // TODO: use a StringMap
+  self.scopes = [{}]; // TODO: use StringMaps
   self.plists = new StringMap();
   self.prng = new PRNG(Math.random() * 0x7fffffff);
 
@@ -259,7 +259,7 @@ function LogoInterpreter(turtle, stream)
 
   self.maybegetvar = function(name) {
     name = name.toLowerCase();
-    for (var i = 0; i < self.scopes.length; ++i) {
+    for (var i = self.scopes.length - 1; i >= 0; --i) {
       if (self.scopes[i].hasOwnProperty(name)) {
         return self.scopes[i][name];
       }
@@ -279,7 +279,7 @@ function LogoInterpreter(turtle, stream)
     name = name.toLowerCase();
 
     // Find the variable in existing scope
-    for (var i = 0; i < self.scopes.length; ++i) {
+    for (var i = self.scopes.length - 1; i >= 0; --i) {
       if (self.scopes[i].hasOwnProperty(name)) {
         self.scopes[i][name] = value;
         return;
@@ -287,7 +287,7 @@ function LogoInterpreter(turtle, stream)
     }
 
     // Otherwise, define a global
-    self.scopes[self.scopes.length - 1][name] = value;
+    self.scopes[0][name] = value;
   };
 
   //----------------------------------------------------------------------
@@ -773,7 +773,7 @@ function LogoInterpreter(turtle, stream)
       for (var i = 0; i < inputs.length && i < arguments.length; i += 1) {
         scope[inputs[i]] = arguments[i];
       }
-      self.scopes.unshift(scope);
+      self.scopes.push(scope);
 
       try {
         // Execute the block
@@ -789,7 +789,7 @@ function LogoInterpreter(turtle, stream)
         }
       } finally {
         // Close the scope
-        self.scopes.shift();
+        self.scopes.pop();
       }
     };
 
@@ -910,7 +910,7 @@ function LogoInterpreter(turtle, stream)
   };
 
   self.routines["remdup"] = function(list) {
-    var dict = {};
+    var dict = Object.create(null);
     return lexpr(list).filter(function(x) { if (!dict[x]) { dict[x] = true; return true; } else { return false; } });
   };
 
@@ -1474,12 +1474,12 @@ function LogoInterpreter(turtle, stream)
   };
 
   self.routines["local"] = function(varname) {
-    var localscope = self.scopes[0];
+    var localscope = self.scopes[self.scopes.length - 1];
     Array.prototype.forEach.call(arguments, function(name) { localscope[sexpr(name).toLowerCase()] = undefined; });
   };
 
   self.routines["localmake"] = function(varname, value) {
-    var localscope = self.scopes[0];
+    var localscope = self.scopes[self.scopes.length - 1];
     localscope[sexpr(varname).toLowerCase()] = value;
   };
 
@@ -1488,7 +1488,7 @@ function LogoInterpreter(turtle, stream)
   };
 
   self.routines["global"] = function(varname) {
-    var globalscope = self.scopes[self.scopes.length - 1];
+    var globalscope = self.scopes[0];
     Array.prototype.forEach.call(arguments, function(name) { globalscope[sexpr(name).toLowerCase()] = undefined; });
   };
 
@@ -1603,7 +1603,7 @@ function LogoInterpreter(turtle, stream)
   };
 
   self.routines["globals"] = function() {
-    var globalscope = self.scopes[self.scopes.length - 1];
+    var globalscope = self.scopes[0];
     return Object.keys(globalscope);
   };
 
@@ -1762,20 +1762,21 @@ function LogoInterpreter(turtle, stream)
 
   self.routines["test"] = function(tf) {
     tf = aexpr(tf);
-    self.scopes[0]._test = tf;
+    self.scopes[self.scopes.length - 1]._test = tf;
     return tf;
   };
 
   self.routines["iftrue"] = self.routines["ift"] = function(statements) {
     statements = lexpr(statements);
-    return self.scopes[0]._test ? self.execute(statements) : self.scopes[0]._test;
+    var tf = self.scopes[self.scopes.length - 1]._test;
+    return tf ? self.execute(statements) : tf;
   };
 
   self.routines["iffalse"] = self.routines["iff"] = function(statements) {
     statements = lexpr(statements);
-    return !self.scopes[0]._test ? self.execute(statements) : self.scopes[0]._test;
+    var tf = self.scopes[self.scopes.length - 1]._test;
+    return !tf ? self.execute(statements) : tf;
   };
-
 
   self.routines["stop"] = function() {
     throw new Output();
