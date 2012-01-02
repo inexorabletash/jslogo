@@ -26,18 +26,6 @@ function LogoInterpreter(turtle, stream)
 
   //----------------------------------------------------------------------
   //
-  // Interpreter State
-  //
-  //----------------------------------------------------------------------
-
-  self.turtle = turtle;
-  self.stream = stream;
-  self.routines = {};
-  self.scopes = [{}];
-  self.plists = {}; // TODO: Use a StringMap
-
-  //----------------------------------------------------------------------
-  //
   // Utilities
   //
   //----------------------------------------------------------------------
@@ -95,7 +83,44 @@ function LogoInterpreter(turtle, stream)
     this.next();
   }
 
-  this.prng = new PRNG(Math.random() * 0x7fffffff);
+  function StringMap() {
+    var map = Object.create(null);
+    return {
+      get: function(key) {
+        return map['$' + key];
+      },
+      set: function (key, value) {
+        map['$' + key] = value;
+      },
+      has: function (key) {
+        return (('$' + key) in map);
+      },
+      'delete': function (key) {
+        return delete map['$' + key];
+      },
+      keys: function () {
+        return Object.keys(map).map(
+          function (key) {
+            return key.substring(1);
+          }
+        );
+      }
+    };
+  }
+
+
+  //----------------------------------------------------------------------
+  //
+  // Interpreter State
+  //
+  //----------------------------------------------------------------------
+
+  self.turtle = turtle;
+  self.stream = stream;
+  self.routines = {};
+  self.scopes = [{}];
+  self.plists = new StringMap();
+  self.prng = new PRNG(Math.random() * 0x7fffffff);
 
   //----------------------------------------------------------------------
   //
@@ -1474,47 +1499,47 @@ function LogoInterpreter(turtle, stream)
   self.routines["pprop"] = function(plistname, propname, value) {
     plistname = sexpr(plistname).toLowerCase();
     propname = sexpr(propname).toLowerCase();
-    var plist = self.plists['$' + plistname];
+    var plist = self.plists.get(plistname);
     if (!plist) {
-      plist = {};
-      self.plists['$' + plistname] = plist;
+      plist = new StringMap();
+      self.plists.set(plistname, plist);
     }
-    plist['$' + propname] = value;
+    plist.set(propname, value);
   };
 
   self.routines["gprop"] = function(plistname, propname) {
     plistname = sexpr(plistname).toLowerCase();
     propname = sexpr(propname).toLowerCase();
-    var plist = self.plists['$' + plistname];
-    if (!plist || !plist.hasOwnProperty('$' + propname)) {
+    var plist = self.plists.get(plistname);
+    if (!plist || !plist.has(propname)) {
       return [];
     }
-    return plist['$' + propname];
+    return plist.get(propname);
   };
 
   self.routines["remprop"] = function(plistname, propname) {
     plistname = sexpr(plistname).toLowerCase();
     propname = sexpr(propname).toLowerCase();
-    var plist = self.plists['$' + plistname];
+    var plist = self.plists.get(plistname);
     if (plist) {
-      delete plist['$' + propname];
-      if (Object.keys(plist).length === 0) {
-        delete self.plists['$' + plistname];
+      plist['delete'](propname);
+      if (plist.keys().length === 0) {
+        self.plists['delete'](plistname);
       }
     }
   };
 
   self.routines["plist"] = function(plistname) {
     plistname = sexpr(plistname).toLowerCase();
-    var plist = self.plists['$' + plistname];
+    var plist = self.plists.get(plistname);
     if (!plist) {
       return [];
     }
 
     var result = [];
-    Object.keys(plist).forEach(function (key) {
-      result.push(key.substring(1));
-      result.push(copy(plist[key]));
+    plist.keys().forEach(function (key) {
+      result.push(key);
+      result.push(copy(plist.get(key)));
     });
     return result;
   };
@@ -1550,7 +1575,7 @@ function LogoInterpreter(turtle, stream)
 
   self.routines["plistp"] = self.routines["plist?"] = function(plistname) {
     plistname = sexpr(plistname).toLowerCase();
-    return self.plists['$' + plistname] ? 1 : 0;
+    return self.plists.has(plistname) ? 1 : 0;
   };
 
   //
@@ -1561,7 +1586,7 @@ function LogoInterpreter(turtle, stream)
     return [
       Object.keys(self.routines).filter(function(x) { return !self.routines[x].primitive; }),
       self.scopes.reduce(function(list, scope) { return list.concat(Object.keys(scope)); }, []),
-      Object.keys(self.plists).map(function(name) { return name.substring(1); })
+      self.plists.keys()
     ];
   };
 
@@ -1587,7 +1612,7 @@ function LogoInterpreter(turtle, stream)
   };
 
   self.routines["plists"] = function() {
-    return [[], [], Object.keys(self.plists).map(function (name) { return name.substring(1); })];
+    return [[], [], self.plists.keys()];
   };
 
   // Not Supported: namelist
@@ -1641,7 +1666,7 @@ function LogoInterpreter(turtle, stream)
       var plists = lexpr(list.shift());
       plists.forEach(function(name) {
         name = sexpr(name);
-        delete self.plists['$' + name.toLowerCase()];
+        self.plists['delete'](name.toLowerCase());
       });
     }
   };
@@ -1658,7 +1683,7 @@ function LogoInterpreter(turtle, stream)
       Object.keys(scope).forEach(function(name) { delete scope[name]; });
     });
 
-    self.plists = {};
+    self.plists = new StringMap();
   };
 
   //----------------------------------------------------------------------
