@@ -34,7 +34,7 @@ function LogoInterpreter(turtle, stream)
   self.stream = stream;
   self.routines = {};
   self.scopes = [{}];
-  self.plists = {};
+  self.plists = {}; // TODO: Use a StringMap
 
   //----------------------------------------------------------------------
   //
