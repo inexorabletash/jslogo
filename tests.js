@@ -717,7 +717,7 @@ test("Graphics", 69, function () {
   // 6.8 Mouse Queries
 });
 
-test("Workspace Management", 50, function () {
+test("Workspace Management", 57, function () {
 
   //
   // 7.1 Procedure Definition
@@ -808,7 +808,17 @@ test("Workspace Management", 50, function () {
   this.assert_equals('make "foo 5 namep "foo', 1);
 
   // 7.3 Property Lists
+
+  this.assert_equals('plistp "lname', 0);
+  this.assert_equals('pprop "lname "pname 123  gprop "lname "pname', 123);
+  this.assert_equals('gprop "lname "nosuchprop', []);
+  this.assert_equals('plist "lname', ["pname", 123]);
+  this.assert_equals('plistp "lname', 1);
+  this.assert_equals('remprop "lname "pname  plist "lname', []);
+  this.assert_equals('plistp "lname', 0);
+
   // 7.4 Workspace Predicates
+  // (tested above)
 
   //
   // 7.5 Workspace Queries

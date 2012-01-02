@@ -566,11 +566,20 @@ of comparison.</p>
   <dd>Reserve the variable at the global scope. This doesn&apos;t do anything useful.
 </dl>
 
-<!--
 <h4>7.3 Property Lists</h4>
 <dl>
+  <dt><code>pprop <var>plistname</var> <var>propname</var> <var>value</var></code>
+  <dd>Set the property <var>propname</var> in the property list <var>plistname</var> to value <var>value</value>.
+
+  <dt><code>gprop <var>plistname</var> <var>propname</var></code>
+  <dd>Get the value of the property <var>propname</var> in the property list <var>plistname</var>, or the empty list if no such property.
+
+  <dt><code>remprop <var>plistname</var> <var>propname</var></code>
+  <dd>Remove the property <var>propname</var> in the property list <var>plistname</var>.
+
+  <dt><code>plist <var>plistname</var></code
+  <dd>Return a list of properties in the property list <var>plistname</var>, alternating property name, property value.
 </dl>
--->
 
 <h4>7.4 Workspace Predicates</h4>
 <p>Predicates return 1 (true) or 0 (false) </p>
@@ -590,6 +599,10 @@ of comparison.</p>
   <dt><code>namep <var>name</var></code>
   <dt><code>name? <var>name</var></code>
   <dd>Test if there is a variable with the given name.
+
+  <dt><code>plistp <var>name</var></code>
+  <dt><code>plist? <var>name</var></code>
+  <dd>Test if there is a property list with the given name.
 </dl>
 
 

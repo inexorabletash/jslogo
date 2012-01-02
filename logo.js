@@ -34,7 +34,7 @@ function LogoInterpreter(turtle, stream)
   self.stream = stream;
   self.routines = {};
   self.scopes = [{}];
-
+  self.plists = {};
 
   //----------------------------------------------------------------------
   //
@@ -533,9 +533,18 @@ function LogoInterpreter(turtle, stream)
     if (atom === (void 0)) { throw new Error(__("Expected list")); }
     if (Type(atom) === 'number') { return stringToArray(atom); }
     if (Type(atom) === 'word') { return stringToArray(atom); }
-    if (Type(atom) === 'list') { return atom.slice(); }
+    if (Type(atom) === 'list') { return copy(atom); }
 
     throw new Error(__("Expected list"));
+  }
+
+  //----------------------------------------------------------------------
+  //----------------------------------------------------------------------
+  function copy(value) {
+    switch (Type(value)) {
+    case 'list': return value.map(copy);
+    default: return value;
+    }
   }
 
   //----------------------------------------------------------------------
@@ -1458,7 +1467,57 @@ function LogoInterpreter(turtle, stream)
     Array.prototype.forEach.call(arguments, function(name) { globalscope[sexpr(name).toLowerCase()] = undefined; });
   };
 
+  //
   // 7.3 Property Lists
+  //
+
+  self.routines["pprop"] = function(plistname, propname, value) {
+    plistname = sexpr(plistname).toLowerCase();
+    propname = sexpr(propname).toLowerCase();
+    var plist = self.plists['$' + plistname];
+    if (!plist) {
+      plist = {};
+      self.plists['$' + plistname] = plist;
+    }
+    plist['$' + propname] = value;
+  };
+
+  self.routines["gprop"] = function(plistname, propname) {
+    plistname = sexpr(plistname).toLowerCase();
+    propname = sexpr(propname).toLowerCase();
+    var plist = self.plists['$' + plistname];
+    if (!plist || !plist.hasOwnProperty('$' + propname)) {
+      return [];
+    }
+    return plist['$' + propname];
+  };
+
+  self.routines["remprop"] = function(plistname, propname) {
+    plistname = sexpr(plistname).toLowerCase();
+    propname = sexpr(propname).toLowerCase();
+    var plist = self.plists['$' + plistname];
+    if (plist) {
+      delete plist['$' + propname];
+      if (Object.keys(plist).length === 0) {
+        delete self.plists['$' + plistname];
+      }
+    }
+  };
+
+  self.routines["plist"] = function(plistname) {
+    plistname = sexpr(plistname).toLowerCase();
+    var plist = self.plists['$' + plistname];
+    if (!plist) {
+      return [];
+    }
+
+    var result = [];
+    Object.keys(plist).forEach(function (key) {
+      result.push(key.substring(1));
+      result.push(copy(plist[key]));
+    });
+    return result;
+  };
 
   //
   // 7.4 Workspace Predicates
@@ -1489,7 +1548,10 @@ function LogoInterpreter(turtle, stream)
     }
   };
 
-  // Not Supported: plistp
+  self.routines["plistp"] = self.routines["plist?"] = function(plistname) {
+    plistname = sexpr(plistname).toLowerCase();
+    return self.plists['$' + plistname] ? 1 : 0;
+  };
 
   //
   // 7.5 Workspace Queries
