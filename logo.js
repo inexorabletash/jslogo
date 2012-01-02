@@ -1561,7 +1561,7 @@ function LogoInterpreter(turtle, stream)
     return [
       Object.keys(self.routines).filter(function(x) { return !self.routines[x].primitive; }),
       self.scopes.reduce(function(list, scope) { return list.concat(Object.keys(scope)); }, []),
-      []
+      Object.keys(self.plists).map(function(name) { return name.substring(1); })
     ];
   };
 
@@ -1586,7 +1586,10 @@ function LogoInterpreter(turtle, stream)
     return [[], self.scopes.reduce(function(list, scope) { return list.concat(Object.keys(scope)); }, [])];
   };
 
-  // Not Supported: plists
+  self.routines["plists"] = function() {
+    return [[], [], Object.keys(self.plists).map(function (name) { return name.substring(1); })];
+  };
+
   // Not Supported: namelist
   // Not Supported: pllist
   // Not Supported: arity
@@ -1632,6 +1635,15 @@ function LogoInterpreter(turtle, stream)
         });
       });
     }
+
+    // Delete property lists
+    if (list.length) {
+      var plists = lexpr(list.shift());
+      plists.forEach(function(name) {
+        name = sexpr(name);
+        delete self.plists['$' + name.toLowerCase()];
+      });
+    }
   };
 
   self.routines["erall"] = function() {
@@ -1645,6 +1657,8 @@ function LogoInterpreter(turtle, stream)
     self.scopes.forEach(function(scope) {
       Object.keys(scope).forEach(function(name) { delete scope[name]; });
     });
+
+    self.plists = {};
   };
 
   //----------------------------------------------------------------------

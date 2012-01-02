@@ -717,7 +717,7 @@ test("Graphics", 69, function () {
   // 6.8 Mouse Queries
 });
 
-test("Workspace Management", 57, function () {
+test("Workspace Management", 58, function () {
 
   //
   // 7.1 Procedure Definition
@@ -826,11 +826,12 @@ test("Workspace Management", 57, function () {
 
   this.assert_equals('erall  contents', [[], [], []]);
 
-  this.assert_equals('erall  make "a 1  to b output 2 end  contents', [['b'], ['a'], []]);
-  this.assert_equals('erall  make "a 1  to b output 2 end  procedures', ['b']);
+  this.assert_equals('erall  make "a 1  to b output 2 end  pprop "c "d "e  contents', [['b'], ['a'], ['c']]);
+  this.assert_equals('erall  make "a 1  to b output 2 end  pprop "c "d "e  procedures', ['b']);
   // TODO: primitives
-  this.assert_equals('erall  make "a 1  to b output 2 end  globals', ['a']);
-  this.assert_equals('erall  make "a 1  to b output 2 end  names', [[], ['a']]);
+  this.assert_equals('erall  make "a 1  to b output 2 end  pprop "c "d "e  globals', ['a']);
+  this.assert_equals('erall  make "a 1  to b output 2 end  pprop "c "d "e  names', [[], ['a']]);
+  this.assert_equals('erall  make "a 1  to b output 2 end  pprop "c "d "e  plists', [[], [], ['c']]);
 
   this.assert_equals('erall  make "a 1  make "b 2  to a output 1 end  to b output 2 end  erase [[a] [b]]  contents', [['b'], ['a'], []]);
   this.assert_equals('erall  make "a 1  make "b 2  to a output 1 end  to b output 2 end  erall  contents', [[], [], []]);

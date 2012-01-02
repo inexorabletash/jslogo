@@ -610,7 +610,7 @@ of comparison.</p>
 <dl>
   <dt><code>contents</code>
   <dd>Outputs a list with three members. The first is a list of user-defined procedure names.
-  The second is a list of defined variables. The third is always an empty list.
+  The second is a list of defined variables. The third is a list of non-empty property list names.
 
   <dt><code>procedures</code>
   <dd>Outputs a list of user-defined procedure names.
@@ -625,6 +625,9 @@ of comparison.</p>
   <dd>Outputs a list with two members. The first is an empty list.
   The second is a list of defined variables.
 
+  <dt><code>plists</code>
+  <dd>Outputs a list with three members. The first is an empty list.
+  The second is an empty list. The third is a list of non-empty property list names.
 </dl>
 
 <!--
@@ -637,9 +640,9 @@ of comparison.</p>
 <h4>7.7 Workspace Control</h4>
 <dl>
   <dt><code>erase <var>contentslist</var></code>
-  <dd>Takes a two member list, where the first is a list of user-defined procedure names to erase,
-  and the second is a list of defined variables to erase. Primitive procedures can&apos;t be
-  erased unless <code>REDEFP</code> is <code>TRUE</code>.
+  <dd>Takes a three member list, where the first is a list of user-defined procedure names to erase,
+  the second is a list of defined variables to erase, the third is a list of property lists to erase.
+  Primitive procedures can&apos;t be erased unless <code>REDEFP</code> is <code>TRUE</code>.
 
   <dt><code>erall</code>
   <dd>Erase all user-defined procedures and variables.
