@@ -1540,6 +1540,7 @@ function LogoInterpreter(turtle, stream)
     if (plist) {
       plist['delete'](propname);
       if (plist.keys().length === 0) {
+        // TODO: Do this? Loses state, e.g. unburies if buried
         self.plists['delete'](plistname);
       }
     }
@@ -1600,35 +1601,79 @@ function LogoInterpreter(turtle, stream)
 
   self.routines["contents"] = function() {
     return [
-      Object.keys(self.routines).filter(function(x) { return !self.routines[x].primitive; }),
-      self.scopes.reduce(function(list, scope) { return list.concat(scope.keys()); }, []),
-      self.plists.keys()
+      Object.keys(self.routines).filter(function(x) {
+        return !self.routines[x].primitive && !self.routines[x].buried; }),
+      self.scopes.reduce(function(list, scope) {
+        return list.concat(scope.keys().filter(function(x) { return !scope.get(x).buried; })); }, []),
+      self.plists.keys().filter(function(x) { return !self.plists.get(x).buried; })
     ];
   };
 
-  // Not Supported: buried
-  // Not Supported: traced
-  // Not Supported: stepped
+  self.routines["buried"] = function() {
+    return [
+      Object.keys(self.routines).filter(function(x) {
+        return !self.routines[x].primitive && self.routines[x].buried; }),
+      self.scopes.reduce(function(list, scope) {
+        return list.concat(scope.keys().filter(function(x) { return scope.get(x).buried; })); }, []),
+      self.plists.keys().filter(function(x) { return self.plists.get(x).buried; })
+    ];
+  };
+
+  self.routines["traced"] = function() {
+    return [
+      Object.keys(self.routines).filter(function(x) {
+        return !self.routines[x].primitive && self.routines[x].traced; }),
+      self.scopes.reduce(function(list, scope) {
+        return list.concat(scope.keys().filter(function(x) { return scope.get(x).traced; })); }, []),
+      self.plists.keys().filter(function(x) { return self.plists.get(x).traced; })
+    ];
+  };
+
+  self.routines["stepped"] = function() {
+    return [
+      Object.keys(self.routines).filter(function(x) {
+        return !self.routines[x].primitive && self.routines[x].stepped; }),
+      self.scopes.reduce(function(list, scope) {
+        return list.concat(scope.keys().filter(function(x) { return scope.get(x).stepped; })); }, []),
+      self.plists.keys().filter(function(x) { return self.plists.get(x).stepped; })
+    ];
+  };
 
   self.routines["procedures"] = function() {
-    return Object.keys(self.routines).filter(function(x) { return !self.routines[x].primitive; });
+    return Object.keys(self.routines).filter(function(x) {
+      return !self.routines[x].primitive && !self.routines[x].buried;
+    });
   };
 
   self.routines["primitives"] = function() {
-    return Object.keys(self.routines).filter(function(x) { return self.routines[x].primitive; });
+    return Object.keys(self.routines).filter(function(x) {
+      return self.routines[x].primitive & !self.routines[x].buried;
+    });
   };
 
   self.routines["globals"] = function() {
     var globalscope = self.scopes[0];
-    return globalscope.keys();
+    return globalscope.keys().filter(function (x) {
+      return !globalscope.get(x).buried;
+    });
   };
 
   self.routines["names"] = function() {
-    return [[], self.scopes.reduce(function(list, scope) { return list.concat(scope.keys()); }, [])];
+    return [
+      [],
+      self.scopes.reduce(function(list, scope) {
+        return list.concat(scope.keys().filter(function(x) {
+          return !scope.get(x).buried; })); }, [])
+    ];
   };
 
   self.routines["plists"] = function() {
-    return [[], [], self.plists.keys()];
+    return [
+      [],
+      [],
+      self.plists.keys().filter(function(x) {
+        return !self.plists.get(x).buried; })
+    ];
   };
 
   // Not Supported: namelist
@@ -1669,8 +1714,8 @@ function LogoInterpreter(turtle, stream)
       // TODO: global only?
       self.scopes.forEach(function(scope) {
         vars.forEach(function(name) {
-          name = sexpr(name);
-          scope['delete'](name.toLowerCase());
+          name = sexpr(name).toLowerCase();
+          scope['delete'](name);
         });
       });
     }
@@ -1679,43 +1724,214 @@ function LogoInterpreter(turtle, stream)
     if (list.length) {
       var plists = lexpr(list.shift());
       plists.forEach(function(name) {
-        name = sexpr(name);
-        self.plists['delete'](name.toLowerCase());
+        name = sexpr(name).toLowerCase();
+        self.plists['delete'](name);
       });
     }
   };
 
+  // TODO: lots of redundant logic here -- clean this up
   self.routines["erall"] = function() {
-
-    Object.keys(self.routines).forEach(function(name) {
-      if (!self.routines[name].primitive) {
+    Object.keys(self.routines).filter(function(x) {
+      return !self.routines[x].primitive && !self.routines[x].buried;
+    }).forEach(function(name) {
         delete self.routines[name];
-      }
     });
 
     self.scopes.forEach(function(scope) {
-      scope.keys().forEach(function(name) { scope['delete'](name); });
+      scope.keys().filter(function(x) {
+        return !scope.get(x).buried;
+      }).forEach(function(name) {
+        scope['delete'](name);
+      });
     });
 
-    self.plists.keys().forEach(function (key) {
+    self.plists.keys().filter(function(x) {
+      return !self.plists.get(x).buried;
+    }).forEach(function (name) {
+      self.plists['delete'](name);
+    });
+  };
+
+  self.routines["erps"] = function() {
+    Object.keys(self.routines).filter(function(x) {
+      return !self.routines[x].primitive && !self.routines[x].buried;
+    }).forEach(function(name) {
+        delete self.routines[name];
+    });
+  };
+
+  self.routines["erns"] = function() {
+    self.scopes.forEach(function(scope) {
+      scope.keys().filter(function(x) {
+        return !scope.get(x).buried;
+      }).forEach(function(name) {
+        scope['delete'](name);
+      });
+    });
+  };
+
+  self.routines["erpls"] = function() {
+    self.plists.keys().filter(function(x) {
+      return !self.plists.get(x).buried;
+    }).forEach(function (key) {
       self.plists['delete'](key);
     });
   };
 
-  // Not Supported: erps
-  // Not Supported: erns
-  // Not Supported: erpls
   // Not Supported: ern
   // Not Supported: erpl
 
-  // Not Supported: bury
-  // Not Supported: buryall
-  // Not Supported: buryname
-  // Not Supported: unbury
-  // Not Supported: unburyall
-  // Not Supported: unburyname
-  // Not Supported: buriedp
+  self.routines["bury"] = function(list) {
+    list = lexpr(list);
 
+    // Bury procedures
+    if (list.length) {
+      var procs = lexpr(list.shift());
+      procs.forEach(function(name) {
+        name = sexpr(name).toLowerCase();
+        if (self.routines.hasOwnProperty(name)) {
+          self.routines[name].buried = true;
+        }
+      });
+    }
+
+    // Bury variables
+    if (list.length) {
+      var vars = lexpr(list.shift());
+      // TODO: global only?
+      self.scopes.forEach(function(scope) {
+        vars.forEach(function(name) {
+          name = sexpr(name).toLowerCase();
+          if (scope.has(name)) {
+            scope.get(name).buried = true;
+          }
+        });
+      });
+    }
+
+    // Bury property lists
+    if (list.length) {
+      var plists = lexpr(list.shift());
+      plists.forEach(function(name) {
+        name = sexpr(name).toLowerCase();
+        if (self.plists.has(name)) {
+          self.plists.get(name).buried = true;
+        }
+      });
+    }
+  };
+
+  self.routines["buryall"] = function() {
+    Object.keys(self.routines).forEach(function(name) {
+      self.routines[name].buried = true;
+    });
+
+    self.scopes.forEach(function(scope) {
+      scope.keys().forEach(function(name) {
+        scope.get(name).buried = true;
+      });
+    });
+
+    self.plists.keys().forEach(function (name) {
+      self.plists.get(name).buried = true;
+    });
+  };
+
+  // Not Supported: buryname
+
+  self.routines["unbury"] = function(list) {
+    list = lexpr(list);
+
+    // Procedures
+    if (list.length) {
+      var procs = lexpr(list.shift());
+      procs.forEach(function(name) {
+        name = sexpr(name).toLowerCase();
+        if (self.routines.hasOwnProperty(name)) {
+          self.routines[name].buried = false;
+        }
+      });
+    }
+
+    // Variables
+    if (list.length) {
+      var vars = lexpr(list.shift());
+      // TODO: global only?
+      self.scopes.forEach(function(scope) {
+        vars.forEach(function(name) {
+          name = sexpr(name).toLowerCase();
+          if (scope.has(name)) {
+            scope.get(name).buried = false;
+          }
+        });
+      });
+    }
+
+    // Property lists
+    if (list.length) {
+      var plists = lexpr(list.shift());
+      plists.forEach(function(name) {
+        name = sexpr(name).toLowerCase();
+        if (self.plists.has(name)) {
+          self.plists.get(name).buried = false;
+        }
+      });
+    }
+  };
+
+  self.routines["unburyall"] = function() {
+    Object.keys(self.routines).forEach(function(name) {
+      self.routines[name].buried = false;
+    });
+
+    self.scopes.forEach(function(scope) {
+      scope.keys().forEach(function(name) {
+        scope.get(name).buried = false;
+      });
+    });
+
+    self.plists.keys().forEach(function (name) {
+      self.plists.get(name).buried = false;
+    });
+  };
+
+  // Not Supported: unburyname
+
+  self.routines["buriedp"] = self.routines["buried?"] = function(list) {
+    list = lexpr(list);
+    var name;
+
+    // Procedures
+    if (list.length) {
+      var procs = lexpr(list.shift());
+      if (procs.length) {
+        name = sexpr(procs[0]).toLowerCase();
+        return (self.routines.hasOwnProperty(name) && self.routines[name].buried) ? 1 : 0;
+      }
+    }
+
+    // Variables
+    if (list.length) {
+      var vars = lexpr(list.shift());
+      if (vars.length) {
+        name = sexpr(vars[0]).toLowerCase();
+        // TODO: global only?
+        return (self.scopes[0].has(name) && self.scopes[0].get(name).buried) ? 1 : 0;
+      }
+    }
+
+    // Property lists
+    if (list.length) {
+      var plists = lexpr(list.shift());
+      if (plists.length) {
+        name = sexpr(plists[0]).toLowerCase();
+        return (self.plists.has(name) && self.plists.get(name).buried) ? 1 : 0;
+      }
+    }
+
+    return 0;
+  };
 
   //----------------------------------------------------------------------
   //

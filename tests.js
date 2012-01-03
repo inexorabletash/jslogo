@@ -717,7 +717,7 @@ test("Graphics", 69, function () {
   // 6.8 Mouse Queries
 });
 
-test("Workspace Management", 58, function () {
+test("Workspace Management", 81, function () {
 
   //
   // 7.1 Procedure Definition
@@ -824,19 +824,45 @@ test("Workspace Management", 58, function () {
   // 7.5 Workspace Queries
   //
 
-  this.assert_equals('erall  contents', [[], [], []]);
+  this.assert_equals('unburyall erall  contents', [[], [], []]);
 
-  this.assert_equals('erall  make "a 1  to b output 2 end  pprop "c "d "e  contents', [['b'], ['a'], ['c']]);
-  this.assert_equals('erall  make "a 1  to b output 2 end  pprop "c "d "e  procedures', ['b']);
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  contents', [['b'], ['a'], ['c']]);
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  procedures', ['b']);
   // TODO: primitives
-  this.assert_equals('erall  make "a 1  to b output 2 end  pprop "c "d "e  globals', ['a']);
-  this.assert_equals('erall  make "a 1  to b output 2 end  pprop "c "d "e  names', [[], ['a']]);
-  this.assert_equals('erall  make "a 1  to b output 2 end  pprop "c "d "e  plists', [[], [], ['c']]);
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  globals', ['a']);
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  names', [[], ['a']]);
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  plists', [[], [], ['c']]);
 
-  this.assert_equals('erall  make "a 1  make "b 2  to a output 1 end  to b output 2 end  erase [[a] [b]]  contents', [['b'], ['a'], []]);
-  this.assert_equals('erall  make "a 1  make "b 2  to a output 1 end  to b output 2 end  erall  contents', [[], [], []]);
+  this.assert_equals('unburyall erall  make "a 1  make "b 2  to a output 1 end  to b output 2 end  erase [[a] [b]]  contents', [['b'], ['a'], []]);
+  this.assert_equals('unburyall erall  make "a 1  make "b 2  to a output 1 end  to b output 2 end  erall  contents', [[], [], []]);
   // TODO: erase + redefp
 
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  erps [[b]]  contents', [[], ['a'], ['c']]);
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  erns [[a]]  contents', [['b'], [], ['c']]);
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  erpls [[c]]  contents', [['b'], ['a'], []]);
+
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  bury [[b]]  contents', [[], ['a'], ['c']]);
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  bury [[] [a]]  contents', [['b'], [], ['c']]);
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  bury [[] [] [c]]  contents', [['b'], ['a'], []]);
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  buryall  contents', [[], [], []]);
+
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  buryall unbury [[b]]  contents', [['b'], [], []]);
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  buryall unbury [[] [a]]  contents', [[], ['a'], []]);
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  buryall unbury [[] [] [c]]  contents', [[], [], ['c']]);
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  buryall  unburyall  contents', [['b'], ['a'], ['c']]);
+
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  buriedp [[b]]', 0);
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  bury [[b]]  buriedp [[b]]', 1);
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  bury [[b]]  buriedp [[] [a]]', 0);
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  bury [[b]]  buriedp [[] [] [c]]', 0);
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  buriedp [[] [a]]', 0);
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  bury [[] [a]]  buriedp [[b]]', 0);
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  bury [[] [a]]  buriedp [[] [a]]', 1);
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  bury [[] [a]]  buriedp [[] [] [c]]', 0);
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  buriedp [[] [] [c]]', 0);
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  bury [[] [] [c]]  buriedp [[b]]', 0);
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  bury [[] [] [c]]  buriedp [[] [a]]', 0);
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  bury [[] [] [c]]  buriedp [[] [] [c]]', 1);
 
   // 7.6 Workspace Inspection
   // 7.7 Workspace Control

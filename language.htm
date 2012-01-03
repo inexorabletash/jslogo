@@ -611,23 +611,29 @@ of comparison.</p>
   <dt><code>contents</code>
   <dd>Outputs a list with three members. The first is a list of user-defined procedure names.
   The second is a list of defined variables. The third is a list of non-empty property list names.
+  Only non-buried procedures, variables, and property lists are included.
+
+  <dt><code>buried</code>
+  <dd>Outputs a list with three members. The first is a list of user-defined procedure names
+  The second is a list of defined variables. The third is a list of non-empty property list names.
+  Only buried procedures, variables, and property lists are included.
 
   <dt><code>procedures</code>
-  <dd>Outputs a list of user-defined procedure names.
+  <dd>Outputs a list of user-defined non-buried procedure names.
 
   <dt><code>primitives</code>
-  <dd>Outputs a list of primitive procedure names.
+  <dd>Outputs a list of primitive non-buried procedure names.
 
   <dt><code>globals</code>
-  <dd>Outputs a list of defined global variables.
+  <dd>Outputs a list of defined non-buried global variables.
 
   <dt><code>names</code>
   <dd>Outputs a list with two members. The first is an empty list.
-  The second is a list of defined variables.
+  The second is a list of defined non-buried variables.
 
   <dt><code>plists</code>
   <dd>Outputs a list with three members. The first is an empty list.
-  The second is an empty list. The third is a list of non-empty property list names.
+  The second is an empty list. The third is a list of non-empty non-buried property list names.
 </dl>
 
 <!--
@@ -645,7 +651,36 @@ of comparison.</p>
   Primitive procedures can&apos;t be erased unless <code>REDEFP</code> is <code>TRUE</code>.
 
   <dt><code>erall</code>
-  <dd>Erase all user-defined procedures and variables.
+  <dd>Erase all non-buried user-defined procedures, variables and property lists.
+
+  <dt><code>erps</code>
+  <dd>Erase all non-buried user-defined procedures.
+
+  <dt><code>erns</code>
+  <dd>Erase all non-buried variables.
+
+  <dt><code>erpls</code>
+  <dd>Erase all non-buried property lists.
+
+  <dt><code>bury <var>contentslist</var></code>
+  <dd>Takes a three member list, where the first is a list of user-defined procedure names to bury,
+  the second is a list of defined variables to bury, the third is a list of property lists to bury.
+
+  <dt><code>buryall</code>
+  <dd>Bury all user-defined procedures, variables, and property lists.
+
+  <dt><code>unbury <var>contentslist</var></code>
+  <dd>Takes a three member list, where the first is a list of user-defined procedure names to unbury,
+  the second is a list of defined variables to unbury, the third is a list of property lists to unbury.
+
+  <dt><code>unburyall</code>
+  <dd>Unbury all user-defined procedures, variables, and property lists.
+
+  <dt><code>buriedp <var>contentslist</var></code>
+  <dt><code>buried? <var>contentslist</var></code>
+  <dd>Return 1 if the first named user-defined procedure, variable, or property list exists and
+    is buried, 0 otherwise.
+
 </dl>
 
 <h3 id="sec8">8. Control Structures</h3>
