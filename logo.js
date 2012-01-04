@@ -670,6 +670,7 @@ function LogoInterpreter(turtle, stream)
         case 'word': return atom;
         case 'number': return String(atom);
         case 'list': return '[ ' + atom.map(defn).join(' ') + ' ]';
+      default: throw new Error(__("Unexpected value: unknown type"));
       }
     }
 
@@ -1676,8 +1677,25 @@ function LogoInterpreter(turtle, stream)
     ];
   };
 
-  // Not Supported: namelist
-  // Not Supported: pllist
+  self.routines["namelist"] = function(varname) {
+    if (Type(varname) === 'list') {
+      varname = lexpr(varname);
+    } else {
+      varname = [sexpr(varname)];
+    }
+    return [[], varname];
+  };
+
+  self.routines["pllist"] = function(plname) {
+    if (Type(plname) === 'list') {
+      plname = lexpr(plname);
+    } else {
+      plname = [sexpr(plname)];
+    }
+    return [[], [], plname];
+  };
+
+
   // Not Supported: arity
   // Not Supported: nodes
 
@@ -1779,8 +1797,35 @@ function LogoInterpreter(turtle, stream)
     });
   };
 
-  // Not Supported: ern
-  // Not Supported: erpl
+  self.routines["ern"] = function(varname) {
+    var varnamelist;
+    if (Type(varname) === 'list') {
+      varnamelist = lexpr(varname);
+    } else {
+      varnamelist = [sexpr(varname)];
+    }
+
+    self.scopes.forEach(function(scope) {
+      varnamelist.forEach(function(name) {
+        name = sexpr(name).toLowerCase();
+        scope['delete'](name);
+      });
+    });
+  };
+
+  self.routines["erpl"] = function(plname) {
+    var plnamelist;
+    if (Type(plname) === 'list') {
+      plnamelist = lexpr(plname);
+    } else {
+      plnamelist = [sexpr(plname)];
+    }
+
+    plnamelist.forEach(function(name) {
+      name = sexpr(name).toLowerCase();
+      self.plists['delete'](name);
+    });
+  };
 
   self.routines["bury"] = function(list) {
     list = lexpr(list);

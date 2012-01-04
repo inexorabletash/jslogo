@@ -634,6 +634,14 @@ of comparison.</p>
   <dt><code>plists</code>
   <dd>Outputs a list with three members. The first is an empty list.
   The second is an empty list. The third is a list of non-empty non-buried property list names.
+
+  <dt><code>namelist <var>name</var></code>
+  <dt><code>namelist <var>namelist</var></code>
+  <dd>Return a <code>contents</code>-style list with the given variable names.
+
+  <dt><code>pllist <var>plname</var></code>
+  <dt><code>pllist <var>plnamelist</var></code>
+  <dd>Return a <code>contents</code>-style list with the given property lists.
 </dl>
 
 <!--
@@ -661,6 +669,14 @@ of comparison.</p>
 
   <dt><code>erpls</code>
   <dd>Erase all non-buried property lists.
+
+  <dt><code>ern <var>varname</var></code>
+  <dt><code>ern <var>varnamelist</var></code>
+  <dd>Erase the named variable(s).
+
+  <dt><code>epl <var>plname</var></code>
+  <dt><code>epl <var>plnamelist</var></code>
+  <dd>Erase the named property list(s).
 
   <dt><code>bury <var>contentslist</var></code>
   <dd>Takes a three member list, where the first is a list of user-defined procedure names to bury,
