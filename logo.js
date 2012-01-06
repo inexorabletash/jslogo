@@ -261,7 +261,6 @@ function LogoInterpreter(turtle, stream)
 
 
   self.maybegetvar = function(name) {
-    window.scopes = self.scopes;
     name = name.toLowerCase();
     for (var i = self.scopes.length - 1; i >= 0; --i) {
       if (self.scopes[i].has(name)) {
