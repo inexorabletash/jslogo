@@ -58,9 +58,6 @@ function onenter() {
     g_history.push( v );
     g_historypos = -1;
 
-    var log = document.getElementById("log");
-    log.innerHTML = log.innerHTML + v + "\n";
-
     try {
       g_logo.run(v);
     } catch (e) {
