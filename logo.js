@@ -158,7 +158,7 @@ function LogoInterpreter(turtle, stream)
 
   var regexIdentifier = /^(\.?[A-Za-z][A-Za-z0-9_.\?]*)(.*?)$/;
   var regexStringLiteral = /^("[^ \[\]\(\)]*)(.*?)$/;
-  var regexVariableLiteral = /^(:[A-Za-z][A-Za-z0-9]*)(.*?)$/;
+  var regexVariableLiteral = /^(:[A-Za-z][A-Za-z0-9_]*)(.*?)$/;
   var regexNumberLiteral = /^([0-9]*\.?[0-9]+(?:[eE]\s*[\-+]?\s*[0-9]+)?)(.*?)$/;
   var regexListDelimiter = /^(\[|\])(.*?)$/;
   var regexOperator = /^(\+|\-|\*|\/|%|\^|>=|<=|<>|=|<|>|\[|\]|\(|\))(.*?)$/;
