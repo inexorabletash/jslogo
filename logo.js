@@ -244,7 +244,7 @@ function LogoInterpreter(turtle, stream)
                             (Type(prev) === 'word' && prev === '(') ||
                             (leading_space && !trailing_space)
                            ) {
-            atom = UNARY_MINUS;
+                             atom = UNARY_MINUS;
           }
 
         }
@@ -548,6 +548,7 @@ function LogoInterpreter(turtle, stream)
   //----------------------------------------------------------------------
   function sexpr(atom) {
     if (atom === (void 0)) { throw new Error(__("Expected string")); }
+    if (atom === UNARY_MINUS) { return '-'; }
     if (Type(atom) === 'word') { return atom; }
     if (Type(atom) === 'number') { return String(atom); } // coerce
 
