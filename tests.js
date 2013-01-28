@@ -86,7 +86,7 @@ module("Logo Unit Tests", {
   }
 });
 
-test("Parser", 30, function () {
+test("Parser", 34, function () {
 
   //
   // Types
@@ -94,7 +94,11 @@ test("Parser", 30, function () {
 
   this.assert_equals('"test', 'test');
   this.assert_equals('1', 1);
-  this.assert_equals('[ 1 2 3 ]', [1, 2, 3]);
+  this.assert_equals('[ a b c ]', ["a", "b", "c"]);
+  this.assert_equals('[ 1 2 3 ]', ["1", "2", "3"]);
+  this.assert_equals('[ 1 -2 3 ]', ["1", "-2", "3"]);
+  this.assert_equals('[ 1-2 3 ]', ["1-2", "3"]);
+  this.assert_equals('[ 1 2 [ 3 ] 4 *5 ]', ["1", "2", [ "3" ], "4", "*5"]);
 
   //
   // Unary Minus
@@ -147,7 +151,7 @@ test("Parser", 30, function () {
 });
 
 
-test("Data Structure Primitives", 135, function () {
+test("Data Structure Primitives", 137, function () {
 
   //
   // 2.1 Constructors
@@ -164,17 +168,17 @@ test("Data Structure Primitives", 135, function () {
   this.assert_equals('se 1 2', [1, 2]);
   this.assert_equals('(sentence 1)', [1]);
   this.assert_equals('(sentence 1 2 3)', [1, 2, 3]);
-  this.assert_equals('sentence [1] [2]', [1, 2]);
-  this.assert_equals('sentence [1 2] [3 4]', [1, 2, 3, 4]);
-  this.assert_equals('sentence 1 [2 3]', [1, 2, 3]);
+  this.assert_equals('sentence [a] [b]', ["a", "b"]);
+  this.assert_equals('sentence [a b] [c d]', ["a", "b", "c", "d"]);
+  this.assert_equals('sentence 1 [2 3]', [1, "2", "3"]);
 
-  this.assert_equals('fput 0 [ 1 2 3 ]', [0, 1, 2, 3]);
-  this.assert_equals('lput 0 [ 1 2 3 ]', [1, 2, 3, 0]);
+  this.assert_equals('fput 0 ( list 1 2 3 )', [0, 1, 2, 3]);
+  this.assert_equals('lput 0 ( list 1 2 3 )', [1, 2, 3, 0]);
 
   this.assert_equals('combine "a "b', 'a b');
-  this.assert_equals('combine 1 [2]', [1, 2]);
+  this.assert_equals('combine "a [b]', ["a", "b"]);
 
-  this.assert_equals('reverse [ 1 2 3 ]', [3, 2, 1]);
+  this.assert_equals('reverse [ a b c ]', ["c", "b", "a"]);
 
   this.assert_equals('gensym <> gensym', 1);
 
@@ -182,18 +186,20 @@ test("Data Structure Primitives", 135, function () {
   // 2.2 Data Selectors
   //
 
-  this.assert_equals('first (LIST 1 2 3 )', 1);
-  this.assert_equals('firsts [ [ 1 2 3 ] [ "a "b "c] ]', [1, '"a']);
-  this.assert_equals('last  [ 1 2 3 ]', 3);
-  this.assert_equals('butfirst [ 1 2 3 ]', [2, 3]);
-  this.assert_equals('bf [ 1 2 3 ]', [2, 3]);
-  this.assert_equals('butfirsts [ [ 1 2 3 ] [ "a "b "c] ]', [[2, 3], ['"b', '"c']]);
-  this.assert_equals('bfs [ [ 1 2 3 ] [ "a "b "c] ]', [[2, 3], ['"b', '"c']]);
-  this.assert_equals('butlast  [ 1 2 3 ]', [1, 2]);
-  this.assert_equals('bl  [ 1 2 3 ]', [1, 2]);
+  this.assert_equals('first (list 1 2 3 )', 1);
+  this.assert_equals('firsts [ [ 1 2 3 ] [ "a "b "c] ]', ["1", '"a']);
+  this.assert_equals('last [ a b c ]', "c");
+  this.assert_equals('butfirst [ a b c ]', ["b", "c"]);
+  this.assert_equals('bf [ a b c ]', ["b", "c"]);
+  this.assert_equals('butfirsts [ [ 1 2 3 ] [ "a "b "c] ]', [["2", "3"], ['"b', '"c']]);
+  this.assert_equals('bfs [ [ 1 2 3 ] [ "a "b "c] ]', [["2", "3"], ['"b', '"c']]);
+  this.assert_equals('butlast  [ a b c ]', ["a", "b"]);
+  this.assert_equals('bl [ a b c ]', ["a", "b"]);
 
   this.assert_equals('first "123', '1');
   this.assert_equals('last  "123', '3');
+  this.assert_equals('first "abc', 'a');
+  this.assert_equals('last  "abc', 'c');
   //assert_equals('butfirst "123', '23');
   //assert_equals('butlast  "123', '12');
 
@@ -203,26 +209,26 @@ test("Data Structure Primitives", 135, function () {
   //assert_equals('butlast  123', '12');
 
 
-  this.assert_error('item 0 [ 1 2 3 ]', 'Index out of bounds');
-  this.assert_equals('item 1 [ 1 2 3 ]', 1);
-  this.assert_equals('item 2 [ 1 2 3 ]', 2);
-  this.assert_equals('item 3 [ 1 2 3 ]', 3);
-  this.assert_error('item 4 [ 1 2 3 ]', 'Index out of bounds');
+  this.assert_error('item 0 [ a b c ]', 'Index out of bounds');
+  this.assert_equals('item 1 [ a b c ]', "a");
+  this.assert_equals('item 2 [ a b c ]', "b");
+  this.assert_equals('item 3 [ a b c ]', "c");
+  this.assert_error('item 4 [ a b c ]', 'Index out of bounds');
   for (var i = 0; i < 10; i += 1) {
     this.assert_predicate('pick [ 1 2 3 4 ]', function(x) { return 1 <= x && x <= 4; });
   }
-  this.assert_equals('remove 2 [ 1 2 3 ]', [1, 3]);
-  this.assert_equals('remove 4 [ 1 2 3 ]', [1, 2, 3]);
-  this.assert_equals('remdup [ 1 2 3 1 2 3 ]', [1, 2, 3]);
+  this.assert_equals('remove "b [ a b c ]', ["a", "c"]);
+  this.assert_equals('remove "d [ a b c ]', ["a", "b", "c"]);
+  this.assert_equals('remdup [ a b c a b c ]', ["a", "b", "c"]);
 
   //
   // 2.3 Data Mutators
   //
 
   this.assert_equals('make "s [] repeat 5 [ push "s repcount ] :s', [5, 4, 3, 2, 1]);
-  this.assert_equals('make "s [ 1 2 3 ] (list pop "s pop "s pop "s)', [1, 2, 3]);
+  this.assert_equals('make "s [ a b c ] (list pop "s pop "s pop "s)', ["a", "b", "c"]);
   this.assert_equals('make "q [] repeat 5 [ queue "q repcount ] :q', [1, 2, 3, 4, 5]);
-  this.assert_equals('make "q [ 1 2 3 ] (list dequeue "q dequeue "q dequeue "q)', [1, 2, 3]);
+  this.assert_equals('make "q [ a b c ] (list dequeue "q dequeue "q dequeue "q)', ["a", "b", "c"]);
 
   //
   // 2.4 Predicates
@@ -303,11 +309,11 @@ test("Data Structure Primitives", 135, function () {
   this.assert_equals('substring? "a "abc', 1);
   this.assert_equals('substring? "z "abc', 0);
 
-  this.assert_equals('memberp 2 [ 1 2 3 ]', 1);
-  this.assert_equals('memberp 5 [ 1 2 3 ]', 0);
+  this.assert_equals('memberp "b [ a b c ]', 1);
+  this.assert_equals('memberp "e [ a b c ]', 0);
   this.assert_equals('memberp [ "b ] [ [ "a ] [ "b ] [ "c ] ]', 1);
-  this.assert_equals('member? 2 [ 1 2 3 ]', 1);
-  this.assert_equals('member? 5 [ 1 2 3 ]', 0);
+  this.assert_equals('member? "b [ a b c ]', 1);
+  this.assert_equals('member? "e [ a b c ]', 0);
   this.assert_equals('member? [ "b ] [ [ "a ] [ "b ] [ "c ] ]', 1);
 
   //
@@ -740,7 +746,7 @@ test("Workspace Management", 91, function () {
 
   this.assert_equals('make "foo 5 :foo', 5);
   this.assert_equals('make "foo "a :foo', 'a');
-  this.assert_equals('make "foo [1 2] :foo', [1, 2]);
+  this.assert_equals('make "foo [a b] :foo', ["a", "b"]);
   this.assert_equals('make "n "alpha make :n "beta :alpha', 'beta');
 
   // by default, make operates in global scope
@@ -760,7 +766,7 @@ test("Workspace Management", 91, function () {
 
   this.assert_equals('name 5 "foo :foo', 5);
   this.assert_equals('name "a "foo :foo', 'a');
-  this.assert_equals('name [1 2] "foo :foo', [1, 2]);
+  this.assert_equals('name [a b] "foo :foo', ["a", "b"]);
   this.assert_equals('name "gamma "m  name "delta :m :gamma', 'delta');
 
   this.assert_equals('to dofoo ' +
@@ -780,7 +786,7 @@ test("Workspace Management", 91, function () {
 
   this.assert_equals('make "baz 321 thing "baz', 321);
   this.assert_equals('make "baz "a thing "baz', 'a');
-  this.assert_equals('make "baz [1 2 3] thing "baz', [1, 2, 3]);
+  this.assert_equals('make "baz [a b c] thing "baz', ["a", "b", "c"]);
 
   this.assert_equals('global "foo 1', 1); // Doesn't actually test anything
   this.assert_equals('(global "foo "bar) 1', 1); // Doesn't actually test anything
@@ -944,9 +950,9 @@ test("Control Structures", 40, function () {
   this.assert_equals('(invoke "word "a "b "c)', 'a b c');
   this.assert_equals('make "x 0  to addx :a make "x :x+:a end  foreach "addx [ 1 2 3 4 5 ]  :x', 15);
   this.assert_equals('to double :x output :x * 2 end  map "double [ 1 2 3 ]', [2, 4, 6]);
-  this.assert_equals('to odd :x output :x % 2 end  filter "odd [ 1 2 3 ]', [1, 3]);
-  this.assert_equals('find "numberp [ "a "b "c 4 "e "f ]', 4);
-  this.assert_equals('find "numberp [ "a "b "c "d "e "f ]', []);
+  this.assert_equals('to odd :x output :x % 2 end  filter "odd [ 1 2 3 ]', ["1", "3"]);
+  this.assert_equals('find "numberp (list "a "b "c 4 "e "f )', 4);
+  this.assert_equals('find "numberp (list "a "b "c "d "e "f )', []);
   this.assert_equals('reduce "sum [ 1 2 3 4 ]', 10);
   this.assert_equals('(reduce "sum [ 1 2 3 4 ] 10)', 20);
 

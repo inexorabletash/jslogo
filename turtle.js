@@ -237,7 +237,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
 
   this.drawtext = function(text) {
     canvas_ctx.save();
-    canvas_ctx.translate(this.x, this.y)
+    canvas_ctx.translate(this.x, this.y);
     canvas_ctx.rotate(-this.r);
     canvas_ctx.fillText(text, 0, 0);
     canvas_ctx.restore();

@@ -174,11 +174,11 @@ function LogoInterpreter(turtle, stream)
 
   function parse(string) {
     if (string === (void 0)) {
-      return; // TODO: Replace this with ...?
+      return (void 0); // TODO: Replace this with ...?
     }
 
-    var atoms = [];
-    var prev;
+    var atoms = [],
+        prev, r;
 
     // Filter out comments
     string = string.replace(/;.*\n/g, '');
@@ -200,28 +200,18 @@ function LogoInterpreter(turtle, stream)
         // Word
         atom = RegExp.$1;
         string = RegExp.$2;
+
       } else if (string.match(regexNumberLiteral)) {
         // Number literal
         atom = RegExp.$1;
         string = RegExp.$2;
 
-        // The following dirties RegExp.$n so it is kept separate
-        atom = parseFloat(atom.replace(/\s+/g, ''), 10);
-      } else if (string.match(regexListDelimiter)) {
-
-        if (RegExp.$1 === '[') {
-          // Start of list - recurse!
-          var r = parse(RegExp.$2);
-          if (!r.list) { throw new Error(__("Expected ']'")); }
-          atom = r.list;
-          string = r.string;
-        } else { // (RegExp.$1 === ']')
-          // End of list - return list and the remaining input
-          return { list: atoms, string: RegExp.$2 };
-        }
+      } else if (string.charAt(0) === '[') {
+        r = parseList(string.substring(1));
+        atom = r.list;
+        string = r.string;
 
       } else if (string.match(regexOperator)) {
-
         atom = RegExp.$1;
         string = RegExp.$2;
 
@@ -259,6 +249,49 @@ function LogoInterpreter(turtle, stream)
     return atoms;
   }
 
+  function isWS(c) {
+    return c === ' ' || c === '\t' || c === '\r' || c === '\n';;
+  }
+
+  function parseList(string) {
+    var index = 0,
+        list = [],
+        atom = '',
+        c;
+
+    while (true) {
+      do {
+        c = string.charAt(index++);
+      } while (isWS(c));
+
+      while (!isWS(c) && c !== '[' && c !== ']' && c !== '') {
+        atom += c;
+        c = string.charAt(index++);
+      }
+
+      if (atom.length) {
+        list.push(atom);
+        atom = '';
+      }
+
+      if (c === '') {
+        throw new Error(__("Expected ']'"));
+      }
+      if (c === ']') {
+        return { list: list, string: string.substring(index) };
+      }
+      if (c === '[') {
+        var r = parseList(string.substring(index));
+        list.push(r.list);
+        string = r.string;
+        index = 0;
+      }
+    }
+  }
+
+  function reparse(list) {
+    return parse(stringify_nodecorate(list));
+  }
 
   self.maybegetvar = function(name) {
     name = name.toLowerCase();
@@ -340,7 +373,6 @@ function LogoInterpreter(turtle, stream)
 
   self.evaluateExpression = function(list) {
     return (self.expression(list))();
-
   };
 
   self.expression = function(list) {
@@ -365,6 +397,7 @@ function LogoInterpreter(turtle, stream)
           case "<=": return function() { return (aexpr(lhs()) <= aexpr(rhs())) ? 1 : 0; };
           case ">=": return function() { return (aexpr(lhs()) >= aexpr(rhs())) ? 1 : 0; };
           case "<>": return function() { return !self.equal(lhs(), rhs()) ? 1 : 0; };
+          default: throw new Error(__("Internal error in expression parser"));
         }
       } (lhs);
     }
@@ -383,6 +416,7 @@ function LogoInterpreter(turtle, stream)
         switch (op) {
           case "+": return function() { return aexpr(lhs()) + aexpr(rhs()); };
           case "-": return function() { return aexpr(lhs()) - aexpr(rhs()); };
+          default: throw new Error(__("Internal error in expression parser"));
         }
       } (lhs);
     }
@@ -410,6 +444,7 @@ function LogoInterpreter(turtle, stream)
             if (d === 0) { throw new Error(__("Division by zero")); }
             return n % d;
           };
+          default: throw new Error(__("Internal error in expression parser"));
         }
       } (lhs);
     }
@@ -456,11 +491,17 @@ function LogoInterpreter(turtle, stream)
 
     switch (Type(atom)) {
       case 'number':
+        throw new Error(__("Unexpected atom type: number"));
+
       case 'list':
         return function() { return atom; };
 
       case 'word':
-        if (atom.charAt(0) === '"') {
+        if (atom.match(regexNumberLiteral)) {
+          // number literal
+          atom = parseFloat(atom);
+          return function() { return atom; };
+        } else if (atom.charAt(0) === '"') {
           // string literal
           literal = atom.substring(1);
           return function() { return literal; };
@@ -492,7 +533,8 @@ function LogoInterpreter(turtle, stream)
           // Procedure dispatch
           return self.dispatch(atom, list, true);
         }
-        break;
+      break;
+        default: throw new Error(__("Internal error in expression parser"));
     }
   };
 
@@ -653,7 +695,7 @@ function LogoInterpreter(turtle, stream)
     } catch (e) {
       if (e instanceof Bye) {
         // clean exit
-        return;
+        return (void 0);
       } else {
         throw e;
       }
@@ -923,7 +965,7 @@ function LogoInterpreter(turtle, stream)
   };
 
   self.routines["remove"] = function(thing, list) {
-    return lexpr(list).filter(function(x) { return x !== thing; });
+    return lexpr(list).filter(function(x) { return !self.equal(x, thing); });
   };
 
   self.routines["remdup"] = function(list) {
@@ -1990,12 +2032,12 @@ function LogoInterpreter(turtle, stream)
 
 
   self.routines["run"] = function(statements) {
-    statements = lexpr(statements);
+    statements = reparse(lexpr(statements));
     return self.execute(statements);
   };
 
   self.routines["runresult"] = function(statements) {
-    statements = lexpr(statements);
+    statements = reparse(lexpr(statements));
     var result = self.execute(statements);
     if (result !== (void 0)) {
       return [result];
@@ -2006,7 +2048,7 @@ function LogoInterpreter(turtle, stream)
 
   self.routines["repeat"] = function(count, statements) {
     count = aexpr(count);
-    statements = lexpr(statements);
+    statements = reparse(lexpr(statements));
     var last;
     for (var i = 1; i <= count; ++i) {
       var old_repcount = self.repcount;
@@ -2021,7 +2063,7 @@ function LogoInterpreter(turtle, stream)
   };
 
   self.routines["forever"] = function(statements) {
-    statements = lexpr(statements);
+    statements = reparse(lexpr(statements));
     for (var i = 1; true; ++i) {
       var old_repcount = self.repcount;
       self.repcount = i;
@@ -2039,15 +2081,15 @@ function LogoInterpreter(turtle, stream)
 
   self.routines["if"] = function(test, statements) {
     test = aexpr(test);
-    statements = lexpr(statements);
+    statements = reparse(lexpr(statements));
 
     return test ? self.execute(statements) : test;
   };
 
   self.routines["ifelse"] = function(test, statements1, statements2) {
     test = aexpr(test);
-    statements1 = lexpr(statements1);
-    statements2 = lexpr(statements2);
+    statements1 = reparse(lexpr(statements1));
+    statements2 = reparse(lexpr(statements2));
 
     return self.execute(test ? statements1 : statements2);
   };
@@ -2060,13 +2102,13 @@ function LogoInterpreter(turtle, stream)
   };
 
   self.routines["iftrue"] = self.routines["ift"] = function(statements) {
-    statements = lexpr(statements);
+    statements = reparse(lexpr(statements));
     var tf = self.scopes[self.scopes.length - 1]._test;
     return tf ? self.execute(statements) : tf;
   };
 
   self.routines["iffalse"] = self.routines["iff"] = function(statements) {
-    statements = lexpr(statements);
+    statements = reparse(lexpr(statements));
     var tf = self.scopes[self.scopes.length - 1]._test;
     return !tf ? self.execute(statements) : tf;
   };
@@ -2107,8 +2149,8 @@ function LogoInterpreter(turtle, stream)
   // Not Supported: `
 
   self.routines["for"] = function(control, statements) {
-    control = lexpr(control);
-    statements = lexpr(statements);
+    control = reparse(lexpr(control));
+    statements = reparse(lexpr(statements));
 
     function sign(x) { return x < 0 ? -1 : x > 0 ? 1 : 0; }
 

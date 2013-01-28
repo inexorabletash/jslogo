@@ -1,0 +1,203 @@
+== Change Log ==
+
+NOTE: Changes after December 2011 are tracked in the jslogo version control change history.
+
+2011-12-29
+	Added support for IE8 via FlashCanvas
+	Migrated unit tests over to use QUnit.
+
+2011-10-22
+	Added another feature from Ofer Wald: ARC angle radius (example)
+
+2011-10-14
+	Added COPYDEF and made it and ERASE respect REDEFP when it comes to primitives (built-in procedures).
+	Applied two patches from Ofer Wald: make text drawn with LABEL (example) rotate with the mouse, and prevent primitives from being overridden with TO
+	You can now put short programs in the URL hash (#blah) as well as the query string (?blah).
+
+2010-08-07
+	Modified the way the turtle is drawn - it now uses an overlay canvas instead of drawing to a backbuffer. This simplifies the code. (I didn't realize HTML5 canvases were transparent when I first implemented this!)
+	Removed fallback canvas text API support, so LABEL will not work on iOS 3 and earlier or Firefox 3.0.
+
+2010-03-27
+	Added: WINDOW, WRAP, FENCE and TURTLEMODE
+
+2009-11-26
+	Infix arithmetic and order-comparison operators now force arguments to be numbers.
+	Fractional decimals with no leading zero (e.g. .1) now parse correctly again.
+	Added: PENPAINT, PENERASE, PENREVERSE
+	READWORD can take an optional prompt string input. e.g. (READWORD "width:)
+
+2009-11-24
+	Expression evaluation separated from parsing. AND and OR now short-circuit evaluation.
+	Slight tweaks to TYPE output.
+	Added aliases: BF, BFS, BL, IFT, IFF, OP
+	Added: READWORD, ABS
+
+2009-11-19
+	You can now specify a program to run in the URL hash or query string. You can %-encode characters or, as a shortcut, use _ instead of space, e.g. http://www.calormen.com/Logo/?repeat_4_[fd_100_rt_90]
+	Thanks to discussion on LogoForum has shown me the error of my ways regarding lists. The contents of list literals is no longer evaluated.
+
+2009-11-11
+	UCBLogo alignment - almost done!
+	Added: run, runresult, test, iftrue, iffalse, .maybeoutput, ignore, for, do.while, while, do.until, until
+
+2009-11-10
+	UCBLogo alignment continues....
+	Added: contents, procedures, primitives, globals, names, erase, erall, apply, invoke, foreach, find
+	Also, fixed a bug with word on WebKit, and ensured that long text output wraps.
+
+2009-11-09
+	UCBLogo alignment continies....
+	Added: name, local, localmake, thing, global, procedurep, primitivep, definedp, namep, forever, bye
+	Corrected stop - was like bye, now like an empty output
+
+2009-11-08
+	UCBLogo alignment continies....
+	Added: remainder, modulo, exp, log10, ln, radarctan, radsin, radcos, radtan, rseq, bitand, bitor, bitxor, bitnot, ashift, lshift, label, setlabelheight, shownp, labelsize, pendownp, pencolor, pensize
+	Removed: modulus (use remainder or modulo), write (use label), setfont (use setlabelheight)
+	Corrected argument order for (arctan x y)
+	In (setpencolor r g b), r/g/b must be in 0..99; Logo colors 0...15 are supported.
+
+2009-11-07
+	I've started to work on aligning the syntax with UCB Logo. Language reference now follows UCB Logo documentation structure for ease of comparison. Code and unit tests similarly reorganized.
+	Added: sentence, combine, gensym, firsts, butfirsts, item, remove, remdup, wordp, listp, numberp, count, ascii, char, lowercase, uppercase
+	Added aliases setpensize, setpencolor
+	Fixed equality comparisons
+	Added: push, pop, queue, dequeue, emptyp, beforep, memberp, substringp
+	Rigged up a text screen overlay.
+	Added: print, type, show, cleartext, emptyp, beforep, memberp, substringp
+	Use write for turtle graphics text now
+
+2009-10-31
+	A series of appropriately spooky changes - they're there, but you can't see them!
+	Change log is now accessible as an Atom feed
+	Switch to native Javascript types for primitive types (number, string, list)
+	Cleaned up use of 'undefined', stopping
+	Turtle graphics puled into own script module
+	Pulled alerting on error out of interpreter
+	Unit tests for unary minus, true, false
+	Unary minus handling revamped - now confined to parser/serializer
+
+2009-10-28
+	def now takes a string argument for procname
+	def now serializes operators correctly
+	Fixed clean (was alerting)
+	Fixed heading (was returning incorrect values)
+	More unit tests
+
+2009-10-27
+	Found and fixed a handful of bugs while implementing unit tests:
+	Operators <=, >=, <> were incorrectly parsed
+	if, ifelse and repeat return now result of last evaluation (language extension?)
+	and, or, xor now return 0 or 1
+	lessequalp and lessequal? corrected
+
+2009-10-26
+	Fixed hiding of the language reference pane
+	Corrected documentation - it's setfont not font
+	Added text rendering for non-Mozilla browsers c/o Jim Studt's Hershey Font implementation for HTML5 canvas
+
+2009-10-24
+	Now licensed under the Apache 2.0 license
+
+2009-04-13
+	Fixed towards and setpos, which have been broken since the 2008-08-30 update (Sigh - I really need to implement unit tests.)
+
+2009-03-21
+	Unary minus disambiguation (similar to UCBLogo):
+
+	Minus sign is parsed as unary minus if it begins a top-level expression, or if it follows an infix operator, or it has a leading space and has no trailing space.
+	Otherwise, minus sign is parsed as an infix difference operator.
+	Compare:
+	cs ht print -5 (unary; will print -5)
+	cs ht print - 5 + 10 (unary; will print 5)
+	cs ht print 10 + - 5 (unary; will print 5)
+	cs ht print 10 -5 (unary; will print 10)
+	cs ht print 10 - 5 (infix; will print 5)
+	cs ht print 10-5 (infix; will print 10)
+	cs ht print 10- 5 (infix; will print 5)
+	cs ht print sum 10 -5 (unary; will print 5)
+	cs ht print sum 10 - 5 (infix; will produce error!)
+
+2009-01-20
+	Added list, fput, lput
+	Added show (temporary) which returns a string representation of its argument
+
+2008-09-28
+	Added (temporary) display of command history, at the bottom of the window
+	Added def (hacky implementation) that shows the definition of a function
+
+2008-09-02
+	Added reverse, iseq
+	print can now print lists
+	Fixed evaluation of lists (e.g. map "square [ 50 + 50 ] now works) [UPDATE 2009-11-19: This is no longer the case]
+
+2008-09-01
+	Rearranged page to maximize display area
+
+2008-08-31
+	Added map, filter, reduce
+	Added pencolor as alias for setcolor, can take r, g, b as arguments
+	Blocks in repeat, if, etc. no longer introduce a scope
+	Comments (anything after ; on a line) are ignored)
+	Renamed predicates to equal?, notequal?, less?, lessequal?, greater?, greaterequal?
+	Changed the "draw text" procedure to print
+	Added output which returns a value from a procedure
+
+2008-08-30
+	Lisp-style calling syntax ( procedure input ... ) now operates per standard Logo, rather than as an implicit reduction.
+	Make use of JavaScript 1.6 and 1.8 functions internally, via compatibility shims
+
+2008-08-26
+	Fixed tan
+	Trig functions now take/return degrees
+	KNOWN ISSUE: setxy -100 -100 parses as setxy (-100 -100) and so fails with too few arguments.
+	make :var and make var are now synonyms for make "var
+	Added true and false
+
+2008-08-25
+	Fixed procedures that return values
+	Made setpos and friends leave a trail if the pen is down
+	jslint cleanup
+	Support ( proc input ... ) format
+	Fixed and and or to not lazily-evaluate arguments - and 0 1 would not consume the 1
+	Added support for ( procedure input ... ) expressions. Acts as reduce, so ( sum 1 2 3 4 ) calls sum 1 2 then sum 3 3 then sum 6 4, finally returning 10.
+
+2008-08-24
+	Added string/number coercion
+	Added word and output
+	Allow unquoted variable names in make
+	Added and, or, xor and setfont
+	Changed towards to return a heading, rather than set a heading
+	Added infix expressions
+	Added first, last, butfirst, butlast
+	Added power, sqrt, arctan, sin, cos, tan, int, round
+	Renamed add to sum, sub to difference, mul to product, div to quotient, mod to modulus, neg to minus
+
+2008-08-21
+	Internal refactoring to simplify parsing
+	Added pos and heading
+
+2008-08-20
+	Added stop and towards
+	Fixed parsing of setpos inputs
+	Inverted Y axis for absolute coordinate references (positive Y is now upwards)
+
+2008-08-19
+	Can't use lt for both "left turn" and "less than". The latter is now lth
+	Added make, setxy, setx, sety, setheading. Updated setpos
+	Fixed negative number parsing
+	Added toggle to multiline display
+	Corrected repcount behavior for nested repeats
+
+2008-08-18
+	Added mathematical and logical operations
+
+2008-08-17
+	Added if, ifelse, repcount, clean, home, showturtle, hideturtle
+	Added procedure inputs
+	Added display of the turtle
+	Had left and right switched. Oops.
+
+2008-08-16
+	Written and published

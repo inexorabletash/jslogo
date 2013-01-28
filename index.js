@@ -168,7 +168,9 @@ window.onload = function() {
   g_entry.onkeydown = onkey;
   g_entry.focus();
 
-  atomToHtml('feed.xml', document.getElementById('feed'));
+  if (typeof atomToHtml === 'function') {
+    atomToHtml('feed.xml', document.getElementById('feed'));
+  }
 
   function demo(param) {
     param = String(param);
