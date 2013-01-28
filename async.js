@@ -200,8 +200,6 @@ window.onload = function() {
   g_entry.onkeydown = onkey;
   g_entry.focus();
 
-  atomToHtml('feed.xml', document.getElementById('feed'));
-
   // Look for a program to run in the query string
   var param = document.location.search;
   if (typeof param === 'string' && param.length > 0) {

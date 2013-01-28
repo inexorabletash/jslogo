@@ -2,10 +2,8 @@
 <html>
 <head>
 <title>Logo Interpreter</title>
-<link rel="Alternate" type="application/atom+xml" href="feed.xml" />
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 
-<script type="text/javascript" src="feed.js"></script> <!-- Atom feed to HTML -->
 <script type="text/javascript">var LOGO_SLEEP = true;</script>
 <script type="text/javascript" src="async.js?update=2011-12-31"></script>
 
@@ -39,12 +37,10 @@ code { font-family: monospace; }
 <div id="title">
 <h1>Logo Interpreter</h1>
 <p>
-By <a href="mailto:inexorabletash@hotmail.com">Joshua Bell</a>
-| <a href="#examples">Examples</a>
-| <a href="#links">Links</a>
-| <a href="#todo">To Do</a>
-| <a href="tests.htm">Unit Tests</a>
-| <a href="#history">Change Log</a>
+By <a href="mailto:inexorabletash@gmail.com">Joshua Bell</a>
+| <a target="_blank" href="tests.htm">Unit Tests</a>
+| <a target="_blank" href="http://code.google.com/p/jslogo">Source</a>
+| <a target="_blank" href="http://code.google.com/p/jslogo/source/list">Changes</a>
 </p>
 </div>
 
@@ -71,7 +67,7 @@ to square :length repeat 4 [ fd :length rt 90 ] end
 repeat 36 [ square 50 rt 10 ]
 to randomcolor setcolor pick [ red orange yellow green blue violet ] end
 repeat 36 [ randomcolor square random 200 rt 10 ]
-window pu repeat 72 [ setlabelheight repcount fd repcount * 2.5 label "Logo bk repcount * 2.5 rt 10 ]
+window pu repeat 72 [ setlabelheight repcount fd repcount * 2.5 label &quot;Logo bk repcount * 2.5 rt 10 ]
 </code></pre>
 </div>
 
@@ -98,11 +94,6 @@ window pu repeat 72 [ setlabelheight repcount fd repcount * 2.5 label "Logo bk r
     <li>Use <a href="http://www.whatwg.org/specs/web-workers/current-work/">Web Workers</a>, so you can see the turtle moving in long-duration programs
     <li>Efficient tail-end recursion
 </ul>
-</div>
-
-<div id="history">
-<h2>Change Log</h2>
-<div id="feed"></div>
 </div>
 
 <div id="guide">

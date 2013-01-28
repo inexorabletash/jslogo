@@ -168,10 +168,6 @@ window.onload = function() {
   g_entry.onkeydown = onkey;
   g_entry.focus();
 
-  if (typeof atomToHtml === 'function') {
-    atomToHtml('feed.xml', document.getElementById('feed'));
-  }
-
   function demo(param) {
     param = String(param);
     if (param.length > 0) {
