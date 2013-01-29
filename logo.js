@@ -249,6 +249,10 @@ function LogoInterpreter(turtle, stream)
     return atoms;
   }
 
+  function isNumber(s) {
+    return String(s).match(/^([0-9]*\.?[0-9]+(?:[eE]\s*[\-+]?\s*[0-9]+)?)$/);
+  }
+
   function isWS(c) {
     return c === ' ' || c === '\t' || c === '\r' || c === '\n';;
   }
@@ -497,7 +501,7 @@ function LogoInterpreter(turtle, stream)
         return function() { return atom; };
 
       case 'word':
-        if (atom.match(regexNumberLiteral)) {
+        if (isNumber(atom)) {
           // number literal
           atom = parseFloat(atom);
           return function() { return atom; };
@@ -578,9 +582,15 @@ function LogoInterpreter(turtle, stream)
   // Arithmetic expression convenience function
   //----------------------------------------------------------------------
   function aexpr(atom) {
-    if (atom === (void 0)) { throw new Error(__("Expected number")); }
-    if (Type(atom) === 'number') { return atom; }
-    if (Type(atom) === 'word') { return parseFloat(atom); } // coerce
+    if (atom === (void 0)) {
+      throw new Error(__("Expected number"));
+    }
+    if (Type(atom) === 'number') {
+      return atom;
+    }
+    if (Type(atom) === 'word' && isNumber(atom)) {
+      return parseFloat(atom);
+    }
 
     throw new Error(__("Expected number"));
   }

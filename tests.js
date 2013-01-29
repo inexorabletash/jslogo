@@ -81,7 +81,18 @@ module("Logo Unit Tests", {
     };
 
     this.assert_error = function(expression, expected) {
-      raises(function() { this.interpreter.run(expression); }.bind(this), function(e) { return e.message === expected; }, expression);
+      raises(
+        function() {
+          this.interpreter.run(expression);
+        }.bind(this),
+        function(e) {
+          if (e.message !== expected) {
+            console.log("mismatch: ", e.message, expected);
+          }
+          return e.message === expected;
+        },
+        expression
+      );
     };
   }
 });
@@ -961,7 +972,7 @@ test("Control Structures", 40, function () {
 
 });
 
-test("Error Messages", 51, function () {
+test("Error Messages", 52, function () {
 
   this.assert_error("to foo end show foo", "No output from procedure");
   this.assert_error("[ 1 2", "Expected ']'");
@@ -973,6 +984,7 @@ test("Error Messages", 51, function () {
   this.assert_error("( 1 + 2", "Expected ')'");
   this.assert_error("( 1 + 2 3", "Expected ')', saw 3");
   this.assert_error("nosuchproc", "Don't know how to NOSUCHPROC");
+  this.assert_error("1 + \"1+2", "Expected number");
   this.assert_error("1 + []", "Expected number");
   this.assert_error("(minus)", "Expected number");
   this.assert_error("make [] 123", "Expected string");
