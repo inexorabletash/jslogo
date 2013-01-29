@@ -778,7 +778,7 @@ function LogoInterpreter(turtle, stream)
   function stringify(thing) {
 
     if (Type(thing) === 'list') {
-      return "[ " + thing.map(stringify).join(" ") + " ]";
+      return "[" + thing.map(stringify).join(" ") + "]";
     } else {
       return sexpr(thing);
     }

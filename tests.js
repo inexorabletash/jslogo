@@ -344,20 +344,20 @@ test("Communication", 18, function () {
   this.assert_stream('print "a', 'a\n');
   this.assert_stream('print 1', '1\n');
   this.assert_stream('print [ 1 ]', '1\n');
-  this.assert_stream('print [ 1 [ 2 ] ]', '1 [ 2 ]\n');
-  this.assert_stream('(print "a 1 [ 2 [ 3 ] ])', 'a 1 2 [ 3 ]\n');
+  this.assert_stream('print [ 1 [ 2 ] ]', '1 [2]\n');
+  this.assert_stream('(print "a 1 [ 2 [ 3 ] ])', 'a 1 2 [3]\n');
 
   this.assert_stream('type "a', 'a');
-  this.assert_stream('(type "a 1 [ 2 [ 3 ] ])', 'a12 [ 3 ]');
+  this.assert_stream('(type "a 1 [ 2 [ 3 ] ])', 'a12 [3]');
 
   this.assert_stream('(print "hello "world)', "hello world\n");
   this.assert_stream('(type "hello "world)', "helloworld");
 
   this.assert_stream('show "a', 'a\n');
   this.assert_stream('show 1', '1\n');
-  this.assert_stream('show [ 1 ]', '[ 1 ]\n');
-  this.assert_stream('show [ 1 [ 2 ] ]', '[ 1 [ 2 ] ]\n');
-  this.assert_stream('(show "a 1 [ 2 [ 3 ] ])', 'a 1 [ 2 [ 3 ] ]\n');
+  this.assert_stream('show [ 1 ]', '[1]\n');
+  this.assert_stream('show [ 1 [ 2 ] ]', '[1 [2]]\n');
+  this.assert_stream('(show "a 1 [ 2 [ 3 ] ])', 'a 1 [2 [3]]\n');
 
   // 3.2 Receivers
 
@@ -664,7 +664,7 @@ test("Graphics", 69, function () {
 
   this.assert_equals('wrap turtlemode', 'WRAP');
 
-  this.assert_equals('(label "a 1 [ 2 [ 3 ] ])', 'a 1 2 [ 3 ]');
+  this.assert_equals('(label "a 1 [ 2 [ 3 ] ])', 'a 1 2 [3]');
   this.assert_equals('setlabelheight 5 labelsize', [5, 5]);
   this.assert_equals('setlabelheight 10 labelsize', [10, 10]);
 
