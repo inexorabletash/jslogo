@@ -58,7 +58,7 @@ module("Logo Unit Tests", {
     var EPSILON = 1e-12;
 
     this.assert_equals = function (expression, expected) {
-      var actual = this.interpreter.run(expression);
+      var actual = this.interpreter.run(expression, {returnResult: true});
       if (typeof expected === 'object') {
         deepEqual(actual, expected, expression);
       } else if (typeof expected === 'number' && typeof actual === 'number') {
@@ -70,14 +70,14 @@ module("Logo Unit Tests", {
 
     this.assert_stream = function (expression, expected) {
       this.stream.clear();
-      this.interpreter.run(expression);
+      this.interpreter.run(expression, {returnResult: true});
       var actual = this.stream.outputbuffer;
       this.stream.clear();
       equal(actual, expected, expression);
     };
 
     this.assert_predicate = function(expression, predicate) {
-      ok(predicate(this.interpreter.run(expression)), expression);
+      ok(predicate(this.interpreter.run(expression, {returnResult: true})), expression);
     };
 
     this.assert_error = function(expression, expected) {
@@ -675,7 +675,7 @@ test("Graphics", 69, function () {
 
   this.assert_equals('wrap turtlemode', 'WRAP');
 
-  this.assert_equals('(label "a 1 [ 2 [ 3 ] ])', 'a 1 2 [3]');
+  this.assert_equals('(label "a 1 [ 2 [ 3 ] ])', undefined);
   this.assert_equals('setlabelheight 5 labelsize', [5, 5]);
   this.assert_equals('setlabelheight 10 labelsize', [10, 10]);
 
@@ -909,16 +909,15 @@ test("Control Structures", 40, function () {
   this.assert_equals('make "c 0  run [ make "c 5 ]  :c', 5);
 
   this.assert_equals('runresult [ make "x 1 ]', []);
-  this.assert_equals('runresult [ 1 + 2]', [3]);
+  this.assert_equals('runresult [ 1 + 2 ]', [3]);
 
   this.assert_equals('make "c 0  repeat 5 [ make "c :c + 1 ]  :c', 5);
   this.assert_equals('make "c 0  repeat 4 [ make "c :c + repcount ]  :c', 10);
 
   this.assert_equals('make "c 0  to foo forever [ make "c :c + 1 if repcount = 5 [ stop ] ] end  foo  :c', 5);
   this.assert_equals('make "c 0  to foo forever [ make "c :c + repcount if repcount = 4 [ stop ] ] end  foo  :c', 10);
-
-  this.assert_equals('ifelse 1 [ "a ] [ "b ]', 'a');
-  this.assert_equals('ifelse 0 [ "a ] [ "b ]', 'b');
+  this.assert_equals('ifelse 1 [ make "r "a ] [ make "r "b ]  :r', 'a');
+  this.assert_equals('ifelse 0 [ make "r "a ] [ make "r "b ]  :r', 'b');
 
   this.assert_equals('to foo if 1 [ output "a ] output "b end  foo', 'a');
   this.assert_equals('to foo if 0 [ output "a ] output "b end  foo', 'b');
@@ -972,7 +971,7 @@ test("Control Structures", 40, function () {
 
 });
 
-test("Error Messages", 52, function () {
+test("Error Messages", 55, function () {
 
   this.assert_error("to foo end show foo", "No output from procedure");
   this.assert_error("[ 1 2", "Expected ']'");
@@ -1026,9 +1025,15 @@ test("Error Messages", 52, function () {
   this.assert_error("reduce \"nosuch [ 1 2 ]", "Don't know how to NOSUCH");
   this.assert_error("reduce \"to [ 1 2 ]", "Can't apply REDUCE to special TO");
   this.assert_error("reduce \"while [ 1 2 ]", "Can't apply REDUCE to special WHILE");
+  this.assert_error("0", "Don't know what to do with 0");
+  this.assert_error("1 + 2", "Don't know what to do with 3");
+  this.assert_error("to foo output 123 end  foo", "Don't know what to do with 123");
 });
 
 test("Regression Tests", function() {
   this.assert_equals('make "x 0  repeat 3 [ for [ i 1 4 ] [ make "x :x + 1 ] ]  :x', 12);
   this.assert_equals('make "x 0  for [i 0 100 :i + 1] [make "x :x + :i]  :x', 120);
+  this.assert_error("fd 100 50 rt 90", "Don't know what to do with 50");
+  this.assert_equals("to foo output 123 end  make \"v foo", undefined);
+  this.assert_equals("to foo end", undefined);
 });

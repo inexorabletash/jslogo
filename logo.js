@@ -676,7 +676,8 @@ function LogoInterpreter(turtle, stream)
   //----------------------------------------------------------------------
   // Execute a sequence of statements
   //----------------------------------------------------------------------
-  self.execute = function(statements) {
+  self.execute = function(statements, options) {
+    options = Object(options);
     // Operate on a copy so the original is not destroyed
     statements = statements.slice();
 
@@ -684,7 +685,9 @@ function LogoInterpreter(turtle, stream)
     while (statements.length) {
       result = self.evaluateExpression(statements);
 
-      // TODO: If result is not undefined, should complain "Dom't know what to do with output from XYZ"
+      if (typeof result !== 'undefined' && !options.returnResult) {
+        throw new Error(format(__("Don't know what to do with {result}"), {result: result}));
+      }
     }
 
     // Return last result
@@ -693,7 +696,8 @@ function LogoInterpreter(turtle, stream)
   };
 
 
-  self.run = function(string) {
+  self.run = function(string, options) {
+    options = Object(options);
     if (self.turtle) { self.turtle.begin(); }
 
     try {
@@ -701,7 +705,7 @@ function LogoInterpreter(turtle, stream)
       var atoms = parse(string);
 
       // And execute it!
-      return self.execute(atoms);
+      return self.execute(atoms, options);
     } catch (e) {
       if (e instanceof Bye) {
         // clean exit
@@ -1072,17 +1076,14 @@ function LogoInterpreter(turtle, stream)
   self.routines["print"] = self.routines["pr"] = function(thing) {
     var s = Array.prototype.map.call(arguments, stringify_nodecorate).join(" ");
     self.stream.write(s, "\n");
-    return s;
   };
   self.routines["type"] = function(thing) {
     var s = Array.prototype.map.call(arguments, stringify_nodecorate).join("");
     self.stream.write(s);
-    return s;
   };
   self.routines["show"] = function(thing) {
     var s = Array.prototype.map.call(arguments, stringify).join(" ");
     self.stream.write(s, "\n");
-    return s;
   };
 
   // 3.2 Receivers
@@ -1397,7 +1398,6 @@ function LogoInterpreter(turtle, stream)
   self.routines["label"] = function(a) {
     var s = Array.prototype.map.call(arguments, stringify_nodecorate).join(" ");
     turtle.drawtext(s);
-    return s;
   };
 
   self.routines["setlabelheight"] = function(a) { turtle.setfontsize(aexpr(a)); };
@@ -2043,12 +2043,12 @@ function LogoInterpreter(turtle, stream)
 
   self.routines["run"] = function(statements) {
     statements = reparse(lexpr(statements));
-    return self.execute(statements);
+    self.execute(statements);
   };
 
   self.routines["runresult"] = function(statements) {
     statements = reparse(lexpr(statements));
-    var result = self.execute(statements);
+    var result = self.execute(statements, {returnResult: true});
     if (result !== (void 0)) {
       return [result];
     } else {
@@ -2059,17 +2059,15 @@ function LogoInterpreter(turtle, stream)
   self.routines["repeat"] = function(count, statements) {
     count = aexpr(count);
     statements = reparse(lexpr(statements));
-    var last;
     for (var i = 1; i <= count; ++i) {
       var old_repcount = self.repcount;
       self.repcount = i;
       try {
-        last = self.execute(statements);
+        self.execute(statements);
       } finally {
         self.repcount = old_repcount;
       }
     }
-    return last;
   };
 
   self.routines["forever"] = function(statements) {
@@ -2093,7 +2091,7 @@ function LogoInterpreter(turtle, stream)
     test = aexpr(test);
     statements = reparse(lexpr(statements));
 
-    return test ? self.execute(statements) : test;
+    if (test) { self.execute(statements); }
   };
 
   self.routines["ifelse"] = function(test, statements1, statements2) {
@@ -2101,26 +2099,25 @@ function LogoInterpreter(turtle, stream)
     statements1 = reparse(lexpr(statements1));
     statements2 = reparse(lexpr(statements2));
 
-    return self.execute(test ? statements1 : statements2);
+    self.execute(test ? statements1 : statements2);
   };
 
   self.routines["test"] = function(tf) {
     tf = aexpr(tf);
     // NOTE: A property on the scope, not within the scope
     self.scopes[self.scopes.length - 1]._test = tf;
-    return tf;
   };
 
   self.routines["iftrue"] = self.routines["ift"] = function(statements) {
     statements = reparse(lexpr(statements));
     var tf = self.scopes[self.scopes.length - 1]._test;
-    return tf ? self.execute(statements) : tf;
+    if (tf) { self.execute(statements); }
   };
 
   self.routines["iffalse"] = self.routines["iff"] = function(statements) {
     statements = reparse(lexpr(statements));
     var tf = self.scopes[self.scopes.length - 1]._test;
-    return !tf ? self.execute(statements) : tf;
+    if (!tf) { self.execute(statements); }
   };
 
   self.routines["stop"] = function() {
@@ -2168,17 +2165,15 @@ function LogoInterpreter(turtle, stream)
     var start = aexpr(self.evaluateExpression(control));
     var limit = aexpr(self.evaluateExpression(control));
 
-    var step, last;
+    var step;
     var current = start;
     while (sign(current - limit) !== sign(step)) {
       self.setvar(varname, current);
-      last = self.execute(statements);
+      self.execute(statements);
 
       step = (control.length) ? aexpr(self.evaluateExpression(control.slice())) : sign(limit - start);
       current += step;
     }
-
-    return last;
   };
 
   function checkevalblock(block) {
@@ -2270,7 +2265,7 @@ function LogoInterpreter(turtle, stream)
     if (!routine) { throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() })); }
     if (routine.special || routine.noeval) { throw new Error(format(__("Can't apply {proc} to special {name}"), { proc: "FOREACH", name: procname.toUpperCase() })); }
 
-    return lexpr(list).forEach(routine);
+    lexpr(list).forEach(routine);
   };
 
 
