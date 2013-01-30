@@ -244,7 +244,7 @@ function LogoInterpreter(turtle, stream)
   }
 
   function isNumber(s) {
-    return String(s).match(/^([0-9]*\.?[0-9]+(?:[eE]\s*[\-+]?\s*[0-9]+)?)$/);
+    return String(s).match(/^-?([0-9]*\.?[0-9]+(?:[eE]\s*[\-+]?\s*[0-9]+)?)$/);
   }
 
   function isWS(c) {

@@ -1041,4 +1041,5 @@ test("Regression Tests", function() {
   this.assert_equals("5;comment\n", 5);
   this.assert_equals("5 ; comment", 5);
   this.assert_equals("5 ; comment\n", 5);
+  this.assert_equals("setpos [ -1 0 ]  123", 123);
 });
