@@ -7,28 +7,7 @@
 
 <script type="text/javascript">var LOGO_SLEEP = true;</script>
 <script type="text/javascript" src="async.js?update=2013-01-29"></script>
-
-<style type="text/css">
-h1, h2, h3, p { margin-bottom: 6pt; margin-top: 6pt; }
-body, p, h1, h2, h3 { font-family: sans-serif; }
-dt, dd { font-size: 8pt; }
-code { font-family: monospace; }
-#guide {
-    position: absolute;
-    right:10px;
-    top: 10px;
-    width: 400px;
-
-    padding: 5pt;
-    padding-top: 0px;
-
-    z-index: 10;
-
-    color: black;
-    background-color: white;
-    border: solid 1px black;
-}
-</style>
+<link rel="stylesheet" href="logo.css">
 
 </head>
 <body>
@@ -44,17 +23,17 @@ By <a href="mailto:inexorabletash@gmail.com">Joshua Bell</a>
 </p>
 </div>
 
-<div id="display" style="width: 760px; height: 480px; position: relative;">
-    <canvas id="sandbox" width="760" height="480" style="position: absolute; border: solid 1px black; z-index: 0;">
-        <span style="color: red; background-color: yellow; font-weight: bold;">Your browser does not support the canvas element - sorry!</span>
+<div id="display">
+    <canvas id="sandbox" width="760" height="480">
+        <span>Your browser does not support the canvas element - sorry!</span>
     </canvas>
-    <canvas id="turtle" width="760" height="480" style="position: absolute; border: solid 1px black; z-index: 1;"></canvas>
-    <div id="overlay" style="width: 740px; height: 460px; padding: 10px; margin: 0; position: absolute; z-index: 2; background-color: transparent; overflow: hidden; white-space: pre-wrap; font-family: Monospace;"></div>
+    <canvas id="turtle" width="760" height="480"></canvas>
+    <div id="overlay"></div>
 </div>
 
-<div id="input" style="width: 760px; padding: 0; padding-top: 5px;">
-    <input id="entry_single" type="text" style="width: 660px; font-family: monospace;" />
-    <textarea rows="20" cols="80" id="entry_multi" style="width: 660px; height: 200px; font-family: monospace; display: none;"></textarea>
+<div id="input">
+    <input id="entry_single" type="text">
+    <textarea rows="20" cols="80" id="entry_multi" style="display: none;"></textarea>
     <input id="run" type="button" value="run" title="Run the specified statements" />
     <input id="toggle" type="button" value="+" title="Switch between a single line and multi-line entry area"/>
 </div>
@@ -97,12 +76,12 @@ window pu repeat 72 [ setlabelheight repcount fd repcount * 2.5 label &quot;Logo
 </div>
 
 <div id="guide">
-<table style="width: 100%;"><tr>
+<table><tr>
 <td><h2>Language Reference</h2></td>
 <td style="text-align: right;"><a id="toggle_link" href="#" onclick="var gb = document.getElementById('guide_body'); var show = (gb.style.display === 'none'); gb.style.display = show ? '' : 'none'; this.innerHTML = show ? 'hide' : 'show'; return false;">hide</a></td>
 </tr></table>
 
-<iframe frameBorder="0" src="language.htm" id="guide_body" style="width: 400px; height: 450px; border: none;"></iframe>
+<iframe frameBorder="0" src="language.htm" id="guide_body"></iframe>
 
 </div>
 

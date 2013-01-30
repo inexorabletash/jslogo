@@ -1,0 +1,74 @@
+h1, h2, h3, p { margin-bottom: 6pt; margin-top: 6pt; }
+body, p, h1, h2, h3 { font-family: sans-serif; }
+dt, dd { font-size: 8pt; }
+code { font-family: monospace; }
+
+/* Language Reference */
+
+#guide {
+    position: absolute;
+    right:10px;
+    top: 10px;
+    width: 400px;
+
+    padding: 5pt;
+    padding-top: 0px;
+
+    z-index: 10;
+
+    color: black;
+    background-color: white;
+    border: solid 1px black;
+}
+#guide > table { width: 100%; }
+#guide_body { width: 400px; height: 450px; border: none; }
+
+
+/* Graphical and Textual Display */
+
+#display {
+    width: 760px;
+    height: 480px;
+    position: relative;
+}
+
+#sandbox {
+    position: absolute;
+    border: solid 1px black;
+    z-index: 0;
+}
+
+#sandbox span {
+    color: red; background-color: yellow; font-weight: bold;
+}
+
+#turtle {
+    position: absolute; border: solid 1px black; z-index: 1;
+}
+
+#overlay {
+    width: 740px;
+    height: 460px;
+    padding: 10px;
+    margin: 0;
+    position: absolute;
+    z-index: 2;
+    background-color: transparent;
+    overflow: hidden;
+    white-space: pre-wrap;
+    font-family: Monospace;
+}
+
+/* User Input */
+
+#input {
+    width: 760px; padding: 0; padding-top: 5px;
+}
+
+#entry_single {
+    width: 660px; font-family: monospace;
+}
+
+#entry_multi {
+    width: 660px; height: 200px; font-family: monospace;
+}
