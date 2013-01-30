@@ -8,11 +8,10 @@
 h1, h2, h3, h4, p { margin-bottom: 6pt; margin-top: 6pt; }
 body, p, h1, h2, h3 { font-family: sans-serif; }
 dl { margin-top: 6pt; }
-p, dt, dd, ol, li { font-size: 8pt; }
-code { font-family: monospace; }
+p, dt, dd, ol, li { font-size: 10pt; }
+code { font-family: monospace; font-weight: bold; }
 body
 {
-  width: 270px;
   color: black;
   background-color: white;
 }
@@ -38,7 +37,7 @@ of comparison.</p>
 
 <h3 id="types">Types</h3>
 <dl>
-  <dt><code>"<var>word</var></code>
+  <dt><code>&quot;<var>word</var></code>
   <dd>Text string (terminated by whitespace)
   <dt><code>:<var>variable</var></code>
   <dd>Input definition/variable reference
@@ -490,11 +489,30 @@ of comparison.</p>
   <dd>
   <p>Set pen/text color. Color can be a standard Logo color number (0-15), CSS color string (<a target="_blank" href="http://www.w3.org/TR/CSS21/syndata.html#value-def-color">CSS color names or #rrggbb</a>), or in the 3-input version, r/g/b values in 0...99.</p>
   <p>The standard Logo colors are:</p>
-  <table>
-    <tr><td style="background-color: black; color: white;">0: black</td><td style="background-color: blue;">1: blue</td><td style="background-color: lime;">2: green</td><td style="background-color: cyan;">3: cyan</td></tr>
-    <tr><td style="background-color: red;">4: red</td><td style="background-color: magenta;">5: magenta</td><td style="background-color: yellow;">6: yellow</td><td style="background-color: white;">7: white</td></tr>
-    <tr><td style="background-color: brown;">8: brown</td><td style="background-color: tan;">9: tan</td><td style="background-color: green;">10: green</td><td style="background-color: aquamarine;">11: aqua</td></tr>
-    <tr><td style="background-color: salmon;">12: salmon</td><td style="background-color: purple;">13: purple</td><td style="background-color: orange;">14: orange</td><td style="background-color: gray;">15: gray</td></tr>
+  <style>
+    #colortable td { width: 25%; padding-left: 4px; padding-right: 4px;}
+  </style>
+  <table id="colortable">
+    <tr>
+      <td style="background-color: black; color: white;">0: black
+      <td style="background-color: blue;">1: blue
+      <td style="background-color: lime;">2: green
+      <td style="background-color: cyan;">3: cyan
+    <tr>
+      <td style="background-color: red;">4: red
+      <td style="background-color: magenta;">5: magenta
+      <td style="background-color: yellow;">6: yellow
+      <td style="background-color: white;">7: white
+    <tr>
+      <td style="background-color: brown;">8: brown
+      <td style="background-color: tan;">9: tan
+      <td style="background-color: green;">10: green
+      <td style="background-color: aquamarine;">11: aqua
+    <tr>
+      <td style="background-color: salmon;">12: salmon
+      <td style="background-color: purple;">13: purple
+      <td style="background-color: orange;">14: orange
+      <td style="background-color: gray;">15: gray
   </table>
 
 
