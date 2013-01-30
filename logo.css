@@ -20,9 +20,9 @@ code { font-family: monospace; }
     background-color: white;
     border: solid 1px black;
 }
-#guide > table { width: 100%; }
-#guide_body { width: 400px; height: 450px; border: none; }
 
+#guide_body { width: 400px; height: 450px; border: none; }
+#guide #toggle_link { display: block; float: right; margin-top: 8pt; }
 
 /* Graphical and Textual Display */
 
