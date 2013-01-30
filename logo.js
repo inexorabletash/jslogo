@@ -179,7 +179,7 @@ function LogoInterpreter(turtle, stream)
         prev, r;
 
     // Filter out comments
-    string = string.replace(/;.*\n/g, '');
+    string = string.replace(/;.*$/mg, '');
 
     // Treat newlines as whitespace (so \s will match)
     string = string.replace(/\r/g, '').replace(/\n/g, ' ');

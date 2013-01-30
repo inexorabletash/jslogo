@@ -1037,4 +1037,8 @@ test("Regression Tests", function() {
   this.assert_error("fd 100 50 rt 90", "Don't know what to do with 50");
   this.assert_equals("to foo output 123 end  make \"v foo", undefined);
   this.assert_equals("to foo end", undefined);
+  this.assert_equals("5;comment", 5);
+  this.assert_equals("5;comment\n", 5);
+  this.assert_equals("5 ; comment", 5);
+  this.assert_equals("5 ; comment\n", 5);
 });
