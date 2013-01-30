@@ -165,12 +165,11 @@ function LogoInterpreter(turtle, stream)
   var regexInfix = /^(\+|\-|\*|\/|%|\^|>=|<=|<>|=|<|>)$/;
 
   //
-  // Construct a parse tree
+  // Tokenize into atoms / lists
   //
   // Input: string
-  // Output: atom list (e.g. "to", "jump", "repeat", "random", 10, [ "fd", 10, "rt" 10 ], "end"
+  // Output: atom list (e.g. "to", "jump", "repeat", "random", 10, [ "fd", "10", "rt", "10" ], "end"
   //
-  // TODO: Move this into expression parsing; should be '[' operator's job!
 
   function parse(string) {
     if (string === (void 0)) {
@@ -613,19 +612,8 @@ function LogoInterpreter(turtle, stream)
   function lexpr(atom) {
     // TODO: If this is an input, output needs to be re-stringified
 
-    // NOTE: Array.prototype.map.call() fails in IE as "0 in string" fails
-    function stringToArray(string) {
-      string = String(string);
-      var result = [], i, length = string.length;
-      for (i = 0; i < length; i += 1) {
-        result[i] = string.charAt(i);
-      }
-      return result;
-    }
-
     if (atom === (void 0)) { throw new Error(__("Expected list")); }
-    if (Type(atom) === 'number') { return stringToArray(atom); }
-    if (Type(atom) === 'word') { return stringToArray(atom); }
+    if (Type(atom) === 'word') { return [].slice.call(atom); }
     if (Type(atom) === 'list') { return copy(atom); }
 
     throw new Error(__("Expected list"));

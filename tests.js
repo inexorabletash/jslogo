@@ -162,7 +162,7 @@ test("Parser", 34, function () {
 });
 
 
-test("Data Structure Primitives", 137, function () {
+test("Data Structure Primitives", 135, function () {
 
   //
   // 2.1 Constructors
@@ -213,12 +213,6 @@ test("Data Structure Primitives", 137, function () {
   this.assert_equals('last  "abc', 'c');
   //assert_equals('butfirst "123', '23');
   //assert_equals('butlast  "123', '12');
-
-  this.assert_equals('first 123', '1');
-  this.assert_equals('last  123', '3');
-  //assert_equals('butfirst 123', '23');
-  //assert_equals('butlast  123', '12');
-
 
   this.assert_error('item 0 [ a b c ]', 'Index out of bounds');
   this.assert_equals('item 1 [ a b c ]', "a");
@@ -971,7 +965,7 @@ test("Control Structures", 40, function () {
 
 });
 
-test("Error Messages", 55, function () {
+test("Error Messages", 59, function () {
 
   this.assert_error("to foo end show foo", "No output from procedure");
   this.assert_error("[ 1 2", "Expected ']'");
@@ -1028,6 +1022,13 @@ test("Error Messages", 55, function () {
   this.assert_error("0", "Don't know what to do with 0");
   this.assert_error("1 + 2", "Don't know what to do with 3");
   this.assert_error("to foo output 123 end  foo", "Don't know what to do with 123");
+
+  this.assert_error('first 123', 'Expected list');
+  this.assert_error('last  123', 'Expected list');
+  this.assert_error('butfirst 123', 'Expected list');
+  this.assert_error('butlast  123', 'Expected list');
+
+
 });
 
 test("Regression Tests", function() {
