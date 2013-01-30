@@ -160,7 +160,6 @@ function LogoInterpreter(turtle, stream)
   var regexStringLiteral = /^("[^ \[\]\(\)]*)(.*?)$/;
   var regexVariableLiteral = /^(:[A-Za-z][A-Za-z0-9_]*)(.*?)$/;
   var regexNumberLiteral = /^([0-9]*\.?[0-9]+(?:[eE]\s*[\-+]?\s*[0-9]+)?)(.*?)$/;
-  var regexListDelimiter = /^(\[|\])(.*?)$/;
   var regexOperator = /^(\+|\-|\*|\/|%|\^|>=|<=|<>|=|<|>|\[|\]|\(|\))(.*?)$/;
   var regexInfix = /^(\+|\-|\*|\/|%|\^|>=|<=|<>|=|<|>)$/;
 
@@ -194,14 +193,10 @@ function LogoInterpreter(turtle, stream)
       string = string.replace(/^\s+/, '');
 
       if (string.match(regexIdentifier) ||
-                string.match(regexStringLiteral) ||
-                string.match(regexVariableLiteral)) {
-        // Word
-        atom = RegExp.$1;
-        string = RegExp.$2;
+          string.match(regexStringLiteral) ||
+          string.match(regexVariableLiteral) ||
+          string.match(regexNumberLiteral)) {
 
-      } else if (string.match(regexNumberLiteral)) {
-        // Number literal
         atom = RegExp.$1;
         string = RegExp.$2;
 
