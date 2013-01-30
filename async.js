@@ -162,7 +162,7 @@ window.onload = function() {
     'window': window
   };
 
-  var worker = new Worker('worker.js?update=2011-12-31');
+  var worker = new Worker('worker.js?update=2013-01-29');
   worker.onmessage = function(event) {
     var obj;
     if (event.data.call) {

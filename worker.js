@@ -1,4 +1,4 @@
-importScripts('../polyfill/polyfill.js?update=2011-12-24', 'logo.js?update=2011-12-31', 'turtle.js?update=2011-12-31');
+importScripts('logo.js?update=2013-01-29', 'turtle.js?update=2013-01-29');
 
 // Sleazy sleep - make an HTTP request that will fail. This causes the JavaScript
 // thread to sleep for a few milliseconds.
