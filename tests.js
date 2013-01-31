@@ -1043,4 +1043,7 @@ test("Regression Tests", function() {
   this.assert_equals("5 ; comment", 5);
   this.assert_equals("5 ; comment\n", 5);
   this.assert_equals("setpos [ -1 0 ]  123", 123);
+  this.assert_equals("to foo output 234 end foo", 234);
+  this.assert_equals("to foo output 234 END foo", 234);
+  this.assert_error("to whatever fd 100", "Expected END");
 });

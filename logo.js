@@ -808,10 +808,11 @@ function LogoInterpreter(turtle, stream)
     var block = [];
 
     // Process inputs, then the statements of the block
-    var state_inputs = true;
+    var state_inputs = true, sawEnd = false;
     while (list.length) {
       var atom = list.shift();
-      if (Type(atom) === 'word' && atom === 'end') {
+      if (Type(atom) === 'word' && atom.toUpperCase() === 'END') {
+        sawEnd = true;
         break;
       } else if (state_inputs && Type(atom) === 'word' && atom.charAt(0) === ':') {
         inputs.push(atom.substring(1));
@@ -819,6 +820,9 @@ function LogoInterpreter(turtle, stream)
         state_inputs = false;
         block.push(atom);
       }
+    }
+    if (!sawEnd) {
+      throw new Error(__("Expected END"));
     }
 
     // Closure over inputs and block to handle scopes, arguments and outputs
