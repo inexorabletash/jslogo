@@ -178,8 +178,8 @@ function LogoInterpreter(turtle, stream)
     var atoms = [],
         prev, r;
 
-    // Filter out comments
-    string = string.replace(/;.*$/mg, '');
+    // Handle escaping and filter out comments
+    string = string.replace(/^(([^;\\\n]|\\.)*);.*$/mg, '$1').replace(/\\(.)/g, '$1');
 
     // Treat newlines as whitespace (so \s will match)
     string = string.replace(/\r/g, '').replace(/\n/g, ' ');
@@ -288,7 +288,7 @@ function LogoInterpreter(turtle, stream)
   }
 
   function reparse(list) {
-    return parse(stringify_nodecorate(list));
+    return parse(stringify_nodecorate(list).replace(/([\\;])/g, '\\$1'));
   }
 
   self.maybegetvar = function(name) {
