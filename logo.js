@@ -510,7 +510,7 @@ function LogoInterpreter(turtle, stream)
         } else if (atom === '(') {
           // parenthesized expression/procedure call
           if (list.length && Type(list[0]) === 'word' &&
-                        self.routines[String(list[0]).toLowerCase()]) {
+              self.routines[String(list[0]).toLowerCase()]) {
 
             // Lisp-style (procedure input ...) calling syntax
             atom = list.shift();
@@ -668,7 +668,7 @@ function LogoInterpreter(turtle, stream)
     while (statements.length) {
       result = self.evaluateExpression(statements);
 
-      if (typeof result !== 'undefined' && !options.returnResult) {
+      if (result !== (void 0) && !options.returnResult) {
         throw new Error(format(__("Don't know what to do with {result}"), {result: result}));
       }
     }
@@ -1340,7 +1340,11 @@ function LogoInterpreter(turtle, stream)
   self.routines["left"] = self.routines["lt"] = function(a) { turtle.turn(-aexpr(a)); };
   self.routines["right"] = self.routines["rt"] = function(a) { turtle.turn(aexpr(a)); };
 
-  self.routines["setpos"] = function(l) { l = lexpr(l); turtle.setposition(aexpr(l[0]), aexpr(l[1])); };
+  self.routines["setpos"] = function(l) {
+    l = lexpr(l);
+    if (l.length !== 2) { throw new Error(__("Expected list of length 2")); }
+    turtle.setposition(aexpr(l[0]), aexpr(l[1]));
+  };
   self.routines["setxy"] = function(x, y) { turtle.setposition(aexpr(x), aexpr(y)); };
   self.routines["setx"] = function(x) { turtle.setposition(aexpr(x), (void 0)); }; // TODO: Replace with ...?
   self.routines["sety"] = function(y) { turtle.setposition((void 0), aexpr(y)); };
@@ -1358,7 +1362,11 @@ function LogoInterpreter(turtle, stream)
   self.routines["xcor"] = function() { var l = turtle.getxy(); return l[0]; };
   self.routines["ycor"] = function() { var l = turtle.getxy(); return l[1]; };
   self.routines["heading"] = function() { return turtle.getheading(); };
-  self.routines["towards"] = function(l) { l = lexpr(l); return turtle.towards(aexpr(l[0]), aexpr(l[1])); };
+  self.routines["towards"] = function(l) {
+    l = lexpr(l);
+    if (l.length !== 2) { throw new Error(__("Expected list of length 2")); }
+    return turtle.towards(aexpr(l[0]), aexpr(l[1]));
+  };
 
   // Not Supported: scrunch
 

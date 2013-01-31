@@ -965,7 +965,7 @@ test("Control Structures", 40, function () {
 
 });
 
-test("Error Messages", 59, function () {
+test("Error Messages", 63, function () {
 
   this.assert_error("to foo end show foo", "No output from procedure");
   this.assert_error("[ 1 2", "Expected ']'");
@@ -1022,13 +1022,14 @@ test("Error Messages", 59, function () {
   this.assert_error("0", "Don't know what to do with 0");
   this.assert_error("1 + 2", "Don't know what to do with 3");
   this.assert_error("to foo output 123 end  foo", "Don't know what to do with 123");
-
   this.assert_error('first 123', 'Expected list');
   this.assert_error('last  123', 'Expected list');
   this.assert_error('butfirst 123', 'Expected list');
   this.assert_error('butlast  123', 'Expected list');
-
-
+  this.assert_error('setpos []', 'Expected list of length 2');
+  this.assert_error('setpos [1 2 3]', 'Expected list of length 2');
+  this.assert_error('towards []', 'Expected list of length 2');
+  this.assert_error('towards [1 2 3]', 'Expected list of length 2');
 });
 
 test("Regression Tests", function() {
