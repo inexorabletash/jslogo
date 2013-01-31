@@ -1048,6 +1048,7 @@ test("Regression Tests", function() {
   this.assert_error("to whatever fd 100", "Expected END");
   this.assert_equals('"abc;def', "abc");
   this.assert_equals('"abc\\;def', "abc;def");
+  this.assert_equals('"abc\\\\def', "abc\\def");
   this.assert_equals('repeat 1 [ make "v "abc\\;def ]  :v', "abc;def");
   this.assert_error('repeat 1 [ make "v "abc;def ]  :v', "Expected ']'");
 });
