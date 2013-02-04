@@ -1,4 +1,4 @@
-importScripts('logo.js?update=2013-01-29', 'turtle.js?update=2013-01-29');
+importScripts('logo.js?update=2013-02-04', 'turtle.js?update=2013-02-04');
 
 // Sleazy sleep - make an HTTP request that will fail. This causes the JavaScript
 // thread to sleep for a few milliseconds.
