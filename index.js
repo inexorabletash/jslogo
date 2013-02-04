@@ -16,21 +16,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*global window, CanvasTurtle, LogoInterpreter, atomToHtml */
-
 var g_logo;
 
 var g_history = [];
 var g_historypos = -1;
 
 var g_entry;
+var g_multi = false;
 
 function ontoggle() {
   var single = document.getElementById('entry_single');
   var multi = document.getElementById('entry_multi');
   var toggle = document.getElementById('toggle');
 
-  if (g_entry === multi) {
+  g_multi = !g_multi;
+  if (!g_multi) {
     g_entry = single;
 
     single.style.display = '';
@@ -53,10 +53,13 @@ function ontoggle() {
 function onenter() {
   var e = g_entry;
   var v = g_entry.value;
-  if (v !== "") {
-    e.value = '';
-    g_history.push(v);
-    g_historypos = -1;
+  if (v !== '') {
+
+    if (!g_multi) {
+      e.value = '';
+      g_history.push(v);
+      g_historypos = -1;
+    }
 
     try {
       g_logo.run(v);
@@ -67,7 +70,7 @@ function onenter() {
 }
 
 var KEY = {
-  RETURN: 10,
+  RETURN: 10, // iOS
   ENTER: 13,
   END: 35,
   HOME: 36,
@@ -79,13 +82,10 @@ var KEY = {
 
 function onkey(e) {
   e = e ? e : window.event;
-  var key = e.keyCode ? e.keyCode :
-              e.charCode ? e.charCode :
-              e.which ? e.which : 0;
 
   var consume = false;
 
-  switch (key) {
+  switch (e.keyCode) {
     case KEY.RETURN:
     case KEY.ENTER:
       onenter();
@@ -180,6 +180,7 @@ window.onload = function() {
       }
     }
   }
+
   // Look for a program to run in the query string / hash
   var param = document.location.search || document.location.hash;
   demo(param);
