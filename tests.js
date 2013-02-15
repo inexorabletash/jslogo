@@ -233,7 +233,7 @@ test("Data Structure Primitives", 135, function () {
   this.assert_equals('make "s [] repeat 5 [ push "s repcount ] :s', [5, 4, 3, 2, 1]);
   this.assert_equals('make "s [ a b c ] (list pop "s pop "s pop "s)', ["a", "b", "c"]);
   this.assert_equals('make "q [] repeat 5 [ queue "q repcount ] :q', [1, 2, 3, 4, 5]);
-  this.assert_equals('make "q [ a b c ] (list dequeue "q dequeue "q dequeue "q)', ["a", "b", "c"]);
+  this.assert_equals('make "q [ a b c ] (list dequeue "q dequeue "q dequeue "q)', ["c", "b", "a"]);
 
   //
   // 2.4 Predicates

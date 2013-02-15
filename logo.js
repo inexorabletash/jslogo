@@ -1002,9 +1002,8 @@ function LogoInterpreter(turtle, stream)
     self.setvar(stackname, stack);
   };
 
-  // NOTE: Same as "pop" (!?!)
   self.routines["dequeue"] = function(stackname) {
-    return self.getvar(stackname).shift();
+    return self.getvar(stackname).pop();
   };
 
   //
