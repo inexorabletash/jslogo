@@ -322,6 +322,7 @@ function LogoInterpreter(turtle, stream)
 
   self.setvar = function(name, value) {
     name = name.toLowerCase();
+    value = copy(value);
 
     // Find the variable in existing scope
     for (var i = self.scopes.length - 1; i >= 0; --i) {
