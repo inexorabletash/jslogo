@@ -17,7 +17,7 @@
 // limitations under the License.
 
 //----------------------------------------------------------------------
-function LogoInterpreter(turtle, stream)
+function LogoInterpreter(turtle, stream, savehook)
 //----------------------------------------------------------------------
 {
   var self = this;
@@ -53,9 +53,7 @@ function LogoInterpreter(turtle, stream)
       parms.push('a' + i);
     }
 
-    /*jslint evil: true */
     var f = eval('f = (function ' + func.name + '(' + parms.join(',') + ') { return func.apply(this, arguments); })');
-    /*jslint evil: false */
     return f;
   }
 
@@ -859,6 +857,10 @@ function LogoInterpreter(turtle, stream)
     // For DEF de-serialization
     self.routines[name].inputs = inputs;
     self.routines[name].block = block;
+
+    if (savehook) {
+      savehook(name, self.definition(name, self.routines[name]));
+    }
   };
   self.routines["to"].special = true;
 

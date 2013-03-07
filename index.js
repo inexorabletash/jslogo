@@ -128,6 +128,35 @@ function onkey(e) {
   }
 }
 
+var savehook;
+function initStorage(loadhook) {
+  if (!indexedDB)
+    return;
+
+  var req = indexedDB.open('logo', 2);
+  req.onupgradeneeded = function() {
+    var db = req.result;
+    db.createObjectStore('procedures');
+  };
+  req.onsuccess = function() {
+    var db = req.result;
+
+    var tx = db.transaction('procedures');
+    var curReq = tx.objectStore('procedures').openCursor();
+    curReq.onsuccess = function() {
+      var cursor = curReq.result;
+      if (cursor) {
+        try { loadhook(cursor.value); } catch (e) { console.log("error loading procedure: " + e); }
+        cursor.continue();
+      } else {
+        savehook = function(name, def) {
+          var tx = db.transaction('procedures', 'readwrite');
+          tx.objectStore('procedures').put(def, name);
+        };
+      }
+    };
+  };
+}
 
 window.onload = function() {
 
@@ -159,7 +188,16 @@ window.onload = function() {
     turtle_ctx,
     canvas_element.width, canvas_element.height);
 
-  g_logo = new LogoInterpreter(turtle, stream);
+  g_logo = new LogoInterpreter(
+    turtle, stream,
+    function (name, def) {
+      if (savehook) {
+        savehook(name, def);
+      }
+    });
+  initStorage(function (def) {
+    g_logo.run(def);
+  });
 
   document.getElementById('toggle').onclick = ontoggle;
   document.getElementById('run').onclick = onenter;
