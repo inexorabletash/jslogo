@@ -723,6 +723,7 @@ function LogoInterpreter(turtle, stream, savehook)
     return def;
   };
 
+  // API to allow pages to persist definitions
   self.procdefs = function() {
     var defs = [];
     Object.keys(self.routines).forEach(function(name) {
@@ -1526,6 +1527,9 @@ function LogoInterpreter(turtle, stream, savehook)
     }
 
     self.routines[newname] = self.routines[oldname];
+    if (savehook) {
+      savehook(newname, self.definition(newname, self.routines[newname]));
+    }
   };
 
 
@@ -1768,6 +1772,7 @@ function LogoInterpreter(turtle, stream, savehook)
           }
           if (!self.routines[name].primitive || self.maybegetvar("redefp")) {
             delete self.routines[name];
+            // TODO: savehook
           } else {
             throw new Error(__("Can't ERASE primitives unless REDEFP is TRUE"));
           }

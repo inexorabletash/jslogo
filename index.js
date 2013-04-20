@@ -130,7 +130,7 @@ function onkey(e) {
 
 var savehook;
 function initStorage(loadhook) {
-  if (!indexedDB)
+  if (!window.indexedDB)
     return;
 
   var req = indexedDB.open('logo', 2);
