@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<title>Logo 15 Word Challenge</title>
+<h1>Logo 15 Word Challenge</h1>
+<p>Original page: <a href="http://www.mathcats.com/gallery/15wordcontest.html">Keith Envoldsen's Logo 15-word Challenge</a>
+
+<script>
+
+var programs = [
+
+//    Five Rose or Starfish, by , Italy (and , Australia) - only 8 words!!
+
+'repeat 1800 [fd 10 rt repcount + .1]',
+//                        Dahlia, by , U.S. (14 words)
+'repeat 8 [rt 45 repeat 6 [repeat 90 [fd 2 rt 2] rt 90]]',
+//                 Layers, by Alessio Plebe, Italy (15 words)
+'for [i 0 420] [seth :i repeat :i [fd 2 rt 1] pu home pd]',
+//     Lissajous variations, by Samuel Kilchenmann, Switzerland (15 words)
+'repeat 360 [setxy (sin(2 * repcount)) * 150 (sin(3 * repcount)) * 150]',
+'repeat 360 [setxy (sin(89 * repcount)) * 150 (sin(179 * repcount)) * 150]',
+'repeat 360 [setxy (sin(254 * repcount)) * 150 (sin(201 * repcount)) * 150]',
+'repeat 360 [setxy (sin(327 * repcount)) * 150 (sin(66 * repcount)) * 150]',
+
+//     Pencil Sketch, by Andrzej Baczynski (shortened by Yehuda Katz), 15
+//                                    words
+'repeat 5000 [run list item sum 1 random 4 [fd bk rt lt] random 10]',
+
+//              Penta-octagon, by M.H. Elhefni, Egypt (15 words)
+'for [l 10 80 5] [repeat 5 [repeat 8 [fd :l rt 45] rt 72]]',
+//        Circus (Ring variation 2), by Olga Tuzova, Russia (14 words)
+//'px setpensize [100 100] repeat 1000 [repeat 72 [fd 20 rt 10] rt 90]', // Sketchy even in async
+//                   Radar, by Zippi Katz, Israel (11 words)
+'px repeat 1000000 [fd 40 fd 40 bk 80 rt 1]',
+//               Square Spiral, by Yehuda Katz, Israel (9 words)
+'px for [x 1 1000000] [fd :x rt 90]',
+//                               Slalom Scrolls
+'for [i 0 2000] [fd 5 rt (90 * sin :i)]',
+//                                 Hairy Star
+'pu setx -200 pd for [i 0 4700] [fd 10 rt (180 * sin (:i * :i))]',
+//                                 Jaggy Star
+'pu sety -220 pd for [i 0 2200] [fd (25 * sin :i) rt (:i * :i)]',
+//                                  Bullring (Ian Stewart)
+'for [i 0 1002] [fd 8 seth (360 * (power :i 3) / 1002)]',
+//                      Random Lines, by , U.S. (9 words)
+'repeat random 1000 [fd random 1000 rt random 360]',
+//       Square Spiral variation 1, by Keith Enevoldsen, U.S. (9 words)
+'px for[x 1 1000000] [fd :x rt 89.99]',
+//      Square Spiral variation 2, by Bill Kerr, Australia (14 words or 8                                   words)
+'make "x 1 repeat 150 [fd :x rt 89 make "x :x + 1] for [x 1 150] [fd :x rt 89]',
+//                Sine Wave, by Shachar Katz, Israel (15 words)
+
+'sety 1000 home setx 1000 for [x -180 180] [setxy :x 70 * sin :x]',
+
+//  Radar variation 1, by Bill Kerr, Australia (12 words)
+'repeat 3600 [px fd 80 fd 0 bk 80 lt random 360]',
+
+// Radar variation 2, by Keith Enevoldsen, U.S. (7 words)
+'px repeat 10000 [fd 200 rt 179]',
+
+//    Brownian Motion, by Erez Katz, Israel (14 words)
+'repeat 10000 [fd 3 * (-1 + random 2) rt 90 * random 4]',
+
+//   Feathers, by , U.S. (13 words)
+'repeat 12 [repeat random 50 [fd 100 bk 95 rt 2] rt 180]',
+
+//    Feathers variation 1, by Keith Enevoldsen, U.S. (13 words)
+'repeat 50 [repeat random 100 [fd 300 bk 295 rt 2] rt 180]',
+
+//   Spiral, by Olga Tuzova, Russia (11 words)
+'for [i 0.01 4 0.05] [repeat 180 [fd :i rt 1]]',
+
+//    Ring, by Olga Tuzova, Russia (10 words)
+'px setpensize [20 20] repeat 100000 [fd 2 rt 2]',
+
+// Ring variation 1, by Keith Enevoldsen, U.S. (10 words)
+'px setpensize [200 200] repeat 36 [fd 20 rt 10]',
+
+//   Cubism (Ring variation 3), by Yehuda Katz, Israel (15 words)
+//'px for [x 10 200] [setpensize se :x :x repeat 36 [fd 20 rt 15]]', // Sketchy even async
+
+// Milky Way, by Olga Tuzova, Russia (15 words)
+'setsc [0 0 0] px setpensize [10 10] repeat 100000 [fd 10 rt random 360]', // DON'T KNOW HOW TO SETSC
+
+// Inky Dots, by Olga Tuzova, Russia (14 words)
+'setpensize [10 10] repeat 10000 [pu fd 15 pd fd 0 rt random 360]', // PD FD 0 doesn't draw anything
+
+// Inky Dots variation 1, by Yehuda Katz, Israel (15 words)
+'px setpensize [10 10] repeat 10000 [pu fd 15 pd fd 00 rt random 360]', // PD FD 0 doesn't draw anything
+
+// Rose, by M.H. Elhefni, Egypt (shortened by Yehuda Katz, Israel, 13 words)
+'for [t 0 180 3] [seth :t fd 200 * sin :t home]',
+
+// Rose variation 1, by Keith Enevoldsen, U.S. (14 words)
+'for [t 0 180] [seth :t fd 200 * sin :t*7 home]',
+
+//   Rose variation 2, by M.H. Elhefni, Egypt (13 words)
+'repeat 9 [for [i 10 200 10] [fd :i bk :i rt 2]]',
+
+// Lissajous, by M.H. Elhefni, Egypt (15 words)
+'for [t 0 360] [setxy 200 * sin :t 200 * cos :t * 5]',
+
+//   Times, by Yehuda Katz, Israel (14 words)
+'for [i 1 10] [repeat 10 [type form repcount * :i 4 0] pr[]]',
+
+//    Shell, by Vered Katz, Israel (14 words)
+//'for [scr .2 1.75 .05] [setscrunch 1 :scr repeat 360 [fd :scr rt 1]]',
+
+// Hypercube, by Frank Caggiano, U.S. (12 words)
+'repeat 8 [repeat 4 [rt 90 fd 100] bk 100 lt 45]',
+
+// Scribble, by Keith Enevoldsen, U.S. (15 words)
+'repeat 1000 [fd 3 rt random int 20 * (1 + sin (10 * repcount))]',
+
+//    Fan Flower, by Keith Enevoldsen, U.S. (12 words)
+'repeat 12 [repeat 75 [fd 100 bk 100 rt 2] fd 250]',
+
+//   Current, by George Mills, U.S. (10 words)
+'repeat 5100 [fd 10 rt arctan (remainder repcount 100) / 100]',
+
+//   Elliptical Spiral, by George Mills, U.S. (15 words)
+'repeat 3600 [setxy repcount / 10 * sin repcount repcount/20 * cos repcount]',
+
+//   Tree Growth Rings, by George Mills, U.S. (13 words)
+'repeat 36000 [setxy (sqrt repcount) * sin repcount (sqrt repcount) * cos repcount]',
+
+// Cloudy Night, by George Mills, U.S. (8 words)
+'repeat 6000 [fd repcount rt remainder repcount 360]',
+
+//   Simple Flower, by , Australia (13 words)
+'repeat 11 [for [i 0 359] [fd 1 rt (sin :i / 2)]]',
+
+//   Seconds, by Zippi Katz, Israel (15 words)
+//'px st setpensize [5 5] repeat 1000 [fd 100 wait 40 bk 100 rt 6]',
+
+//    Face, by Yehuda Katz, Israel (15 words)
+'pu rt 30 repeat 12 [fd 110 pd label repcount pu bk 110 rt 30]',
+
+//   Self-Replicating, by Brian Harvey, U.S. (13 words)
+//'invoke [[x] print (list "invoke :x :x)] [[x] print (list "invoke :x :x)]', // ????
+
+//   Basic Spinning Wheel variations 1-3, by Greg Simkins' 6th grade class, U.S. (15 words)
+//'define "spin [[ ][repeat 15 [fd 100 bk 100 rt 5]]] repeat 25 [spin fd 100]', // Don't now how to DEFINE
+//'define "spin [[ ][repeat 15 [fd 100 bk 95 rt 10]]] repeat 12 [spin fd 100]', // Don't now how to DEFINE
+//'pu setpos [-400 0] pd  define "spin [[ ][repeat 25 [fd 100 bk 100 rt 15]]] repeat 24 [spin fd 100]', // Don't know how to DEFINE
+
+//    Basic Spinning Wheel variations 1-3, shortened by Yehuda Katz, Israel  (12 words)
+'repeat 25 [repeat 15 [fd 100 bk 100 rt 5] fd 100]',
+'repeat 12 [repeat 15 [fd 100 bk 95 rt 10] fd 100]',
+'repeat 24 [repeat 25 [fd 100 bk 100 rt 15] fd 100]',
+
+//    Low, by Alessio Plebe, Italy (15 words)
+'pu setx -100 pd for [i 0 32] [repeat :i [fd :i rt 358 / :i] bk sqrt :i]',
+
+//    Sun, by Alessio Plebe, Italy (13 words)
+'repeat 2000 [pu home seth random 361 fd 40 pd fd random 200]',
+
+//  Hexagon, by M.H. Elhefni, Egypt (15 words)
+'for [i 100 30 -50] [repeat 6 [repeat 6 [fd :i lt 60] lt 60]]',
+
+// Hexagon variation 1, by Yehuda Katz, Israel (15 words)
+'for [size 20 80 20] [repeat 6 [repeat 6 [fd :size rt 60] rt 60]]',
+
+// Hexagon variation 2, by M.H. Elhefni, Egypt (15 words)
+'for [i 100 10 -5] [repeat 6 [repeat 6 [fd :i lt 60] lt 60]]',
+
+//    Pentahexagon, by M.H. Elhefni, Egypt (shortened by Keith Enevoldsen, U.S.) (10 words)
+'repeat 5 [repeat 6 [fd 100 lt 72] lt 144]',
+
+//    Pentahexagon variation 1, by M.H. Elhefni, Egypt (15 words)
+'for [i 100 10 -5] [repeat 5 [repeat 6 [fd :i lt 72] lt 144]]',
+
+//  Pentagon, by M.H. Elhefni, Egypt (15 words)
+'for [i 100 10 -10] [repeat 5 [repeat 5 [fd :i lt 72] lt 72]]',
+
+//    Moire, by Yehuda Katz, Israel (9 words)
+'window repeat 180 [fd 500 bk 500 rt 2]',
+
+// Fireworks, by M.H. Elhefni, Egypt (14 words)
+// 'for [i 0 220 0.0001*sin :i] [fd :i bk :i rt 10]', // Not sure what this is doing
+
+//Peltonwheel, by M.H. Elhefni, Egypt (14 words)
+// 'for [i 0 220 sin :i/1000] [fd :i bk :i rt 51]', // Not sure what this is doing
+
+//  Spirals, by M.H. Elhefni, Egypt (14 words)
+// 'for [i 0 220 sin :i/1000] [fd :i bk :i rt 41]', // Not sure what this is doing
+
+//Gillyflower, by Alessio Plebe, Italy (15 words)
+'repeat 450 [make "a 73 * sin repcount fd :a rt 88 * cos :a]',
+
+// Growing Scrolls variation 1, by Keith Enevoldsen, U.S. (12 words)
+'for [i -1 4] [repeat 720 [fd power 2 :i rt repcount]]',
+
+// Growing Scrolls variation 2, by Keith Enevoldsen, U.S. (14 words)
+'for [i -1 15] [repeat 720 [fd power 1.2 :i rt repcount] lt 45]',
+
+//  Growing Scrolls variation 3, by M.H. Elhefni, Egypt (11 words)
+'for [i 1 14 6] [repeat 720 [fd :i rt repcount]]',
+
+//  Growing Scrolls variation 4, by M.H. Elhefni, Egypt (13 words)
+'for [i 1 18 2] [repeat 720 [fd :i rt repcount] lt 45]',
+
+//Mountains, by Keith Enevoldsen, U.S. (12 words)
+//'repeat 2000 [setxy (repcount * 2) (ycor - 2 + random 5)]', // TODO: expression detection in parser?
+'repeat 2000 [setxy (0 + repcount * 2) (0 + ycor - 2 + random 5)]',
+
+//  Head, by Keith Enevoldsen, U.S. (15 words)
+'repeat 38 [fd 5 rt 10] setx 55 setx 27 setxy 20 -10 setx 27',
+
+//Eye, by , Italy (12 words)
+'repeat 1800 [fd ln repcount bk 10*sin repcount rt 10]',
+
+//   Growing, by , Italy (13 words)
+'repeat 360 [repeat repcount [repeat repcount [fd repcount lt 15] home] lt 1]',
+
+// Don Quixote, by , Italy (14 words)
+'px repeat 360 [repeat repcount [repeat repcount [fd repcount lt 15] home] lt 1]',
+
+//   Ellipse, by , Italy (14 words)
+'repeat 360 [rt repcount fd 1 lt repcount * 2 fd 0.5 rt repcount]',
+
+// Polygon variations 1-3, by , Italy (14 words)
+'repeat 4 [repeat 30 [lt 90 fd 4 rt 90 fd 4] rt 90]',
+'repeat 4 [repeat 20 [lt 160 fd 20 rt 160 fd 20] rt 90]',
+'repeat 8 [repeat 20 [lt 170 fd 20 rt 170 fd 20] rt 45]',
+
+//   Rotating Circle, by M.H. Elhefni, Egypt (11 words)
+'px repeat 4000 [repeat 34 [fd 12 rt 10] rt 90]',
+
+//Disappearing Triangles, by Olga Tuzova, Russia (14 words)
+'px repeat 360 [setx 200 * (cos repcount) sety xcor * (cos repcount) home]',
+
+//Smiling Fish, by Yehuda Katz, Israel (15 words)
+'pu setx -157 pd  for [t -315 315] [setxy :t * sin :t :t * cos 2 * :t]',
+
+//Bird's Wings, by Olga Tuzova, Russia (15 words)
+'repeat 360 [setx 200 * (sin repcount) sety xcor * (cos 2 * repcount) home]',
+
+// Butterfly, by Olga Tuzova, Russia (15 words)
+'repeat 360 [setx 200 * (sin 2 * repcount) sety xcor * (cos repcount) home]',
+
+//    Fish, by Olga Tuzova, Russia (15 words)
+'repeat 360 [setx 200 * (cos 2 * repcount) sety xcor * (cos repcount) home]',
+
+//   Block, by de Walt Smith, U.S. (12 words)
+'repeat 25726 [setpos se (50 - random 100) (50 - random 100)]',
+
+//   Octa-star Spiral, by M.H. Elhefni, Egypt (15 words)
+'for [l 0 120 4] [repeat 8 [fd :l rt 135] fd :l rt 30]',
+
+// Penta-star Spiral, 15W, M.H. Elhefni, Egypt (15 words)
+'for [l 0 95 3] [repeat 5 [fd :l rt 144] fd :l rt 30]',
+
+//    Designs 1-5, by Alex Mylonas' class, Greece (12 - 14 words)
+'repeat 36 [fd 60 rt 61 bk 80 lt 41 fd 85 rt 41]',
+'repeat 16 [fd 85 lt 60 fd 107 bk 72 lt 53 fd 74]',
+'repeat 100 [fd 5 + repcount rt 45 fd 10 + repcount rt 60]',
+
+'repeat 36 [repeat 36 [fd 10 rt 10] fd repcount rt 90 fd repcount]',
+
+'repeat 18 [repeat 5 [rt 40 fd 100 rt 120] rt 20]'
+
+];
+
+function escapeHtml(string) {
+  return String(string).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+document.write('<ul>')
+while(programs.length) {
+  var program = programs.shift();
+  document.write('<li><a href="async.htm?' + encodeURIComponent(program) + '">' + escapeHtml(program) + '</a>');
+}
+document.write('</ul>')
+
+</script>
