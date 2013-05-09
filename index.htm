@@ -1,6 +1,5 @@
 <!DOCTYPE html>
-<html>
-<head>
+
 <title>Logo Interpreter</title>
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <link rel="alternate" type="application/atom+xml" href="https://github.com/inexorabletash/jslogo/commits/master.atom">
@@ -11,9 +10,6 @@
 <script type="text/javascript" src="turtle.js"></script> <!-- Canvas turtle -->
 <script type="text/javascript" src="index.js"></script>
 <link rel="stylesheet" href="logo.css">
-
-</head>
-<body>
 
 
 <div id="title">
@@ -72,16 +68,6 @@ window pu repeat 72 [ setlabelheight repcount fd repcount * 2.5 label &quot;Logo
 </ul>
 </div>
 
-<div id="todo">
-<h2>To Do</h2>
-<ul>
-    <li>Document deviations from UCB Logo standard
-    <li>Make these examples all work: <a href="http://www.mathcats.com/gallery/15wordcontest.html">Logo 15-word challenge</a>
-    <li>Use <a href="http://www.whatwg.org/specs/web-workers/current-work/">Web Workers</a>, so you can see the turtle moving in long-duration programs
-    <li>Efficient tail-end recursion
-</ul>
-</div>
-
 <div id="guide">
 <a id="toggle_link" href="#" onclick="var gb = document.getElementById('guide_body'); var show = (gb.style.display === 'none'); gb.style.display = show ? '' : 'none'; this.innerHTML = show ? 'hide' : 'show'; return false;">hide</a>
 <h2>Language Reference</h2>
@@ -99,5 +85,3 @@ window pu repeat 72 [ setlabelheight repcount fd repcount * 2.5 label &quot;Logo
     var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
   })();
 </script>
-</body>
-</html>
