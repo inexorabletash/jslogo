@@ -257,8 +257,9 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
       canvas_ctx.closePath();
       canvas_ctx.fillStyle = fillcolor;
       canvas_ctx.fill();
-      canvas_ctx.stroke();
       canvas_ctx.fillStyle = this.color;
+      if (this.down)
+        canvas_ctx.stroke();
     }
   };
 
