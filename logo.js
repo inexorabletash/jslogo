@@ -1390,7 +1390,8 @@ function LogoInterpreter(turtle, stream, savehook)
   self.routines["window"] = function() { turtle.setturtlemode('window'); };
   self.routines["fence"] = function() { turtle.setturtlemode('fence'); };
 
-  // Not Supported: fill
+  self.routines["fill"] = function() { turtle.fill(); };
+
   // Not Supported: filled
 
   self.routines["label"] = function(a) {

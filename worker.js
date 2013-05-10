@@ -89,7 +89,7 @@ var g_logo;
 
 var CANVAS_METHODS = ['beginPath', 'moveTo', 'lineTo', 'clearRect', 'fillText',
                       'stroke', 'fill', 'save', 'translate', 'rotate', 'restore',
-                      'arc'];
+                      'arc', 'floodFill'];
 var CANVAS_PROPERTIES = ['lineCap', 'lineWidth', 'strokeStyle', 'fillStyle',
                          'globalCompositeOperation', 'font'];
 

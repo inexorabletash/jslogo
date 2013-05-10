@@ -243,6 +243,10 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     canvas_ctx.restore();
   };
 
+  this.fill = function() {
+    canvas_ctx.floodFill(this.x, this.y);
+  };
+
   this.arc = function(angle, radius) {
     var self = this;
     if (this.turtlemode == 'wrap') {
