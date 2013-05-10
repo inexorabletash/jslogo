@@ -25,9 +25,11 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
 
   var self = this;
   function moveto(x, y) {
-
     function _go(x1, y1, x2, y2) {
-      if (self.down) {
+      if (self.filling) {
+        canvas_ctx.lineTo(x1, y1);
+        canvas_ctx.lineTo(x2, y2);
+      } else if (self.down) {
         canvas_ctx.beginPath();
         canvas_ctx.moveTo(x1, y1);
         canvas_ctx.lineTo(x2, y2);
@@ -243,6 +245,23 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     canvas_ctx.restore();
   };
 
+  this.filling = 0;
+  this.beginpath = function() {
+    ++this.filling;
+    canvas_ctx.beginPath();
+  };
+
+  this.fillpath = function(fillcolor) {
+    --this.filling;
+    if (this.filling === 0) {
+      canvas_ctx.closePath();
+      canvas_ctx.fillStyle = fillcolor;
+      canvas_ctx.fill();
+      canvas_ctx.stroke();
+      canvas_ctx.fillStyle = this.color;
+    }
+  };
+
   this.fill = function() {
     canvas_ctx.floodFill(this.x, this.y);
   };
@@ -252,15 +271,19 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     if (this.turtlemode == 'wrap') {
       [self.x, self.x + width, this.x - width].forEach(function(x) {
         [self.y, self.y + height, this.y - height].forEach(function(y) {
-          canvas_ctx.beginPath();
+          if (!this.filling)
+            canvas_ctx.beginPath();
           canvas_ctx.arc(x, y, radius, -self.r, -self.r + deg2rad(angle), false);
-          canvas_ctx.stroke();
+          if (!this.filling)
+            canvas_ctx.stroke();
         });
       });
     } else {
-      canvas_ctx.beginPath();
+      if (!this.filling)
+        canvas_ctx.beginPath();
       canvas_ctx.arc(this.x, this.y, radius, -this.r, -this.r + deg2rad(angle), false);
-      canvas_ctx.stroke();
+      if (!this.filling)
+        canvas_ctx.stroke();
     }
   };
 

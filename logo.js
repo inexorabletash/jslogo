@@ -1392,7 +1392,16 @@ function LogoInterpreter(turtle, stream, savehook)
 
   self.routines["fill"] = function() { turtle.fill(); };
 
-  // Not Supported: filled
+  self.routines["filled"] = function(fillcolor, statements) {
+    fillcolor = sexpr(fillcolor);
+    statements = reparse(lexpr(statements));
+    turtle.beginpath();
+    try {
+      self.execute(statements);
+    } finally {
+      turtle.fillpath(fillcolor);
+    }
+  };
 
   self.routines["label"] = function(a) {
     var s = Array.prototype.map.call(arguments, stringify_nodecorate).join(" ");
