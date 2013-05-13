@@ -674,7 +674,6 @@ function LogoInterpreter(turtle, stream, savehook)
 
     // Return last result
     return result;
-
   };
 
 
@@ -2055,7 +2054,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   self.routines["run"] = function(statements) {
     statements = reparse(lexpr(statements));
-    self.execute(statements);
+    return self.execute(statements);
   };
 
   self.routines["runresult"] = function(statements) {
@@ -2230,7 +2229,22 @@ function LogoInterpreter(turtle, stream, savehook)
   };
   self.routines["until"].noeval = true;
 
-  // Not Supported: case
+  self.routines["case"] = function(value, clauses) {
+    clauses = lexpr(clauses);
+
+    for (var i = 0; i < clauses.length; ++i) {
+      var clause = lexpr(clauses[i]);
+      var first = clause.shift();
+      if (Type(first) === 'word' && first.toUpperCase() === 'ELSE') {
+        return self.evaluateExpression(clause);
+      }
+      if (lexpr(first).some(function(x) { return self.equal(x, value); })) {
+        return self.evaluateExpression(clause);
+      }
+    }
+    return (void 0);
+  };
+
   // Not Supported: cond
 
 

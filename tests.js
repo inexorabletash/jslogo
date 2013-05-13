@@ -893,7 +893,7 @@ test("Workspace Management", 91, function () {
 
 });
 
-test("Control Structures", 40, function () {
+test("Control Structures", 41, function () {
 
   //
   // 8.1 Control
@@ -945,6 +945,11 @@ test("Control Structures", 40, function () {
 
   this.assert_equals('make "x 0  do.until [ make "x :x + 1 ] :x > 10  :x', 11);
   this.assert_equals('make "x 0  until :x > 10 [ make "x :x + 1 ]     :x', 11);
+
+  this.assert_equals('to vowelp :letter ' +
+                     'output case :letter [ [[a e i o u] "true] [else "false] ] ' +
+                     'end ' +
+                     '(list vowelp "a vowelp "b', ['true', 'false']);
 
   //
   // 8.2 Template-based Iteration

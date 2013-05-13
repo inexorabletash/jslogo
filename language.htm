@@ -793,6 +793,14 @@ of comparison.</p>
   <dt><code>until <var>expr</var> [ <var>statements ...</var>]</code>
   <dd>Runs the specified statements only while the expression remains zero (false).
 
+  <dt><code>case <var>value</var> [ <var>clauses ...</var> ] </code>
+  <dd>For each clause in order:
+    If the clause is of the form <code>[ ELSE <var>expression</var> ]</code>
+    then that expression is evaluated and returned.
+    Otherwise, if the clause is of the form <code>[ [ <var>matches</var> ] <var>expression</var> ]</code>
+    and <var>value</var> is a member of <var>matches</var>
+    then that expression is evaluated and returned.
+
 </dl>
 
 <h4>8.2 Template-based Iteration</h4>
