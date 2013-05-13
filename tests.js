@@ -893,7 +893,7 @@ test("Workspace Management", 91, function () {
 
 });
 
-test("Control Structures", 41, function () {
+test("Control Structures", 42, function () {
 
   //
   // 8.1 Control
@@ -947,9 +947,21 @@ test("Control Structures", 41, function () {
   this.assert_equals('make "x 0  until :x > 10 [ make "x :x + 1 ]     :x', 11);
 
   this.assert_equals('to vowelp :letter ' +
-                     'output case :letter [ [[a e i o u] "true] [else "false] ] ' +
+                     '  output case :letter [ [[a e i o u] "true] [else "false] ] ' +
                      'end ' +
                      '(list vowelp "a vowelp "b', ['true', 'false']);
+
+  this.assert_equals('to evenp :n ' +
+                     '  output not bitand :n 1 ' +
+                     'end ' +
+                     'to evens :numbers ' +
+                     '  op cond [ [ [emptyp :numbers]      [] ] ' +
+                     '            [ [evenp first :numbers] ' +
+                     '              fput first :numbers evens butfirst :numbers] '+
+                     '            [ else evens butfirst :numbers] '+
+                     ' ] ' +
+                     'end ' +
+                     'evens [ 1 2 3 4 5 6 ]', ['2', '4', '6']);
 
   //
   // 8.2 Template-based Iteration

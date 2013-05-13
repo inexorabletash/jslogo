@@ -787,7 +787,7 @@ of comparison.</p>
   <dt><code>while <var>expr</var> [ <var>statements ...</var>]</code>
   <dd>Runs the specified statements only while the expression remains non-zero (true).
 
-  <dt><code>do.until[ <var>statements ...</var>] <var>expr</var></code>
+  <dt><code>do.until [ <var>statements ...</var>] <var>expr</var></code>
   <dd>Runs the specified statements at least once, and repeats while the expression is zero (false).
 
   <dt><code>until <var>expr</var> [ <var>statements ...</var>]</code>
@@ -795,12 +795,18 @@ of comparison.</p>
 
   <dt><code>case <var>value</var> [ <var>clauses ...</var> ] </code>
   <dd>For each clause in order:
-    If the clause is of the form <code>[ ELSE <var>expression</var> ]</code>
-    then that expression is evaluated and returned.
-    Otherwise, if the clause is of the form <code>[ [ <var>matches</var> ] <var>expression</var> ]</code>
+    If the clause is of the form <code>[ ELSE <var>expr</var> ]</code>
+    then <var>expr</var> is evaluated and returned.
+    Otherwise, if the clause is of the form <code>[ [ <var>matches</var> ] <var>expr</var> ]</code>
     and <var>value</var> is a member of <var>matches</var>
-    then that expression is evaluated and returned.
+    then <var>expr</var> is evaluated and returned.
 
+  <dt><code>cond [ <var>clauses ...</var> ] </code>
+  <dd>For each clause in order:
+    If the clause is of the form <code>[ ELSE <var>expr</var> ]</code>
+    then <var>expr</var> is evaluated and returned.
+    Otherwise, if the clause is of the form <code>[ [ <var>expr1</var> ] <var>expr2</var> ]</code>
+    and <var>expr1</var> evaluates to non-zero (true) then <var>expr2</var> is evaluated and returned.
 </dl>
 
 <h4>8.2 Template-based Iteration</h4>

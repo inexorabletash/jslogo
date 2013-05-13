@@ -2245,8 +2245,21 @@ function LogoInterpreter(turtle, stream, savehook)
     return (void 0);
   };
 
-  // Not Supported: cond
+  self.routines["cond"] = function(clauses) {
+    clauses = lexpr(clauses);
 
+    for (var i = 0; i < clauses.length; ++i) {
+      var clause = lexpr(clauses[i]);
+      var first = clause.shift();
+      if (Type(first) === 'word' && first.toUpperCase() === 'ELSE') {
+        return self.evaluateExpression(clause);
+      }
+      if (self.evaluateExpression(lexpr(first))) {
+        return self.evaluateExpression(clause);
+      }
+    }
+    return (void 0);
+  };
 
   //
   // 8.2 Template-based Iteration
