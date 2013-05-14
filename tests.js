@@ -162,7 +162,7 @@ test("Parser", 34, function () {
 });
 
 
-test("Data Structure Primitives", 135, function () {
+test("Data Structure Primitives", 168, function () {
 
   //
   // 2.1 Constructors
@@ -174,6 +174,20 @@ test("Data Structure Primitives", 135, function () {
 
   this.assert_equals('list 1 2', [1, 2]);
   this.assert_equals('(list 1 2 3)', [1, 2, 3]);
+
+  this.assert_stream('make "a (array 5 0) ' +
+                     'repeat 5 [ setitem repcount-1 :a repcount*repcount ] ' +
+                     'show :a', '{1 4 9 16 25}@0\n');
+  this.assert_stream('make "a { 1 2 3 } ' +
+                     'show :a', '{1 2 3}\n');
+  this.assert_stream('make "a { 1 2 3 } @ 10' +
+                     'show :a', '{1 2 3}@10\n');
+
+  this.assert_stream('show (listtoarray [ 1 2 3 ])', '{1 2 3}\n');
+  this.assert_stream('show (listtoarray [ 1 2 3 ] 0)', '{1 2 3}@0\n');
+
+  this.assert_equals('arraytolist {1 2 3}', ['1', '2', '3']);
+  this.assert_equals('arraytolist {1 2 3}@0', ['1', '2', '3']);
 
   this.assert_equals('sentence 1 2', [1, 2]);
   this.assert_equals('se 1 2', [1, 2]);
@@ -219,6 +233,26 @@ test("Data Structure Primitives", 135, function () {
   this.assert_equals('item 2 [ a b c ]', "b");
   this.assert_equals('item 3 [ a b c ]', "c");
   this.assert_error('item 4 [ a b c ]', 'Index out of bounds');
+
+  this.assert_error('item 0 { a b c }', 'Index out of bounds');
+  this.assert_equals('item 1 { a b c }', "a");
+  this.assert_equals('item 2 { a b c }', "b");
+  this.assert_equals('item 3 { a b c }', "c");
+  this.assert_error('item 4 { a b c }', 'Index out of bounds');
+
+  this.assert_equals('item 0 { a b c }@0', 'a');
+  this.assert_equals('item 1 { a b c }@0', 'b');
+  this.assert_equals('item 2 { a b c }@0', 'c');
+  this.assert_error('item 3 { a b c }@0', 'Index out of bounds');
+
+  this.assert_stream('make "a { a b c } ' +
+                     'setitem 2 :a "q ' +
+                     'show :a', '{a q c}\n');
+  this.assert_stream('make "a { a b c }@0 ' +
+                     'setitem 2 :a "q ' +
+                     'show :a', '{a b q}@0\n');
+
+
   for (var i = 0; i < 10; i += 1) {
     this.assert_predicate('pick [ 1 2 3 4 ]', function(x) { return 1 <= x && x <= 4; });
   }
@@ -242,16 +276,29 @@ test("Data Structure Primitives", 135, function () {
   this.assert_equals('wordp "a', 1);
   this.assert_equals('wordp 1', 0);
   this.assert_equals('wordp [ 1 ]', 0);
+  this.assert_equals('wordp { 1 }', 0);
   this.assert_equals('word? "a', 1);
   this.assert_equals('word? 1', 0);
   this.assert_equals('word? [ 1 ]', 0);
+  this.assert_equals('word? { 1 }', 0);
 
   this.assert_equals('listp "a', 0);
   this.assert_equals('listp 1', 0);
   this.assert_equals('listp [ 1 ]', 1);
+  this.assert_equals('listp { 1 }', 0);
   this.assert_equals('list? "a', 0);
   this.assert_equals('list? 1', 0);
   this.assert_equals('list? [ 1 ]', 1);
+  this.assert_equals('list? { 1 }', 0);
+
+  this.assert_equals('arrayp "a', 0);
+  this.assert_equals('arrayp 1', 0);
+  this.assert_equals('arrayp [ 1 ]', 0);
+  this.assert_equals('arrayp { 1 }', 1);
+  this.assert_equals('array? "a', 0);
+  this.assert_equals('array? 1', 0);
+  this.assert_equals('array? [ 1 ]', 0);
+  this.assert_equals('array? { 1 }', 1);
 
   this.assert_equals('equalp 3 4', 0);
   this.assert_equals('equalp 3 3', 1);
@@ -289,9 +336,11 @@ test("Data Structure Primitives", 135, function () {
   this.assert_equals('numberp "a', 0);
   this.assert_equals('numberp 1', 1);
   this.assert_equals('numberp [ 1 ]', 0);
+  this.assert_equals('numberp { 1 }', 0);
   this.assert_equals('number? "a', 0);
   this.assert_equals('number? 1', 1);
   this.assert_equals('number? [ 1 ]', 0);
+  this.assert_equals('number? { 1 }', 0);
 
   this.assert_equals('emptyp []', 1);
   this.assert_equals('empty? []', 1);
@@ -301,6 +350,8 @@ test("Data Structure Primitives", 135, function () {
   this.assert_equals('empty? "', 1);
   this.assert_equals('emptyp "a', 0);
   this.assert_equals('empty? "a', 0);
+
+  this.assert_equals('emptyp {}', 0);
 
   this.assert_equals('beforep "a "b', 1);
   this.assert_equals('beforep "b "b', 0);

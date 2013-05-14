@@ -109,6 +109,38 @@ function LogoInterpreter(turtle, stream, savehook)
     };
   }
 
+  function LogoArray(init, origin) {
+    if (typeof init === 'object' && init && 'length' in init) {
+      this.array = [].slice.call(init);
+    } else {
+      this.array = new Array(Number(init));
+      for (var i = 0; i < this.array.length; ++i) {
+        this.array[i] = '';
+      }
+    }
+    this.origin = origin;
+  }
+  LogoArray.prototype = {
+    item: function(i) {
+      i = Number(i)|0;
+      i -= this.origin;
+      if (i < 0 || i >= this.array.length) {
+        throw new Error(__("Index out of bounds"));
+      }
+      return this.array[i];
+    },
+    setItem: function(i, v) {
+      i = Number(i)|0;
+      i -= this.origin;
+      if (i < 0 || i >= this.array.length) {
+        throw new Error(__("Index out of bounds"));
+      }
+      this.array[i] = v;
+    },
+    list: function() {
+      return this.array.slice();
+    }
+  };
 
   //----------------------------------------------------------------------
   //
@@ -147,6 +179,8 @@ function LogoInterpreter(turtle, stream, savehook)
       return 'number';
     } else if (Array.isArray(atom)) {
       return 'list';
+    } else if (atom instanceof LogoArray) {
+      return 'array';
     } else if (!atom) {
       throw new Error(__("Unexpected value: null"));
     } else {
@@ -155,10 +189,10 @@ function LogoInterpreter(turtle, stream, savehook)
   }
 
   var regexIdentifier = /^(\.?[A-Za-z][A-Za-z0-9_.\?]*)(.*?)$/;
-  var regexStringLiteral = /^("[^ \[\]\(\)]*)(.*?)$/;
+  var regexStringLiteral = /^("[^ \[\]\(\)\{\}]*)(.*?)$/;
   var regexVariableLiteral = /^(:[A-Za-z][A-Za-z0-9_]*)(.*?)$/;
   var regexNumberLiteral = /^([0-9]*\.?[0-9]+(?:[eE]\s*[\-+]?\s*[0-9]+)?)(.*?)$/;
-  var regexOperator = /^(\+|\-|\*|\/|%|\^|>=|<=|<>|=|<|>|\[|\]|\(|\))(.*?)$/;
+  var regexOperator = /^(\+|\-|\*|\/|%|\^|>=|<=|<>|=|<|>|\[|\]|\{|\}|\(|\))(.*?)$/;
   var regexInfix = /^(\+|\-|\*|\/|%|\^|>=|<=|<>|=|<|>)$/;
 
   //
@@ -201,6 +235,11 @@ function LogoInterpreter(turtle, stream, savehook)
       } else if (string.charAt(0) === '[') {
         r = parseList(string.substring(1));
         atom = r.list;
+        string = r.string;
+
+      } else if (string.charAt(0) === '{') {
+        r = parseArray(string.substring(1));
+        atom = r.array;
         string = r.string;
 
       } else if (string.match(regexOperator)) {
@@ -281,6 +320,50 @@ function LogoInterpreter(turtle, stream, savehook)
         list.push(r.list);
         string = r.string;
         index = 0;
+      }
+    }
+  }
+
+  // NOTE: This parses arrays like lists - flat list of words
+  // TODO: Should list literals be able to contain arrays?
+  // TODO: Should array literals be able to contain lists?
+  // TODO: Should array literals be able to contain arrays?
+  function parseArray(string) {
+    var index = 0,
+        list = [],
+        atom = '',
+        c;
+
+    while (true) {
+      do {
+        c = string.charAt(index++);
+      } while (isWS(c));
+
+      while (!isWS(c) && c !== '}' && c !== '') {
+        atom += c;
+        c = string.charAt(index++);
+      }
+
+      if (atom.length) {
+        list.push(atom);
+        atom = '';
+      }
+
+      if (c === '') {
+        throw new Error(__("Expected '}'"));
+      }
+      if (c === '}') {
+        string = string.substring(index);
+        var origin = 1;
+        if (string.match(/^(\s*@\s*)(.*)$/)) {
+          string = RegExp.$2;
+          if (!string.match(regexNumberLiteral))
+            throw new Error('Expected number after @');
+          origin = RegExp.$1;
+          string = RegExp.$2;
+        }
+
+        return { array: new LogoArray(list, origin), string: string };
       }
     }
   }
@@ -490,6 +573,7 @@ function LogoInterpreter(turtle, stream, savehook)
       case 'number':
         throw new Error(__("Unexpected atom type: number"));
 
+      case 'array':
       case 'list':
         return function() { return atom; };
 
@@ -578,13 +662,14 @@ function LogoInterpreter(turtle, stream, savehook)
     if (atom === (void 0)) {
       throw new Error(__("Expected number"));
     }
-    if (Type(atom) === 'number') {
+    switch (Type(atom)) {
+    case 'number':
       return atom;
+    case 'word':
+      if (isNumber(atom))
+        return parseFloat(atom);
+      break;
     }
-    if (Type(atom) === 'word' && isNumber(atom)) {
-      return parseFloat(atom);
-    }
-
     throw new Error(__("Expected number"));
   }
 
@@ -594,8 +679,12 @@ function LogoInterpreter(turtle, stream, savehook)
   function sexpr(atom) {
     if (atom === (void 0)) { throw new Error(__("Expected string")); }
     if (atom === UNARY_MINUS) { return '-'; }
-    if (Type(atom) === 'word') { return atom; }
-    if (Type(atom) === 'number') { return String(atom); } // coerce
+    switch (Type(atom)) {
+    case 'word':
+      return atom;
+    case 'number':
+      return String(atom);
+    }
 
     throw new Error(__("Expected string"));
   }
@@ -607,8 +696,12 @@ function LogoInterpreter(turtle, stream, savehook)
     // TODO: If this is an input, output needs to be re-stringified
 
     if (atom === (void 0)) { throw new Error(__("Expected list")); }
-    if (Type(atom) === 'word') { return [].slice.call(atom); }
-    if (Type(atom) === 'list') { return copy(atom); }
+    switch (Type(atom)) {
+    case 'word':
+      return [].slice.call(atom);
+    case 'list':
+      return copy(atom);
+    }
 
     throw new Error(__("Expected list"));
   }
@@ -707,6 +800,8 @@ function LogoInterpreter(turtle, stream, savehook)
         case 'word': return atom;
         case 'number': return String(atom);
         case 'list': return '[ ' + atom.map(defn).join(' ') + ' ]';
+        case 'array': return '{ ' + atom.list().map(defn).join(' ') + ' }' +
+          (atom.origin === 1 ? '' : '@' + atom.origin);
       default: throw new Error(__("Unexpected value: unknown type"));
       }
     }
@@ -772,20 +867,25 @@ function LogoInterpreter(turtle, stream, savehook)
   }
 
   function stringify(thing) {
-
-    if (Type(thing) === 'list') {
+    switch (Type(thing)) {
+    case 'list':
       return "[" + thing.map(stringify).join(" ") + "]";
-    } else {
+    case 'array':
+      return "{" + thing.list().map(stringify).join(" ") + "}" +
+        (thing.origin === 1 ? '' : '@' + thing.origin);
+    default:
       return sexpr(thing);
     }
   }
 
   function stringify_nodecorate(thing) {
-
-    if (Type(thing) === 'list') {
+    switch (Type(thing)) {
+    case 'list':
       return thing.map(stringify).join(" ");
-    } else {
-      return stringify(thing);
+    case 'array':
+      return thing.list().map(stringify).join(" ");
+    default:
+      return sexpr(thing);
     }
   }
 
@@ -911,10 +1011,33 @@ function LogoInterpreter(turtle, stream, savehook)
 
   self.routines["lput"] = function(thing, list) { list = lexpr(list); list.push(thing); return list; };
 
-  // Not Supported: array
+  self.routines["array"] = function(size) {
+    size = aexpr(size);
+    if (size < 1) { throw new Error(__("Array size must be positive integer")); }
+    var origin = 1;
+    if (arguments.length > 1) {
+      origin = aexpr(arguments[1]);
+    }
+    return new LogoArray(size, origin);
+  };
+
   // Not Supported: mdarray
-  // Not Supported: listtoarray
-  // Not Supported: arraytolist
+
+  self.routines["listtoarray"] = function(list) {
+    list = lexpr(list);
+    var origin = 1;
+    if (arguments.length > 1) {
+      origin = aexpr(arguments[1]);
+    }
+    return new LogoArray(list, origin);
+  };
+
+  self.routines["arraytolist"] = function(array) {
+    if (Type(array) !== 'array') {
+      throw new Error(__("Expected array"));
+    }
+    return array.list();
+  };
 
   self.routines["combine"] = function(thing1, thing2) {
     if (Type(thing2) !== 'list') {
@@ -952,12 +1075,19 @@ function LogoInterpreter(turtle, stream, savehook)
 
   self.routines["butlast"] = self.routines["bl"] = function(list) { return lexpr(list).slice(0, -1); };
 
-  self.routines["item"] = function(index, list) {
+  self.routines["item"] = function(index, thing) {
     index = aexpr(index);
-    if (index < 1 || index > list.length) {
-      throw new Error(__("Index out of bounds"));
+    switch (Type(thing)) {
+    case 'list':
+      if (index < 1 || index > thing.length) {
+        throw new Error(__("Index out of bounds"));
+      }
+      return thing[index - 1];
+    case 'array':
+      return thing.item(index);
+    default:
+      return sexpr(thing).charAt(index);
     }
-    return lexpr(list)[index - 1];
   };
 
   // Not Supported: mditem
@@ -983,7 +1113,14 @@ function LogoInterpreter(turtle, stream, savehook)
   // 2.3 Data Mutators
   //
 
-  // Not Supported: setitem
+  self.routines["setitem"] = function(index, array, value) {
+    index = aexpr(index);
+    if (Type(array) !== 'array') {
+      throw new Error(__("Expected array"));
+    }
+    array.setItem(index, value);
+  };
+
   // Not Supported: mdsetitem
   // Not Supported: .setfirst
   // Not Supported: .setbf
@@ -1016,14 +1153,20 @@ function LogoInterpreter(turtle, stream, savehook)
 
   self.routines["wordp"] = self.routines["word?"] = function(thing) { return Type(thing) === 'word' ? 1 : 0; };
   self.routines["listp"] = self.routines["list?"] = function(thing) { return Type(thing) === 'list' ? 1 : 0; };
-  // Not Supported: arrayp
+  self.routines["arrayp"] = self.routines["array?"] = function(thing) { return Type(thing) === 'array' ? 1 : 0; };
   self.routines["numberp"] = self.routines["number?"] = function(thing) { return Type(thing) === 'number' ? 1 : 0; };
   self.routines["numberwang"] = function(thing) { return self.prng.next() < 0.5 ? 1 : 0; };
 
   self.routines["equalp"] = self.routines["equal?"] = function(a, b) { return self.equal(a, b) ? 1 : 0; };
   self.routines["notequalp"] = self.routines["notequal?"] = function(a, b) { return !self.equal(a, b) ? 1 : 0; };
 
-  self.routines["emptyp"] = self.routines["empty?"] = function(thing) { return lexpr(thing).length === 0 ? 1 : 0; };
+  self.routines["emptyp"] = self.routines["empty?"] = function(thing) {
+    switch (Type(thing)) {
+    case 'word': return thing.length === 0 ? 1 : 0;
+    case 'list': return thing.length === 0 ? 1 : 0;
+    default: return 0;
+    }
+  };
   self.routines["beforep"] = self.routines["before?"] = function(word1, word2) { return sexpr(word1) < sexpr(word2) ? 1 : 0; };
 
   // Not Supported: .eq

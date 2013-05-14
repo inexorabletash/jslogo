@@ -43,6 +43,9 @@ of comparison.</p>
   <dd>Input definition/variable reference
   <dt><code>[ <var>word ...</var> ]</code>
   <dd>List of words or lists, whitespace separated
+  <dt><code>{ <var>word ...</var> }</code>
+  <dt><code>{ <var>word ...</var> }@<var>origin</var></code>
+  <dd>Array of words whitespace separated
   <dt><code> ( <var>expression</var> )</code>
   <dd>Parenthesis can be used to group expressions
   <dt><code><var>procedure</var> <var>input</var> ...</code>
@@ -59,9 +62,20 @@ of comparison.</p>
   <dt><code>(word <var>expr</var> <var>...</var>)</code>
   <dd>Concatenate two (or more) words into one word, separated with spaces
 
-  <dt><code>list thing1 thing2</code>
-  <dt><code>(list thing1 thing2 ...)</code>
+  <dt><code>list <var>thing1</var> <var>thing2</var></code>
+  <dt><code>(list <var>thing1</var> <var>thing2</var> ...)</code>
   <dd>Create a new list from the inputs
+
+  <dt><code>array <var>size</var></code>
+  <dt><code>(array <var>size</var> <var>origin</var>)</code>
+  <dd>Create a new array. The default origin is 1.
+
+  <dt><code>listtoarray <var>list</var></code>
+  <dt><code>(listtoarray <var>list</var> <var>origin</var>)</code>
+  <dd>Create a new array populated by members of a list
+
+  <dt><code>arraytolist <var>array</var></code>
+  <dd>Create a new list populated by members of a array
 
   <dt><code>sentence thing1 thing2</code>
   <dt><code>(sentence thing1 thing2 ...)</code>
@@ -105,8 +119,11 @@ of comparison.</p>
   <dt><code>pick <var>list</var></code>
   <dd>Outputs one item from a list, at random
 
-  <dt><code>item <var>index</var> <var>list</var></code>
-  <dd>Outputs the indexth item of the list
+  <dt><code>item <var>index</var> <var>thing</var></code>
+  <dd>Outputs the indexth item of the list or array
+
+  <dt><code>setitem <var>index</var> <var>array</var> <var>value</var></code>
+  <dd>Sets the indexth item of the array to value
 
   <dt><code>remove <var>thing</var> <var>list</var></code>
   <dd>Outputs the list with any occurences of thing removed
@@ -134,9 +151,11 @@ of comparison.</p>
   <dt><code>word? <var>thing</var></code>
   <dt><code>listp <var>thing</var></code>
   <dt><code>list? <var>thing</var></code>
+  <dt><code>arrayp <var>thing</var></code>
+  <dt><code>array? <var>thing</var></code>
   <dt><code>numberp <var>thing</var></code>
   <dt><code>number? <var>thing</var></code>
-  <dd>Test if thing is a word, list, or number respectively.
+  <dd>Test if thing is a word, list, array, or number respectively.
 
   <dt><code>equalp <var>expr</var> <var>expr</var></code>
   <dt><code>equal? <var>expr</var> <var>expr</var></code>
