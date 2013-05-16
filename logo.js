@@ -1535,6 +1535,7 @@ function LogoInterpreter(turtle, stream, savehook)
   self.routines["fill"] = function() { turtle.fill(); };
 
   self.routines["filled"] = function(fillcolor, statements) {
+    // TODO: Support color numbers
     fillcolor = sexpr(fillcolor);
     statements = reparse(lexpr(statements));
     turtle.beginpath();

@@ -247,8 +247,12 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
 
   this.filling = 0;
   this.beginpath = function() {
-    ++this.filling;
-    canvas_ctx.beginPath();
+    if (this.filling === 0) {
+      this.saved_turtlemode = this.turtlemode;
+      this.turtlemode = 'window';
+      ++this.filling;
+      canvas_ctx.beginPath();
+    }
   };
 
   this.fillpath = function(fillcolor) {
@@ -260,6 +264,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
       canvas_ctx.fillStyle = this.color;
       if (this.down)
         canvas_ctx.stroke();
+      this.turtlemode = this.saved_turtlemode;
     }
   };
 
