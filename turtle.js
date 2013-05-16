@@ -162,12 +162,16 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     12: "salmon", 13: "purple", 14: "orange", 15: "gray"
   };
 
-  this.setcolor = function(color) {
+  function parseColor(color) {
     if (STANDARD_COLORS[color] !== undefined) {
-      this.color = STANDARD_COLORS[color];
+      return STANDARD_COLORS[color];
     } else {
-      this.color = color;
+      return color;
     }
+  }
+
+  this.setcolor = function(color) {
+    this.color = parseColor(color);
     canvas_ctx.strokeStyle = this.color;
     canvas_ctx.fillStyle = this.color;
   };
@@ -259,7 +263,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     --this.filling;
     if (this.filling === 0) {
       canvas_ctx.closePath();
-      canvas_ctx.fillStyle = fillcolor;
+      canvas_ctx.fillStyle = parseColor(fillcolor);
       canvas_ctx.fill();
       canvas_ctx.fillStyle = this.color;
       if (this.down)
