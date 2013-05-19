@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+
+<title>Logo Interpreter</title>
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<link rel="alternate" type="application/atom+xml" href="https://github.com/inexorabletash/jslogo/commits/master.atom">
+
+<!--[if lt IE 9]><script type="text/javascript" src="../polyfill/polyfill.js"></script><![endif]-->
+<!--[if lt IE 9]><script type="text/javascript" src="../polyfill/flashcanvas.js"></script><![endif]-->
+
+<script src="../CodeMirror/lib/codemirror.js"></script>
+<script src="../CodeMirror/addon/runmode/runmode.js"></script>
+<link rel="stylesheet" href="../CodeMirror/lib/codemirror.css">
+<script src="cm/logo.js"></script>
+<link rel="stylesheet" href="cm/logo.css">
+
+<script src="floodfill.js"></script>
+<script src="logo.js"></script>
+<script src="turtle.js"></script>
+<script src="index.js"></script>
+
+<style>
+body, p, h1, h2, h3 { font-family: sans-serif; }
+dt, dd { font-size: 8pt; }
+code { font-family: monospace; }
+
+#topbar {
+ position: absolute;
+ left: 0;
+ right: 0;
+ top: 0;
+ height: 50px;
+ background-color: yellow;
+}
+
+#display-panel {
+ position: absolute;
+ left: 0;
+ right: 400px;
+ top: 50px;
+ bottom: 50px;
+ background-color: red;
+}
+
+#input-panel {
+ position: absolute;
+ left: 0;
+ right: 400px;
+ bottom: 0;
+ height: 50px;
+ background-color: green;
+}
+
+#sidebar-header {
+ position: absolute;
+ right: 0;
+ width: 400px;
+ top: 50px;
+ height: 100px;
+ background-color: pink;
+}
+#sidebar-header ul { margin: 5px 10px; padding: 0; }
+#sidebar-header ul li { list-decoration: none; }
+
+#sidebar {
+ position: absolute;
+ right: 0;
+ width: 400px;
+ top: 150px;
+ bottom: 0;
+ background-color: blue;
+}
+
+.panel {
+ border: 1px solid black;
+ overflow: hidden;
+}
+
+.fill {
+ position: absolute;
+ left: 10px; right: 10px; top: 10px; bottom: 10px;
+ background-color: #e0e0e0;
+ overflow-x: hidden;
+ overflow-y: scroll;
+}
+
+#reference {
+ width: 100%; height: 100%;
+}
+
+#sidebar #reference,
+#sidebar #examples,
+#sidebar #history,
+#sidebar #links,
+#sidebar #library { display: none; }
+
+#sidebar.reference #reference,
+#sidebar.examples #examples,
+#sidebar.history #history,
+#sidebar.library #library,
+#sidebar.links #links { display: block; }
+
+/* Graphical and Textual Display */
+
+#display {
+    width: 760px;
+    height: 480px;
+    position: relative;
+}
+
+#sandbox {
+    position: absolute;
+    border: solid 1px black;
+    z-index: 0;
+    background-color: white;
+}
+
+#sandbox span {
+    color: red; background-color: yellow; font-weight: bold;
+}
+
+#turtle {
+    position: absolute; border: solid 1px black; z-index: 1;
+}
+
+#overlay {
+    width: 740px;
+    height: 460px;
+    padding: 10px;
+    margin: 0;
+    position: absolute;
+    z-index: 2;
+    background-color: transparent;
+    overflow: hidden;
+    white-space: pre-wrap;
+    font-family: Monospace;
+}
+
+/* User Input */
+
+#input {
+    width: 760px; padding: 0; padding-top: 5px;
+}
+
+#entry_single {
+    width: 660px; font-family: monospace;
+}
+
+#entry_multi {
+    width: 660px; height: 200px; font-family: monospace;
+}
+
+.snippet pre {
+  word-wrap: break-word; margin-top: 0px; margin-bottom: 5px;
+}
+
+#topbar h1,
+#topbar p {
+  margin: 6pt; display: inline-block;
+}
+
+#links ul { padding-left: 20px; margin: 0}
+#links ul li { margin-bottom: 5px; }
+
+</style>
+
+
+
+<div id="topbar" class="panel">
+      <h1>Logo Interpreter</h1>
+      <p>
+        By <a href="mailto:inexorabletash@gmail.com">Joshua Bell</a>
+        | <a target="_blank" href="tests.htm">Unit Tests</a>
+        | <a target="_blank" href="https://github.com/inexorabletash/jslogo">Source</a>
+        | <a target="_blank" href="https://github.com/inexorabletash/jslogo/commits/master">Changes</a>
+      </p>
+</div>
+
+<div id="display-panel" class="panel">
+  <div class="fill">
+
+    <div id="display">
+      <canvas id="sandbox" width="760" height="480">
+        <span>Your browser does not support the canvas element - sorry!</span>
+      </canvas>
+      <canvas id="turtle" width="760" height="480"></canvas>
+      <div id="overlay"></div>
+    </div>
+
+  </div>
+</div>
+
+<div id="input-panel" class="panel">
+  <div class="fill">
+    <div id="input">
+      <textarea rows="1" cols="80" id="entry_single"></textarea>
+      <textarea rows="20" cols="80" id="entry_multi" style="display: none;"></textarea>
+      <input id="run" type="button" value="run" title="Run the specified statements" />
+      <input id="toggle" type="button" value="+" title="Switch between a single line and multi-line entry area"/>
+    </div>
+  </div>
+</div>
+
+<style>
+#logo-cm-single-line .CodeMirror-hscrollbar,
+#logo-cm-single-line .CodeMirror-vscrollbar { visibility: hidden; }
+#logo-cm-single-line .CodeMirror-scroll { overflow: hidden; }
+</style>
+<script>
+(function() {
+  if (CodeMirror) {
+    // Single Line
+    CodeMirror.keyMap['single-line'] = {
+      'Enter': function(cm) {
+        console.log('user hit enter');
+      },
+      fallthrough: ['default']
+    };
+    var width = $('#entry_single').offsetWidth;
+    var cm = CodeMirror.fromTextArea($('#entry_single'), {
+      keyMap: 'single-line'
+    });
+    $('#entry_single + .CodeMirror').id = 'logo-cm-single-line';
+
+    // http://stackoverflow.com/questions/13026285/codemirror-for-just-one-line-textfield
+    cm.setSize(width, cm.defaultTextHeight() + 4 + 4); // 4 = theme padding
+
+    // Handle paste
+    cm.on("beforeChange", function(cm, change) {
+      var newtext = change.text.join('').replace(/\n/g, '  ');
+      change.update(change.from, change.to, [newtext]);
+      return true;
+    });
+
+    // Multi-Line
+    CodeMirror.fromTextArea($('#entry_multi'));
+    $('#entry_multi + .CodeMirror').id = 'logo-cm-multi-line';
+  }
+}());
+</script>
+<script>
+window.addEventListener('resize', function() {
+  var box = $('#display-panel .fill'), w = box.offsetWidth, h = box.offsetHeight;
+  $('#sandbox').width = w; $('#sandbox').height = h;
+  $('#turtle').width = w; $('#turtle').height = h;
+  $('#overlay').width = w; $('#overlay').height = h;
+  if (g_logo) {
+    g_logo.run('cs');
+    // TODO: Need to reset turtle internal width/height here
+  }
+});
+</script>
+
+<div id="sidebar-header" class="panel">
+<ul>
+<li><a id="sb-link-reference" href="#">Reference</a> - the Logo language
+<li><a id="sb-link-library" href="#">Library</a> - your procedures
+<li><a id="sb-link-history" href="#">History</a> - everything you&apos;ve done here
+<li><a id="sb-link-examples" href="#">Examples</a> - fun things to try out
+<li><a id="sb-link-links" href="#">Links</a> - other Logo resources
+</ul>
+</div>
+
+<script>
+(function() {
+  var sidebars = ['reference', 'library', 'history', 'examples', 'links'];
+  sidebars.forEach(function(k) {
+    $('#sb-link-' + k).addEventListener('click', function() {
+      var cl = $('#sidebar').classList;
+      sidebars.forEach(function(sb) { cl.remove(sb); });
+      cl.add(k);
+    });
+  });
+}());
+</script>
+
+<div id="sidebar" class="panel library">
+  <div class="fill">
+    <iframe frameBorder="0" src="language.htm" class="choice" id="reference"></iframe>
+    <div class="choice snippets" id="examples">
+    </div>
+    <div class="choice snippets" id="history">
+    </div>
+    <div class="choice snippets" id="library">
+    </div>
+    <div class="choice" id="links">
+
+
+      <ul>
+        <li><a target="_blank" href="http://en.wikipedia.org/wiki/Logo_(programming_language)">Logo</a> according to Wikipedia
+        <li>Other Web-based Logos:
+          <ul>
+            <li><a target="_blank" href="http://logo.twentygototen.org/_REo_2F2">papert - logo in your browser</a> 
+            <li><a target="_blank" href="https://github.com/drj11/curlylogo" data-old-href="http://www.amberfrog.com/logo/">Curly Logo</a> (uses SVG).
+          </ul>
+        <li><a target="_blank" href="http://el.media.mit.edu/logo-foundation/">The Logo Foundation</a> with links to learning resources and software
+        <li><a target="_blank" href="http://www.cs.berkeley.edu/~bh/logo.html">Berkeley Logo (UCBLogo)</a> is a well respected freeware interpreter
+        <li><a target="_blank" href="http://elica.net/download/papers/LogoTreeProject.pdf">The Logo Tree Project</a> analyzes Logo variants
+        <li><a target="_blank" href="http://blog.ianbicking.org/2007/10/19/logo/">Ian Bicking on Logo</a>
+        <li><a target="_blank" href="http://pylogo.sourceforge.net/">PyLogo</a> is a sweet interpreter in Python
+        <li><a target="_blank" href="http://www.bfoit.org/itp/itp.html">Introduction to Computer Programming</a> using Logo
+        <li><a target="_blank" href="http://groups.yahoo.com/group/LogoForum/">LogoForum</a> - a group for Logo programming discussions
+      </ul>
+    </div>
+  </div>
+</div>
+<script>
+
+function insertSnippet(text, parent) {
+  var snippet = document.createElement('div');
+  snippet.className = 'snippet';
+  var container = document.createElement('pre');
+  snippet.appendChild(container);
+  if (CodeMirror) {
+    CodeMirror.runMode(text, 'logo', container);
+  } else {
+    container.appendChild(document.createTextNode(text));
+  }
+  parent.appendChild(snippet);
+  // TODO: Scroll async and only once for a batch
+  parent.scrollTop = parent.scrollHeight;
+}
+
+var savehook;
+(function() {
+  var orig_savehook = savehook;
+  savehook = function(name, def) {
+    var parent = $('#library');
+    try {
+      insertSnippet(def, parent);
+    } finally {
+      if (orig_savehook)
+        orig_savehook(name, def);
+    }
+  };
+  var orig_historyhook = historyhook;
+  historyhook = function(entry) {
+    var parent = $('#history');
+    try {
+      insertSnippet(entry, parent);
+    } finally {
+      if (orig_historyhook)
+        orig_historyhook(entry);
+    }
+  };
+
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', 'examples.txt', true);
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === XMLHttpRequest.DONE) {
+      if (xhr.status === 200 || xhr.status === 0) {
+         var parent = $('#examples');
+         xhr.responseText.split(/\n\n/g).forEach(function(line) {
+           insertSnippet(line, parent);
+         });
+        }
+      }
+    };
+  xhr.send();
+
+
+}());
+
+</script>
+
+
+
+
+
+
+
+
+
+
+<script type="text/javascript">
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-18610679-3']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+<a href="https://github.com/you"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png" alt="Fork me on GitHub"></a>
+
