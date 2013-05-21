@@ -2,6 +2,9 @@ span.cm-logo-error {
   background-image: url('data:image/gif;base64,R0lGODlhBAAOAJEAAAAAAP////8AAP///yH5BAEAAAMALAAAAAAEAA4AAAIJnI+pyyg+XkwFADs=');
   background-repeat: repeat-x;
   background-position: left bottom;
+
+  background-color: #ffff00;
+  border-radius: 2px;
 }
 
 span.cm-logo-string {
@@ -31,10 +34,22 @@ span.cm-logo-comment {
   font-style: italic;
 }
 
-span.cm-logo-definition {
+span.cm-logo-defn-start {
   color: #3f0000;
   font-weight: bold;
   text-transform: uppercase;
+
+  background-color: #c0ffc0;
+  border-radius: 2px;
+}
+
+span.cm-logo-defn-end {
+  color: #3f0000;
+  font-weight: bold;
+  text-transform: uppercase;
+
+  background-color: #ffc0c0;
+  border-radius: 2px;
 }
 
 span.cm-logo-defn-name {

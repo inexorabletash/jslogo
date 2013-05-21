@@ -13,14 +13,14 @@ code { font-family: monospace; font-weight: bold; }
 body
 {
   color: black;
-  background-color: white;
+  background-color: transparent;
 }
 </style>
 </head>
 <body>
 <div>
 
-<p>The section numbers are per the <a target="_blank" href="http://www.cs.berkeley.edu/~bh/v2ch14/manual.html">Berkeley Logo Reference Manual</a> in Brian Harvey's <cite>Computer Science Logo Style volume 2: Advanced Techniques</cite> for ease
+<p>The section numbers are per the <a target="_blank" href="http://www.cs.berkeley.edu/~bh/v2ch14/manual.html">Berkeley Logo Reference Manual</a> in Brian Harvey&apos;s <cite>Computer Science Logo Style volume 2: Advanced Techniques</cite> for ease
 of comparison.</p>
 
 <ol>
@@ -421,7 +421,7 @@ of comparison.</p>
   <dd>Moves the turtle to center, pointing upwards
 
   <dt><code>arc <var>angle</var> <var>radius</var></code>
-  <dd>Without moving the turtle, draws an arc centered on the turtle, starting at the turtle's heading.
+  <dd>Without moving the turtle, draws an arc centered on the turtle, starting at the turtle&apos;s heading.
 </dl>
 
 <h4>6.2 Turtle Motion Queries</h4>
@@ -466,7 +466,7 @@ of comparison.</p>
   <dd>The turtle attempts to move past the edge of the screen it will stop.
 
   <dt><code>fill</code>
-  <dd>Does a paint bucket flood fill at the turtle's position.
+  <dd>Does a paint bucket flood fill at the turtle&apos;s position.
 
   <dt><code>filled <var>fillcolor</var> [ <var>statements ...</var> ]</code>
   <dd>Execute <var>statements</var> without drawing but keeping track of turtle movements.
@@ -584,7 +584,7 @@ of comparison.</p>
 
   <dt><code>copydef <var>newname</var> <var>oldname</var></code>
   <dd>Copy a procedure. If a procedure <var>newname</var> already existed it will
-  be overridden. Primitive procedures can't be overridden unless <code>REDEFP</code> is <code>TRUE</code>.
+  be overridden. Primitive procedures can&apos;t be overridden unless <code>REDEFP</code> is <code>TRUE</code>.
 </dl>
 
 <h4>7.2 Variable Definition</h4>
@@ -607,7 +607,7 @@ of comparison.</p>
   <dd>Outputs the value of variable. <code>:foo</code> is a shortcut for <code>thing &quot;foo</code>
 
   <dt><code>global <var>varname</var></code>
-  <dd>Reserve the variable at the global scope. This doesn't do anything useful.
+  <dd>Reserve the variable at the global scope. This doesn&apos;t do anything useful.
 </dl>
 
 <h4>7.3 Property Lists</h4>
@@ -700,7 +700,7 @@ of comparison.</p>
   <dt><code>erase <var>contentslist</var></code>
   <dd>Takes a three member list, where the first is a list of user-defined procedure names to erase,
   the second is a list of defined variables to erase, the third is a list of property lists to erase.
-  Primitive procedures can't be erased unless <code>REDEFP</code> is <code>TRUE</code>.
+  Primitive procedures can&apos;t be erased unless <code>REDEFP</code> is <code>TRUE</code>.
 
   <dt><code>erall</code>
   <dd>Erase all non-buried user-defined procedures, variables and property lists.

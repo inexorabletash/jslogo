@@ -5,7 +5,6 @@ CodeMirror.defineMode('logo', function(config, parserConfig) {
 
   // states are 'normal', 'defn-name', 'defn-args', 'defn-body'
 
-  // TODO: indentation
   // TODO: list literals [ a b c ]
   // TODO: array literals { a b c }@0
 
@@ -16,10 +15,21 @@ CodeMirror.defineMode('logo', function(config, parserConfig) {
   var regexOperator = /^\+|\-|\*|\/|%|\^|>=|<=|<>|=|<|>|\[|\]|\{|\}|\(|\)/;
 
   return {
+    electricChars: "dD", // for enD
+
     startState: function() {
       return {
         state: 'normal'
       };
+    },
+
+    indent: function(state, textAfter) {
+      switch(state.state) {
+      case 'defn-name': return 2;
+      case 'defn-vars':
+      case 'defn-body': return /^END\b/i.test(textAfter) ? 0 : 2;
+      default: return 0;
+      }
     },
 
     token: function(stream, state) {
@@ -37,7 +47,7 @@ CodeMirror.defineMode('logo', function(config, parserConfig) {
       if (state.state === 'normal') {
         if (stream.match(/^TO\b/i, true)) {
           state.state = 'defn-name';
-          return 'logo-definition';
+          return 'logo-defn-start';
         }
         if (stream.match(/^END\b/i, true)) {
           return 'logo-error';
@@ -65,7 +75,7 @@ CodeMirror.defineMode('logo', function(config, parserConfig) {
 
         if (stream.match(/^END\b/i, true)) {
           state.state = 'normal';
-          return 'logo-definition';
+          return 'logo-defn-end';
         }
       }
 

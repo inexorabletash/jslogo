@@ -789,9 +789,9 @@ test("Workspace Management", 91, function () {
   this.assert_equals('to foo output 5 end  foo', 5);
   this.assert_equals('to foo :x :y output 5 end  foo 1 2', 5);
   this.assert_equals('to foo :x :y output :x + :y end  foo 1 2', 3);
-  this.assert_equals('to foo :x :y output :x + :y end  def "foo', 'to foo :x :y output :x + :y end');
-  this.assert_equals('to foo :x bar 1 "a + :x [ 1 2 ] end  def "foo', 'to foo :x bar 1 "a + :x [ 1 2 ] end');
-  this.assert_equals('to foo 1 + 2 - 3 * 4 / 5 % 6 ^ -1 end  def "foo', 'to foo 1 + 2 - 3 * 4 / 5 % 6 ^ -1 end');
+  this.assert_equals('to foo :x :y output :x + :y end  def "foo', 'to foo :x :y\n  output :x + :y\nend');
+  this.assert_equals('to foo :x bar 1 "a + :x [ 1 2 ] end  def "foo', 'to foo :x\n  bar 1 "a + :x [ 1 2 ]\nend');
+  this.assert_equals('to foo 1 + 2 - 3 * 4 / 5 % 6 ^ -1 end  def "foo', 'to foo\n  1 + 2 - 3 * 4 / 5 % 6 ^ -1\nend');
 
   this.assert_equals('to square :x output :x * :x end  copydef "multbyself "square  multbyself 5', 25);
   // TODO: copydef + redefp

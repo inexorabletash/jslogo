@@ -9,6 +9,8 @@
 
 <script src="../CodeMirror/lib/codemirror.js"></script>
 <script src="../CodeMirror/addon/runmode/runmode.js"></script>
+<script src="../CodeMirror/addon/edit/closebrackets.js"></script>
+
 <link rel="stylesheet" href="../CodeMirror/lib/codemirror.css">
 <script src="cm/logo.js"></script>
 <link rel="stylesheet" href="cm/logo.css">
@@ -16,20 +18,23 @@
 <script src="floodfill.js"></script>
 <script src="logo.js"></script>
 <script src="turtle.js"></script>
-<script src="index.js"></script>
+<script src="new.js"></script>
 
 <style>
 body, p, h1, h2, h3 { font-family: sans-serif; }
 dt, dd { font-size: 8pt; }
 code { font-family: monospace; }
 
+body {
+ background-color: #e0e0e0;
+}
+
 #topbar {
  position: absolute;
  left: 0;
- right: 0;
+ right: 400px;
  top: 0;
  height: 50px;
- background-color: yellow;
 }
 
 #display-panel {
@@ -37,26 +42,45 @@ code { font-family: monospace; }
  left: 0;
  right: 400px;
  top: 50px;
- bottom: 50px;
- background-color: red;
+ bottom: 60px;
 }
+.multi #display-panel {
+ bottom: 150px;
+}
+
 
 #input-panel {
  position: absolute;
  left: 0;
  right: 400px;
  bottom: 0;
- height: 50px;
- background-color: green;
+ height: 60px;
 }
+.multi #input-panel {
+ height: 150px;
+}
+
+#input #toggle {
+ cursor: pointer;
+
+ position: absolute;
+ z-index: 1000;
+ top: 1px; right: 1px;
+ width: 20px; height: 20px;
+ overflow: hidden;
+ text-shadow: 0 0 1px black;
+}
+
+.single #toggle #collapse-label { display: none; }
+.multi  #toggle #expand-label { display: none; }
+
 
 #sidebar-header {
  position: absolute;
  right: 0;
  width: 400px;
- top: 50px;
+ top: 0px;
  height: 100px;
- background-color: pink;
 }
 #sidebar-header ul { margin: 5px 10px; padding: 0; }
 #sidebar-header ul li { list-decoration: none; }
@@ -65,23 +89,28 @@ code { font-family: monospace; }
  position: absolute;
  right: 0;
  width: 400px;
- top: 150px;
+ top: 100px;
  bottom: 0;
- background-color: blue;
+ overflow-x: hidden;
+ overflow-y: auto;
 }
 
+#library,
+#history,
+#examples,
+#links { margin: 10px; }
+
 .panel {
- border: 1px solid black;
  overflow: hidden;
 }
 
-.fill {
+.inner {
  position: absolute;
- left: 10px; right: 10px; top: 10px; bottom: 10px;
- background-color: #e0e0e0;
- overflow-x: hidden;
- overflow-y: scroll;
+ margin: 0; padding: 0;
+ left: 0; right: 0; top: 0; bottom: 0;
+ overflow: hidden;
 }
+
 
 #reference {
  width: 100%; height: 100%;
@@ -102,29 +131,48 @@ code { font-family: monospace; }
 /* Graphical and Textual Display */
 
 #display {
-    width: 760px;
-    height: 480px;
-    position: relative;
+ position: absolute;
+ overflow: hidden;
+ left: 10px; right: 5px; top: 5px; bottom: 5px;
+ border: 2px solid black;
+ border-radius: 5px;
+ background-color: white;
 }
 
 #sandbox {
-    position: absolute;
-    border: solid 1px black;
-    z-index: 0;
-    background-color: white;
+ position: absolute;
+ z-index: 0;
 }
 
 #sandbox span {
-    color: red; background-color: yellow; font-weight: bold;
+ /* Error in case of no canvas */
+ color: red; background-color: yellow; font-weight: bold;
+}
+
+#display #error {
+ position: absolute;
+ padding: 3px 20px;
+ left: 0;
+ bottom: 0;
+ border-radius: 2px;
+
+ font-size: 14pt;
+ font-weight: bold;
+ color: white;
+ background-color: #e01010;
+ display: none;
+ z-index: 9999;
+}
+#display #error.shown {
+ display: block;
 }
 
 #turtle {
-    position: absolute; border: solid 1px black; z-index: 1;
+    position: absolute; z-index: 1;
 }
 
 #overlay {
-    width: 740px;
-    height: 460px;
+    left: 0; top: 0; right: 0; bottom: 0;
     padding: 10px;
     margin: 0;
     position: absolute;
@@ -137,9 +185,52 @@ code { font-family: monospace; }
 
 /* User Input */
 
-#input {
-    width: 760px; padding: 0; padding-top: 5px;
+#run {
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  position: absolute;
+  top: 5px; bottom: 10px; right: 5px; width: 70px;
+  border: 2px solid black;
+  border-radius: 5px;
+  background-color: white;
 }
+#run:hover {
+  background-color: #eeeeee;
+}
+#run .label {
+  position: absolute;
+  top: 0; bottom: 0; left: 0; right: 0;
+  margin: auto;
+  height: 20px;
+  text-align: center;
+  display: block;
+}
+
+#input {
+  position: absolute;
+  top: 5px; bottom: 10px; left: 10px; right: 85px;
+  border: 2px solid black;
+  border-radius: 5px;
+  overflow: hidden;
+  background-color: white;
+}
+
+#logo-cm-multi-line,
+#logo-cm-single-line,
+#entry_single,
+#entry_multi { display: none; }
+
+.single #logo-cm-single-line,
+.single #entry_single { display: block; }
+.multi #logo-cm-multi-line,
+.multi #entry_multi { display: block; }
+
+.usingCodeMirror #entry_single,
+.usingCodeMirror #entry_multi { display: none; }
 
 #entry_single {
     width: 660px; font-family: monospace;
@@ -150,20 +241,28 @@ code { font-family: monospace; }
 }
 
 .snippet pre {
-  word-wrap: break-word; margin-top: 0px; margin-bottom: 5px;
+  white-space: pre-wrap;
+  margin-top: 0px; margin-bottom: 5px;
+  padding: 2px;
+  background-color: #eeeeee;
+}
+.snippet pre:hover {
+  background-color: white;
 }
 
+#topbar { white-space: nowrap; }
 #topbar h1,
 #topbar p {
   margin: 6pt; display: inline-block;
 }
 
-#links ul { padding-left: 20px; margin: 0}
+
+#links ul { padding-left: 20px; }
 #links ul li { margin-bottom: 5px; }
 
 </style>
 
-
+<body class="single">
 
 <div id="topbar" class="panel">
       <h1>Logo Interpreter</h1>
@@ -176,26 +275,28 @@ code { font-family: monospace; }
 </div>
 
 <div id="display-panel" class="panel">
-  <div class="fill">
-
-    <div id="display">
-      <canvas id="sandbox" width="760" height="480">
+  <div id="display">
+    <div class="inner">
+      <canvas id="sandbox" width="450" height="250">
         <span>Your browser does not support the canvas element - sorry!</span>
       </canvas>
-      <canvas id="turtle" width="760" height="480"></canvas>
+      <canvas id="turtle" width="450" height="250"></canvas>
       <div id="overlay"></div>
+      <div id="error"></div>
     </div>
-
   </div>
 </div>
 
 <div id="input-panel" class="panel">
-  <div class="fill">
-    <div id="input">
+  <div id="run"><div class="label">Run</div></div> <!-- TODO: Make this a button or anchor -->
+  <div id="input">
+    <div class="inner">
+      <div id="toggle">
+        <span id="expand-label">&#x2197;</span>
+        <span id="collapse-label">&#x2199;</span>
+      </div>
       <textarea rows="1" cols="80" id="entry_single"></textarea>
-      <textarea rows="20" cols="80" id="entry_multi" style="display: none;"></textarea>
-      <input id="run" type="button" value="run" title="Run the specified statements" />
-      <input id="toggle" type="button" value="+" title="Switch between a single line and multi-line entry area"/>
+      <textarea rows="20" cols="80" id="entry_multi"></textarea>
     </div>
   </div>
 </div>
@@ -204,25 +305,114 @@ code { font-family: monospace; }
 #logo-cm-single-line .CodeMirror-hscrollbar,
 #logo-cm-single-line .CodeMirror-vscrollbar { visibility: hidden; }
 #logo-cm-single-line .CodeMirror-scroll { overflow: hidden; }
+
+#logo-cm-single-line.CodeMirror {
+  position: absolute;
+  top: 0; bottom: 0; left: 0; right: 0;
+  margin: auto;
+}
 </style>
 <script>
+
+var history = (function() {
+  var entries = [], pos = -1;
+  return {
+    push: function(entry) {
+      entries.push(entry);
+      pos = -1;
+      if (historyhook) {
+        historyhook(entry);
+      }
+    },
+    next: function() {
+      if (entries.length === 0) {
+        return undefined;
+      }
+      if (pos === -1) {
+        pos = 0;
+      } else {
+        pos = (pos === entries.length - 1) ? 0 : pos + 1;
+      }
+      return entries[pos];
+    },
+    prev: function() {
+      if (entries.length === 0) {
+        return undefined;
+      }
+      if (pos === -1) {
+        pos = entries.length - 1;
+      } else {
+        pos = (pos === 0) ? entries.length - 1 : pos - 1;
+      }
+      return entries[pos];
+    }
+  };
+}());
+
 (function() {
+
+  var isMulti = function() {
+    return document.body.classList.contains('multi');
+  };
+  var getValue, setValue;
+
+  function run() {
+    var error = $('#display #error');
+    error.classList.remove('shown');
+
+    var v = getValue();
+    if (v === '') {
+      return;
+    }
+    history.push(v);
+    if (!isMulti()) {
+      setValue('');
+    }
+    setTimeout(function() {
+      try {
+        g_logo.run(v);
+      } catch (e) {
+        error.innerHTML = '';
+        error.appendChild(document.createTextNode(e.message));
+        error.classList.add('shown');
+      }
+    }, 100);
+  }
+
   if (CodeMirror) {
+    document.body.classList.add('using-cm');
+
+    var BRACKETS = '()[]{}';
+
+    var input = $('#input'), w = input.offsetWidth, h = input.offsetHeight;
+
     // Single Line
     CodeMirror.keyMap['single-line'] = {
       'Enter': function(cm) {
-        console.log('user hit enter');
+         run();
+       },
+      'Up': function(cm) {
+        v = history.prev();
+        if (v !== undefined) {
+          cm.setValue(v);
+        }
+      },
+      'Down': function(cm) {
+        v = history.next();
+        if (v !== undefined) {
+          cm.setValue(v);
+        }
       },
       fallthrough: ['default']
     };
-    var width = $('#entry_single').offsetWidth;
     var cm = CodeMirror.fromTextArea($('#entry_single'), {
-      keyMap: 'single-line'
+      keyMap: 'single-line',
+      autoCloseBrackets: BRACKETS
     });
     $('#entry_single + .CodeMirror').id = 'logo-cm-single-line';
 
     // http://stackoverflow.com/questions/13026285/codemirror-for-just-one-line-textfield
-    cm.setSize(width, cm.defaultTextHeight() + 4 + 4); // 4 = theme padding
+    cm.setSize('100%', cm.defaultTextHeight() + 4 + 4); // 4 = theme padding
 
     // Handle paste
     cm.on("beforeChange", function(cm, change) {
@@ -232,22 +422,111 @@ code { font-family: monospace; }
     });
 
     // Multi-Line
-    CodeMirror.fromTextArea($('#entry_multi'));
+    var cm2 = CodeMirror.fromTextArea($('#entry_multi'), {
+      autoCloseBrackets: BRACKETS,
+      lineNumbers: true,
+    });
     $('#entry_multi + .CodeMirror').id = 'logo-cm-multi-line';
+    cm2.setSize('100%', '100%');
+
+    getValue = function() {
+      return (isMulti() ? cm2 : cm).getValue();
+    };
+    setValue = function(v) {
+      (isMulti() ? cm2 : cm).setValue(v);
+    };
+
+    (isMulti() ? cm2 : cm).focus();
+
+  } else {
+
+    $('#entry_single').addEventListener('keydown', function(e) {
+
+      var keyNames = { 3: 'Enter', 10: 'Enter', 13: 'Enter',
+                       38: 'Up', 40: 'Down', 63232: 'Up', 63233: 'Down' };
+
+      var elem = $('#entry_single'),
+          consume = false,
+          keyName = keyNames[e.keyCode],
+          v;
+
+      switch (keyName) {
+        case 'Enter':
+          run();
+          consume = true;
+          break;
+
+        case 'Up':
+          v = history.prev();
+          if (v !== undefined) {
+            elem.value = v;
+          }
+          consume = true;
+          break;
+
+        case 'Down':
+          v = history.next();
+          if (v !== undefined) {
+            elem.value = v;
+          }
+          consume = true;
+          break;
+      }
+
+      if (consume) {
+        e.stopPropagation();
+        e.preventDefault(); // e.g. to block arrows from scrolling the page
+        return false;
+      } else {
+        return true;
+      }
+    });
+
+    getValue = function() {
+      return $(isMulti() ? '#entry_multi' : '#entry_single').value;
+    };
+    setValue = function(v) {
+      $(isMulti() ? '#entry_multi' : '#entry_single').value = v;
+    };
+
+    $(isMulti() ? '#entry_multi' : '#entry_single').focus();
   }
+
+  $('#toggle').addEventListener('click', function(e) {
+    var v = getValue();
+    document.body.classList.toggle('single');
+    document.body.classList.toggle('multi');
+    if (!isMulti()) {
+      v = v.replace(/\n/g, '  ');
+    }
+    setValue(v);
+  });
+
+  $('#run').addEventListener('click', run);
+
 }());
 </script>
 <script>
-window.addEventListener('resize', function() {
-  var box = $('#display-panel .fill'), w = box.offsetWidth, h = box.offsetHeight;
-  $('#sandbox').width = w; $('#sandbox').height = h;
-  $('#turtle').width = w; $('#turtle').height = h;
-  $('#overlay').width = w; $('#overlay').height = h;
-  if (g_logo) {
-    g_logo.run('cs');
-    // TODO: Need to reset turtle internal width/height here
+(function() {
+  window.addEventListener('resize', resize);
+  window.addEventListener('load', resize);
+  var resizeTimeoutId = null;
+  function resize() {
+    if (resizeTimeoutId)
+      clearTimeout(resizeTimeoutId);
+    resizeTimeoutId = setTimeout(function() {
+      resizeTimeoutId = null;
+      var box = $('#display-panel .inner'), w = box.offsetWidth, h = box.offsetHeight;
+      $('#sandbox').width = w; $('#sandbox').height = h;
+      $('#turtle').width = w; $('#turtle').height = h;
+      $('#overlay').width = w; $('#overlay').height = h;
+      if (g_logo) {
+        g_logo.run('cs');
+        // TODO: Need to reset turtle internal width/height here
+      }
+    }, 100);
   }
-});
+}());
 </script>
 
 <div id="sidebar-header" class="panel">
@@ -274,8 +553,7 @@ window.addEventListener('resize', function() {
 </script>
 
 <div id="sidebar" class="panel library">
-  <div class="fill">
-    <iframe frameBorder="0" src="language.htm" class="choice" id="reference"></iframe>
+    <iframe frameBorder="0" allowtransparency="true" src="language.htm" class="choice" id="reference"></iframe>
     <div class="choice snippets" id="examples">
     </div>
     <div class="choice snippets" id="history">
@@ -291,6 +569,7 @@ window.addEventListener('resize', function() {
           <ul>
             <li><a target="_blank" href="http://logo.twentygototen.org/_REo_2F2">papert - logo in your browser</a> 
             <li><a target="_blank" href="https://github.com/drj11/curlylogo" data-old-href="http://www.amberfrog.com/logo/">Curly Logo</a> (uses SVG).
+            <li><a target="_blank" href="https://blog.heroku.com/archives/2011/4/1/announcing_heroku_for_logo">Heroku for Logo</a> - based on Logo; launched April 1st, 2011
           </ul>
         <li><a target="_blank" href="http://el.media.mit.edu/logo-foundation/">The Logo Foundation</a> with links to learning resources and software
         <li><a target="_blank" href="http://www.cs.berkeley.edu/~bh/logo.html">Berkeley Logo (UCBLogo)</a> is a well respected freeware interpreter
@@ -302,7 +581,6 @@ window.addEventListener('resize', function() {
       </ul>
     </div>
   </div>
-</div>
 <script>
 
 function insertSnippet(text, parent) {
@@ -316,8 +594,12 @@ function insertSnippet(text, parent) {
     container.appendChild(document.createTextNode(text));
   }
   parent.appendChild(snippet);
-  // TODO: Scroll async and only once for a batch
-  parent.scrollTop = parent.scrollHeight;
+  if (parent.scrollTimeoutId)
+    clearTimeout(parent.scrollTimeoutId);
+  parent.scrollTimeoutId = setTimeout(function() {
+    parent.scrollTimeoutId = null;
+    parent.scrollTop = parent.scrollHeight;
+  }, 100);
 }
 
 var savehook;
@@ -385,3 +667,4 @@ var savehook;
 
 <a href="https://github.com/you"><img style="position: absolute; top: 0; right: 0; border: 0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_orange_ff7600.png" alt="Fork me on GitHub"></a>
 
+</body>

@@ -806,13 +806,14 @@ function LogoInterpreter(turtle, stream, savehook)
       }
     }
 
-    var def = "to " + name + " ";
+    var def = "to " + name;
     if (proc.inputs.length) {
-      def += proc.inputs.map(function(a) { return ":" + a; }).join(" ");
       def += " ";
+      def += proc.inputs.map(function(a) { return ":" + a; }).join(" ");
     }
-    def += proc.block.map(defn).join(" ").replace(new RegExp(UNARY_MINUS + ' ', 'g'), '-');
-    def += " end";
+    def += "\n";
+    def += "  " + proc.block.map(defn).join(" ").replace(new RegExp(UNARY_MINUS + ' ', 'g'), '-');
+    def += "\n" + "end";
 
     return def;
   };
