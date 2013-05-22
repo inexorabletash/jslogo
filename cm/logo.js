@@ -40,7 +40,7 @@ CodeMirror.defineMode('logo', function(config, parserConfig) {
       }
 
       // Comment
-      if (stream.match(/^;.*?\n/, true)) {
+      if (stream.match(/^;.*/, true)) {
         return 'logo-comment';
       }
 

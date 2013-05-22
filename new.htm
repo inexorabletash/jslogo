@@ -349,12 +349,14 @@ var history = (function() {
   };
 }());
 
+// TODO: Wrap these in an Input object.
+var getValue, setValue, setFocus;
+
 (function() {
 
   var isMulti = function() {
     return document.body.classList.contains('multi');
   };
-  var getValue, setValue;
 
   function run() {
     var error = $('#display #error');
@@ -435,8 +437,9 @@ var history = (function() {
     setValue = function(v) {
       (isMulti() ? cm2 : cm).setValue(v);
     };
-
-    (isMulti() ? cm2 : cm).focus();
+    setFocus = function() {
+      (isMulti() ? cm2 : cm).focus();
+    };
 
   } else {
 
@@ -488,9 +491,12 @@ var history = (function() {
     setValue = function(v) {
       $(isMulti() ? '#entry_multi' : '#entry_single').value = v;
     };
-
-    $(isMulti() ? '#entry_multi' : '#entry_single').focus();
+    setFocus = function() {
+      $(isMulti() ? '#entry_multi' : '#entry_single').focus();
+    };
   }
+
+  setFocus();
 
   $('#toggle').addEventListener('click', function(e) {
     var v = getValue();
@@ -500,6 +506,7 @@ var history = (function() {
       v = v.replace(/\n/g, '  ');
     }
     setValue(v);
+    setFocus();
   });
 
   $('#run').addEventListener('click', run);
