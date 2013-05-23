@@ -7,10 +7,10 @@
 <!--[if lt IE 9]><script type="text/javascript" src="../polyfill/polyfill.js"></script><![endif]-->
 <!--[if lt IE 9]><script type="text/javascript" src="../polyfill/flashcanvas.js"></script><![endif]-->
 
+<!-- CodeMirror, add-ons, and Logo-specific highlighting -->
 <script src="../CodeMirror/lib/codemirror.js"></script>
 <script src="../CodeMirror/addon/runmode/runmode.js"></script>
 <script src="../CodeMirror/addon/edit/closebrackets.js"></script>
-
 <link rel="stylesheet" href="../CodeMirror/lib/codemirror.css">
 <script src="cm/logo.js"></script>
 <link rel="stylesheet" href="cm/logo.css">
@@ -21,6 +21,8 @@
 <script src="new.js"></script>
 
 <style>
+/* General Styles */
+
 body, p, h1, h2, h3 { font-family: sans-serif; }
 dt, dd { font-size: 8pt; }
 code { font-family: monospace; }
@@ -28,6 +30,8 @@ code { font-family: monospace; }
 body {
  background-color: #e0e0e0;
 }
+
+/* Overall Page Structure */
 
 #topbar {
  position: absolute;
@@ -48,7 +52,6 @@ body {
  bottom: 150px;
 }
 
-
 #input-panel {
  position: absolute;
  left: 0;
@@ -60,21 +63,6 @@ body {
  height: 150px;
 }
 
-#input #toggle {
- cursor: pointer;
-
- position: absolute;
- z-index: 1000;
- top: 1px; right: 1px;
- width: 20px; height: 20px;
- overflow: hidden;
- text-shadow: 0 0 1px black;
-}
-
-.single #toggle #collapse-label { display: none; }
-.multi  #toggle #expand-label { display: none; }
-
-
 #sidebar-header {
  position: absolute;
  right: 0;
@@ -82,8 +70,6 @@ body {
  top: 0px;
  height: 100px;
 }
-#sidebar-header ul { margin: 5px 10px; padding: 0; }
-#sidebar-header ul li { list-decoration: none; }
 
 #sidebar {
  position: absolute;
@@ -93,11 +79,6 @@ body {
  bottom: 0;
  overflow: hidden;
 }
-
-#library,
-#history,
-#examples,
-#links { margin: 10px; }
 
 .panel {
  overflow: hidden;
@@ -110,10 +91,18 @@ body {
  overflow: hidden;
 }
 
+/* Header */
 
-#reference {
- width: 100%; height: 100%;
+#topbar { white-space: nowrap; }
+#topbar h1,
+#topbar p {
+ margin: 6pt; display: inline-block;
 }
+
+/* Side Bars */
+
+#sidebar-header ul { margin: 5px 10px; padding: 0; }
+#sidebar-header ul li { list-decoration: none; }
 
 #sidebar #reference,
 #sidebar #examples,
@@ -133,6 +122,30 @@ body {
 #sidebar.library #library,
 #sidebar.links #links { display: block; }
 
+.snippet pre {
+ white-space: pre-wrap;
+ margin-top: 0px; margin-bottom: 5px;
+ padding: 2px;
+ background-color: #eeeeee;
+}
+.snippet pre:hover {
+ background-color: white;
+}
+
+#links ul { padding-left: 20px; }
+#links ul li { margin-bottom: 5px; }
+
+#library,
+#history,
+#examples,
+#links {
+ margin: 10px;
+}
+
+#reference {
+ width: 100%; height: 100%;
+}
+
 /* Graphical and Textual Display */
 
 #display {
@@ -142,16 +155,6 @@ body {
  border: 2px solid black;
  border-radius: 5px;
  background-color: white;
-}
-
-#sandbox {
- position: absolute;
- z-index: 0;
-}
-
-#sandbox span {
- /* Error in case of no canvas */
- color: red; background-color: yellow; font-weight: bold;
 }
 
 #display #error {
@@ -172,99 +175,116 @@ body {
  display: block;
 }
 
+#sandbox {
+ position: absolute;
+ z-index: 0;
+}
+
+#sandbox span {
+ /* Error in case of no canvas */
+ color: red; background-color: yellow; font-weight: bold;
+}
+
 #turtle {
-    position: absolute; z-index: 1;
+ position: absolute; z-index: 1;
 }
 
 #overlay {
-    left: 0; top: 0; right: 0; bottom: 0;
-    padding: 10px;
-    margin: 0;
-    position: absolute;
-    z-index: 2;
-    background-color: transparent;
-    overflow: hidden;
-    white-space: pre-wrap;
-    font-family: Monospace;
+ left: 0; top: 0; right: 0; bottom: 0;
+ padding: 10px;
+ margin: 0;
+ position: absolute;
+ z-index: 2;
+ background-color: transparent;
+ overflow: hidden;
+ white-space: pre-wrap;
+ font-family: Monospace;
 }
 
 /* User Input */
 
-#run {
-  cursor: pointer;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-
-  position: absolute;
-  top: 5px; bottom: 10px; right: 5px; width: 70px;
-  border: 2px solid black;
-  border-radius: 5px;
-  background-color: white;
-}
-#run:hover {
-  background-color: #eeeeee;
-}
-#run .label {
-  position: absolute;
-  top: 0; bottom: 0; left: 0; right: 0;
-  margin: auto;
-  height: 20px;
-  text-align: center;
-  display: block;
-}
-
 #input {
-  position: absolute;
-  top: 5px; bottom: 10px; left: 10px; right: 85px;
-  border: 2px solid black;
-  border-radius: 5px;
-  overflow: hidden;
-  background-color: white;
+ position: absolute;
+ overflow: hidden;
+ top: 5px; bottom: 10px; left: 10px; right: 85px;
+ border: 2px solid black;
+ border-radius: 5px;
+ color: black;
+ background-color: white;
 }
 
 #logo-cm-multi-line,
 #logo-cm-single-line,
-#entry_single,
-#entry_multi { display: none; }
+#logo-ta-single-line,
+#logo-ta-multi-line {
+ position: absolute;
+ overflow: hidden;
+ left: 0; top: 0; right: 0; bottom: 0;
+ font-family: monospace;
+ display: none;
+}
 
 .single #logo-cm-single-line,
-.single #entry_single { display: block; }
+.single #logo-ta-single-line,
 .multi #logo-cm-multi-line,
-.multi #entry_multi { display: block; }
-
-.usingCodeMirror #entry_single,
-.usingCodeMirror #entry_multi { display: none; }
-
-#entry_single {
-    width: 660px; font-family: monospace;
+.multi #logo-ta-multi-line {
+ display: block;
 }
 
-#entry_multi {
-    width: 660px; height: 200px; font-family: monospace;
+#logo-cm-single-line .CodeMirror-hscrollbar,
+#logo-cm-single-line .CodeMirror-vscrollbar { visibility: hidden; }
+
+#logo-cm-single-line.CodeMirror {
+ position: absolute;
+ top: 0; bottom: 0; left: 0; right: 0;
+ margin: auto;
 }
 
-.snippet pre {
-  white-space: pre-wrap;
-  margin-top: 0px; margin-bottom: 5px;
-  padding: 2px;
-  background-color: #eeeeee;
-}
-.snippet pre:hover {
-  background-color: white;
+.single #logo-cm-single-line,
+.single #logo-ta-single-line {
+ font-size: 12pt;
+ display: block;
 }
 
-#topbar { white-space: nowrap; }
-#topbar h1,
-#topbar p {
-  margin: 6pt; display: inline-block;
+#input #toggle {
+ cursor: pointer;
+
+ position: absolute;
+ overflow: hidden;
+ z-index: 1000;
+ top: 1px; right: 1px;
+ width: 20px; height: 20px;
+ text-shadow: 0 0 1px black;
+}
+.single #toggle #collapse-label { display: none; }
+.multi  #toggle #expand-label { display: none; }
+
+#run {
+ cursor: pointer;
+ -webkit-user-select: none;
+ -moz-user-select: none;
+ -ms-user-select: none;
+ user-select: none;
+
+ position: absolute;
+ top: 5px; bottom: 10px; right: 5px; width: 70px;
+ border: 2px solid black;
+ border-radius: 5px;
+ background-color: white;
 }
 
+#run:hover {
+ background-color: #eeeeee;
+}
 
-#links ul { padding-left: 20px; }
-#links ul li { margin-bottom: 5px; }
-
+#run .label {
+ position: absolute;
+ top: 0; bottom: 0; left: 0; right: 0;
+ margin: auto;
+ height: 20px;
+ text-align: center;
+ display: block;
+}
 </style>
 
 <body class="single">
@@ -293,36 +313,29 @@ body {
 </div>
 
 <div id="input-panel" class="panel">
-  <div id="run"><div class="label">Run</div></div> <!-- TODO: Make this a button or anchor -->
+  <!-- TODO: Make this a button or anchor -->
+  <div id="run"><div class="label">Run</div></div>
   <div id="input">
     <div class="inner">
       <div id="toggle">
         <span id="expand-label">&#x2197;</span>
         <span id="collapse-label">&#x2199;</span>
       </div>
-      <textarea rows="1" cols="80" id="entry_single"></textarea>
-      <textarea rows="20" cols="80" id="entry_multi"></textarea>
+      <textarea rows="1" cols="80" id="logo-ta-single-line"></textarea>
+      <textarea rows="20" cols="80" id="logo-ta-multi-line"></textarea>
     </div>
   </div>
 </div>
 
-<style>
-#logo-cm-single-line .CodeMirror-hscrollbar,
-#logo-cm-single-line .CodeMirror-vscrollbar { visibility: hidden; }
-#logo-cm-single-line .CodeMirror-scroll { overflow: hidden; }
-
-#logo-cm-single-line.CodeMirror {
-  position: absolute;
-  top: 0; bottom: 0; left: 0; right: 0;
-  margin: auto;
-}
-</style>
 <script>
 
 var history = (function() {
   var entries = [], pos = -1;
   return {
     push: function(entry) {
+      if (entries.length > 0 && entries[entries.length - 1] === entry) {
+        return;
+      }
       entries.push(entry);
       pos = -1;
       if (historyhook) {
@@ -354,12 +367,12 @@ var history = (function() {
   };
 }());
 
-// TODO: Wrap these in an Input object.
-var getValue, setValue, setFocus, setMulti, setSingle;
+var input = {};
 
 (function() {
 
-  setMulti = function() {
+  input.setMulti = function() {
+    // TODO: Collapse these to a single class?
     document.body.classList.remove('single');
     document.body.classList.add('multi');
   };
@@ -372,13 +385,13 @@ var getValue, setValue, setFocus, setMulti, setSingle;
     var error = $('#display #error');
     error.classList.remove('shown');
 
-    var v = getValue();
+    var v = input.getValue();
     if (v === '') {
       return;
     }
     history.push(v);
     if (!isMulti()) {
-      setValue('');
+      input.setValue('');
     }
     setTimeout(function() {
       try {
@@ -391,12 +404,8 @@ var getValue, setValue, setFocus, setMulti, setSingle;
     }, 100);
   }
 
-  if (CodeMirror) {
-    document.body.classList.add('using-cm');
-
+  if ('CodeMirror' in window) {
     var BRACKETS = '()[]{}';
-
-    var input = $('#input'), w = input.offsetWidth, h = input.offsetHeight;
 
     // Single Line
     CodeMirror.keyMap['single-line'] = {
@@ -417,11 +426,11 @@ var getValue, setValue, setFocus, setMulti, setSingle;
       },
       fallthrough: ['default']
     };
-    var cm = CodeMirror.fromTextArea($('#entry_single'), {
+    var cm = CodeMirror.fromTextArea($('#logo-ta-single-line'), {
       keyMap: 'single-line',
       autoCloseBrackets: BRACKETS
     });
-    $('#entry_single + .CodeMirror').id = 'logo-cm-single-line';
+    $('#logo-ta-single-line + .CodeMirror').id = 'logo-cm-single-line';
 
     // http://stackoverflow.com/questions/13026285/codemirror-for-just-one-line-textfield
     cm.setSize('100%', cm.defaultTextHeight() + 4 + 4); // 4 = theme padding
@@ -434,83 +443,75 @@ var getValue, setValue, setFocus, setMulti, setSingle;
     });
 
     // Multi-Line
-    var cm2 = CodeMirror.fromTextArea($('#entry_multi'), {
+    var cm2 = CodeMirror.fromTextArea($('#logo-ta-multi-line'), {
       autoCloseBrackets: BRACKETS,
       lineNumbers: true,
     });
-    $('#entry_multi + .CodeMirror').id = 'logo-cm-multi-line';
+    $('#logo-ta-multi-line + .CodeMirror').id = 'logo-cm-multi-line';
     cm2.setSize('100%', '100%');
 
-    getValue = function() {
+    input.getValue = function() {
       return (isMulti() ? cm2 : cm).getValue();
     };
-    setValue = function(v) {
+    input.setValue = function(v) {
       (isMulti() ? cm2 : cm).setValue(v);
     };
-    setFocus = function() {
+    input.setFocus = function() {
       (isMulti() ? cm2 : cm).focus();
     };
 
   } else {
+    // Fallback in case of no CodeMirror
 
-    $('#entry_single').addEventListener('keydown', function(e) {
+    $('#logo-ta-single-line').addEventListener('keydown', function(e) {
 
       var keyNames = { 3: 'Enter', 10: 'Enter', 13: 'Enter',
                        38: 'Up', 40: 'Down', 63232: 'Up', 63233: 'Down' };
 
-      var elem = $('#entry_single'),
-          consume = false,
-          keyName = keyNames[e.keyCode],
-          v;
+      var elem = $('#logo-ta-single-line');
 
-      switch (keyName) {
-        case 'Enter':
+      var keyMap = {
+        'Enter': function(elem) {
           run();
-          consume = true;
-          break;
-
-        case 'Up':
-          v = history.prev();
+        },
+        'Up': function(elem) {
+          var v = history.prev();
           if (v !== undefined) {
             elem.value = v;
           }
-          consume = true;
-          break;
-
-        case 'Down':
-          v = history.next();
+        },
+        'Down': function(elem) {
+          var v = history.next();
           if (v !== undefined) {
             elem.value = v;
           }
-          consume = true;
-          break;
-      }
+        }
+      };
 
-      if (consume) {
+      var keyName = keyNames[e.keyCode];
+      if (keyName in keyMap && typeof keyMap[keyName] === 'function') {
+        keyMap[keyName](elem);
         e.stopPropagation();
-        e.preventDefault(); // e.g. to block arrows from scrolling the page
-        return false;
-      } else {
-        return true;
+        e.preventDefault();
       }
     });
 
-    getValue = function() {
-      return $(isMulti() ? '#entry_multi' : '#entry_single').value;
+    input.getValue = function() {
+      return $(isMulti() ? '#logo-ta-multi-line' : '#logo-ta-single-line').value;
     };
-    setValue = function(v) {
-      $(isMulti() ? '#entry_multi' : '#entry_single').value = v;
+    input.setValue = function(v) {
+      $(isMulti() ? '#logo-ta-multi-line' : '#logo-ta-single-line').value = v;
     };
-    setFocus = function() {
-      $(isMulti() ? '#entry_multi' : '#entry_single').focus();
+    input.setFocus = function() {
+      $(isMulti() ? '#logo-ta-multi-line' : '#logo-ta-single-line').focus();
     };
   }
 
-  setFocus();
-  $('#input').addEventListener('click', setFocus);
+  input.setFocus();
+  $('#input').addEventListener('click', function() { input.setFocus() });
 
   $('#toggle').addEventListener('click', function(e) {
-    var v = getValue();
+    var v = input.getValue();
     document.body.classList.toggle('single');
     document.body.classList.toggle('multi');
     if (!isMulti()) {
@@ -518,8 +519,8 @@ var getValue, setValue, setFocus, setMulti, setSingle;
     } else {
       v = v.replace(/\s\s(\s*)/g, '\n$1');
     }
-    setValue(v);
-    setFocus();
+    input.setValue(v);
+    input.setFocus();
   });
 
   $('#run').addEventListener('click', run);
@@ -530,21 +531,15 @@ var getValue, setValue, setFocus, setMulti, setSingle;
 (function() {
   window.addEventListener('resize', resize);
   window.addEventListener('load', resize);
-  var resizeTimeoutId = null;
   function resize() {
-    if (resizeTimeoutId)
-      clearTimeout(resizeTimeoutId);
-    resizeTimeoutId = setTimeout(function() {
-      resizeTimeoutId = null;
-      var box = $('#display-panel .inner'), w = box.offsetWidth, h = box.offsetHeight;
-      $('#sandbox').width = w; $('#sandbox').height = h;
-      $('#turtle').width = w; $('#turtle').height = h;
-      $('#overlay').width = w; $('#overlay').height = h;
-      if (g_logo && g_turtle) {
-        g_turtle.resize(w, h);
-        g_logo.run('cs');
-      }
-    }, 100);
+    var box = $('#display-panel .inner'), w = box.offsetWidth, h = box.offsetHeight;
+    $('#sandbox').width = w; $('#sandbox').height = h;
+    $('#turtle').width = w; $('#turtle').height = h;
+    $('#overlay').width = w; $('#overlay').height = h;
+    if (g_logo && g_turtle) {
+      g_turtle.resize(w, h);
+      g_logo.run('cs');
+    }
   }
 }());
 </script>
@@ -572,11 +567,12 @@ var getValue, setValue, setFocus, setMulti, setSingle;
 }());
 </script>
 
-<div id="sidebar" class="panel library">
+<div id="sidebar" class="panel examples">
     <iframe frameBorder="0" allowtransparency="true" src="language.htm" class="choice" id="reference"></iframe>
     <div class="choice snippets" id="examples">
     </div>
     <div class="choice snippets" id="history">
+      <!-- TODO: Add "clear history" button -->
     </div>
     <div class="choice snippets" id="library">
     </div>
@@ -587,7 +583,7 @@ var getValue, setValue, setFocus, setMulti, setSingle;
         <li><a target="_blank" href="http://en.wikipedia.org/wiki/Logo_(programming_language)">Logo</a> according to Wikipedia
         <li>Other Web-based Logos:
           <ul>
-            <li><a target="_blank" href="http://logo.twentygototen.org/_REo_2F2">papert - logo in your browser</a> 
+            <li><a target="_blank" href="http://logo.twentygototen.org/_REo_2F2">papert - logo in your browser</a>
             <li><a target="_blank" href="https://github.com/drj11/curlylogo" data-old-href="http://www.amberfrog.com/logo/">Curly Logo</a> (uses SVG).
             <li><a target="_blank" href="https://blog.heroku.com/archives/2011/4/1/announcing_heroku_for_logo">Heroku for Logo</a> - based on Logo; launched April 1st, 2011
           </ul>
@@ -604,23 +600,27 @@ var getValue, setValue, setFocus, setMulti, setSingle;
 <script>
 
 function insertSnippet(text, parent) {
+
   var snippet = document.createElement('div');
   snippet.className = 'snippet';
   snippet.title = "Click to edit";
   snippet.addEventListener('click', function() {
-    setMulti();
-    setValue(text);
+    input.setMulti();
+    input.setValue(text);
   });
+
   var container = document.createElement('pre');
   snippet.appendChild(container);
-  if (CodeMirror) {
+  if ('CodeMirror' in window) {
     CodeMirror.runMode(text, 'logo', container);
   } else {
     container.appendChild(document.createTextNode(text));
   }
   parent.appendChild(snippet);
-  if (parent.scrollTimeoutId)
+
+  if (parent.scrollTimeoutId) {
     clearTimeout(parent.scrollTimeoutId);
+  }
   parent.scrollTimeoutId = setTimeout(function() {
     parent.scrollTimeoutId = null;
     parent.scrollTop = parent.scrollHeight;
@@ -629,6 +629,7 @@ function insertSnippet(text, parent) {
 
 var savehook;
 (function() {
+
   var orig_savehook = savehook;
   savehook = function(name, def) {
     var parent = $('#library');
@@ -639,6 +640,7 @@ var savehook;
         orig_savehook(name, def);
     }
   };
+
   var orig_historyhook = historyhook;
   historyhook = function(entry) {
     var parent = $('#history');
@@ -664,13 +666,9 @@ var savehook;
     };
   xhr.send();
 
-
 }());
 
 </script>
-
-
-
 
 <script type="text/javascript">
   var _gaq = _gaq || [];

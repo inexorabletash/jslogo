@@ -1,21 +1,28 @@
 to star
   repeat 5 [ fd 100 rt 144 ]
 end
+clearscreen
 star
 
 to square :length
   repeat 4 [ fd :length rt 90 ]
 end
+clearscreen
 repeat 36 [ square 50 rt 10 ]
 
 to randomcolor
   setcolor pick [ red orange yellow green blue violet ]
 end
+clearscreen
 repeat 36 [ randomcolor square random 200 rt 10 ]
 
-window pu repeat 72 [
+clearscreen
+repeat 72 [
   setlabelheight repcount
+  penup
   fd repcount * 2.5
-  label "Logo bk repcount * 2.5
+  label "Logo
+  bk repcount * 2.5
+  pendown
   rt 10
 ]
