@@ -50,20 +50,32 @@ function initStorage(loadhook) {
   req.onsuccess = function() {
     var db = req.result;
 
-    var tx = db.transaction('procedures');
-    var curReq = tx.objectStore('procedures').openCursor();
-    curReq.onsuccess = function() {
-      var cursor = curReq.result;
+    var tx = db.transaction(['procedures', 'history']);
+    tx.objectStore('procedures').openCursor().onsuccess = function(e) {
+      var cursor = e.target.result;
       if (cursor) {
         try {
           loadhook(cursor.value);
         } catch (e) {
-          console.error("error loading procedure: " + e);
+          console.error("Error loading procedure: " + e);
         } finally {
           cursor.continue();
         }
       }
     };
+    tx.objectStore('history').openCursor().onsuccess = function(e) {
+      var cursor = e.target.result;
+      if (cursor) {
+        try {
+          historyhook(cursor.value);
+        } catch (e) {
+          console.error("Error loading procedure: " + e);
+        } finally {
+          cursor.continue();
+        }
+      }
+    };
+
     tx.oncomplete = function() {
       var orig_savehook = savehook;
       savehook = function(name, def) {
@@ -71,7 +83,7 @@ function initStorage(loadhook) {
           var tx = db.transaction('procedures', 'readwrite');
           tx.objectStore('procedures').put(def, name);
         } catch (e) {
-          console.error(e);
+          console.error('Error saving procedure: ' + e);
         } finally {
           if (orig_savehook)
             orig_savehook(name, def);
@@ -83,7 +95,7 @@ function initStorage(loadhook) {
           var tx = db.transaction('history', 'readwrite');
           tx.objectStore('history').put(entry);
         } catch (e) {
-          console.error(e);
+          console.error('Error saving history: ' + e);
         } finally {
           if (orig_historyhook)
             orig_historyhook(entry);
