@@ -336,6 +336,11 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
   this.y = height / 2;
   this.r = Math.PI / 2;
 
+  this.resize = function(w, h) {
+    width = w;
+    height = h;
+  };
+
   this.begin();
   this.end();
 }

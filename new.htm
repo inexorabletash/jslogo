@@ -350,9 +350,14 @@ var history = (function() {
 }());
 
 // TODO: Wrap these in an Input object.
-var getValue, setValue, setFocus;
+var getValue, setValue, setFocus, setMulti, setSingle;
 
 (function() {
+
+  setMulti = function() {
+    document.body.classList.remove('single');
+    document.body.classList.add('multi');
+  };
 
   var isMulti = function() {
     return document.body.classList.contains('multi');
@@ -497,6 +502,7 @@ var getValue, setValue, setFocus;
   }
 
   setFocus();
+  $('#input').addEventListener('click', setFocus);
 
   $('#toggle').addEventListener('click', function(e) {
     var v = getValue();
@@ -504,6 +510,8 @@ var getValue, setValue, setFocus;
     document.body.classList.toggle('multi');
     if (!isMulti()) {
       v = v.replace(/\n/g, '  ');
+    } else {
+      v = v.replace(/\s\s(\s*)/g, '\n$1');
     }
     setValue(v);
     setFocus();
@@ -527,9 +535,9 @@ var getValue, setValue, setFocus;
       $('#sandbox').width = w; $('#sandbox').height = h;
       $('#turtle').width = w; $('#turtle').height = h;
       $('#overlay').width = w; $('#overlay').height = h;
-      if (g_logo) {
+      if (g_logo && g_turtle) {
+        g_turtle.resize(w, h);
         g_logo.run('cs');
-        // TODO: Need to reset turtle internal width/height here
       }
     }, 100);
   }
@@ -593,6 +601,11 @@ var getValue, setValue, setFocus;
 function insertSnippet(text, parent) {
   var snippet = document.createElement('div');
   snippet.className = 'snippet';
+  snippet.title = "Click to edit";
+  snippet.addEventListener('click', function() {
+    setMulti();
+    setValue(text);
+  });
   var container = document.createElement('pre');
   snippet.appendChild(container);
   if (CodeMirror) {
@@ -650,12 +663,6 @@ var savehook;
 }());
 
 </script>
-
-
-
-
-
-
 
 
 

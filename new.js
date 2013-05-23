@@ -22,7 +22,7 @@ if (!('console' in window)) {
 
 var $ = document.querySelector.bind(document);
 
-var g_logo;
+var g_logo, g_turtle;
 
 
 var savehook;
@@ -118,13 +118,13 @@ window.addEventListener('load', function() {
 
   var canvas_element = $("#sandbox"), canvas_ctx = canvas_element.getContext('2d'),
       turtle_element = $("#turtle"), turtle_ctx = turtle_element.getContext('2d');
-  var turtle = new CanvasTurtle(
+  g_turtle = new CanvasTurtle(
     canvas_ctx,
     turtle_ctx,
     canvas_element.width, canvas_element.height);
 
   g_logo = new LogoInterpreter(
-    turtle, stream,
+    g_turtle, stream,
     function (name, def) {
       if (savehook) {
         savehook(name, def);
