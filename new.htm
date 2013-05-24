@@ -417,12 +417,14 @@ var input = {};
         v = history.prev();
         if (v !== undefined) {
           cm.setValue(v);
+          cm.setCursor({line: 0, ch: v.length});
         }
       },
       'Down': function(cm) {
         v = history.next();
         if (v !== undefined) {
           cm.setValue(v);
+          cm.setCursor({line: 0, ch: v.length});
         }
       },
       fallthrough: ['default']
