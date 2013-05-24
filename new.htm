@@ -30,67 +30,67 @@ dt, dd { font-size: 8pt; }
 code { font-family: monospace; }
 
 body {
- background-color: #e0e0e0;
+  background-color: #e0e0e0;
 }
 
 /* Overall Page Structure */
 
 #topbar {
- position: absolute;
- left: 0;
- right: 400px;
- top: 0;
- height: 50px;
+  position: absolute;
+  left: 0;
+  right: 400px;
+  top: 0;
+  height: 50px;
 }
 
 #display-panel {
- position: absolute;
- left: 0;
- right: 400px;
- top: 50px;
- bottom: 60px;
+  position: absolute;
+  left: 0;
+  right: 400px;
+  top: 50px;
+  bottom: 60px;
 }
 .multi #display-panel {
- bottom: 150px;
+  bottom: 150px;
 }
 
 #input-panel {
- position: absolute;
- left: 0;
- right: 400px;
- bottom: 0;
- height: 60px;
+  position: absolute;
+  left: 0;
+  right: 400px;
+  bottom: 0;
+  height: 60px;
 }
 .multi #input-panel {
- height: 150px;
+  height: 150px;
 }
 
 #sidebar-header {
- position: absolute;
- right: 0;
- width: 400px;
- top: 0px;
- height: 100px;
+  position: absolute;
+  right: 0;
+  width: 400px;
+  top: 0px;
+  height: 100px;
 }
 
 #sidebar {
- position: absolute;
- right: 0;
- width: 400px;
- top: 100px;
- bottom: 0;
- overflow: hidden;
+  position: absolute;
+  right: 0;
+  width: 400px;
+  top: 100px;
+  bottom: 0;
+  overflow: hidden;
 }
 
 .panel {
- overflow: hidden;
+  overflow: hidden;
 }
 
 .inner {
- position: absolute;
- margin: 0; padding: 0;
- left: 0; right: 0; top: 0; bottom: 0;
- overflow: hidden;
+  position: absolute;
+  margin: 0; padding: 0;
+  left: 0; right: 0; top: 0; bottom: 0;
+  overflow: hidden;
 }
 
 /* Header */
@@ -98,7 +98,7 @@ body {
 #topbar { white-space: nowrap; }
 #topbar h1,
 #topbar p {
- margin: 6pt; display: inline-block;
+  margin: 6pt; display: inline-block;
 }
 
 /* Side Bars */
@@ -111,11 +111,11 @@ body {
 #sidebar #history,
 #sidebar #links,
 #sidebar #library {
- position: absolute;
- left: 0; right: 0; top: 0; bottom: 0;
- display: none;
- overflow-x: hidden;
- overflow-y: auto;
+  position: absolute;
+  left: 0; right: 0; top: 0; bottom: 0;
+  display: none;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 #sidebar.reference #reference,
@@ -125,13 +125,13 @@ body {
 #sidebar.links #links { display: block; }
 
 .snippet pre {
- white-space: pre-wrap;
- margin-top: 0px; margin-bottom: 5px;
- padding: 2px;
- background-color: #eeeeee;
+  white-space: pre-wrap;
+  margin-top: 0px; margin-bottom: 5px;
+  padding: 2px;
+  background-color: #eeeeee;
 }
 .snippet pre:hover {
- background-color: white;
+  background-color: white;
 }
 
 #links ul { padding-left: 20px; }
@@ -141,96 +141,96 @@ body {
 #history,
 #examples,
 #links {
- margin: 10px;
+  margin: 10px;
 }
 
 #reference {
- width: 100%; height: 100%;
+  width: 100%; height: 100%;
 }
 
 /* Graphical and Textual Display */
 
 #display {
- position: absolute;
- overflow: hidden;
- left: 10px; right: 5px; top: 5px; bottom: 5px;
- border: 2px solid black;
- border-radius: 5px;
- background-color: white;
+  position: absolute;
+  overflow: hidden;
+  left: 10px; right: 5px; top: 5px; bottom: 5px;
+  border: 2px solid black;
+  border-radius: 5px;
+  background-color: white;
 }
 
 #display #error {
- position: absolute;
- padding: 3px 20px;
- left: 0;
- bottom: 0;
- border-radius: 2px;
+  position: absolute;
+  padding: 3px 20px;
+  left: 0;
+  bottom: 0;
+  border-radius: 2px;
 
- font-size: 14pt;
- font-weight: bold;
- color: white;
- background-color: #e01010;
- display: none;
- z-index: 9999;
+  font-size: 14pt;
+  font-weight: bold;
+  color: white;
+  background-color: #e01010;
+  display: none;
+  z-index: 9999;
 }
 #display #error.shown {
- display: block;
+  display: block;
 }
 
 #sandbox {
- position: absolute;
- z-index: 0;
+  position: absolute;
+  z-index: 0;
 }
 
 #sandbox span {
- /* Error in case of no canvas */
- color: red; background-color: yellow; font-weight: bold;
+  /* Error in case of no canvas */
+  color: red; background-color: yellow; font-weight: bold;
 }
 
 #turtle {
- position: absolute; z-index: 1;
+  position: absolute; z-index: 1;
 }
 
 #overlay {
- left: 0; top: 0; right: 0; bottom: 0;
- padding: 10px;
- margin: 0;
- position: absolute;
- z-index: 2;
- background-color: transparent;
- overflow: hidden;
- white-space: pre-wrap;
- font-family: Monospace;
+  left: 0; top: 0; right: 0; bottom: 0;
+  padding: 10px;
+  margin: 0;
+  position: absolute;
+  z-index: 2;
+  background-color: transparent;
+  overflow: hidden;
+  white-space: pre-wrap;
+  font-family: Monospace;
 }
 
 /* User Input */
 
 #input {
- position: absolute;
- overflow: hidden;
- top: 5px; bottom: 10px; left: 10px; right: 85px;
- border: 2px solid black;
- border-radius: 5px;
- color: black;
- background-color: white;
+  position: absolute;
+  overflow: hidden;
+  top: 5px; bottom: 10px; left: 10px; right: 85px;
+  border: 2px solid black;
+  border-radius: 5px;
+  color: black;
+  background-color: white;
 }
 
 #logo-cm-multi-line,
 #logo-cm-single-line,
 #logo-ta-single-line,
 #logo-ta-multi-line {
- position: absolute;
- overflow: hidden;
- left: 0; top: 0; right: 0; bottom: 0;
- font-family: monospace;
- display: none;
+  position: absolute;
+  overflow: hidden;
+  left: 0; top: 0; right: 0; bottom: 0;
+  font-family: monospace;
+  display: none;
 }
 
 .single #logo-cm-single-line,
 .single #logo-ta-single-line,
 .multi #logo-cm-multi-line,
 .multi #logo-ta-multi-line {
- display: block;
+  display: block;
 }
 
 .CodeMirror .CodeMirror-placeholder { color: gray; font-style: italic; }
@@ -239,68 +239,68 @@ body {
 #logo-cm-single-line .CodeMirror-vscrollbar { visibility: hidden; }
 
 #logo-cm-single-line.CodeMirror {
- position: absolute;
- top: 0; bottom: 0; left: 0; right: 0;
- margin: auto;
+  position: absolute;
+  top: 0; bottom: 0; left: 0; right: 0;
+  margin: auto;
 }
 
 .single #logo-cm-single-line,
 .single #logo-ta-single-line {
- font-size: 12pt;
- display: block;
+  font-size: 12pt;
+  display: block;
 }
 
 #input #toggle {
- cursor: pointer;
+  cursor: pointer;
 
- position: absolute;
- overflow: hidden;
- z-index: 1000;
- top: 1px; right: 1px;
- width: 20px; height: 20px;
- text-shadow: 0 0 1px black;
+  position: absolute;
+  overflow: hidden;
+  z-index: 1000;
+  top: 1px; right: 1px;
+  width: 20px; height: 20px;
+  text-shadow: 0 0 1px black;
 }
 .single #toggle #collapse-label { display: none; }
 .multi  #toggle #expand-label { display: none; }
 
 #run {
- cursor: pointer;
- -webkit-user-select: none;
- -moz-user-select: none;
- -ms-user-select: none;
- user-select: none;
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 
- position: absolute;
- top: 5px; bottom: 10px; right: 5px; width: 70px;
- border: 2px solid black;
- border-radius: 5px;
- background-color: white;
+  position: absolute;
+  top: 5px; bottom: 10px; right: 5px; width: 70px;
+  border: 2px solid black;
+  border-radius: 5px;
+  background-color: white;
 }
 
 #run:hover {
- background-color: #eeeeee;
+  background-color: #eeeeee;
 }
 
 #run .label {
- position: absolute;
- top: 0; bottom: 0; left: 0; right: 0;
- margin: auto;
- height: 20px;
- text-align: center;
- display: block;
+  position: absolute;
+  top: 0; bottom: 0; left: 0; right: 0;
+  margin: auto;
+  height: 20px;
+  text-align: center;
+  display: block;
 }
 </style>
 
 <body class="single">
 
 <div id="topbar" class="panel">
-      <h1>Logo Interpreter</h1>
-      <p>
-        By <a href="mailto:inexorabletash@gmail.com">Joshua Bell</a>
-        | <a target="_blank" href="tests.htm">Unit Tests</a>
-        | <a target="_blank" href="https://github.com/inexorabletash/jslogo">Source</a>
-        | <a target="_blank" href="https://github.com/inexorabletash/jslogo/commits/master">Changes</a>
-      </p>
+  <h1>Logo Interpreter</h1>
+  <p>
+    By <a href="mailto:inexorabletash@gmail.com">Joshua Bell</a>
+    | <a target="_blank" href="tests.htm">Unit Tests</a>
+    | <a target="_blank" href="https://github.com/inexorabletash/jslogo">Source</a>
+    | <a target="_blank" href="https://github.com/inexorabletash/jslogo/commits/master">Changes</a>
+  </p>
 </div>
 
 <div id="display-panel" class="panel">
@@ -554,16 +554,17 @@ var input = {};
 </script>
 
 <div id="sidebar-header" class="panel">
-<ul>
-<li><a id="sb-link-reference" href="#">Reference</a> - the Logo language
-<li><a id="sb-link-library" href="#">Library</a> - your procedures
-<li><a id="sb-link-history" href="#">History</a> - everything you&apos;ve done here
-<li><a id="sb-link-examples" href="#">Examples</a> - fun things to try out
-<li><a id="sb-link-links" href="#">Links</a> - other Logo resources
-</ul>
+  <ul>
+    <li><a id="sb-link-reference" href="#">Reference</a> - the Logo language
+    <li><a id="sb-link-library" href="#">Library</a> - your procedures
+    <li><a id="sb-link-history" href="#">History</a> - everything you&apos;ve done here
+    <li><a id="sb-link-examples" href="#">Examples</a> - fun things to try out
+    <li><a id="sb-link-links" href="#">Links</a> - other Logo resources
+  </ul>
 </div>
 
 <script>
+
 (function() {
   var sidebars = ['reference', 'library', 'history', 'examples', 'links'];
   sidebars.forEach(function(k) {
@@ -577,35 +578,34 @@ var input = {};
 </script>
 
 <div id="sidebar" class="panel examples">
-    <iframe frameBorder="0" allowtransparency="true" src="language.htm" class="choice" id="reference"></iframe>
-    <div class="choice snippets" id="examples">
-    </div>
-    <div class="choice snippets" id="history">
-      <!-- TODO: Add "clear history" button -->
-    </div>
-    <div class="choice snippets" id="library">
-    </div>
-    <div class="choice" id="links">
-
-
-      <ul>
-        <li><a target="_blank" href="http://en.wikipedia.org/wiki/Logo_(programming_language)">Logo</a> according to Wikipedia
-        <li>Other Web-based Logos:
-          <ul>
-            <li><a target="_blank" href="http://logo.twentygototen.org/_REo_2F2">papert - logo in your browser</a>
-            <li><a target="_blank" href="https://github.com/drj11/curlylogo" data-old-href="http://www.amberfrog.com/logo/">Curly Logo</a> (uses SVG).
-            <li><a target="_blank" href="https://blog.heroku.com/archives/2011/4/1/announcing_heroku_for_logo">Heroku for Logo</a> - based on Logo; launched April 1st, 2011
-          </ul>
-        <li><a target="_blank" href="http://el.media.mit.edu/logo-foundation/">The Logo Foundation</a> with links to learning resources and software
-        <li><a target="_blank" href="http://www.cs.berkeley.edu/~bh/logo.html">Berkeley Logo (UCBLogo)</a> is a well respected freeware interpreter
-        <li><a target="_blank" href="http://elica.net/download/papers/LogoTreeProject.pdf">The Logo Tree Project</a> analyzes Logo variants
-        <li><a target="_blank" href="http://blog.ianbicking.org/2007/10/19/logo/">Ian Bicking on Logo</a>
-        <li><a target="_blank" href="http://pylogo.sourceforge.net/">PyLogo</a> is a sweet interpreter in Python
-        <li><a target="_blank" href="http://www.bfoit.org/itp/itp.html">Introduction to Computer Programming</a> using Logo
-        <li><a target="_blank" href="http://groups.yahoo.com/group/LogoForum/">LogoForum</a> - a group for Logo programming discussions
-      </ul>
-    </div>
+  <iframe frameBorder="0" allowtransparency="true" src="language.htm" class="choice" id="reference"></iframe>
+  <div class="choice snippets" id="examples">
   </div>
+  <div class="choice snippets" id="history">
+    <!-- TODO: Add "clear history" button -->
+  </div>
+  <div class="choice snippets" id="library">
+  </div>
+  <div class="choice" id="links">
+
+    <ul>
+      <li><a target="_blank" href="http://en.wikipedia.org/wiki/Logo_(programming_language)">Logo</a> according to Wikipedia
+      <li>Other Web-based Logos:
+        <ul>
+          <li><a target="_blank" href="http://logo.twentygototen.org/_REo_2F2">papert - logo in your browser</a>
+          <li><a target="_blank" href="https://github.com/drj11/curlylogo" data-old-href="http://www.amberfrog.com/logo/">Curly Logo</a> (uses SVG).
+          <li><a target="_blank" href="https://blog.heroku.com/archives/2011/4/1/announcing_heroku_for_logo">Heroku for Logo</a> - based on Logo; launched April 1st, 2011
+        </ul>
+      <li><a target="_blank" href="http://el.media.mit.edu/logo-foundation/">The Logo Foundation</a> with links to learning resources and software
+      <li><a target="_blank" href="http://www.cs.berkeley.edu/~bh/logo.html">Berkeley Logo (UCBLogo)</a> is a well respected freeware interpreter
+      <li><a target="_blank" href="http://elica.net/download/papers/LogoTreeProject.pdf">The Logo Tree Project</a> analyzes Logo variants
+      <li><a target="_blank" href="http://blog.ianbicking.org/2007/10/19/logo/">Ian Bicking on Logo</a>
+      <li><a target="_blank" href="http://pylogo.sourceforge.net/">PyLogo</a> is a sweet interpreter in Python
+      <li><a target="_blank" href="http://www.bfoit.org/itp/itp.html">Introduction to Computer Programming</a> using Logo
+      <li><a target="_blank" href="http://groups.yahoo.com/group/LogoForum/">LogoForum</a> - a group for Logo programming discussions
+      </ul>
+  </div>
+</div>
 <script>
 
 var snippets = {};
