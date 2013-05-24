@@ -16,13 +16,13 @@ end
 clearscreen
 repeat 36 [ randomcolor square random 200 rt 10 ]
 
-clearscreen
-repeat 72 [
+clearscreen window
+repeat 144 [
   setlabelheight repcount
   penup
-  fd repcount * 2.5
+  fd repcount * repcount / 30
   label "Logo
-  bk repcount * 2.5
+  bk repcount * repcount / 30
   pendown
   rt 10
 ]

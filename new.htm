@@ -11,6 +11,8 @@
 <script src="../CodeMirror/lib/codemirror.js"></script>
 <script src="../CodeMirror/addon/runmode/runmode.js"></script>
 <script src="../CodeMirror/addon/edit/closebrackets.js"></script>
+<script src="../CodeMirror/addon/edit/matchbrackets.js"></script>
+<script src="../CodeMirror/addon/display/placeholder.js"></script>
 <link rel="stylesheet" href="../CodeMirror/lib/codemirror.css">
 <script src="cm/logo.js"></script>
 <link rel="stylesheet" href="cm/logo.css">
@@ -231,6 +233,8 @@ body {
  display: block;
 }
 
+.CodeMirror .CodeMirror-placeholder { color: gray; font-style: italic; }
+
 #logo-cm-single-line .CodeMirror-hscrollbar,
 #logo-cm-single-line .CodeMirror-vscrollbar { visibility: hidden; }
 
@@ -321,8 +325,8 @@ body {
         <span id="expand-label">&#x2197;</span>
         <span id="collapse-label">&#x2199;</span>
       </div>
-      <textarea rows="1" cols="80" id="logo-ta-single-line"></textarea>
-      <textarea rows="20" cols="80" id="logo-ta-multi-line"></textarea>
+      <textarea rows="1" cols="80" placeholder="Type your code here..." id="logo-ta-single-line"></textarea>
+      <textarea rows="20" cols="80" placeholder="Type your code here..." id="logo-ta-multi-line"></textarea>
     </div>
   </div>
 </div>
@@ -430,8 +434,9 @@ var input = {};
       fallthrough: ['default']
     };
     var cm = CodeMirror.fromTextArea($('#logo-ta-single-line'), {
+      autoCloseBrackets: BRACKETS,
+      matchBrackets: true,
       keyMap: 'single-line',
-      autoCloseBrackets: BRACKETS
     });
     $('#logo-ta-single-line + .CodeMirror').id = 'logo-cm-single-line';
 
@@ -448,6 +453,7 @@ var input = {};
     // Multi-Line
     var cm2 = CodeMirror.fromTextArea($('#logo-ta-multi-line'), {
       autoCloseBrackets: BRACKETS,
+      matchBrackets: true,
       lineNumbers: true,
     });
     $('#logo-ta-multi-line + .CodeMirror').id = 'logo-cm-multi-line';
