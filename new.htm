@@ -334,6 +334,7 @@ var history = (function() {
   return {
     push: function(entry) {
       if (entries.length > 0 && entries[entries.length - 1] === entry) {
+        pos = -1;
         return;
       }
       entries.push(entry);
@@ -599,15 +600,25 @@ var input = {};
   </div>
 <script>
 
-function insertSnippet(text, parent) {
+var snippets = {};
+function insertSnippet(text, parent, key) {
 
-  var snippet = document.createElement('div');
-  snippet.className = 'snippet';
-  snippet.title = "Click to edit";
-  snippet.addEventListener('click', function() {
-    input.setMulti();
-    input.setValue(text);
-  });
+  var snippet;
+  if (key && snippets.hasOwnProperty(key)) {
+    snippet = snippets[key];
+    snippet.innerHTML = '';
+  } else {
+    snippet = document.createElement('div');
+    snippet.className = 'snippet';
+    snippet.title = "Click to edit";
+    snippet.addEventListener('click', function() {
+      input.setMulti();
+      input.setValue(text);
+    });
+    if (key) {
+      snippets[key] = snippet;
+    }
+  }
 
   var container = document.createElement('pre');
   snippet.appendChild(container);
@@ -616,15 +627,17 @@ function insertSnippet(text, parent) {
   } else {
     container.appendChild(document.createTextNode(text));
   }
-  parent.appendChild(snippet);
 
   if (parent.scrollTimeoutId) {
     clearTimeout(parent.scrollTimeoutId);
   }
   parent.scrollTimeoutId = setTimeout(function() {
     parent.scrollTimeoutId = null;
-    parent.scrollTop = parent.scrollHeight;
+    parent.scrollTop = snippet.offsetTop;
   }, 100);
+  if (snippet.parentElement !== parent) {
+    parent.appendChild(snippet);
+  }
 }
 
 var savehook;
@@ -634,7 +647,7 @@ var savehook;
   savehook = function(name, def) {
     var parent = $('#library');
     try {
-      insertSnippet(def, parent);
+      insertSnippet(def, parent, name);
     } finally {
       if (orig_savehook)
         orig_savehook(name, def);

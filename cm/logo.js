@@ -19,16 +19,25 @@ CodeMirror.defineMode('logo', function(config, parserConfig) {
 
     startState: function() {
       return {
-        state: 'normal'
+        state: 'normal',
+        indent: 0
       };
     },
 
     indent: function(state, textAfter) {
+      var size = 2;
+      var indent = state.indent;
+      // TODO: reduce indent before ] ?
       switch(state.state) {
-      case 'defn-name': return 2;
+      case 'defn-name':
+        return (indent + 1 ) * size;
       case 'defn-vars':
-      case 'defn-body': return /^END\b/i.test(textAfter) ? 0 : 2;
-      default: return 0;
+      case 'defn-body':
+        if (/^END\b/i.test(textAfter))
+          return indent * size;
+        return (indent + 1 ) * size;
+      default:
+        return indent * size;;
       }
     },
 
@@ -89,6 +98,16 @@ CodeMirror.defineMode('logo', function(config, parserConfig) {
         // String literal
         if (stream.match(regexStringLiteral, true)) {
           return 'logo-string';
+        }
+
+        if (stream.match(/^\[/, true)) {
+          ++state.indent;
+          return 'logo-operator';
+        }
+
+        if (stream.match(/^\]/, true)) {
+          if (state.indent > 0) --state.indent;
+          return 'logo-operator';
         }
 
         // Operator
