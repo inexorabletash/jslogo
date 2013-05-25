@@ -1,0 +1,266 @@
+/* General Styles */
+
+body, p, h1, h2, h3 { font-family: sans-serif; }
+dt, dd { font-size: 8pt; }
+code { font-family: monospace; }
+
+body {
+  background-color: #e0e0e0;
+}
+
+/* Overall Page Structure */
+
+#topbar {
+  position: absolute;
+  left: 0;
+  right: 400px;
+  top: 0;
+  height: 50px;
+}
+
+#display-panel {
+  position: absolute;
+  left: 0;
+  right: 400px;
+  top: 50px;
+  bottom: 60px;
+}
+.multi #display-panel {
+  bottom: 150px;
+}
+
+#input-panel {
+  position: absolute;
+  left: 0;
+  right: 400px;
+  bottom: 0;
+  height: 60px;
+}
+.multi #input-panel {
+  height: 150px;
+}
+
+#sidebar-header {
+  position: absolute;
+  right: 0;
+  width: 400px;
+  top: 0px;
+  height: 100px;
+}
+
+#sidebar {
+  position: absolute;
+  right: 0;
+  width: 400px;
+  top: 100px;
+  bottom: 0;
+  overflow: hidden;
+}
+
+.panel {
+  overflow: hidden;
+}
+
+.inner {
+  position: absolute;
+  margin: 0; padding: 0;
+  left: 0; right: 0; top: 0; bottom: 0;
+  overflow: hidden;
+}
+
+/* Header */
+
+#topbar { white-space: nowrap; }
+#topbar h1,
+#topbar p {
+  margin: 6pt; display: inline-block;
+}
+
+/* Side Bars */
+
+#sidebar-header ul { margin: 5px 10px; padding: 0; }
+#sidebar-header ul li { list-decoration: none; }
+
+#sidebar #reference,
+#sidebar #examples,
+#sidebar #history,
+#sidebar #links,
+#sidebar #library {
+  position: absolute;
+  left: 0; right: 0; top: 0; bottom: 0;
+  display: none;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+#sidebar.reference #reference,
+#sidebar.examples #examples,
+#sidebar.history #history,
+#sidebar.library #library,
+#sidebar.links #links { display: block; }
+
+.snippet pre {
+  white-space: pre-wrap;
+  margin-top: 0px; margin-bottom: 5px;
+  padding: 2px;
+  background-color: #eeeeee;
+}
+.snippet pre:hover {
+  background-color: white;
+}
+
+#links ul { padding-left: 20px; }
+#links ul li { margin-bottom: 5px; }
+
+#library,
+#history,
+#examples,
+#links {
+  margin: 10px;
+}
+
+#reference {
+  width: 100%; height: 100%;
+}
+
+/* Graphical and Textual Display */
+
+#display {
+  position: absolute;
+  overflow: hidden;
+  left: 10px; right: 5px; top: 5px; bottom: 5px;
+  border: 2px solid black;
+  border-radius: 5px;
+  background-color: white;
+}
+
+#display #error {
+  position: absolute;
+  padding: 3px 20px;
+  left: 0;
+  bottom: 0;
+  border-radius: 2px;
+
+  font-size: 14pt;
+  font-weight: bold;
+  color: white;
+  background-color: #e01010;
+  display: none;
+  z-index: 9999;
+}
+#display #error.shown {
+  display: block;
+}
+
+#sandbox {
+  position: absolute;
+  z-index: 0;
+}
+
+#sandbox span {
+  /* Error in case of no canvas */
+  color: red; background-color: yellow; font-weight: bold;
+}
+
+#turtle {
+  position: absolute; z-index: 1;
+}
+
+#overlay {
+  left: 0; top: 0; right: 0; bottom: 0;
+  padding: 10px;
+  margin: 0;
+  position: absolute;
+  z-index: 2;
+  background-color: transparent;
+  overflow: hidden;
+  white-space: pre-wrap;
+  font-family: Monospace;
+}
+
+/* User Input */
+
+#input {
+  position: absolute;
+  overflow: hidden;
+  top: 5px; bottom: 10px; left: 10px; right: 85px;
+  border: 2px solid black;
+  border-radius: 5px;
+  color: black;
+  background-color: white;
+}
+
+#logo-cm-multi-line,
+#logo-cm-single-line,
+#logo-ta-single-line,
+#logo-ta-multi-line {
+  position: absolute;
+  overflow: hidden;
+  left: 0; top: 0; right: 0; bottom: 0;
+  font-family: monospace;
+  display: none;
+}
+
+.single #logo-cm-single-line,
+.single #logo-ta-single-line,
+.multi #logo-cm-multi-line,
+.multi #logo-ta-multi-line {
+  display: block;
+}
+
+.CodeMirror .CodeMirror-placeholder { color: gray; font-style: italic; }
+
+#logo-cm-single-line .CodeMirror-hscrollbar,
+#logo-cm-single-line .CodeMirror-vscrollbar { visibility: hidden; }
+
+#logo-cm-single-line.CodeMirror {
+  position: absolute;
+  top: 0; bottom: 0; left: 0; right: 0;
+  margin: auto;
+}
+
+.single #logo-cm-single-line,
+.single #logo-ta-single-line {
+  font-size: 12pt;
+  display: block;
+}
+
+#input #toggle {
+  cursor: pointer;
+
+  position: absolute;
+  overflow: hidden;
+  z-index: 1000;
+  top: 1px; right: 1px;
+  width: 20px; height: 20px;
+  text-shadow: 0 0 1px black;
+}
+.single #toggle #collapse-label { display: none; }
+.multi  #toggle #expand-label { display: none; }
+
+#run {
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  position: absolute;
+  top: 5px; bottom: 10px; right: 5px; width: 70px;
+  border: 2px solid black;
+  border-radius: 5px;
+  background-color: white;
+}
+
+#run:hover {
+  background-color: #eeeeee;
+}
+
+#run .label {
+  position: absolute;
+  top: 0; bottom: 0; left: 0; right: 0;
+  margin: auto;
+  height: 20px;
+  text-align: center;
+  display: block;
+}

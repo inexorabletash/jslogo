@@ -2,7 +2,7 @@
 // Logo Interpreter in Javascript
 //
 
-// Copyright (C) 2011 Joshua Bell
+// Copyright (C) 2011-2013 Joshua Bell
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,127 +16,22 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+var CodeMirror; // https://github.com/marijnh/CodeMirror
+var LogoInterpreter; // logo.js
+var CanvasTurtle; // turtle.js
+
 if (!('console' in window)) {
   window.console = { log: function(){}, error: function(){} };
 }
 
 var $ = document.querySelector.bind(document);
 
-var g_logo;
+// Globals
+var logo, turtle;
 
-var g_history = [];
-var g_historypos = -1;
-
-var g_entry;
-var g_multi = false;
-
-function ontoggle() {
-  var single = $('#entry_single');
-  var multi = $('#entry_multi');
-  var toggle = $('#toggle');
-
-  g_multi = !g_multi;
-  if (!g_multi) {
-    g_entry = single;
-
-    single.style.display = '';
-    multi.style.display = 'none';
-
-    single.value = multi.value;
-    toggle.value = "+";
-  } else {
-    g_entry = multi;
-
-    single.style.display = 'none';
-    multi.style.display = '';
-
-    multi.value = single.value;
-    toggle.value = "-";
-  }
-}
-
-
-function onenter() {
-  var e = g_entry;
-  var v = g_entry.value;
-  if (v !== '') {
-
-    if (!g_multi) {
-      e.value = '';
-      g_history.push(v);
-      g_historypos = -1;
-      if (historyhook) {
-        historyhook(v);
-      }
-    }
-
-    try {
-      g_logo.run(v);
-    } catch (e) {
-      window.alert("Error: " + e.message);
-    }
-  }
-}
-
-var KEY = {
-  RETURN: 10, // iOS
-  ENTER: 13,
-  END: 35,
-  HOME: 36,
-  LEFT: 37,
-  UP: 38,
-  RIGHT: 39,
-  DOWN: 40
-};
-
-function onkey(e) {
-  e = e ? e : window.event;
-
-  var consume = false;
-
-  switch (e.keyCode) {
-    case KEY.RETURN:
-    case KEY.ENTER:
-      onenter();
-      consume = true;
-      break;
-
-    case KEY.UP:
-      if (g_history.length > 0) {
-        if (g_historypos === -1) {
-          g_historypos = g_history.length - 1;
-        } else {
-          g_historypos = (g_historypos === 0) ? g_history.length - 1 : g_historypos - 1;
-        }
-        $('#entry_single').value = g_history[g_historypos];
-      }
-      consume = true;
-      break;
-
-    case KEY.DOWN:
-      if (g_history.length > 0) {
-        if (g_historypos === -1) {
-          g_historypos = 0;
-        } else {
-          g_historypos = (g_historypos === g_history.length - 1) ? 0 : g_historypos + 1;
-        }
-        $('#entry_single').value = g_history[g_historypos];
-      }
-      consume = true;
-      break;
-  }
-
-  if (consume) {
-    e.cancelBubble = true; // IE
-    e.returnValue = false;
-    if (e.stopPropagation) { e.stopPropagation(); } // W3C
-    if (e.preventDefault) { e.preventDefault(); } // e.g. to block arrows from scrolling the page
-    return false;
-  } else {
-    return true;
-  }
-}
-
+//
+// Storage hooks
+//
 var savehook;
 var historyhook;
 function initStorage(loadhook) {
@@ -162,20 +57,32 @@ function initStorage(loadhook) {
   req.onsuccess = function() {
     var db = req.result;
 
-    var tx = db.transaction('procedures');
-    var curReq = tx.objectStore('procedures').openCursor();
-    curReq.onsuccess = function() {
-      var cursor = curReq.result;
+    var tx = db.transaction(['procedures', 'history']);
+    tx.objectStore('procedures').openCursor().onsuccess = function(e) {
+      var cursor = e.target.result;
       if (cursor) {
         try {
           loadhook(cursor.value);
         } catch (e) {
-          console.error("error loading procedure: " + e);
+          console.error("Error loading procedure: " + e);
         } finally {
           cursor.continue();
         }
       }
     };
+    tx.objectStore('history').openCursor().onsuccess = function(e) {
+      var cursor = e.target.result;
+      if (cursor) {
+        try {
+          historyhook(cursor.value);
+        } catch (e) {
+          console.error("Error loading procedure: " + e);
+        } finally {
+          cursor.continue();
+        }
+      }
+    };
+
     tx.oncomplete = function() {
       var orig_savehook = savehook;
       savehook = function(name, def) {
@@ -183,7 +90,7 @@ function initStorage(loadhook) {
           var tx = db.transaction('procedures', 'readwrite');
           tx.objectStore('procedures').put(def, name);
         } catch (e) {
-          console.error(e);
+          console.error('Error saving procedure: ' + e);
         } finally {
           if (orig_savehook)
             orig_savehook(name, def);
@@ -195,7 +102,7 @@ function initStorage(loadhook) {
           var tx = db.transaction('history', 'readwrite');
           tx.objectStore('history').put(entry);
         } catch (e) {
-          console.error(e);
+          console.error('Error saving history: ' + e);
         } finally {
           if (orig_historyhook)
             orig_historyhook(entry);
@@ -205,6 +112,349 @@ function initStorage(loadhook) {
   };
 }
 
+//
+// Command history
+//
+var history = (function() {
+  var entries = [], pos = -1;
+  return {
+    push: function(entry) {
+      if (entries.length > 0 && entries[entries.length - 1] === entry) {
+        pos = -1;
+        return;
+      }
+      entries.push(entry);
+      pos = -1;
+      if (historyhook) {
+        historyhook(entry);
+      }
+    },
+    next: function() {
+      if (entries.length === 0) {
+        return undefined;
+      }
+      if (pos === -1) {
+        pos = 0;
+      } else {
+        pos = (pos === entries.length - 1) ? 0 : pos + 1;
+      }
+      return entries[pos];
+    },
+    prev: function() {
+      if (entries.length === 0) {
+        return undefined;
+      }
+      if (pos === -1) {
+        pos = entries.length - 1;
+      } else {
+        pos = (pos === 0) ? entries.length - 1 : pos - 1;
+      }
+      return entries[pos];
+    }
+  };
+}());
+
+
+//
+// Input UI
+//
+var input = {};
+
+(function() {
+
+  input.setMulti = function() {
+    // TODO: Collapse these to a single class?
+    document.body.classList.remove('single');
+    document.body.classList.add('multi');
+  };
+
+  var isMulti = function() {
+    return document.body.classList.contains('multi');
+  };
+
+  function run() {
+    var error = $('#display #error');
+    error.classList.remove('shown');
+
+    var v = input.getValue();
+    if (v === '') {
+      return;
+    }
+    history.push(v);
+    if (!isMulti()) {
+      input.setValue('');
+    }
+    setTimeout(function() {
+      try {
+        logo.run(v);
+      } catch (e) {
+        error.innerHTML = '';
+        error.appendChild(document.createTextNode(e.message));
+        error.classList.add('shown');
+      }
+    }, 100);
+  }
+
+  if ('CodeMirror' in window) {
+    var BRACKETS = '()[]{}';
+
+    // Single Line
+    CodeMirror.keyMap['single-line'] = {
+      'Enter': function(cm) {
+         run();
+       },
+      'Up': function(cm) {
+        var v = history.prev();
+        if (v !== undefined) {
+          cm.setValue(v);
+          cm.setCursor({line: 0, ch: v.length});
+        }
+      },
+      'Down': function(cm) {
+        var v = history.next();
+        if (v !== undefined) {
+          cm.setValue(v);
+          cm.setCursor({line: 0, ch: v.length});
+        }
+      },
+      fallthrough: ['default']
+    };
+    var cm = CodeMirror.fromTextArea($('#logo-ta-single-line'), {
+      autoCloseBrackets: BRACKETS,
+      matchBrackets: true,
+      keyMap: 'single-line'
+    });
+    $('#logo-ta-single-line + .CodeMirror').id = 'logo-cm-single-line';
+
+    // http://stackoverflow.com/questions/13026285/codemirror-for-just-one-line-textfield
+    cm.setSize('100%', cm.defaultTextHeight() + 4 + 4); // 4 = theme padding
+
+    // Handle paste
+    cm.on("beforeChange", function(cm, change) {
+      var newtext = change.text.join('').replace(/\n/g, '  ');
+      change.update(change.from, change.to, [newtext]);
+      return true;
+    });
+
+    // Multi-Line
+    var cm2 = CodeMirror.fromTextArea($('#logo-ta-multi-line'), {
+      autoCloseBrackets: BRACKETS,
+      matchBrackets: true,
+      lineNumbers: true
+    });
+    $('#logo-ta-multi-line + .CodeMirror').id = 'logo-cm-multi-line';
+    cm2.setSize('100%', '100%');
+
+    input.getValue = function() {
+      return (isMulti() ? cm2 : cm).getValue();
+    };
+    input.setValue = function(v) {
+      (isMulti() ? cm2 : cm).setValue(v);
+    };
+    input.setFocus = function() {
+      (isMulti() ? cm2 : cm).focus();
+    };
+
+  } else {
+    // Fallback in case of no CodeMirror
+
+    $('#logo-ta-single-line').addEventListener('keydown', function(e) {
+
+      var keyNames = { 3: 'Enter', 10: 'Enter', 13: 'Enter',
+                       38: 'Up', 40: 'Down', 63232: 'Up', 63233: 'Down' };
+
+      var elem = $('#logo-ta-single-line');
+
+      var keyMap = {
+        'Enter': function(elem) {
+          run();
+        },
+        'Up': function(elem) {
+          var v = history.prev();
+          if (v !== undefined) {
+            elem.value = v;
+          }
+        },
+        'Down': function(elem) {
+          var v = history.next();
+          if (v !== undefined) {
+            elem.value = v;
+          }
+        }
+      };
+
+      var keyName = keyNames[e.keyCode];
+      if (keyName in keyMap && typeof keyMap[keyName] === 'function') {
+        keyMap[keyName](elem);
+        e.stopPropagation();
+        e.preventDefault();
+      }
+    });
+
+    input.getValue = function() {
+      return $(isMulti() ? '#logo-ta-multi-line' : '#logo-ta-single-line').value;
+    };
+    input.setValue = function(v) {
+      $(isMulti() ? '#logo-ta-multi-line' : '#logo-ta-single-line').value = v;
+    };
+    input.setFocus = function() {
+      $(isMulti() ? '#logo-ta-multi-line' : '#logo-ta-single-line').focus();
+    };
+  }
+
+  input.setFocus();
+  $('#input').addEventListener('click', function() {
+    input.setFocus();
+  });
+
+  $('#toggle').addEventListener('click', function(e) {
+    var v = input.getValue();
+    document.body.classList.toggle('single');
+    document.body.classList.toggle('multi');
+    if (!isMulti()) {
+      v = v.replace(/\n/g, '  ');
+    } else {
+      v = v.replace(/\s\s(\s*)/g, '\n$1');
+    }
+    input.setValue(v);
+    input.setFocus();
+  });
+
+  $('#run').addEventListener('click', run);
+}());
+
+
+//
+// Canvas resizing
+//
+(function() {
+  window.addEventListener('resize', resize);
+  window.addEventListener('load', resize);
+  function resize() {
+    var box = $('#display-panel .inner'), w = box.offsetWidth, h = box.offsetHeight;
+    $('#sandbox').width = w; $('#sandbox').height = h;
+    $('#turtle').width = w; $('#turtle').height = h;
+    $('#overlay').width = w; $('#overlay').height = h;
+    if (logo && turtle) {
+      turtle.resize(w, h);
+      logo.run('cs');
+    }
+  }
+}());
+
+
+//
+// Populate "Examples" sidebar via XHR
+//
+window.addEventListener('load', function() {
+  var xhr = new XMLHttpRequest();
+  xhr.open('GET', 'examples.txt', true);
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === XMLHttpRequest.DONE) {
+      if (xhr.status === 200 || xhr.status === 0) {
+         var parent = $('#examples');
+         xhr.responseText.split(/\n\n/g).forEach(function(line) {
+           insertSnippet(line, parent);
+         });
+        }
+      }
+    };
+  xhr.send();
+});
+
+
+//
+// Hook up sidebar links
+//
+(function() {
+  var sidebars = ['reference', 'library', 'history', 'examples', 'links'];
+  sidebars.forEach(function(k) {
+    $('#sb-link-' + k).addEventListener('click', function() {
+      var cl = $('#sidebar').classList;
+      sidebars.forEach(function(sb) { cl.remove(sb); });
+      cl.add(k);
+    });
+  });
+}());
+
+
+//
+// Hooks for Library and History sidebars
+//
+(function() {
+
+  var orig_savehook = savehook;
+  savehook = function(name, def) {
+    var parent = $('#library');
+    try {
+      insertSnippet(def, parent, name);
+    } finally {
+      if (orig_savehook)
+        orig_savehook(name, def);
+    }
+  };
+
+  var orig_historyhook = historyhook;
+  historyhook = function(entry) {
+    var parent = $('#history');
+    try {
+      insertSnippet(entry, parent);
+    } finally {
+      if (orig_historyhook)
+        orig_historyhook(entry);
+    }
+  };
+
+}());
+
+
+//
+// Code snippets
+//
+var snippets = {};
+function insertSnippet(text, parent, key) {
+
+  var snippet;
+  if (key && snippets.hasOwnProperty(key)) {
+    snippet = snippets[key];
+    snippet.innerHTML = '';
+  } else {
+    snippet = document.createElement('div');
+    snippet.className = 'snippet';
+    snippet.title = "Click to edit";
+    snippet.addEventListener('click', function() {
+      input.setMulti();
+      input.setValue(text);
+    });
+    if (key) {
+      snippets[key] = snippet;
+    }
+  }
+
+  var container = document.createElement('pre');
+  snippet.appendChild(container);
+  if ('CodeMirror' in window) {
+    CodeMirror.runMode(text, 'logo', container);
+  } else {
+    container.appendChild(document.createTextNode(text));
+  }
+
+  if (parent.scrollTimeoutId) {
+    clearTimeout(parent.scrollTimeoutId);
+  }
+  parent.scrollTimeoutId = setTimeout(function() {
+    parent.scrollTimeoutId = null;
+    parent.scrollTop = snippet.offsetTop;
+  }, 100);
+  if (snippet.parentElement !== parent) {
+    parent.appendChild(snippet);
+  }
+}
+
+
+//
+// Main page logic
+//
 window.addEventListener('load', function() {
 
   var stream = {
@@ -230,12 +480,12 @@ window.addEventListener('load', function() {
 
   var canvas_element = $("#sandbox"), canvas_ctx = canvas_element.getContext('2d'),
       turtle_element = $("#turtle"), turtle_ctx = turtle_element.getContext('2d');
-  var turtle = new CanvasTurtle(
+  turtle = new CanvasTurtle(
     canvas_ctx,
     turtle_ctx,
     canvas_element.width, canvas_element.height);
 
-  g_logo = new LogoInterpreter(
+  logo = new LogoInterpreter(
     turtle, stream,
     function (name, def) {
       if (savehook) {
@@ -243,23 +493,16 @@ window.addEventListener('load', function() {
       }
     });
   initStorage(function (def) {
-    g_logo.run(def);
+    logo.run(def);
   });
-
-  $('#toggle').addEventListener('click', ontoggle);
-  $('#run').addEventListener('click', onenter);
-
-  g_entry = $('#entry_single');
-  g_entry.addEventListener('keydown', onkey);
-  g_entry.focus();
 
   function demo(param) {
     param = String(param);
     if (param.length > 0) {
       param = decodeURIComponent(param.substring(1).replace(/\_/g, ' '));
-      g_entry.value = param;
+      input.setValue(param);
       try {
-        g_logo.run(param);
+        logo.run(param);
       } catch (e) {
         window.alert("Error: " + e.message);
       }
