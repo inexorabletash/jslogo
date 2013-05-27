@@ -15,7 +15,7 @@ CodeMirror.defineMode('logo', function(config, parserConfig) {
   var regexOperator = /^\+|\-|\*|\/|%|\^|>=|<=|<>|=|<|>|\[|\]|\{|\}|\(|\)/;
 
   return {
-    electricChars: "dD", // for enD
+    electricChars: "[]dD", // for enD
 
     startState: function() {
       return {
@@ -27,7 +27,9 @@ CodeMirror.defineMode('logo', function(config, parserConfig) {
     indent: function(state, textAfter) {
       var size = 2;
       var indent = state.indent;
-      // TODO: reduce indent before ] ?
+      // TODO: This interacts poorly with autoCloseBrackets.
+      //if (/^\]/.test(textAfter))
+      //  --indent;
       switch(state.state) {
       case 'defn-name':
         return (indent + 1 ) * size;
@@ -120,7 +122,12 @@ CodeMirror.defineMode('logo', function(config, parserConfig) {
           return 'logo-variable';
         }
 
-        // Identifier
+        // Special Words
+        if (stream.match(/^(TRUE|FALSE)\b/i, true)) {
+          return 'logo-keyword';
+        }
+
+        // Word
         if (stream.match(regexIdentifier, true)) {
           return 'logo-word';
         }

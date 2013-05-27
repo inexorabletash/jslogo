@@ -25,8 +25,13 @@ span.cm-logo-variable {
   font-style: italic;
 }
 
-span.cm-logo-identifier {
-  color: #3f3f00;
+span.cm-logo-keyword {
+  color: black;
+  font-weight: bold;
+  text-transform: uppercase;
+}
+span.cm-logo-word {
+  color: black;
 }
 
 span.cm-logo-comment {

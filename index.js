@@ -222,6 +222,7 @@ var input = {};
     var cm = CodeMirror.fromTextArea($('#logo-ta-single-line'), {
       autoCloseBrackets: BRACKETS,
       matchBrackets: true,
+      lineComment: ';',
       keyMap: 'single-line'
     });
     $('#logo-ta-single-line + .CodeMirror').id = 'logo-cm-single-line';
@@ -240,6 +241,7 @@ var input = {};
     var cm2 = CodeMirror.fromTextArea($('#logo-ta-multi-line'), {
       autoCloseBrackets: BRACKETS,
       matchBrackets: true,
+      lineComment: ';',
       lineNumbers: true
     });
     $('#logo-ta-multi-line + .CodeMirror').id = 'logo-cm-multi-line';
