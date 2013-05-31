@@ -221,7 +221,6 @@ var input = {};
     };
     var cm = CodeMirror.fromTextArea($('#logo-ta-single-line'), {
       autoCloseBrackets: BRACKETS,
-      explode: BRACKETS,
       matchBrackets: true,
       lineComment: ';',
       keyMap: 'single-line'
