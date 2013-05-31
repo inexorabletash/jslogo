@@ -220,7 +220,7 @@ var input = {};
       fallthrough: ['default']
     };
     var cm = CodeMirror.fromTextArea($('#logo-ta-single-line'), {
-      autoCloseBrackets: BRACKETS,
+      autoCloseBrackets: { pairs: BRACKETS, explode: false },
       matchBrackets: true,
       lineComment: ';',
       keyMap: 'single-line'
@@ -239,8 +239,7 @@ var input = {};
 
     // Multi-Line
     var cm2 = CodeMirror.fromTextArea($('#logo-ta-multi-line'), {
-      autoCloseBrackets: BRACKETS,
-      explode: BRACKETS,
+      autoCloseBrackets: { pairs: BRACKETS, explode: BRACKETS },
       matchBrackets: true,
       lineComment: ';',
       lineNumbers: true
