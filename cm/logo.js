@@ -27,9 +27,8 @@ CodeMirror.defineMode('logo', function(config, parserConfig) {
     indent: function(state, textAfter) {
       var size = 2;
       var indent = state.indent;
-      // TODO: This interacts poorly with autoCloseBrackets.
-      //if (/^\]/.test(textAfter))
-      //  --indent;
+      if (/^\]/.test(textAfter))
+        --indent;
       switch(state.state) {
       case 'defn-name':
         return (indent + 1 ) * size;
