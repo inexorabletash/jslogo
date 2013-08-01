@@ -154,7 +154,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   self.turtle = turtle;
   self.stream = stream;
-  self.routines = {}; // TODO: use a StringMap
+  self.routines = new StringMap(true);
   self.scopes = [new StringMap(true)];
   self.plists = new StringMap(true);
   self.prng = new PRNG(Math.random() * 0x7fffffff);
@@ -593,7 +593,7 @@ function LogoInterpreter(turtle, stream, savehook)
         } else if (atom === '(') {
           // parenthesized expression/procedure call
           if (list.length && Type(list[0]) === 'word' &&
-              self.routines[String(list[0]).toLowerCase()]) {
+              self.routines.has(String(list[0]))) {
 
             // Lisp-style (procedure input ...) calling syntax
             atom = list.shift();
@@ -620,7 +620,7 @@ function LogoInterpreter(turtle, stream, savehook)
   };
 
   self.dispatch = function(name, tokenlist, natural) {
-    var procedure = self.routines[name.toLowerCase()];
+    var procedure = self.routines.get(name);
     if (!procedure) { throw new Error(format(__("Don't know how to {name}"), { name: name.toUpperCase() })); }
 
     if (procedure.special) {
@@ -821,8 +821,8 @@ function LogoInterpreter(turtle, stream, savehook)
   // API to allow pages to persist definitions
   self.procdefs = function() {
     var defs = [];
-    Object.keys(self.routines).forEach(function(name) {
-      var proc = self.routines[name];
+    self.routines.keys().forEach(function(name) {
+      var proc = self.routines.get(name);
       if (!proc.primitive) {
         defs.push(self.definition(name, proc));
       }
@@ -839,22 +839,20 @@ function LogoInterpreter(turtle, stream, savehook)
 
   // Basic form:
   //
-  //  self.routines["procname"] = function(input1, input2, ...) { ... return output; }
+  //  def("procname", function(input1, input2, ...) { ... return output; });
   //   * inputs are JavaScript strings, numbers, or Arrays
   //   * output is string, number, Array or undefined/no output
   //
   // Special forms:
   //
-  //   self.routines["procname"] = function(tokenlist) { ... }
-  //   self.routines["procname"].special = true
-  //    * input is Array (list) of tokens (words, numbers, Arrays)
-  //    * used for implementation of special forms (e.g. TO inputs... statements... END)
+  //  def("procname", function(tokenlist) { ... }, {special: true});
+  //   * input is Array (list) of tokens (words, numbers, Arrays)
+  //   * used for implementation of special forms (e.g. TO inputs... statements... END)
   //
-  //   self.routines["procname"] = function(finput1, finput2, ...) { ... return output; }
-  //   self.routines["procname"].noeval = true
-  //    * inputs are arity-0 functions that evaluate to string, number Array
-  //    * used for short-circuiting evaluation (AND, OR)
-  //    * used for repeat evaluation (DO.WHILE, WHILE, DO.UNTIL, UNTIL)
+  //  def("procname", function(fin, fin, ...) { ... return op; }, {noeval: true});
+  //   * inputs are arity-0 functions that evaluate to string, number Array
+  //   * used for short-circuiting evaluation (AND, OR)
+  //   * used for repeat evaluation (DO.WHILE, WHILE, DO.UNTIL, UNTIL)
   //
 
 
@@ -890,17 +888,31 @@ function LogoInterpreter(turtle, stream, savehook)
     }
   }
 
+  function def(name, fn, props) {
+    if (props) {
+      Object.keys(props).forEach(function(key) {
+        fn[key] = props[key];
+      });
+    }
+    if (Array.isArray(name)) {
+      name.forEach(function(name) {
+        self.routines.set(name, fn);
+      });
+    } else {
+      self.routines.set(name, fn);
+    }
+  }
+
   //
   // Procedures and Flow Control
   //
-  self.routines["to"] = function(list) {
+  def("to", function(list) {
     var name = sexpr(list.shift());
     if (!name.match(regexIdentifier)) {
       throw new Error(__("Expected identifier"));
     }
-    name = name.toLowerCase();
 
-    if (self.routines.hasOwnProperty(name) && self.routines[name].primitive) {
+    if (self.routines.has(name) && self.routines.get(name).primitive) {
       throw new Error(format(__("Can't redefine primitive {name}"), { name: name.toUpperCase() }));
     }
 
@@ -953,27 +965,27 @@ function LogoInterpreter(turtle, stream, savehook)
       }
     };
 
-    self.routines[name] = to_arity(func, inputs.length);
+    var proc = to_arity(func, inputs.length);
+    self.routines.set(name, proc);
 
     // For DEF de-serialization
-    self.routines[name].inputs = inputs;
-    self.routines[name].block = block;
+    proc.inputs = inputs;
+    proc.block = block;
 
     if (savehook) {
-      savehook(name, self.definition(name, self.routines[name]));
+      savehook(name, self.definition(name, proc));
     }
-  };
-  self.routines["to"].special = true;
+  }, {special: true});
 
-  self.routines["def"] = function(list) {
+  def("def", function(list) {
 
-    var name = sexpr(list).toLowerCase();
-    var proc = self.routines[name];
+    var name = sexpr(list);
+    var proc = self.routines.get(name);
     if (!proc) { throw new Error(format(__("Don't know how to {name}"), { name: name.toUpperCase() })); }
     if (!proc.inputs) { throw new Error(format(__("Can't show definition of primitive {name}"), { name: name.toUpperCase() })); }
 
     return self.definition(name, proc);
-  };
+  });
 
 
   //----------------------------------------------------------------------
@@ -986,15 +998,15 @@ function LogoInterpreter(turtle, stream, savehook)
   // 2.1 Constructors
   //
 
-  self.routines["word"] = function(word1, word2) {
+  def("word", function(word1, word2) {
     return arguments.length ? mapreduce(arguments, sexpr, function(a, b) { return a + " " + b; }) : "";
-  };
+  });
 
-  self.routines["list"] = function(thing1, thing2) {
+  def("list", function(thing1, thing2) {
     return Array.prototype.map.call(arguments, function(x) { return x; }); // Make a copy
-  };
+  });
 
-  self.routines["sentence"] = self.routines["se"] = function(thing1, thing2) {
+  def(["sentence", "se"], function(thing1, thing2) {
     var list = [];
     for (var i = 0; i < arguments.length; i += 1) {
       var thing = arguments[i];
@@ -1006,13 +1018,13 @@ function LogoInterpreter(turtle, stream, savehook)
       }
     }
     return list;
-  };
+  });
 
-  self.routines["fput"] = function(thing, list) { list = lexpr(list); list.unshift(thing); return list; };
+  def("fput", function(thing, list) { list = lexpr(list); list.unshift(thing); return list; });
 
-  self.routines["lput"] = function(thing, list) { list = lexpr(list); list.push(thing); return list; };
+  def("lput", function(thing, list) { list = lexpr(list); list.push(thing); return list; });
 
-  self.routines["array"] = function(size) {
+  def("array", function(size) {
     size = aexpr(size);
     if (size < 1) { throw new Error(__("Array size must be positive integer")); }
     var origin = 1;
@@ -1020,63 +1032,63 @@ function LogoInterpreter(turtle, stream, savehook)
       origin = aexpr(arguments[1]);
     }
     return new LogoArray(size, origin);
-  };
+  });
 
   // Not Supported: mdarray
 
-  self.routines["listtoarray"] = function(list) {
+  def("listtoarray", function(list) {
     list = lexpr(list);
     var origin = 1;
     if (arguments.length > 1) {
       origin = aexpr(arguments[1]);
     }
     return new LogoArray(list, origin);
-  };
+  });
 
-  self.routines["arraytolist"] = function(array) {
+  def("arraytolist", function(array) {
     if (Type(array) !== 'array') {
       throw new Error(__("Expected array"));
     }
     return array.list();
-  };
+  });
 
-  self.routines["combine"] = function(thing1, thing2) {
+  def("combine", function(thing1, thing2) {
     if (Type(thing2) !== 'list') {
-      return self.routines['word'](thing1, thing2);
+      return self.routines.get('word')(thing1, thing2);
     } else {
-      return self.routines['fput'](thing1, thing2);
+      return self.routines.get('fput')(thing1, thing2);
     }
-  };
+  });
 
-  self.routines["reverse"] = function(list) { return lexpr(list).reverse(); };
+  def("reverse", function(list) { return lexpr(list).reverse(); });
 
   var gensym_index = 0;
-  self.routines["gensym"] = function() {
+  def("gensym", function() {
     gensym_index += 1;
     return 'G' + gensym_index;
-  };
+  });
 
   //
   // 2.2 Data Selectors
   //
 
-  self.routines["first"] = function(list) { return lexpr(list)[0]; };
+  def("first", function(list) { return lexpr(list)[0]; });
 
-  self.routines["firsts"] = function(list) {
+  def("firsts", function(list) {
     return lexpr(list).map(function(x) { return x[0]; });
-  };
+  });
 
-  self.routines["last"] = function(list) { list = lexpr(list); return list[list.length - 1]; };
+  def("last", function(list) { list = lexpr(list); return list[list.length - 1]; });
 
-  self.routines["butfirst"] = self.routines["bf"] = function(list) { return lexpr(list).slice(1); };
+  def(["butfirst", "bf"], function(list) { return lexpr(list).slice(1); });
 
-  self.routines["butfirsts"] = self.routines["bfs"] = function(list) {
+  def(["butfirsts", "bfs"], function(list) {
     return lexpr(list).map(function(x) { return lexpr(x).slice(1); });
-  };
+  });
 
-  self.routines["butlast"] = self.routines["bl"] = function(list) { return lexpr(list).slice(0, -1); };
+  def(["butlast", "bl"], function(list) { return lexpr(list).slice(0, -1); });
 
-  self.routines["item"] = function(index, thing) {
+  def("item", function(index, thing) {
     index = aexpr(index);
     switch (Type(thing)) {
     case 'list':
@@ -1089,24 +1101,24 @@ function LogoInterpreter(turtle, stream, savehook)
     default:
       return sexpr(thing).charAt(index);
     }
-  };
+  });
 
   // Not Supported: mditem
 
-  self.routines["pick"] = function(list) {
+  def("pick", function(list) {
     list = lexpr(list);
     var i = Math.floor(self.prng.next() * list.length);
     return list[i];
-  };
+  });
 
-  self.routines["remove"] = function(thing, list) {
+  def("remove", function(thing, list) {
     return lexpr(list).filter(function(x) { return !self.equal(x, thing); });
-  };
+  });
 
-  self.routines["remdup"] = function(list) {
+  def("remdup", function(list) {
     var dict = Object.create(null);
     return lexpr(list).filter(function(x) { if (!dict[x]) { dict[x] = true; return true; } else { return false; } });
-  };
+  });
 
   // TODO: quoted
 
@@ -1114,87 +1126,85 @@ function LogoInterpreter(turtle, stream, savehook)
   // 2.3 Data Mutators
   //
 
-  self.routines["setitem"] = function(index, array, value) {
+  def("setitem", function(index, array, value) {
     index = aexpr(index);
     if (Type(array) !== 'array') {
       throw new Error(__("Expected array"));
     }
     array.setItem(index, value);
-  };
+  });
 
   // Not Supported: mdsetitem
   // Not Supported: .setfirst
   // Not Supported: .setbf
   // Not Supported: .setitem
 
-  self.routines["push"] = function(stackname, thing) {
+  def("push", function(stackname, thing) {
     var stack = lexpr(self.getvar(stackname));
     stack.unshift(thing);
     self.setvar(stackname, stack);
-  };
+  });
 
-  self.routines["pop"] = function(stackname) {
+  def("pop", function(stackname) {
     return self.getvar(stackname).shift();
-  };
+  });
 
-  self.routines["queue"] = function(stackname, thing) {
+  def("queue", function(stackname, thing) {
     var stack = lexpr(self.getvar(stackname));
     stack.push(thing);
     self.setvar(stackname, stack);
-  };
+  });
 
-  self.routines["dequeue"] = function(stackname) {
+  def("dequeue", function(stackname) {
     return self.getvar(stackname).pop();
-  };
+  });
 
   //
   // 2.4 Predicates
   //
 
 
-  self.routines["wordp"] = self.routines["word?"] = function(thing) { return Type(thing) === 'word' ? 1 : 0; };
-  self.routines["listp"] = self.routines["list?"] = function(thing) { return Type(thing) === 'list' ? 1 : 0; };
-  self.routines["arrayp"] = self.routines["array?"] = function(thing) { return Type(thing) === 'array' ? 1 : 0; };
-  self.routines["numberp"] = self.routines["number?"] = function(thing) { return Type(thing) === 'number' ? 1 : 0; };
-  self.routines["numberwang"] = function(thing) { return self.prng.next() < 0.5 ? 1 : 0; };
+  def(["wordp", "word?"], function(thing) { return Type(thing) === 'word' ? 1 : 0; });
+  def(["listp", "list?"], function(thing) { return Type(thing) === 'list' ? 1 : 0; });
+  def(["arrayp", "array?"], function(thing) { return Type(thing) === 'array' ? 1 : 0; });
+  def(["numberp", "number?"], function(thing) { return Type(thing) === 'number' ? 1 : 0; });
+  def(["numberwang"], function(thing) { return self.prng.next() < 0.5 ? 1 : 0; });
 
-  self.routines["equalp"] = self.routines["equal?"] = function(a, b) { return self.equal(a, b) ? 1 : 0; };
-  self.routines["notequalp"] = self.routines["notequal?"] = function(a, b) { return !self.equal(a, b) ? 1 : 0; };
+  def(["equalp", "equal?"], function(a, b) { return self.equal(a, b) ? 1 : 0; });
+  def(["notequalp", "notequal?"], function(a, b) { return !self.equal(a, b) ? 1 : 0; });
 
-  self.routines["emptyp"] = self.routines["empty?"] = function(thing) {
+  def(["emptyp", "empty?"], function(thing) {
     switch (Type(thing)) {
     case 'word': return thing.length === 0 ? 1 : 0;
     case 'list': return thing.length === 0 ? 1 : 0;
     default: return 0;
     }
-  };
-  self.routines["beforep"] = self.routines["before?"] = function(word1, word2) { return sexpr(word1) < sexpr(word2) ? 1 : 0; };
+  });
+  def(["beforep", "before?"], function(word1, word2) { return sexpr(word1) < sexpr(word2) ? 1 : 0; });
 
   // Not Supported: .eq
   // Not Supported: vbarredp
 
-  self.routines["memberp"] = self.routines["member?"] =
-        function(thing, list) {
-          return lexpr(list).some(function(x) { return self.equal(x, thing); }) ? 1 : 0;
-        };
+  def(["memberp", "member?"], function(thing, list) {
+    return lexpr(list).some(function(x) { return self.equal(x, thing); }) ? 1 : 0;
+  });
 
 
-  self.routines["substringp"] = self.routines["substring?"] =
-        function(word1, word2) {
-          return sexpr(word2).indexOf(sexpr(word1)) !== -1 ? 1 : 0;
-        };
+  def(["substringp", "substring?"], function(word1, word2) {
+    return sexpr(word2).indexOf(sexpr(word1)) !== -1 ? 1 : 0;
+  });
 
   //
   // 2.5 Queries
   //
 
-  self.routines["count"] = function(thing) { return lexpr(thing).length; };
-  self.routines["ascii"] = function(chr) { return sexpr(chr).charCodeAt(0); };
+  def("count", function(thing) { return lexpr(thing).length; });
+  def("ascii", function(chr) { return sexpr(chr).charCodeAt(0); });
   // Not Supported: rawascii
-  self.routines["char"] = function(integer) { return String.fromCharCode(aexpr(integer)); };
-  self.routines["lowercase"] = function(word) { return sexpr(word).toLowerCase(); };
-  self.routines["uppercase"] = function(word) { return sexpr(word).toUpperCase(); };
-  self.routines["standout"] = function(word) { return sexpr(word); }; // For compat
+  def("char", function(integer) { return String.fromCharCode(aexpr(integer)); });
+  def("lowercase", function(word) { return sexpr(word).toLowerCase(); });
+  def("uppercase", function(word) { return sexpr(word).toUpperCase(); });
+  def("standout", function(word) { return sexpr(word); }); // For compat
   // Not Supported: parse
   // Not Supported: runparse
 
@@ -1206,30 +1216,30 @@ function LogoInterpreter(turtle, stream, savehook)
 
   // 3.1 Transmitters
 
-  self.routines["print"] = self.routines["pr"] = function(thing) {
+  def(["print", "pr"], function(thing) {
     var s = Array.prototype.map.call(arguments, stringify_nodecorate).join(" ");
     self.stream.write(s, "\n");
-  };
-  self.routines["type"] = function(thing) {
+  });
+  def("type", function(thing) {
     var s = Array.prototype.map.call(arguments, stringify_nodecorate).join("");
     self.stream.write(s);
-  };
-  self.routines["show"] = function(thing) {
+  });
+  def("show", function(thing) {
     var s = Array.prototype.map.call(arguments, stringify).join(" ");
     self.stream.write(s, "\n");
-  };
+  });
 
   // 3.2 Receivers
 
   // Not Supported: readlist
 
-  self.routines["readword"] = function() {
+  def("readword", function() {
     if (arguments.length > 0) {
       return stream.read(sexpr(arguments[0]));
     } else {
       return stream.read();
     }
-  };
+  });
 
 
   // Not Supported: readrawline
@@ -1266,9 +1276,9 @@ function LogoInterpreter(turtle, stream, savehook)
 
   // Not Supported: keyp
 
-  self.routines["cleartext"] = self.routines["ct"] = function() {
+  def(["cleartext", "ct"], function() {
     self.stream.clear();
-  };
+  });
 
   // Not Supported: setcursor
   // Not Supported: cursor
@@ -1288,48 +1298,48 @@ function LogoInterpreter(turtle, stream, savehook)
   // 4.1 Numeric Operations
 
 
-  self.routines["sum"] = function(a, b) {
+  def("sum", function(a, b) {
     return mapreduce(arguments, aexpr, function(a, b) { return a + b; }, 0);
-  };
+  });
 
-  self.routines["difference"] = function(a, b) {
+  def("difference", function(a, b) {
     return aexpr(a) - aexpr(b);
-  };
+  });
 
-  self.routines["minus"] = function(a) { return -aexpr(a); };
+  def("minus", function(a) { return -aexpr(a); });
 
-  self.routines["product"] = function(a, b) {
+  def("product", function(a, b) {
     return mapreduce(arguments, aexpr, function(a, b) { return a * b; }, 1);
-  };
+  });
 
-  self.routines["quotient"] = function(a, b) {
+  def("quotient", function(a, b) {
     if (b !== (void 0)) {
       return aexpr(a) / aexpr(b);
     } else {
       return 1 / aexpr(a);
     }
-  };
+  });
 
-  self.routines["remainder"] = function(num1, num2) {
+  def("remainder", function(num1, num2) {
     return aexpr(num1) % aexpr(num2);
-  };
-  self.routines["modulo"] = function(num1, num2) {
+  });
+  def("modulo", function(num1, num2) {
     num1 = aexpr(num1);
     num2 = aexpr(num2);
     return Math.abs(num1 % num2) * (num2 < 0 ? -1 : 1);
-  };
+  });
 
-  self.routines["power"] = function(a, b) { return Math.pow(aexpr(a), aexpr(b)); };
-  self.routines["sqrt"] = function(a) { return Math.sqrt(aexpr(a)); };
-  self.routines["exp"] = function(a) { return Math.exp(aexpr(a)); };
-  self.routines["log10"] = function(a) { return Math.log(aexpr(a)) / Math.LN10; };
-  self.routines["ln"] = function(a) { return Math.log(aexpr(a)); };
+  def("power", function(a, b) { return Math.pow(aexpr(a), aexpr(b)); });
+  def("sqrt", function(a) { return Math.sqrt(aexpr(a)); });
+  def("exp", function(a) { return Math.exp(aexpr(a)); });
+  def("log10", function(a) { return Math.log(aexpr(a)) / Math.LN10; });
+  def("ln", function(a) { return Math.log(aexpr(a)); });
 
 
   function deg2rad(d) { return d / 180 * Math.PI; }
   function rad2deg(r) { return r * 180 / Math.PI; }
 
-  self.routines["arctan"] = function(a) {
+  def("arctan", function(a) {
     if (arguments.length > 1) {
       var x = aexpr(arguments[0]);
       var y = aexpr(arguments[1]);
@@ -1337,13 +1347,13 @@ function LogoInterpreter(turtle, stream, savehook)
     } else {
       return rad2deg(Math.atan(aexpr(a)));
     }
-  };
+  });
 
-  self.routines["sin"] = function(a) { return Math.sin(deg2rad(aexpr(a))); };
-  self.routines["cos"] = function(a) { return Math.cos(deg2rad(aexpr(a))); };
-  self.routines["tan"] = function(a) { return Math.tan(deg2rad(aexpr(a))); };
+  def("sin", function(a) { return Math.sin(deg2rad(aexpr(a))); });
+  def("cos", function(a) { return Math.cos(deg2rad(aexpr(a))); });
+  def("tan", function(a) { return Math.tan(deg2rad(aexpr(a))); });
 
-  self.routines["radarctan"] = function(a) {
+  def("radarctan", function(a) {
     if (arguments.length > 1) {
       var x = aexpr(arguments[0]);
       var y = aexpr(arguments[1]);
@@ -1351,21 +1361,21 @@ function LogoInterpreter(turtle, stream, savehook)
     } else {
       return Math.atan(aexpr(a));
     }
-  };
+  });
 
-  self.routines["radsin"] = function(a) { return Math.sin(aexpr(a)); };
-  self.routines["radcos"] = function(a) { return Math.cos(aexpr(a)); };
-  self.routines["radtan"] = function(a) { return Math.tan(aexpr(a)); };
+  def("radsin", function(a) { return Math.sin(aexpr(a)); });
+  def("radcos", function(a) { return Math.cos(aexpr(a)); });
+  def("radtan", function(a) { return Math.tan(aexpr(a)); });
 
-  self.routines["abs"] = function(a) { return Math.abs(aexpr(a)); };
+  def("abs", function(a) { return Math.abs(aexpr(a)); });
 
 
   function truncate(x) { return parseInt(x, 10); }
 
-  self.routines["int"] = function(a) { return truncate(aexpr(a)); };
-  self.routines["round"] = function(a) { return Math.round(aexpr(a)); };
+  def("int", function(a) { return truncate(aexpr(a)); });
+  def("round", function(a) { return Math.round(aexpr(a)); });
 
-  self.routines["iseq"] = function(a, b) {
+  def("iseq", function(a, b) {
     a = truncate(aexpr(a));
     b = truncate(aexpr(b));
     var step = (a < b) ? 1 : -1;
@@ -1374,10 +1384,10 @@ function LogoInterpreter(turtle, stream, savehook)
       list.push(i);
     }
     return list;
-  };
+  });
 
 
-  self.routines["rseq"] = function(from, to, count) {
+  def("rseq", function(from, to, count) {
     from = aexpr(from);
     to = aexpr(to);
     count = truncate(aexpr(count));
@@ -1387,30 +1397,30 @@ function LogoInterpreter(turtle, stream, savehook)
       list.push(i);
     }
     return list;
-  };
+  });
 
   // 4.2 Numeric Predicates
 
-  self.routines["greaterp"] = self.routines["greater?"] = function(a, b) { return aexpr(a) > aexpr(b) ? 1 : 0; };
-  self.routines["greaterequalp"] = self.routines["greaterequal?"] = function(a, b) { return aexpr(a) >= aexpr(b) ? 1 : 0; };
-  self.routines["lessp"] = self.routines["less?"] = function(a, b) { return aexpr(a) < aexpr(b) ? 1 : 0; };
-  self.routines["lessequalp"] = self.routines["lessequal?"] = function(a, b) { return aexpr(a) <= aexpr(b) ? 1 : 0; };
+  def(["greaterp", "greater?"], function(a, b) { return aexpr(a) > aexpr(b) ? 1 : 0; });
+  def(["greaterequalp", "greaterequal?"], function(a, b) { return aexpr(a) >= aexpr(b) ? 1 : 0; });
+  def(["lessp", "less?"], function(a, b) { return aexpr(a) < aexpr(b) ? 1 : 0; });
+  def(["lessequalp", "lessequal?"], function(a, b) { return aexpr(a) <= aexpr(b) ? 1 : 0; });
 
   // 4.3 Random Numbers
 
-  self.routines["random"] = function(max) {
+  def("random", function(max) {
     max = aexpr(max);
     return Math.floor(self.prng.next() * max);
-  };
+  });
 
-  self.routines["rerandom"] = function() {
+  def("rerandom", function() {
     var seed = (arguments.length > 0) ? aexpr(arguments[0]) : 2345678901;
     return self.prng.seed(seed);
-  };
+  });
 
   // 4.4 Print Formatting
 
-  self.routines["form"] = function(num, width, precision) {
+  def("form", function(num, width, precision) {
     num = aexpr(num);
     width = aexpr(width);
     precision = aexpr(precision);
@@ -1420,36 +1430,36 @@ function LogoInterpreter(turtle, stream, savehook)
       str = Array(1 + width - str.length).join(' ') + str;
     }
     return str;
-  };
+  });
 
   // 4.5 Bitwise Operations
 
 
-  self.routines["bitand"] = function(num1, num2) {
+  def("bitand", function(num1, num2) {
     return mapreduce(arguments, aexpr, function(a, b) { return a & b; }, -1);
-  };
-  self.routines["bitor"] = function(num1, num2) {
+  });
+  def("bitor", function(num1, num2) {
     return mapreduce(arguments, aexpr, function(a, b) { return a | b; }, 0);
-  };
-  self.routines["bitxor"] = function(num1, num2) {
+  });
+  def("bitxor", function(num1, num2) {
     return mapreduce(arguments, aexpr, function(a, b) { return a ^ b; }, 0);
-  };
-  self.routines["bitnot"] = function(num) {
+  });
+  def("bitnot", function(num) {
     return ~aexpr(num);
-  };
+  });
 
 
-  self.routines["ashift"] = function(num1, num2) {
+  def("ashift", function(num1, num2) {
     num1 = truncate(aexpr(num1));
     num2 = truncate(aexpr(num2));
     return num2 >= 0 ? num1 << num2 : num1 >> -num2;
-  };
+  });
 
-  self.routines["lshift"] = function(num1, num2) {
+  def("lshift", function(num1, num2) {
     num1 = truncate(aexpr(num1));
     num2 = truncate(aexpr(num2));
     return num2 >= 0 ? num1 << num2 : num1 >>> -num2;
-  };
+  });
 
 
   //----------------------------------------------------------------------
@@ -1458,25 +1468,23 @@ function LogoInterpreter(turtle, stream, savehook)
   //
   //----------------------------------------------------------------------
 
-  self.routines["true"] = function() { return 1; };
-  self.routines["false"] = function() { return 0; };
+  def("true", function() { return 1; });
+  def("false", function() { return 0; });
 
-  self.routines["and"] = function(a, b) {
+  def("and", function(a, b) {
     return Array.prototype.every.call(arguments, function(f) { return f(); }) ? 1 : 0;
-  };
-  self.routines["and"].noeval = true;
+  }, {noeval: true});
 
-  self.routines["or"] = function(a, b) {
+  def("or", function(a, b) {
     return Array.prototype.some.call(arguments, function(f) { return f(); }) ? 1 : 0;
-  };
-  self.routines["or"].noeval = true;
+  }, {noeval: true});
 
-  self.routines["xor"] = function(a, b) {
+  def("xor", function(a, b) {
     return mapreduce(arguments, aexpr, function(a, b) { return Boolean(a) !== Boolean(b); }, 0) ? 1 : 0;
-  };
-  self.routines["not"] = function(a) {
+  });
+  def("not", function(a) {
     return !aexpr(a) ? 1 : 0;
-  };
+  });
 
   //----------------------------------------------------------------------
   //
@@ -1485,38 +1493,38 @@ function LogoInterpreter(turtle, stream, savehook)
   //----------------------------------------------------------------------
   // 6.1 Turtle Motion
 
-  self.routines["forward"] = self.routines["fd"] = function(a) { turtle.move(aexpr(a)); };
-  self.routines["back"] = self.routines["bk"] = function(a) { turtle.move(-aexpr(a)); };
-  self.routines["left"] = self.routines["lt"] = function(a) { turtle.turn(-aexpr(a)); };
-  self.routines["right"] = self.routines["rt"] = function(a) { turtle.turn(aexpr(a)); };
+  def(["forward", "fd"], function(a) { turtle.move(aexpr(a)); });
+  def(["back", "bk"], function(a) { turtle.move(-aexpr(a)); });
+  def(["left", "lt"], function(a) { turtle.turn(-aexpr(a)); });
+  def(["right", "rt"], function(a) { turtle.turn(aexpr(a)); });
 
-  self.routines["setpos"] = function(l) {
+  def("setpos", function(l) {
     l = lexpr(l);
     if (l.length !== 2) { throw new Error(__("Expected list of length 2")); }
     turtle.setposition(aexpr(l[0]), aexpr(l[1]));
-  };
-  self.routines["setxy"] = function(x, y) { turtle.setposition(aexpr(x), aexpr(y)); };
-  self.routines["setx"] = function(x) { turtle.setposition(aexpr(x), (void 0)); }; // TODO: Replace with ...?
-  self.routines["sety"] = function(y) { turtle.setposition((void 0), aexpr(y)); };
-  self.routines["setheading"] = self.routines["seth"] = function(a) { turtle.setheading(aexpr(a)); };
+  });
+  def("setxy", function(x, y) { turtle.setposition(aexpr(x), aexpr(y)); });
+  def("setx", function(x) { turtle.setposition(aexpr(x), (void 0)); }); // TODO: Replace with ...?
+  def("sety", function(y) { turtle.setposition((void 0), aexpr(y)); });
+  def(["setheading", "seth"], function(a) { turtle.setheading(aexpr(a)); });
 
-  self.routines["home"] = function() { turtle.home(); };
+  def("home", function() { turtle.home(); });
 
-  self.routines["arc"] = function(angle, radius) { turtle.arc(aexpr(angle), aexpr(radius)); };
+  def("arc", function(angle, radius) { turtle.arc(aexpr(angle), aexpr(radius)); });
 
   //
   // 6.2 Turtle Motion Queries
   //
 
-  self.routines["pos"] = function() { var l = turtle.getxy(); return [l[0], l[1]]; };
-  self.routines["xcor"] = function() { var l = turtle.getxy(); return l[0]; };
-  self.routines["ycor"] = function() { var l = turtle.getxy(); return l[1]; };
-  self.routines["heading"] = function() { return turtle.getheading(); };
-  self.routines["towards"] = function(l) {
+  def("pos", function() { var l = turtle.getxy(); return [l[0], l[1]]; });
+  def("xcor", function() { var l = turtle.getxy(); return l[0]; });
+  def("ycor", function() { var l = turtle.getxy(); return l[1]; });
+  def("heading", function() { return turtle.getheading(); });
+  def("towards", function(l) {
     l = lexpr(l);
     if (l.length !== 2) { throw new Error(__("Expected list of length 2")); }
     return turtle.towards(aexpr(l[0]), aexpr(l[1]));
-  };
+  });
 
   // Not Supported: scrunch
 
@@ -1524,18 +1532,18 @@ function LogoInterpreter(turtle, stream, savehook)
   // 6.3 Turtle and Window Control
   //
 
-  self.routines["showturtle"] = self.routines["st"] = function() { turtle.showturtle(); };
-  self.routines["hideturtle"] = self.routines["ht"] = function() { turtle.hideturtle(); };
-  self.routines["clean"] = function() { turtle.clear(); };
-  self.routines["clearscreen"] = self.routines["cs"] = function() { turtle.clearscreen(); };
+  def(["showturtle", "st"], function() { turtle.showturtle(); });
+  def(["hideturtle", "ht"], function() { turtle.hideturtle(); });
+  def("clean", function() { turtle.clear(); });
+  def(["clearscreen", "cs"], function() { turtle.clearscreen(); });
 
-  self.routines["wrap"] = function() { turtle.setturtlemode('wrap'); };
-  self.routines["window"] = function() { turtle.setturtlemode('window'); };
-  self.routines["fence"] = function() { turtle.setturtlemode('fence'); };
+  def("wrap", function() { turtle.setturtlemode('wrap'); });
+  def("window", function() { turtle.setturtlemode('window'); });
+  def("fence", function() { turtle.setturtlemode('fence'); });
 
-  self.routines["fill"] = function() { turtle.fill(); };
+  def("fill", function() { turtle.fill(); });
 
-  self.routines["filled"] = function(fillcolor, statements) {
+  def("filled", function(fillcolor, statements) {
     fillcolor = sexpr(fillcolor);
     statements = reparse(lexpr(statements));
     turtle.beginpath();
@@ -1544,14 +1552,14 @@ function LogoInterpreter(turtle, stream, savehook)
     } finally {
       turtle.fillpath(fillcolor);
     }
-  };
+  });
 
-  self.routines["label"] = function(a) {
+  def("label", function(a) {
     var s = Array.prototype.map.call(arguments, stringify_nodecorate).join(" ");
     turtle.drawtext(s);
-  };
+  });
 
-  self.routines["setlabelheight"] = function(a) { turtle.setfontsize(aexpr(a)); };
+  def("setlabelheight", function(a) { turtle.setfontsize(aexpr(a)); });
 
   // Not Supported: textscreen
   // Not Supported: fullscreen
@@ -1564,31 +1572,31 @@ function LogoInterpreter(turtle, stream, savehook)
   // 6.4 Turtle and Window Queries
   //
 
-  self.routines["shownp"] = self.routines["shown?"] = function() {
+  def(["shownp", "shown?"], function() {
     return turtle.isturtlevisible() ? 1 : 0;
-  };
+  });
 
   // Not Supported: screenmode
 
-  self.routines["turtlemode"] = function() {
+  def("turtlemode", function() {
     return turtle.getturtlemode().toUpperCase();
-  };
+  });
 
-  self.routines["labelsize"] = function() {
+  def("labelsize", function() {
     return [turtle.getfontsize(), turtle.getfontsize()];
-  };
+  });
 
   //
   // 6.5 Pen and Background Control
   //
-  self.routines["pendown"] = self.routines["pd"] = function() { turtle.pendown(); };
-  self.routines["penup"] = self.routines["pu"] = function() { turtle.penup(); };
+  def(["pendown", "pd"], function() { turtle.pendown(); });
+  def(["penup", "pu"], function() { turtle.penup(); });
 
-  self.routines["penpaint"] = self.routines["ppt"] = function() { turtle.setpenmode('paint'); };
-  self.routines["penerase"] = self.routines["pe"] = function() { turtle.setpenmode('erase'); };
-  self.routines["penreverse"] = self.routines["px"] = function() { turtle.setpenmode('reverse'); };
+  def(["penpaint", "ppt"], function() { turtle.setpenmode('paint'); });
+  def(["penerase", "pe"], function() { turtle.setpenmode('erase'); });
+  def(["penreverse", "px"], function() { turtle.setpenmode('reverse'); });
 
-  self.routines["setpencolor"] = self.routines["setpc"] = self.routines["setcolor"] = function(a) {
+  def(["setpencolor", "setpc", "setcolor"], function(a) {
     if (arguments.length === 3) {
       var r = Math.round(aexpr(arguments[0]) * 255 / 99);
       var g = Math.round(aexpr(arguments[1]) * 255 / 99);
@@ -1600,17 +1608,17 @@ function LogoInterpreter(turtle, stream, savehook)
     } else {
       turtle.setcolor(sexpr(a));
     }
-  };
+  });
 
   // Not Supported: setpallete
 
-  self.routines["setpensize"] = self.routines["setwidth"] = self.routines["setpw"] = function(a) {
+  def(["setpensize", "setwidth", "setpw"], function(a) {
     if (Type(a) === 'list') {
       turtle.setwidth(aexpr(a[0]));
     } else {
       turtle.setwidth(aexpr(a));
     }
-  };
+  });
 
   // Not Supported: setpenpattern
   // Not Supported: setpen
@@ -1620,23 +1628,23 @@ function LogoInterpreter(turtle, stream, savehook)
   // 6.6 Pen Queries
   //
 
-  self.routines["pendownp"] = self.routines["pendown?"] = function() {
+  def(["pendownp", "pendown?"], function() {
     return turtle.ispendown() ? 1 : 0;
-  };
+  });
 
-  self.routines["penmode"] = self.routines["pc"] = function() {
+  def(["penmode", "pc"], function() {
     return turtle.getpenmode().toUpperCase();
-  };
+  });
 
-  self.routines["pencolor"] = self.routines["pc"] = function() {
+  def(["pencolor", "pc"], function() {
     return turtle.getcolor();
-  };
+  });
 
   // Not Supported: palette
 
-  self.routines["pensize"] = function() {
+  def("pensize", function() {
     return [turtle.getwidth(), turtle.getwidth()];
-  };
+  });
 
   // Not Supported: pen
   // Not Supported: background
@@ -1661,65 +1669,65 @@ function LogoInterpreter(turtle, stream, savehook)
   //----------------------------------------------------------------------
   // 7.1 Procedure Definition
 
-  self.routines["copydef"] = function(newname, oldname) {
+  def("copydef", function(newname, oldname) {
 
-    newname = sexpr(newname).toLowerCase();
-    oldname = sexpr(oldname).toLowerCase();
+    newname = sexpr(newname);
+    oldname = sexpr(oldname);
 
-    if (!self.routines.hasOwnProperty(oldname)) {
+    if (!self.routines.has(oldname)) {
       throw new Error(format(__("Don't know how to {name}"), { name: oldname.toUpperCase() }));
     }
 
-    if (self.routines.hasOwnProperty(newname)) {
-      if (self.routines[newname].special) {
+    if (self.routines.has(newname)) {
+      if (self.routines.get(newname).special) {
         throw new Error(format(__("Can't overwrite special form {name}"), { name: newname.toUpperCase() }));
       }
-      if (self.routines[newname].primitive && !self.maybegetvar("redefp")) {
+      if (self.routines.get(newname).primitive && !self.maybegetvar("redefp")) {
         throw new Error(__("Can't overwrite primitives unless REDEFP is TRUE"));
       }
     }
 
-    self.routines[newname] = self.routines[oldname];
+    self.routines.set(newname, self.routines.get(oldname));
     if (savehook) {
-      savehook(newname, self.definition(newname, self.routines[newname]));
+      savehook(newname, self.definition(newname, self.routines.get(newname)));
     }
-  };
+  });
 
 
   // 7.2 Variable Definition
 
-  self.routines["make"] = function(varname, value) {
+  def("make", function(varname, value) {
     self.setvar(sexpr(varname), value);
-  };
+  });
 
-  self.routines["name"] = function(value, varname) {
+  def("name", function(value, varname) {
     self.setvar(sexpr(varname), value);
-  };
+  });
 
-  self.routines["local"] = function(varname) {
+  def("local", function(varname) {
     var localscope = self.scopes[self.scopes.length - 1];
     Array.prototype.forEach.call(arguments, function(name) { localscope.set(sexpr(name), {value: (void 0)}); });
-  };
+  });
 
-  self.routines["localmake"] = function(varname, value) {
+  def("localmake", function(varname, value) {
     var localscope = self.scopes[self.scopes.length - 1];
     localscope.set(sexpr(varname), {value: value});
-  };
+  });
 
-  self.routines["thing"] = function(varname) {
+  def("thing", function(varname) {
     return self.getvar(sexpr(varname));
-  };
+  });
 
-  self.routines["global"] = function(varname) {
+  def("global", function(varname) {
     var globalscope = self.scopes[0];
     Array.prototype.forEach.call(arguments, function(name) { globalscope.set(sexpr(name), {value: (void 0)}); });
-  };
+  });
 
   //
   // 7.3 Property Lists
   //
 
-  self.routines["pprop"] = function(plistname, propname, value) {
+  def("pprop", function(plistname, propname, value) {
     plistname = sexpr(plistname);
     propname = sexpr(propname);
     var plist = self.plists.get(plistname);
@@ -1728,9 +1736,9 @@ function LogoInterpreter(turtle, stream, savehook)
       self.plists.set(plistname, plist);
     }
     plist.set(propname, value);
-  };
+  });
 
-  self.routines["gprop"] = function(plistname, propname) {
+  def("gprop", function(plistname, propname) {
     plistname = sexpr(plistname);
     propname = sexpr(propname);
     var plist = self.plists.get(plistname);
@@ -1738,9 +1746,9 @@ function LogoInterpreter(turtle, stream, savehook)
       return [];
     }
     return plist.get(propname);
-  };
+  });
 
-  self.routines["remprop"] = function(plistname, propname) {
+  def("remprop", function(plistname, propname) {
     plistname = sexpr(plistname);
     propname = sexpr(propname);
     var plist = self.plists.get(plistname);
@@ -1751,9 +1759,9 @@ function LogoInterpreter(turtle, stream, savehook)
         self.plists['delete'](plistname);
       }
     }
-  };
+  });
 
-  self.routines["plist"] = function(plistname) {
+  def("plist", function(plistname) {
     plistname = sexpr(plistname);
     var plist = self.plists.get(plistname);
     if (!plist) {
@@ -1766,140 +1774,140 @@ function LogoInterpreter(turtle, stream, savehook)
       result.push(copy(plist.get(key)));
     });
     return result;
-  };
+  });
 
   //
   // 7.4 Workspace Predicates
   //
 
-  self.routines["procedurep"] = self.routines["procedure?"] = function(name) {
-    name = sexpr(name).toLowerCase();
-    return typeof self.routines[name] === 'function' ? 1 : 0;
-  };
+  def(["procedurep", "procedure?"], function(name) {
+    name = sexpr(name);
+    return self.routines.has(name) ? 1 : 0;
+  });
 
-  self.routines["primitivep"] = self.routines["primitive?"] = function(name) {
-    name = sexpr(name).toLowerCase();
-    return (typeof self.routines[name] === 'function' &&
-            self.routines[name].primitive) ? 1 : 0;
-  };
+  def(["primitivep", "primitive?"], function(name) {
+    name = sexpr(name);
+    return (self.routines.has(name) &&
+            self.routines.get(name).primitive) ? 1 : 0;
+  });
 
-  self.routines["definedp"] = self.routines["defined?"] = function(name) {
-    name = sexpr(name).toLowerCase();
-    return (typeof self.routines[name] === 'function' &&
-            !self.routines[name].primitive) ? 1 : 0;
-  };
+  def(["definedp", "defined?"], function(name) {
+    name = sexpr(name);
+    return (self.routines.has(name) &&
+            !self.routines.get(name).primitive) ? 1 : 0;
+  });
 
-  self.routines["namep"] = self.routines["name?"] = function(varname) {
+  def(["namep", "name?"], function(varname) {
     try {
       return self.getvar(sexpr(varname)) !== (void 0) ? 1 : 0;
     } catch (e) {
       return 0;
     }
-  };
+  });
 
-  self.routines["plistp"] = self.routines["plist?"] = function(plistname) {
+  def(["plistp", "plist?"], function(plistname) {
     plistname = sexpr(plistname);
     return self.plists.has(plistname) ? 1 : 0;
-  };
+  });
 
   //
   // 7.5 Workspace Queries
   //
 
-  self.routines["contents"] = function() {
+  def("contents", function() {
     return [
-      Object.keys(self.routines).filter(function(x) {
-        return !self.routines[x].primitive && !self.routines[x].buried; }),
+      self.routines.keys().filter(function(x) {
+        return !self.routines.get(x).primitive && !self.routines.get(x).buried; }),
       self.scopes.reduce(function(list, scope) {
         return list.concat(scope.keys().filter(function(x) { return !scope.get(x).buried; })); }, []),
       self.plists.keys().filter(function(x) { return !self.plists.get(x).buried; })
     ];
-  };
+  });
 
-  self.routines["buried"] = function() {
+  def("buried", function() {
     return [
-      Object.keys(self.routines).filter(function(x) {
-        return !self.routines[x].primitive && self.routines[x].buried; }),
+      self.routines.keys().filter(function(x) {
+        return !self.routines.get(x).primitive && self.routines.get(x).buried; }),
       self.scopes.reduce(function(list, scope) {
         return list.concat(scope.keys().filter(function(x) { return scope.get(x).buried; })); }, []),
       self.plists.keys().filter(function(x) { return self.plists.get(x).buried; })
     ];
-  };
+  });
 
-  self.routines["traced"] = function() {
+  def("traced", function() {
     return [
-      Object.keys(self.routines).filter(function(x) {
-        return !self.routines[x].primitive && self.routines[x].traced; }),
+      self.routines.keys().filter(function(x) {
+        return !self.routines.get(x).primitive && self.routines.get(x).traced; }),
       self.scopes.reduce(function(list, scope) {
         return list.concat(scope.keys().filter(function(x) { return scope.get(x).traced; })); }, []),
       self.plists.keys().filter(function(x) { return self.plists.get(x).traced; })
     ];
-  };
+  });
 
-  self.routines["stepped"] = function() {
+  def(["stepped"], function() {
     return [
-      Object.keys(self.routines).filter(function(x) {
-        return !self.routines[x].primitive && self.routines[x].stepped; }),
+      self.routines.keys().filter(function(x) {
+        return !self.routines.get(x).primitive && self.routines.get(x).stepped; }),
       self.scopes.reduce(function(list, scope) {
         return list.concat(scope.keys().filter(function(x) { return scope.get(x).stepped; })); }, []),
       self.plists.keys().filter(function(x) { return self.plists.get(x).stepped; })
     ];
-  };
+  });
 
-  self.routines["procedures"] = function() {
-    return Object.keys(self.routines).filter(function(x) {
-      return !self.routines[x].primitive && !self.routines[x].buried;
+  def("procedures", function() {
+    return self.routines.keys().filter(function(x) {
+      return !self.routines.get(x).primitive && !self.routines.get(x).buried;
     });
-  };
+  });
 
-  self.routines["primitives"] = function() {
-    return Object.keys(self.routines).filter(function(x) {
-      return self.routines[x].primitive & !self.routines[x].buried;
+  def("primitives", function() {
+    return self.routines.keys().filter(function(x) {
+      return self.routines.get(x).primitive & !self.routines.get(x).buried;
     });
-  };
+  });
 
-  self.routines["globals"] = function() {
+  def("globals", function() {
     var globalscope = self.scopes[0];
     return globalscope.keys().filter(function (x) {
       return !globalscope.get(x).buried;
     });
-  };
+  });
 
-  self.routines["names"] = function() {
+  def("names", function() {
     return [
       [],
       self.scopes.reduce(function(list, scope) {
         return list.concat(scope.keys().filter(function(x) {
           return !scope.get(x).buried; })); }, [])
     ];
-  };
+  });
 
-  self.routines["plists"] = function() {
+  def("plists", function() {
     return [
       [],
       [],
       self.plists.keys().filter(function(x) {
         return !self.plists.get(x).buried; })
     ];
-  };
+  });
 
-  self.routines["namelist"] = function(varname) {
+  def("namelist", function(varname) {
     if (Type(varname) === 'list') {
       varname = lexpr(varname);
     } else {
       varname = [sexpr(varname)];
     }
     return [[], varname];
-  };
+  });
 
-  self.routines["pllist"] = function(plname) {
+  def("pllist", function(plname) {
     if (Type(plname) === 'list') {
       plname = lexpr(plname);
     } else {
       plname = [sexpr(plname)];
     }
     return [[], [], plname];
-  };
+  });
 
 
   // Not Supported: arity
@@ -1911,20 +1919,20 @@ function LogoInterpreter(turtle, stream, savehook)
   // 7.7 Workspace Control
   //
 
-  self.routines["erase"] = function(list) {
+  def("erase", function(list) {
     list = lexpr(list);
 
     // Delete procedures
     if (list.length) {
       var procs = lexpr(list.shift());
       procs.forEach(function(name) {
-        name = sexpr(name).toLowerCase();
-        if (self.routines.hasOwnProperty(name)) {
-          if (self.routines[name].special) {
+        name = sexpr(name);
+        if (self.routines.has(name)) {
+          if (self.routines.get(name).special) {
             throw new Error(format(__("Can't ERASE special form {name}"), { name: name.toUpperCase() }));
           }
-          if (!self.routines[name].primitive || self.maybegetvar("redefp")) {
-            delete self.routines[name];
+          if (!self.routines.get(name).primitive || self.maybegetvar("redefp")) {
+            self.routines['delete'](name);
             // TODO: savehook
           } else {
             throw new Error(__("Can't ERASE primitives unless REDEFP is TRUE"));
@@ -1953,14 +1961,14 @@ function LogoInterpreter(turtle, stream, savehook)
         self.plists['delete'](name);
       });
     }
-  };
+  });
 
   // TODO: lots of redundant logic here -- clean this up
-  self.routines["erall"] = function() {
-    Object.keys(self.routines).filter(function(x) {
-      return !self.routines[x].primitive && !self.routines[x].buried;
+  def("erall", function() {
+    self.routines.keys().filter(function(x) {
+      return !self.routines.get(x).primitive && !self.routines.get(x).buried;
     }).forEach(function(name) {
-        delete self.routines[name];
+      self.routines['delete'](name);
     });
 
     self.scopes.forEach(function(scope) {
@@ -1976,17 +1984,17 @@ function LogoInterpreter(turtle, stream, savehook)
     }).forEach(function (name) {
       self.plists['delete'](name);
     });
-  };
+  });
 
-  self.routines["erps"] = function() {
-    Object.keys(self.routines).filter(function(x) {
-      return !self.routines[x].primitive && !self.routines[x].buried;
+  def("erps", function() {
+    self.routines.keys().filter(function(x) {
+      return !self.routines.get(x).primitive && !self.routines.get(x).buried;
     }).forEach(function(name) {
-        delete self.routines[name];
+        self.routines['delete'](name);
     });
-  };
+  });
 
-  self.routines["erns"] = function() {
+  def("erns", function() {
     self.scopes.forEach(function(scope) {
       scope.keys().filter(function(x) {
         return !scope.get(x).buried;
@@ -1994,17 +2002,17 @@ function LogoInterpreter(turtle, stream, savehook)
         scope['delete'](name);
       });
     });
-  };
+  });
 
-  self.routines["erpls"] = function() {
+  def("erpls", function() {
     self.plists.keys().filter(function(x) {
       return !self.plists.get(x).buried;
     }).forEach(function (key) {
       self.plists['delete'](key);
     });
-  };
+  });
 
-  self.routines["ern"] = function(varname) {
+  def("ern", function(varname) {
     var varnamelist;
     if (Type(varname) === 'list') {
       varnamelist = lexpr(varname);
@@ -2018,9 +2026,9 @@ function LogoInterpreter(turtle, stream, savehook)
         scope['delete'](name);
       });
     });
-  };
+  });
 
-  self.routines["erpl"] = function(plname) {
+  def("erpl", function(plname) {
     var plnamelist;
     if (Type(plname) === 'list') {
       plnamelist = lexpr(plname);
@@ -2032,18 +2040,18 @@ function LogoInterpreter(turtle, stream, savehook)
       name = sexpr(name);
       self.plists['delete'](name);
     });
-  };
+  });
 
-  self.routines["bury"] = function(list) {
+  def("bury", function(list) {
     list = lexpr(list);
 
     // Bury procedures
     if (list.length) {
       var procs = lexpr(list.shift());
       procs.forEach(function(name) {
-        name = sexpr(name).toLowerCase();
-        if (self.routines.hasOwnProperty(name)) {
-          self.routines[name].buried = true;
+        name = sexpr(name);
+        if (self.routines.has(name)) {
+          self.routines.get(name).buried = true;
         }
       });
     }
@@ -2072,11 +2080,11 @@ function LogoInterpreter(turtle, stream, savehook)
         }
       });
     }
-  };
+  });
 
-  self.routines["buryall"] = function() {
-    Object.keys(self.routines).forEach(function(name) {
-      self.routines[name].buried = true;
+  def("buryall", function() {
+    self.routines.keys().forEach(function(name) {
+      self.routines.get(name).buried = true;
     });
 
     self.scopes.forEach(function(scope) {
@@ -2088,20 +2096,20 @@ function LogoInterpreter(turtle, stream, savehook)
     self.plists.keys().forEach(function (name) {
       self.plists.get(name).buried = true;
     });
-  };
+  });
 
   // Not Supported: buryname
 
-  self.routines["unbury"] = function(list) {
+  def("unbury", function(list) {
     list = lexpr(list);
 
     // Procedures
     if (list.length) {
       var procs = lexpr(list.shift());
       procs.forEach(function(name) {
-        name = sexpr(name).toLowerCase();
-        if (self.routines.hasOwnProperty(name)) {
-          self.routines[name].buried = false;
+        name = sexpr(name);
+        if (self.routines.has(name)) {
+          self.routines.get(name).buried = false;
         }
       });
     }
@@ -2130,11 +2138,11 @@ function LogoInterpreter(turtle, stream, savehook)
         }
       });
     }
-  };
+  });
 
-  self.routines["unburyall"] = function() {
-    Object.keys(self.routines).forEach(function(name) {
-      self.routines[name].buried = false;
+  def("unburyall", function() {
+    self.routines.keys().forEach(function(name) {
+      self.routines.get(name).buried = false;
     });
 
     self.scopes.forEach(function(scope) {
@@ -2146,11 +2154,11 @@ function LogoInterpreter(turtle, stream, savehook)
     self.plists.keys().forEach(function (name) {
       self.plists.get(name).buried = false;
     });
-  };
+  });
 
   // Not Supported: unburyname
 
-  self.routines["buriedp"] = self.routines["buried?"] = function(list) {
+  def(["buriedp", "buried?"], function(list) {
     list = lexpr(list);
     var name;
 
@@ -2158,8 +2166,8 @@ function LogoInterpreter(turtle, stream, savehook)
     if (list.length) {
       var procs = lexpr(list.shift());
       if (procs.length) {
-        name = sexpr(procs[0]).toLowerCase();
-        return (self.routines.hasOwnProperty(name) && self.routines[name].buried) ? 1 : 0;
+        name = sexpr(procs[0]);
+        return (self.routines.has(name) && self.routines.get(name).buried) ? 1 : 0;
       }
     }
 
@@ -2183,7 +2191,7 @@ function LogoInterpreter(turtle, stream, savehook)
     }
 
     return 0;
-  };
+  });
 
   //----------------------------------------------------------------------
   //
@@ -2196,12 +2204,12 @@ function LogoInterpreter(turtle, stream, savehook)
   //
 
 
-  self.routines["run"] = function(statements) {
+  def("run", function(statements) {
     statements = reparse(lexpr(statements));
     return self.execute(statements);
-  };
+  });
 
-  self.routines["runresult"] = function(statements) {
+  def("runresult", function(statements) {
     statements = reparse(lexpr(statements));
     var result = self.execute(statements, {returnResult: true});
     if (result !== (void 0)) {
@@ -2209,9 +2217,9 @@ function LogoInterpreter(turtle, stream, savehook)
     } else {
       return [];
     }
-  };
+  });
 
-  self.routines["repeat"] = function(count, statements) {
+  def("repeat", function(count, statements) {
     count = aexpr(count);
     statements = reparse(lexpr(statements));
     for (var i = 1; i <= count; ++i) {
@@ -2223,9 +2231,9 @@ function LogoInterpreter(turtle, stream, savehook)
         self.repcount = old_repcount;
       }
     }
-  };
+  });
 
-  self.routines["forever"] = function(statements) {
+  def("forever", function(statements) {
     statements = reparse(lexpr(statements));
     for (var i = 1; true; ++i) {
       var old_repcount = self.repcount;
@@ -2236,52 +2244,52 @@ function LogoInterpreter(turtle, stream, savehook)
         self.repcount = old_repcount;
       }
     }
-  };
+  });
 
-  self.routines["repcount"] = function() {
+  def("repcount", function() {
     return self.repcount;
-  };
+  });
 
-  self.routines["if"] = function(test, statements) {
+  def("if", function(test, statements) {
     test = aexpr(test);
     statements = reparse(lexpr(statements));
 
     if (test) { self.execute(statements); }
-  };
+  });
 
-  self.routines["ifelse"] = function(test, statements1, statements2) {
+  def("ifelse", function(test, statements1, statements2) {
     test = aexpr(test);
     statements1 = reparse(lexpr(statements1));
     statements2 = reparse(lexpr(statements2));
 
     self.execute(test ? statements1 : statements2);
-  };
+  });
 
-  self.routines["test"] = function(tf) {
+  def("test", function(tf) {
     tf = aexpr(tf);
     // NOTE: A property on the scope, not within the scope
     self.scopes[self.scopes.length - 1]._test = tf;
-  };
+  });
 
-  self.routines["iftrue"] = self.routines["ift"] = function(statements) {
+  def(["iftrue", "ift"], function(statements) {
     statements = reparse(lexpr(statements));
     var tf = self.scopes[self.scopes.length - 1]._test;
     if (tf) { self.execute(statements); }
-  };
+  });
 
-  self.routines["iffalse"] = self.routines["iff"] = function(statements) {
+  def(["iffalse", "iff"], function(statements) {
     statements = reparse(lexpr(statements));
     var tf = self.scopes[self.scopes.length - 1]._test;
     if (!tf) { self.execute(statements); }
-  };
+  });
 
-  self.routines["stop"] = function() {
+  def("stop", function() {
     throw new Output();
-  };
+  });
 
-  self.routines["output"] = self.routines["op"] = function(atom) {
+  def(["output", "op"], function(atom) {
     throw new Output(atom);
-  };
+  });
 
   // TODO: catch
   // TODO: throw
@@ -2290,27 +2298,27 @@ function LogoInterpreter(turtle, stream, savehook)
   // Not Supported: continue
   // Not Supported: wait
 
-  self.routines["bye"] = function() {
+  def("bye", function() {
     throw new Bye();
-  };
+  });
 
-  self.routines[".maybeoutput"] = function(value) {
+  def(".maybeoutput", function(value) {
     if (value !== (void 0)) {
       throw new Output(value);
     } else {
       throw new Output();
     }
-  };
+  });
 
   // Not Supported: goto
   // Not Supported: tag
 
-  self.routines["ignore"] = function(value) {
-  };
+  def("ignore", function(value) {
+  });
 
   // Not Supported: `
 
-  self.routines["for"] = function(control, statements) {
+  def("for", function(control, statements) {
     control = reparse(lexpr(control));
     statements = reparse(lexpr(statements));
 
@@ -2329,7 +2337,7 @@ function LogoInterpreter(turtle, stream, savehook)
       step = (control.length) ? aexpr(self.evaluateExpression(control.slice())) : sign(limit - start);
       current += step;
     }
-  };
+  });
 
   function checkevalblock(block) {
     block = block();
@@ -2337,43 +2345,39 @@ function LogoInterpreter(turtle, stream, savehook)
     throw new Error(__("Expected block"));
   }
 
-  self.routines["do.while"] = function(block, tf) {
+  def("do.while", function(block, tf) {
     block = checkevalblock(block);
 
     do {
       self.execute(block);
     } while (tf());
-  };
-  self.routines["do.while"].noeval = true;
+  }, {noeval: true});
 
-  self.routines["while"] = function(tf, block) {
+  def("while", function(tf, block) {
     block = checkevalblock(block);
 
     while (tf()) {
       self.execute(block);
     }
-  };
-  self.routines["while"].noeval = true;
+  }, {noeval: true});
 
-  self.routines["do.until"] = function(block, tf) {
+  def("do.until", function(block, tf) {
     block = checkevalblock(block);
 
     do {
       self.execute(block);
     } while (!tf());
-  };
-  self.routines["do.until"].noeval = true;
+  }, {noeval: true});
 
-  self.routines["until"] = function(tf, block) {
+  def("until", function(tf, block) {
     block = checkevalblock(block);
 
     while (!tf()) {
       self.execute(block);
     }
-  };
-  self.routines["until"].noeval = true;
+  }, {noeval: true});
 
-  self.routines["case"] = function(value, clauses) {
+  def("case", function(value, clauses) {
     clauses = lexpr(clauses);
 
     for (var i = 0; i < clauses.length; ++i) {
@@ -2387,9 +2391,9 @@ function LogoInterpreter(turtle, stream, savehook)
       }
     }
     return (void 0);
-  };
+  });
 
-  self.routines["cond"] = function(clauses) {
+  def("cond", function(clauses) {
     clauses = lexpr(clauses);
 
     for (var i = 0; i < clauses.length; ++i) {
@@ -2403,7 +2407,7 @@ function LogoInterpreter(turtle, stream, savehook)
       }
     }
     return (void 0);
-  };
+  });
 
   //
   // 8.2 Template-based Iteration
@@ -2416,20 +2420,20 @@ function LogoInterpreter(turtle, stream, savehook)
 
   // TODO: multiple inputs
 
-  self.routines["apply"] = function(procname, list) {
-    procname = sexpr(procname).toLowerCase();
+  def("apply", function(procname, list) {
+    procname = sexpr(procname);
 
-    var routine = self.routines[procname];
+    var routine = self.routines.get(procname);
     if (!routine) { throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() })); }
     if (routine.special || routine.noeval) { throw new Error(format(__("Can't apply {proc} to special {name}"), { proc: "APPLY", name: procname.toUpperCase() })); }
 
     return routine.apply(null, lexpr(list));
-  };
+  });
 
-  self.routines["invoke"] = function(procname) {
-    procname = sexpr(procname).toLowerCase();
+  def("invoke", function(procname) {
+    procname = sexpr(procname);
 
-    var routine = self.routines[procname];
+    var routine = self.routines.get(procname);
     if (!routine) { throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() })); }
     if (routine.special || routine.noeval) { throw new Error(format(__("Can't apply {proc} to special {name}"), { proc: "INVOKE", name: procname.toUpperCase() })); }
 
@@ -2439,45 +2443,45 @@ function LogoInterpreter(turtle, stream, savehook)
     }
 
     return routine.apply(null, args);
-  };
+  });
 
-  self.routines["foreach"] = function(procname, list) {
-    procname = sexpr(procname).toLowerCase();
+  def("foreach", function(procname, list) {
+    procname = sexpr(procname);
 
-    var routine = self.routines[procname];
+    var routine = self.routines.get(procname);
     if (!routine) { throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() })); }
     if (routine.special || routine.noeval) { throw new Error(format(__("Can't apply {proc} to special {name}"), { proc: "FOREACH", name: procname.toUpperCase() })); }
 
     lexpr(list).forEach(routine);
-  };
+  });
 
 
-  self.routines["map"] = function(procname, list) {
-    procname = sexpr(procname).toLowerCase();
+  def("map", function(procname, list) {
+    procname = sexpr(procname);
 
-    var routine = self.routines[procname];
+    var routine = self.routines.get(procname);
     if (!routine) { throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() })); }
     if (routine.special || routine.noeval) { throw new Error(format(__("Can't apply {proc} to special {name}"), { proc: "MAP", name: procname.toUpperCase() })); }
 
     return lexpr(list).map(routine);
-  };
+  });
 
   // Not Supported: map.se
 
-  self.routines["filter"] = function(procname, list) {
-    procname = sexpr(procname).toLowerCase();
+  def("filter", function(procname, list) {
+    procname = sexpr(procname);
 
-    var routine = self.routines[procname];
+    var routine = self.routines.get(procname);
     if (!routine) { throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() })); }
     if (routine.special || routine.noeval) { throw new Error(format(__("Can't apply {proc} to special {name}"), { proc: "FILTER", name: procname.toUpperCase() })); }
 
     return lexpr(list).filter(function(x) { return routine(x); });
-  };
+  });
 
-  self.routines["find"] = function(procname, list) {
-    procname = sexpr(procname).toLowerCase();
+  def("find", function(procname, list) {
+    procname = sexpr(procname);
 
-    var routine = self.routines[procname];
+    var routine = self.routines.get(procname);
     if (!routine) { throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() })); }
     if (routine.special || routine.noeval) { throw new Error(format(__("Can't apply {proc} to special {name}"), { proc: "FIND", name: procname.toUpperCase() })); }
 
@@ -2489,21 +2493,21 @@ function LogoInterpreter(turtle, stream, savehook)
       }
     }
     return [];
-  };
+  });
 
-  self.routines["reduce"] = function(procname, list) {
-    procname = sexpr(procname).toLowerCase();
+  def("reduce", function(procname, list) {
+    procname = sexpr(procname);
     list = lexpr(list);
     var value = arguments[2] !== (void 0) ? arguments[2] : list.shift();
 
-    var procedure = self.routines[procname];
+    var procedure = self.routines.get(procname);
     if (!procedure) { throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() })); }
     if (procedure.special || procedure.noeval) { throw new Error(format(__("Can't apply {proc} to special {name}"), { proc: "REDUCE", name: procname.toUpperCase() })); }
 
     // NOTE: Can't use procedure directly as reduce calls
     // targets w/ additional args and defaults initial value to undefined
     return list.reduce(function(a, b) { return procedure(a, b); }, value);
-  };
+  });
 
   // Not Supported: crossmap
   // Not Supported: cascade
@@ -2515,5 +2519,5 @@ function LogoInterpreter(turtle, stream, savehook)
   // Mark built-ins as such
   //----------------------------------------------------------------------
 
-  Object.keys(self.routines).forEach(function(x) { self.routines[x].primitive = true; });
+  self.routines.keys().forEach(function(x) { self.routines.get(x).primitive = true; });
 }
