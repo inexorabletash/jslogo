@@ -84,19 +84,23 @@ function LogoInterpreter(turtle, stream, savehook)
   // TODO: Allow case-sensitive and case-insensitive lookup
   // so CASEIGNOREDP can be implemented. Right now, callers
   // must do case folding.
-  function StringMap() {
+  function StringMap(case_fold) {
     var map = Object.create(null);
     return {
       get: function(key) {
+        if (case_fold) key = String(key).toLowerCase();
         return map['$' + key];
       },
       set: function (key, value) {
+        if (case_fold) key = String(key).toLowerCase();
         map['$' + key] = value;
       },
       has: function (key) {
+        if (case_fold) key = String(key).toLowerCase();
         return (('$' + key) in map);
       },
       'delete': function (key) {
+        if (case_fold) key = String(key).toLowerCase();
         return delete map['$' + key];
       },
       keys: function () {
@@ -151,8 +155,8 @@ function LogoInterpreter(turtle, stream, savehook)
   self.turtle = turtle;
   self.stream = stream;
   self.routines = {}; // TODO: use a StringMap
-  self.scopes = [new StringMap()];
-  self.plists = new StringMap();
+  self.scopes = [new StringMap(true)];
+  self.plists = new StringMap(true);
   self.prng = new PRNG(Math.random() * 0x7fffffff);
 
   //----------------------------------------------------------------------
@@ -373,7 +377,6 @@ function LogoInterpreter(turtle, stream, savehook)
   }
 
   self.maybegetvar = function(name) {
-    name = name.toLowerCase();
     for (var i = self.scopes.length - 1; i >= 0; --i) {
       if (self.scopes[i].has(name)) {
         return self.scopes[i].get(name).value;
@@ -383,7 +386,6 @@ function LogoInterpreter(turtle, stream, savehook)
   };
 
   self.getvar = function(name) {
-    name = name.toLowerCase();
     var value = self.maybegetvar(name);
     if (value !== (void 0)) {
       return value;
@@ -392,7 +394,6 @@ function LogoInterpreter(turtle, stream, savehook)
   };
 
   self.getlvalue = function(name) {
-    name = name.toLowerCase();
     for (var i = self.scopes.length - 1; i >= 0; --i) {
       if (self.scopes[i].has(name)) {
         return self.scopes[i].get(name);
@@ -402,7 +403,6 @@ function LogoInterpreter(turtle, stream, savehook)
   };
 
   self.setvar = function(name, value) {
-    name = name.toLowerCase();
     value = copy(value);
 
     // Find the variable in existing scope
@@ -929,9 +929,9 @@ function LogoInterpreter(turtle, stream, savehook)
     var func = function() {
 
       // Define a new scope
-      var scope = new StringMap();
+      var scope = new StringMap(true);
       for (var i = 0; i < inputs.length && i < arguments.length; i += 1) {
-        scope.set(inputs[i].toLowerCase(), {value: arguments[i]});
+        scope.set(inputs[i], {value: arguments[i]});
       }
       self.scopes.push(scope);
 
@@ -1698,12 +1698,12 @@ function LogoInterpreter(turtle, stream, savehook)
 
   self.routines["local"] = function(varname) {
     var localscope = self.scopes[self.scopes.length - 1];
-    Array.prototype.forEach.call(arguments, function(name) { localscope.set(sexpr(name).toLowerCase(), {value: (void 0)}); });
+    Array.prototype.forEach.call(arguments, function(name) { localscope.set(sexpr(name), {value: (void 0)}); });
   };
 
   self.routines["localmake"] = function(varname, value) {
     var localscope = self.scopes[self.scopes.length - 1];
-    localscope.set(sexpr(varname).toLowerCase(), {value: value});
+    localscope.set(sexpr(varname), {value: value});
   };
 
   self.routines["thing"] = function(varname) {
@@ -1712,7 +1712,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   self.routines["global"] = function(varname) {
     var globalscope = self.scopes[0];
-    Array.prototype.forEach.call(arguments, function(name) { globalscope.set(sexpr(name).toLowerCase(), {value: (void 0)}); });
+    Array.prototype.forEach.call(arguments, function(name) { globalscope.set(sexpr(name), {value: (void 0)}); });
   };
 
   //
@@ -1720,19 +1720,19 @@ function LogoInterpreter(turtle, stream, savehook)
   //
 
   self.routines["pprop"] = function(plistname, propname, value) {
-    plistname = sexpr(plistname).toLowerCase();
-    propname = sexpr(propname).toLowerCase();
+    plistname = sexpr(plistname);
+    propname = sexpr(propname);
     var plist = self.plists.get(plistname);
     if (!plist) {
-      plist = new StringMap();
+      plist = new StringMap(true);
       self.plists.set(plistname, plist);
     }
     plist.set(propname, value);
   };
 
   self.routines["gprop"] = function(plistname, propname) {
-    plistname = sexpr(plistname).toLowerCase();
-    propname = sexpr(propname).toLowerCase();
+    plistname = sexpr(plistname);
+    propname = sexpr(propname);
     var plist = self.plists.get(plistname);
     if (!plist || !plist.has(propname)) {
       return [];
@@ -1741,8 +1741,8 @@ function LogoInterpreter(turtle, stream, savehook)
   };
 
   self.routines["remprop"] = function(plistname, propname) {
-    plistname = sexpr(plistname).toLowerCase();
-    propname = sexpr(propname).toLowerCase();
+    plistname = sexpr(plistname);
+    propname = sexpr(propname);
     var plist = self.plists.get(plistname);
     if (plist) {
       plist['delete'](propname);
@@ -1754,7 +1754,7 @@ function LogoInterpreter(turtle, stream, savehook)
   };
 
   self.routines["plist"] = function(plistname) {
-    plistname = sexpr(plistname).toLowerCase();
+    plistname = sexpr(plistname);
     var plist = self.plists.get(plistname);
     if (!plist) {
       return [];
@@ -1798,7 +1798,7 @@ function LogoInterpreter(turtle, stream, savehook)
   };
 
   self.routines["plistp"] = self.routines["plist?"] = function(plistname) {
-    plistname = sexpr(plistname).toLowerCase();
+    plistname = sexpr(plistname);
     return self.plists.has(plistname) ? 1 : 0;
   };
 
@@ -1939,7 +1939,7 @@ function LogoInterpreter(turtle, stream, savehook)
       // TODO: global only?
       self.scopes.forEach(function(scope) {
         vars.forEach(function(name) {
-          name = sexpr(name).toLowerCase();
+          name = sexpr(name);
           scope['delete'](name);
         });
       });
@@ -1949,7 +1949,7 @@ function LogoInterpreter(turtle, stream, savehook)
     if (list.length) {
       var plists = lexpr(list.shift());
       plists.forEach(function(name) {
-        name = sexpr(name).toLowerCase();
+        name = sexpr(name);
         self.plists['delete'](name);
       });
     }
@@ -2014,7 +2014,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
     self.scopes.forEach(function(scope) {
       varnamelist.forEach(function(name) {
-        name = sexpr(name).toLowerCase();
+        name = sexpr(name);
         scope['delete'](name);
       });
     });
@@ -2029,7 +2029,7 @@ function LogoInterpreter(turtle, stream, savehook)
     }
 
     plnamelist.forEach(function(name) {
-      name = sexpr(name).toLowerCase();
+      name = sexpr(name);
       self.plists['delete'](name);
     });
   };
@@ -2054,7 +2054,7 @@ function LogoInterpreter(turtle, stream, savehook)
       // TODO: global only?
       self.scopes.forEach(function(scope) {
         vars.forEach(function(name) {
-          name = sexpr(name).toLowerCase();
+          name = sexpr(name);
           if (scope.has(name)) {
             scope.get(name).buried = true;
           }
@@ -2066,7 +2066,7 @@ function LogoInterpreter(turtle, stream, savehook)
     if (list.length) {
       var plists = lexpr(list.shift());
       plists.forEach(function(name) {
-        name = sexpr(name).toLowerCase();
+        name = sexpr(name);
         if (self.plists.has(name)) {
           self.plists.get(name).buried = true;
         }
@@ -2112,7 +2112,7 @@ function LogoInterpreter(turtle, stream, savehook)
       // TODO: global only?
       self.scopes.forEach(function(scope) {
         vars.forEach(function(name) {
-          name = sexpr(name).toLowerCase();
+          name = sexpr(name);
           if (scope.has(name)) {
             scope.get(name).buried = false;
           }
@@ -2124,7 +2124,7 @@ function LogoInterpreter(turtle, stream, savehook)
     if (list.length) {
       var plists = lexpr(list.shift());
       plists.forEach(function(name) {
-        name = sexpr(name).toLowerCase();
+        name = sexpr(name);
         if (self.plists.has(name)) {
           self.plists.get(name).buried = false;
         }
@@ -2167,7 +2167,7 @@ function LogoInterpreter(turtle, stream, savehook)
     if (list.length) {
       var vars = lexpr(list.shift());
       if (vars.length) {
-        name = sexpr(vars[0]).toLowerCase();
+        name = sexpr(vars[0]);
         // TODO: global only?
         return (self.scopes[0].has(name) && self.scopes[0].get(name).buried) ? 1 : 0;
       }
@@ -2177,7 +2177,7 @@ function LogoInterpreter(turtle, stream, savehook)
     if (list.length) {
       var plists = lexpr(list.shift());
       if (plists.length) {
-        name = sexpr(plists[0]).toLowerCase();
+        name = sexpr(plists[0]);
         return (self.plists.has(name) && self.plists.get(name).buried) ? 1 : 0;
       }
     }
