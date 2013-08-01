@@ -109,6 +109,11 @@ function LogoInterpreter(turtle, stream, savehook)
             return key.substring(1);
           }
         );
+      },
+      forEach: function(fn) {
+        return Object.keys(map).forEach(function(key) {
+          fn(map[key]);
+        });
       }
     };
   }
@@ -2083,18 +2088,18 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   def("buryall", function() {
-    self.routines.keys().forEach(function(name) {
-      self.routines.get(name).buried = true;
+    self.routines.forEach(function(proc) {
+      proc.buried = true;
     });
 
     self.scopes.forEach(function(scope) {
-      scope.keys().forEach(function(name) {
-        scope.get(name).buried = true;
+      scope.forEach(function(entry) {
+        entry.buried = true;
       });
     });
 
-    self.plists.keys().forEach(function (name) {
-      self.plists.get(name).buried = true;
+    self.plists.forEach(function(entry) {
+      entry.buried = true;
     });
   });
 
@@ -2141,18 +2146,18 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   def("unburyall", function() {
-    self.routines.keys().forEach(function(name) {
-      self.routines.get(name).buried = false;
+    self.routines.forEach(function(proc) {
+      proc.buried = false;
     });
 
     self.scopes.forEach(function(scope) {
-      scope.keys().forEach(function(name) {
-        scope.get(name).buried = false;
+      scope.forEach(function(entry) {
+        entry.buried = false;
       });
     });
 
-    self.plists.keys().forEach(function (name) {
-      self.plists.get(name).buried = false;
+    self.plists.forEach(function(entry) {
+      entry.buried = false;
     });
   });
 
@@ -2519,5 +2524,5 @@ function LogoInterpreter(turtle, stream, savehook)
   // Mark built-ins as such
   //----------------------------------------------------------------------
 
-  self.routines.keys().forEach(function(x) { self.routines.get(x).primitive = true; });
+  self.routines.forEach(function(proc) { proc.primitive = true; });
 }
