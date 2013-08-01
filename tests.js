@@ -1120,4 +1120,5 @@ test("Regression Tests", function() {
   this.assert_equals('repeat 1 [ make "v "abc\\;def ]  :v', "abc;def");
   this.assert_error('repeat 1 [ make "v "abc;def ]  :v', "Expected ']'");
   this.assert_equals('make "a [ a b c ]  make "b :a  pop "a  :b', ["a", "b", "c"]);
+  this.assert_equals('to foo :BAR output :BAR end  foo 1', 1);
 });

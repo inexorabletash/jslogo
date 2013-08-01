@@ -931,7 +931,7 @@ function LogoInterpreter(turtle, stream, savehook)
       // Define a new scope
       var scope = new StringMap();
       for (var i = 0; i < inputs.length && i < arguments.length; i += 1) {
-        scope.set(inputs[i], {value: arguments[i]});
+        scope.set(inputs[i].toLowerCase(), {value: arguments[i]});
       }
       self.scopes.push(scope);
 
