@@ -110,9 +110,12 @@ function LogoInterpreter(turtle, stream, savehook)
           }
         );
       },
+      empty: function() {
+        return Object.keys(map).length === 0;
+      },
       forEach: function(fn) {
         return Object.keys(map).forEach(function(key) {
-          fn(map[key]);
+          fn(key.substring(1), map[key]);
         });
       }
     };
@@ -826,8 +829,7 @@ function LogoInterpreter(turtle, stream, savehook)
   // API to allow pages to persist definitions
   self.procdefs = function() {
     var defs = [];
-    self.routines.keys().forEach(function(name) {
-      var proc = self.routines.get(name);
+    self.routines.forEach(function(name, proc) {
       if (!proc.primitive) {
         defs.push(self.definition(name, proc));
       }
@@ -1759,7 +1761,7 @@ function LogoInterpreter(turtle, stream, savehook)
     var plist = self.plists.get(plistname);
     if (plist) {
       plist['delete'](propname);
-      if (plist.keys().length === 0) {
+      if (plist.empty()) {
         // TODO: Do this? Loses state, e.g. unburies if buried
         self.plists['delete'](plistname);
       }
@@ -1774,9 +1776,9 @@ function LogoInterpreter(turtle, stream, savehook)
     }
 
     var result = [];
-    plist.keys().forEach(function (key) {
+    plist.forEach(function (key, value) {
       result.push(key);
-      result.push(copy(plist.get(key)));
+      result.push(copy(value));
     });
     return result;
   });
@@ -2088,17 +2090,17 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   def("buryall", function() {
-    self.routines.forEach(function(proc) {
+    self.routines.forEach(function(name, proc) {
       proc.buried = true;
     });
 
     self.scopes.forEach(function(scope) {
-      scope.forEach(function(entry) {
+      scope.forEach(function(name, entry) {
         entry.buried = true;
       });
     });
 
-    self.plists.forEach(function(entry) {
+    self.plists.forEach(function(name, entry) {
       entry.buried = true;
     });
   });
@@ -2146,17 +2148,17 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   def("unburyall", function() {
-    self.routines.forEach(function(proc) {
+    self.routines.forEach(function(name, proc) {
       proc.buried = false;
     });
 
     self.scopes.forEach(function(scope) {
-      scope.forEach(function(entry) {
+      scope.forEach(function(name, entry) {
         entry.buried = false;
       });
     });
 
-    self.plists.forEach(function(entry) {
+    self.plists.forEach(function(name, entry) {
       entry.buried = false;
     });
   });
@@ -2524,5 +2526,5 @@ function LogoInterpreter(turtle, stream, savehook)
   // Mark built-ins as such
   //----------------------------------------------------------------------
 
-  self.routines.forEach(function(proc) { proc.primitive = true; });
+  self.routines.forEach(function(name, proc) { proc.primitive = true; });
 }
