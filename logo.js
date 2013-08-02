@@ -31,8 +31,12 @@ function LogoInterpreter(turtle, stream, savehook)
   //----------------------------------------------------------------------
 
   function format(string, params) {
-    return string.replace(/\{(\w+)\}/g, function(m, n) {
-      return params[n];
+    return string.replace(/{(\w+)(:[UL])?}/g, function(m, n, o) {
+      switch (o) {
+        case ':U': return String(params[n]).toUpperCase();
+        case ':L': return String(params[n]).toLowerCase();
+        default: return params[n];
+      }
     });
   }
 
@@ -272,11 +276,11 @@ function LogoInterpreter(turtle, stream, savehook)
           var trailing_space = /^\s+/.test(string);
 
           if (prev === undefined ||
-                            (Type(prev) === 'word' && regexInfix.test(prev)) ||
-                            (Type(prev) === 'word' && prev === '(') ||
-                            (leading_space && !trailing_space)
-                           ) {
-                             atom = UNARY_MINUS;
+              (Type(prev) === 'word' && regexInfix.test(prev)) ||
+              (Type(prev) === 'word' && prev === '(') ||
+              (leading_space && !trailing_space)
+             ) {
+               atom = UNARY_MINUS;
           }
 
         }
@@ -296,7 +300,7 @@ function LogoInterpreter(turtle, stream, savehook)
   }
 
   function isWS(c) {
-    return c === ' ' || c === '\t' || c === '\r' || c === '\n';;
+    return c === ' ' || c === '\t' || c === '\r' || c === '\n';
   }
 
   function parseList(string) {
@@ -397,7 +401,7 @@ function LogoInterpreter(turtle, stream, savehook)
     if (value !== undefined) {
       return value;
     }
-    throw new Error(format(__("Don't know about variable {name}"), { name: name.toUpperCase() }));
+    throw new Error(format(__("Don't know about variable {name:U}"), { name: name }));
   };
 
   self.getlvalue = function(name) {
@@ -406,7 +410,7 @@ function LogoInterpreter(turtle, stream, savehook)
         return self.scopes[i].get(name);
       }
     }
-    throw new Error(format(__("Don't know about variable {name}"), { name: name.toUpperCase() }));
+    throw new Error(format(__("Don't know about variable {name:U}"), { name: name }));
   };
 
   self.setvar = function(name, value) {
@@ -629,7 +633,7 @@ function LogoInterpreter(turtle, stream, savehook)
   self.dispatch = function(name, tokenlist, natural) {
     var procedure = self.routines.get(name);
     if (!procedure) {
-      throw new Error(format(__("Don't know how to {name}"), { name: name.toUpperCase() }));
+      throw new Error(format(__("Don't know how to {name:U}"), { name: name }));
     }
 
     if (procedure.special) {
@@ -924,7 +928,7 @@ function LogoInterpreter(turtle, stream, savehook)
     }
 
     if (self.routines.has(name) && self.routines.get(name).primitive) {
-      throw new Error(format(__("Can't redefine primitive {name}"), { name: name.toUpperCase() }));
+      throw new Error(format(__("Can't redefine primitive {name:U}"), { name: name }));
     }
 
     var inputs = [];
@@ -993,12 +997,10 @@ function LogoInterpreter(turtle, stream, savehook)
     var name = sexpr(list);
     var proc = self.routines.get(name);
     if (!proc) {
-      throw new Error(format(__("Don't know how to {name}"),
-                             { name: name.toUpperCase() }));
+      throw new Error(format(__("Don't know how to {name:U}"), { name: name }));
     }
     if (!proc.inputs) {
-      throw new Error(format(__("Can't show definition of primitive {name}"),
-                             { name: name.toUpperCase() }));
+      throw new Error(format(__("Can't show definition of primitive {name:U}"), { name: name }));
     }
 
     return self.definition(name, proc);
@@ -1698,13 +1700,12 @@ function LogoInterpreter(turtle, stream, savehook)
     oldname = sexpr(oldname);
 
     if (!self.routines.has(oldname)) {
-      throw new Error(format(__("Don't know how to {name}"), { name: oldname.toUpperCase() }));
+      throw new Error(format(__("Don't know how to {name:U}"), { name: oldname }));
     }
 
     if (self.routines.has(newname)) {
       if (self.routines.get(newname).special) {
-        throw new Error(format(__("Can't overwrite special form {name}"),
-                               { name: newname.toUpperCase() }));
+        throw new Error(format(__("Can't overwrite special form {name:U}"), { name: newname }));
       }
       if (self.routines.get(newname).primitive && !self.maybegetvar("redefp")) {
         throw new Error(__("Can't overwrite primitives unless REDEFP is TRUE"));
@@ -1962,8 +1963,7 @@ function LogoInterpreter(turtle, stream, savehook)
         name = sexpr(name);
         if (self.routines.has(name)) {
           if (self.routines.get(name).special) {
-            throw new Error(format(__("Can't ERASE special form {name}"),
-                                   { name: name.toUpperCase() }));
+            throw new Error(format(__("Can't ERASE special form {name:U}"), { name: name }));
           }
           if (!self.routines.get(name).primitive || self.maybegetvar("redefp")) {
             self.routines['delete'](name);
@@ -2460,11 +2460,11 @@ function LogoInterpreter(turtle, stream, savehook)
 
     var routine = self.routines.get(procname);
     if (!routine) {
-      throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() }));
+      throw new Error(format(__("Don't know how to {name:U}"), { name: procname }));
     }
     if (routine.special || routine.noeval) {
-      throw new Error(format(__("Can't apply {proc} to special {name}"),
-                             { proc: "APPLY", name: procname.toUpperCase() }));
+      throw new Error(format(__("Can't apply {proc} to special {name:U}"),
+                             { proc: "APPLY", name: procname }));
     }
 
     return routine.apply(null, lexpr(list));
@@ -2475,11 +2475,11 @@ function LogoInterpreter(turtle, stream, savehook)
 
     var routine = self.routines.get(procname);
     if (!routine) {
-      throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() }));
+      throw new Error(format(__("Don't know how to {name:U}"), { name: procname }));
     }
     if (routine.special || routine.noeval) {
-      throw new Error(format(__("Can't apply {proc} to special {name}"),
-                             { proc: "INVOKE", name: procname.toUpperCase() }));
+      throw new Error(format(__("Can't apply {proc} to special {name:U}"),
+                             { proc: "INVOKE", name: procname }));
     }
 
     var args = [];
@@ -2495,11 +2495,11 @@ function LogoInterpreter(turtle, stream, savehook)
 
     var routine = self.routines.get(procname);
     if (!routine) {
-      throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() }));
+      throw new Error(format(__("Don't know how to {name:U}"), { name: procname }));
     }
     if (routine.special || routine.noeval) {
-      throw new Error(format(__("Can't apply {proc} to special {name}"),
-                             { proc: "FOREACH", name: procname.toUpperCase() }));
+      throw new Error(format(__("Can't apply {proc} to special {name:U}"),
+                             { proc: "FOREACH", name: procname }));
     }
 
     lexpr(list).forEach(routine);
@@ -2511,11 +2511,11 @@ function LogoInterpreter(turtle, stream, savehook)
 
     var routine = self.routines.get(procname);
     if (!routine) {
-      throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() }));
+      throw new Error(format(__("Don't know how to {name:U}"), { name: procname }));
     }
     if (routine.special || routine.noeval) {
-      throw new Error(format(__("Can't apply {proc} to special {name}"),
-                             { proc: "MAP", name: procname.toUpperCase() }));
+      throw new Error(format(__("Can't apply {proc} to special {name:U}"),
+                             { proc: "MAP", name: procname }));
     }
 
     return lexpr(list).map(routine);
@@ -2528,11 +2528,11 @@ function LogoInterpreter(turtle, stream, savehook)
 
     var routine = self.routines.get(procname);
     if (!routine) {
-      throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() }));
+      throw new Error(format(__("Don't know how to {name:U}"), { name: procname }));
     }
     if (routine.special || routine.noeval) {
-      throw new Error(format(__("Can't apply {proc} to special {name}"),
-                             { proc: "FILTER", name: procname.toUpperCase() }));
+      throw new Error(format(__("Can't apply {proc} to special {name:U}"),
+                             { proc: "FILTER", name: procname }));
     }
 
     return lexpr(list).filter(function(x) { return routine(x); });
@@ -2543,11 +2543,11 @@ function LogoInterpreter(turtle, stream, savehook)
 
     var routine = self.routines.get(procname);
     if (!routine) {
-      throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() }));
+      throw new Error(format(__("Don't know how to {name:U}"), { name: procname }));
     }
     if (routine.special || routine.noeval) {
-      throw new Error(format(__("Can't apply {proc} to special {name}"),
-                             { proc: "FIND", name: procname.toUpperCase() }));
+      throw new Error(format(__("Can't apply {proc} to special {name:U}"),
+                             { proc: "FIND", name: procname }));
     }
 
     list = lexpr(list);
@@ -2567,11 +2567,11 @@ function LogoInterpreter(turtle, stream, savehook)
 
     var procedure = self.routines.get(procname);
     if (!procedure) {
-      throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() }));
+      throw new Error(format(__("Don't know how to {name:U}"), { name: procname }));
     }
     if (procedure.special || procedure.noeval) {
-      throw new Error(format(__("Can't apply {proc} to special {name}"),
-                             { proc: "REDUCE", name: procname.toUpperCase() }));
+      throw new Error(format(__("Can't apply {proc} to special {name:U}"),
+                             { proc: "REDUCE", name: procname }));
     }
 
     // NOTE: Can't use procedure directly as reduce calls
