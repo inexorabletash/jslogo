@@ -181,7 +181,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
 
   function Type(atom) {
-    if (atom === (void 0)) {
+    if (atom === undefined) {
       // TODO: Should be caught higher upstream than this
       throw new Error(__("No output from procedure"));
     } else if (typeof atom === 'string') {
@@ -214,8 +214,8 @@ function LogoInterpreter(turtle, stream, savehook)
   //
 
   function parse(string) {
-    if (string === (void 0)) {
-      return (void 0); // TODO: Replace this with ...?
+    if (string === undefined) {
+      return undefined; // TODO: Replace this with ...?
     }
 
     var atoms = [],
@@ -228,7 +228,7 @@ function LogoInterpreter(turtle, stream, savehook)
     string = string.replace(/\r/g, '').replace(/\n/g, ' ');
     string = string.replace(/^\s+/, '').replace(/\s+$/, '');
 
-    while (string !== (void 0) && string !== '') {
+    while (string !== undefined && string !== '') {
       var atom;
 
       // Ignore (but track) leading space - needed for unary minus disambiguation
@@ -271,7 +271,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
           var trailing_space = /^\s+/.test(string);
 
-          if (prev === (void 0) ||
+          if (prev === undefined ||
                             (Type(prev) === 'word' && regexInfix.test(prev)) ||
                             (Type(prev) === 'word' && prev === '(') ||
                             (leading_space && !trailing_space)
@@ -389,12 +389,12 @@ function LogoInterpreter(turtle, stream, savehook)
         return self.scopes[i].get(name).value;
       }
     }
-    return (void 0);
+    return undefined;
   };
 
   self.getvar = function(name) {
     var value = self.maybegetvar(name);
-    if (value !== (void 0)) {
+    if (value !== undefined) {
       return value;
     }
     throw new Error(format(__("Don't know about variable {name}"), { name: name.toUpperCase() }));
@@ -668,7 +668,7 @@ function LogoInterpreter(turtle, stream, savehook)
   // Arithmetic expression convenience function
   //----------------------------------------------------------------------
   function aexpr(atom) {
-    if (atom === (void 0)) {
+    if (atom === undefined) {
       throw new Error(__("Expected number"));
     }
     switch (Type(atom)) {
@@ -686,7 +686,7 @@ function LogoInterpreter(turtle, stream, savehook)
   // String expression convenience function
   //----------------------------------------------------------------------
   function sexpr(atom) {
-    if (atom === (void 0)) { throw new Error(__("Expected string")); }
+    if (atom === undefined) { throw new Error(__("Expected string")); }
     if (atom === UNARY_MINUS) { return '-'; }
     switch (Type(atom)) {
     case 'word':
@@ -704,7 +704,7 @@ function LogoInterpreter(turtle, stream, savehook)
   function lexpr(atom) {
     // TODO: If this is an input, output needs to be re-stringified
 
-    if (atom === (void 0)) { throw new Error(__("Expected list")); }
+    if (atom === undefined) { throw new Error(__("Expected list")); }
     switch (Type(atom)) {
     case 'word':
       return [].slice.call(atom);
@@ -744,7 +744,7 @@ function LogoInterpreter(turtle, stream, savehook)
       return true;
     } else if (typeof a !== typeof b) {
       return false;
-    } else if (epsilon !== (void 0) && typeof a === 'number') {
+    } else if (epsilon !== undefined && typeof a === 'number') {
       return Math.abs(a - b) < epsilon;
     } else {
       return a === b;
@@ -769,7 +769,7 @@ function LogoInterpreter(turtle, stream, savehook)
     while (statements.length) {
       result = self.evaluateExpression(statements);
 
-      if (result !== (void 0) && !options.returnResult) {
+      if (result !== undefined && !options.returnResult) {
         throw new Error(format(__("Don't know what to do with {result}"), {result: result}));
       }
     }
@@ -792,7 +792,7 @@ function LogoInterpreter(turtle, stream, savehook)
     } catch (e) {
       if (e instanceof Bye) {
         // clean exit
-        return (void 0);
+        return undefined;
       } else {
         throw e;
       }
@@ -866,7 +866,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   function mapreduce(list, mapfunc, reducefunc, initial) {
     // NOTE: Uses Array.XXX format to handle array-like types: arguments and strings
-    if (initial === (void 0)) {
+    if (initial === undefined) {
       return [].reduce.call(
         [].map.call(list, mapfunc), reducefunc);
     } else {
@@ -1335,7 +1335,7 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   def("quotient", function(a, b) {
-    if (b !== (void 0)) {
+    if (b !== undefined) {
       return aexpr(a) / aexpr(b);
     } else {
       return 1 / aexpr(a);
@@ -1527,8 +1527,8 @@ function LogoInterpreter(turtle, stream, savehook)
     turtle.setposition(aexpr(l[0]), aexpr(l[1]));
   });
   def("setxy", function(x, y) { turtle.setposition(aexpr(x), aexpr(y)); });
-  def("setx", function(x) { turtle.setposition(aexpr(x), (void 0)); }); // TODO: Replace with ...?
-  def("sety", function(y) { turtle.setposition((void 0), aexpr(y)); });
+  def("setx", function(x) { turtle.setposition(aexpr(x), undefined); }); // TODO: Replace with ...?
+  def("sety", function(y) { turtle.setposition(undefined, aexpr(y)); });
   def(["setheading", "seth"], function(a) { turtle.setheading(aexpr(a)); });
 
   def("home", function() { turtle.home(); });
@@ -1730,7 +1730,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("local", function(varname) {
     var localscope = self.scopes[self.scopes.length - 1];
-    [].forEach.call(arguments, function(name) { localscope.set(sexpr(name), {value: (void 0)}); });
+    [].forEach.call(arguments, function(name) { localscope.set(sexpr(name), {value: undefined}); });
   });
 
   def("localmake", function(varname, value) {
@@ -1744,7 +1744,8 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("global", function(varname) {
     var globalscope = self.scopes[0];
-    [].forEach.call(arguments, function(name) { globalscope.set(sexpr(name), {value: (void 0)}); });
+    [].forEach.call(arguments,
+                    function(name) { globalscope.set(sexpr(name), {value: undefined}); });
   });
 
   //
@@ -1823,7 +1824,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def(["namep", "name?"], function(varname) {
     try {
-      return self.getvar(sexpr(varname)) !== (void 0) ? 1 : 0;
+      return self.getvar(sexpr(varname)) !== undefined ? 1 : 0;
     } catch (e) {
       return 0;
     }
@@ -1842,8 +1843,10 @@ function LogoInterpreter(turtle, stream, savehook)
     return [
       self.routines.keys().filter(function(x) {
         return !self.routines.get(x).primitive && !self.routines.get(x).buried; }),
-      self.scopes.reduce(function(list, scope) {
-        return list.concat(scope.keys().filter(function(x) { return !scope.get(x).buried; })); }, []),
+      self.scopes.reduce(
+        function(list, scope) {
+          return list.concat(scope.keys().filter(function(x) { return !scope.get(x).buried; })); },
+        []),
       self.plists.keys().filter(function(x) { return !self.plists.get(x).buried; })
     ];
   });
@@ -1852,8 +1855,10 @@ function LogoInterpreter(turtle, stream, savehook)
     return [
       self.routines.keys().filter(function(x) {
         return !self.routines.get(x).primitive && self.routines.get(x).buried; }),
-      self.scopes.reduce(function(list, scope) {
-        return list.concat(scope.keys().filter(function(x) { return scope.get(x).buried; })); }, []),
+      self.scopes.reduce(
+        function(list, scope) {
+          return list.concat(scope.keys().filter(function(x) { return scope.get(x).buried; })); },
+        []),
       self.plists.keys().filter(function(x) { return self.plists.get(x).buried; })
     ];
   });
@@ -1862,8 +1867,10 @@ function LogoInterpreter(turtle, stream, savehook)
     return [
       self.routines.keys().filter(function(x) {
         return !self.routines.get(x).primitive && self.routines.get(x).traced; }),
-      self.scopes.reduce(function(list, scope) {
-        return list.concat(scope.keys().filter(function(x) { return scope.get(x).traced; })); }, []),
+      self.scopes.reduce(
+        function(list, scope) {
+          return list.concat(scope.keys().filter(function(x) { return scope.get(x).traced; })); },
+        []),
       self.plists.keys().filter(function(x) { return self.plists.get(x).traced; })
     ];
   });
@@ -1872,8 +1879,10 @@ function LogoInterpreter(turtle, stream, savehook)
     return [
       self.routines.keys().filter(function(x) {
         return !self.routines.get(x).primitive && self.routines.get(x).stepped; }),
-      self.scopes.reduce(function(list, scope) {
-        return list.concat(scope.keys().filter(function(x) { return scope.get(x).stepped; })); }, []),
+      self.scopes.reduce(
+        function(list, scope) {
+          return list.concat(scope.keys().filter(function(x) { return scope.get(x).stepped; })); },
+        []),
       self.plists.keys().filter(function(x) { return self.plists.get(x).stepped; })
     ];
   });
@@ -1953,7 +1962,8 @@ function LogoInterpreter(turtle, stream, savehook)
         name = sexpr(name);
         if (self.routines.has(name)) {
           if (self.routines.get(name).special) {
-            throw new Error(format(__("Can't ERASE special form {name}"), { name: name.toUpperCase() }));
+            throw new Error(format(__("Can't ERASE special form {name}"),
+                                   { name: name.toUpperCase() }));
           }
           if (!self.routines.get(name).primitive || self.maybegetvar("redefp")) {
             self.routines['delete'](name);
@@ -2236,7 +2246,7 @@ function LogoInterpreter(turtle, stream, savehook)
   def("runresult", function(statements) {
     statements = reparse(lexpr(statements));
     var result = self.execute(statements, {returnResult: true});
-    if (result !== (void 0)) {
+    if (result !== undefined) {
       return [result];
     } else {
       return [];
@@ -2327,7 +2337,7 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   def(".maybeoutput", function(value) {
-    if (value !== (void 0)) {
+    if (value !== undefined) {
       throw new Output(value);
     } else {
       throw new Output();
@@ -2358,7 +2368,8 @@ function LogoInterpreter(turtle, stream, savehook)
       self.setvar(varname, current);
       self.execute(statements);
 
-      step = (control.length) ? aexpr(self.evaluateExpression(control.slice())) : sign(limit - start);
+      step = (control.length) ?
+        aexpr(self.evaluateExpression(control.slice())) : sign(limit - start);
       current += step;
     }
   });
@@ -2414,7 +2425,7 @@ function LogoInterpreter(turtle, stream, savehook)
         return self.evaluateExpression(clause);
       }
     }
-    return (void 0);
+    return undefined;
   });
 
   def("cond", function(clauses) {
@@ -2430,7 +2441,7 @@ function LogoInterpreter(turtle, stream, savehook)
         return self.evaluateExpression(clause);
       }
     }
-    return (void 0);
+    return undefined;
   });
 
   //
@@ -2448,8 +2459,13 @@ function LogoInterpreter(turtle, stream, savehook)
     procname = sexpr(procname);
 
     var routine = self.routines.get(procname);
-    if (!routine) { throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() })); }
-    if (routine.special || routine.noeval) { throw new Error(format(__("Can't apply {proc} to special {name}"), { proc: "APPLY", name: procname.toUpperCase() })); }
+    if (!routine) {
+      throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() }));
+    }
+    if (routine.special || routine.noeval) {
+      throw new Error(format(__("Can't apply {proc} to special {name}"),
+                             { proc: "APPLY", name: procname.toUpperCase() }));
+    }
 
     return routine.apply(null, lexpr(list));
   });
@@ -2458,8 +2474,13 @@ function LogoInterpreter(turtle, stream, savehook)
     procname = sexpr(procname);
 
     var routine = self.routines.get(procname);
-    if (!routine) { throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() })); }
-    if (routine.special || routine.noeval) { throw new Error(format(__("Can't apply {proc} to special {name}"), { proc: "INVOKE", name: procname.toUpperCase() })); }
+    if (!routine) {
+      throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() }));
+    }
+    if (routine.special || routine.noeval) {
+      throw new Error(format(__("Can't apply {proc} to special {name}"),
+                             { proc: "INVOKE", name: procname.toUpperCase() }));
+    }
 
     var args = [];
     for (var i = 1; i < arguments.length; i += 1) {
@@ -2473,8 +2494,13 @@ function LogoInterpreter(turtle, stream, savehook)
     procname = sexpr(procname);
 
     var routine = self.routines.get(procname);
-    if (!routine) { throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() })); }
-    if (routine.special || routine.noeval) { throw new Error(format(__("Can't apply {proc} to special {name}"), { proc: "FOREACH", name: procname.toUpperCase() })); }
+    if (!routine) {
+      throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() }));
+    }
+    if (routine.special || routine.noeval) {
+      throw new Error(format(__("Can't apply {proc} to special {name}"),
+                             { proc: "FOREACH", name: procname.toUpperCase() }));
+    }
 
     lexpr(list).forEach(routine);
   });
@@ -2484,8 +2510,13 @@ function LogoInterpreter(turtle, stream, savehook)
     procname = sexpr(procname);
 
     var routine = self.routines.get(procname);
-    if (!routine) { throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() })); }
-    if (routine.special || routine.noeval) { throw new Error(format(__("Can't apply {proc} to special {name}"), { proc: "MAP", name: procname.toUpperCase() })); }
+    if (!routine) {
+      throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() }));
+    }
+    if (routine.special || routine.noeval) {
+      throw new Error(format(__("Can't apply {proc} to special {name}"),
+                             { proc: "MAP", name: procname.toUpperCase() }));
+    }
 
     return lexpr(list).map(routine);
   });
@@ -2496,8 +2527,13 @@ function LogoInterpreter(turtle, stream, savehook)
     procname = sexpr(procname);
 
     var routine = self.routines.get(procname);
-    if (!routine) { throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() })); }
-    if (routine.special || routine.noeval) { throw new Error(format(__("Can't apply {proc} to special {name}"), { proc: "FILTER", name: procname.toUpperCase() })); }
+    if (!routine) {
+      throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() }));
+    }
+    if (routine.special || routine.noeval) {
+      throw new Error(format(__("Can't apply {proc} to special {name}"),
+                             { proc: "FILTER", name: procname.toUpperCase() }));
+    }
 
     return lexpr(list).filter(function(x) { return routine(x); });
   });
@@ -2506,8 +2542,13 @@ function LogoInterpreter(turtle, stream, savehook)
     procname = sexpr(procname);
 
     var routine = self.routines.get(procname);
-    if (!routine) { throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() })); }
-    if (routine.special || routine.noeval) { throw new Error(format(__("Can't apply {proc} to special {name}"), { proc: "FIND", name: procname.toUpperCase() })); }
+    if (!routine) {
+      throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() }));
+    }
+    if (routine.special || routine.noeval) {
+      throw new Error(format(__("Can't apply {proc} to special {name}"),
+                             { proc: "FIND", name: procname.toUpperCase() }));
+    }
 
     list = lexpr(list);
     for (var i = 0; i < list.length; i += 1) {
@@ -2522,11 +2563,16 @@ function LogoInterpreter(turtle, stream, savehook)
   def("reduce", function(procname, list) {
     procname = sexpr(procname);
     list = lexpr(list);
-    var value = arguments[2] !== (void 0) ? arguments[2] : list.shift();
+    var value = arguments[2] !== undefined ? arguments[2] : list.shift();
 
     var procedure = self.routines.get(procname);
-    if (!procedure) { throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() })); }
-    if (procedure.special || procedure.noeval) { throw new Error(format(__("Can't apply {proc} to special {name}"), { proc: "REDUCE", name: procname.toUpperCase() })); }
+    if (!procedure) {
+      throw new Error(format(__("Don't know how to {name}"), { name: procname.toUpperCase() }));
+    }
+    if (procedure.special || procedure.noeval) {
+      throw new Error(format(__("Can't apply {proc} to special {name}"),
+                             { proc: "REDUCE", name: procname.toUpperCase() }));
+    }
 
     // NOTE: Can't use procedure directly as reduce calls
     // targets w/ additional args and defaults initial value to undefined
