@@ -57,8 +57,8 @@ function LogoInterpreter(turtle, stream, savehook)
       parms.push('a' + i);
     }
 
-    var f = eval('f = (function ' + func.name +
-                 '(' + parms.join(',') + ') { return func.apply(this, arguments); })');
+    var f = eval('(function ' + func.name + '(' + parms.join(',') + ')' +
+                 '{ return func.apply(this, arguments); })');
     return f;
   }
 
