@@ -53,7 +53,8 @@ function LogoInterpreter(turtle, stream, savehook)
       parms.push('a' + i);
     }
 
-    var f = eval('f = (function ' + func.name + '(' + parms.join(',') + ') { return func.apply(this, arguments); })');
+    var f = eval('f = (function ' + func.name +
+                 '(' + parms.join(',') + ') { return func.apply(this, arguments); })');
     return f;
   }
 
@@ -81,9 +82,6 @@ function LogoInterpreter(turtle, stream, savehook)
     this.next();
   }
 
-  // TODO: Allow case-sensitive and case-insensitive lookup
-  // so CASEIGNOREDP can be implemented. Right now, callers
-  // must do case folding.
   function StringMap(case_fold) {
     var map = Object.create(null);
     return {
@@ -184,7 +182,8 @@ function LogoInterpreter(turtle, stream, savehook)
 
   function Type(atom) {
     if (atom === (void 0)) {
-      throw new Error(__("No output from procedure")); // TODO: Should be caught higher upstream than this
+      // TODO: Should be caught higher upstream than this
+      throw new Error(__("No output from procedure"));
     } else if (typeof atom === 'string') {
       return 'word';
     } else if (typeof atom === 'number') {
@@ -321,7 +320,7 @@ function LogoInterpreter(turtle, stream, savehook)
         atom = '';
       }
 
-      if (c === '') {
+      if (!c) {
         throw new Error(__("Expected ']'"));
       }
       if (c === ']') {
@@ -361,7 +360,7 @@ function LogoInterpreter(turtle, stream, savehook)
         atom = '';
       }
 
-      if (c === '') {
+      if (!c) {
         throw new Error(__("Expected '}'"));
       }
       if (c === '}') {
@@ -629,7 +628,9 @@ function LogoInterpreter(turtle, stream, savehook)
 
   self.dispatch = function(name, tokenlist, natural) {
     var procedure = self.routines.get(name);
-    if (!procedure) { throw new Error(format(__("Don't know how to {name}"), { name: name.toUpperCase() })); }
+    if (!procedure) {
+      throw new Error(format(__("Don't know how to {name}"), { name: name.toUpperCase() }));
+    }
 
     if (procedure.special) {
       // Special routines are built-ins that get handed the token list:
@@ -866,9 +867,11 @@ function LogoInterpreter(turtle, stream, savehook)
   function mapreduce(list, mapfunc, reducefunc, initial) {
     // NOTE: Uses Array.XXX format to handle array-like types: arguments and strings
     if (initial === (void 0)) {
-      return Array.prototype.reduce.call(Array.prototype.map.call(list, mapfunc), reducefunc);
+      return [].reduce.call(
+        [].map.call(list, mapfunc), reducefunc);
     } else {
-      return Array.prototype.reduce.call(Array.prototype.map.call(list, mapfunc), reducefunc, initial);
+      return [].reduce.call(
+        [].map.call(list, mapfunc), reducefunc, initial);
     }
   }
 
@@ -901,6 +904,7 @@ function LogoInterpreter(turtle, stream, savehook)
         fn[key] = props[key];
       });
     }
+    fn.primitive = true;
     if (Array.isArray(name)) {
       name.forEach(function(name) {
         self.routines.set(name, fn);
@@ -988,8 +992,14 @@ function LogoInterpreter(turtle, stream, savehook)
 
     var name = sexpr(list);
     var proc = self.routines.get(name);
-    if (!proc) { throw new Error(format(__("Don't know how to {name}"), { name: name.toUpperCase() })); }
-    if (!proc.inputs) { throw new Error(format(__("Can't show definition of primitive {name}"), { name: name.toUpperCase() })); }
+    if (!proc) {
+      throw new Error(format(__("Don't know how to {name}"),
+                             { name: name.toUpperCase() }));
+    }
+    if (!proc.inputs) {
+      throw new Error(format(__("Can't show definition of primitive {name}"),
+                             { name: name.toUpperCase() }));
+    }
 
     return self.definition(name, proc);
   });
@@ -1006,11 +1016,12 @@ function LogoInterpreter(turtle, stream, savehook)
   //
 
   def("word", function(word1, word2) {
-    return arguments.length ? mapreduce(arguments, sexpr, function(a, b) { return a + " " + b; }) : "";
+    return arguments.length ?
+      mapreduce(arguments, sexpr, function(a, b) { return a + " " + b; }) : "";
   });
 
   def("list", function(thing1, thing2) {
-    return Array.prototype.map.call(arguments, function(x) { return x; }); // Make a copy
+    return [].map.call(arguments, function(x) { return x; }); // Make a copy
   });
 
   def(["sentence", "se"], function(thing1, thing2) {
@@ -1124,7 +1135,9 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("remdup", function(list) {
     var dict = Object.create(null);
-    return lexpr(list).filter(function(x) { if (!dict[x]) { dict[x] = true; return true; } else { return false; } });
+    return lexpr(list).filter(function(x) {
+      if (!dict[x]) { dict[x] = true; return true; } else { return false; }
+    });
   });
 
   // TODO: quoted
@@ -1187,7 +1200,9 @@ function LogoInterpreter(turtle, stream, savehook)
     default: return 0;
     }
   });
-  def(["beforep", "before?"], function(word1, word2) { return sexpr(word1) < sexpr(word2) ? 1 : 0; });
+  def(["beforep", "before?"], function(word1, word2) {
+    return sexpr(word1) < sexpr(word2) ? 1 : 0;
+  });
 
   // Not Supported: .eq
   // Not Supported: vbarredp
@@ -1224,15 +1239,15 @@ function LogoInterpreter(turtle, stream, savehook)
   // 3.1 Transmitters
 
   def(["print", "pr"], function(thing) {
-    var s = Array.prototype.map.call(arguments, stringify_nodecorate).join(" ");
+    var s = [].map.call(arguments, stringify_nodecorate).join(" ");
     self.stream.write(s, "\n");
   });
   def("type", function(thing) {
-    var s = Array.prototype.map.call(arguments, stringify_nodecorate).join("");
+    var s = [].map.call(arguments, stringify_nodecorate).join("");
     self.stream.write(s);
   });
   def("show", function(thing) {
-    var s = Array.prototype.map.call(arguments, stringify).join(" ");
+    var s = [].map.call(arguments, stringify).join(" ");
     self.stream.write(s, "\n");
   });
 
@@ -1479,15 +1494,16 @@ function LogoInterpreter(turtle, stream, savehook)
   def("false", function() { return 0; });
 
   def("and", function(a, b) {
-    return Array.prototype.every.call(arguments, function(f) { return f(); }) ? 1 : 0;
+    return [].every.call(arguments, function(f) { return f(); }) ? 1 : 0;
   }, {noeval: true});
 
   def("or", function(a, b) {
-    return Array.prototype.some.call(arguments, function(f) { return f(); }) ? 1 : 0;
+    return [].some.call(arguments, function(f) { return f(); }) ? 1 : 0;
   }, {noeval: true});
 
   def("xor", function(a, b) {
-    return mapreduce(arguments, aexpr, function(a, b) { return Boolean(a) !== Boolean(b); }, 0) ? 1 : 0;
+    return mapreduce(arguments, aexpr,
+                     function(a, b) { return Boolean(a) !== Boolean(b); }, 0) ? 1 : 0;
   });
   def("not", function(a) {
     return !aexpr(a) ? 1 : 0;
@@ -1562,7 +1578,7 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   def("label", function(a) {
-    var s = Array.prototype.map.call(arguments, stringify_nodecorate).join(" ");
+    var s = [].map.call(arguments, stringify_nodecorate).join(" ");
     turtle.drawtext(s);
   });
 
@@ -1687,7 +1703,8 @@ function LogoInterpreter(turtle, stream, savehook)
 
     if (self.routines.has(newname)) {
       if (self.routines.get(newname).special) {
-        throw new Error(format(__("Can't overwrite special form {name}"), { name: newname.toUpperCase() }));
+        throw new Error(format(__("Can't overwrite special form {name}"),
+                               { name: newname.toUpperCase() }));
       }
       if (self.routines.get(newname).primitive && !self.maybegetvar("redefp")) {
         throw new Error(__("Can't overwrite primitives unless REDEFP is TRUE"));
@@ -1713,7 +1730,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("local", function(varname) {
     var localscope = self.scopes[self.scopes.length - 1];
-    Array.prototype.forEach.call(arguments, function(name) { localscope.set(sexpr(name), {value: (void 0)}); });
+    [].forEach.call(arguments, function(name) { localscope.set(sexpr(name), {value: (void 0)}); });
   });
 
   def("localmake", function(varname, value) {
@@ -1727,7 +1744,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("global", function(varname) {
     var globalscope = self.scopes[0];
-    Array.prototype.forEach.call(arguments, function(name) { globalscope.set(sexpr(name), {value: (void 0)}); });
+    [].forEach.call(arguments, function(name) { globalscope.set(sexpr(name), {value: (void 0)}); });
   });
 
   //
@@ -2520,11 +2537,4 @@ function LogoInterpreter(turtle, stream, savehook)
   // Not Supported: cascade
   // Not Supported: cascade.2
   // Not Supported: transfer
-
-
-  //----------------------------------------------------------------------
-  // Mark built-ins as such
-  //----------------------------------------------------------------------
-
-  self.routines.forEach(function(name, proc) { proc.primitive = true; });
 }
