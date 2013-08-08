@@ -502,13 +502,12 @@ window.addEventListener('load', function() {
     logo.run(def);
   });
 
-  function saveCanvasAs(selector, filename) {
+  function saveDataAs(dataURL, filename) {
     if (!('download' in document.createElement('a')))
       return false;
-    var canvas = document.querySelector(selector);
     var anchor = document.createElement('a');
+    anchor.href = dataURL;
     anchor.download = filename;
-    anchor.href = canvas.toDataURL('image/png');
     var event = document.createEvent('MouseEvents');
     event.initMouseEvent('click', true, true, false, self,
                          0, 0, 0, 0, 0, false, false, false, false, 0, null);
@@ -516,8 +515,16 @@ window.addEventListener('load', function() {
     return true;
   }
 
+  $('#savelibrary').addEventListener('click', function(e) {
+    var library = logo.procdefs().replace('\n', '\r\n');
+    var url = 'data:text/plain,' + encodeURIComponent(library);
+    if (!saveDataAs(url, 'logo_library.txt'))
+      alert("Sorry, not supported by your browser");
+  });
   $('#screenshot').addEventListener('click', function(e) {
-    if (!saveCanvasAs('#sandbox', 'logo_drawing.png'))
+    var canvas = document.querySelector('#sandbox');
+    var url = canvas.toDataURL('image/png');
+    if (!saveDataAs(url, 'logo_drawing.png'))
       alert("Sorry, not supported by your browser");
   });
 

@@ -839,7 +839,7 @@ function LogoInterpreter(turtle, stream, savehook)
         defs.push(self.definition(name, proc));
       }
     });
-    return defs.join("\n");
+    return defs.join("\n\n");
   };
 
 
