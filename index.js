@@ -333,10 +333,12 @@ var input = {};
   window.addEventListener('resize', resize);
   window.addEventListener('load', resize);
   function resize() {
-    var box = $('#display-panel .inner'), w = box.offsetWidth, h = box.offsetHeight;
+    var box = $('#display-panel .inner'), rect = box.getBoundingClientRect(),
+        w = rect.width, h = rect.height;
     $('#sandbox').width = w; $('#sandbox').height = h;
     $('#turtle').width = w; $('#turtle').height = h;
     $('#overlay').width = w; $('#overlay').height = h;
+
     if (logo && turtle) {
       turtle.resize(w, h);
       logo.run('cs');
@@ -369,7 +371,8 @@ window.addEventListener('load', function() {
 // Hook up sidebar links
 //
 (function() {
-  var sidebars = ['reference', 'library', 'history', 'examples', 'links'];
+  var sidebars = [].slice.call(document.querySelectorAll('#sidebar .choice')).map(
+    function(elem) { return elem.id; });
   sidebars.forEach(function(k) {
     $('#sb-link-' + k).addEventListener('click', function() {
       var cl = $('#sidebar').classList;
@@ -494,8 +497,28 @@ window.addEventListener('load', function() {
         savehook(name, def);
       }
     });
+  logo.run('cs');
   initStorage(function (def) {
     logo.run(def);
+  });
+
+  function saveCanvasAs(selector, filename) {
+    if (!('download' in document.createElement('a')))
+      return false;
+    var canvas = document.querySelector(selector);
+    var anchor = document.createElement('a');
+    anchor.download = filename;
+    anchor.href = canvas.toDataURL('image/png');
+    var event = document.createEvent('MouseEvents');
+    event.initMouseEvent('click', true, true, false, self,
+                         0, 0, 0, 0, 0, false, false, false, false, 0, null);
+    anchor.dispatchEvent(event);
+    return true;
+  }
+
+  $('#screenshot').addEventListener('click', function(e) {
+    if (!saveCanvasAs('#sandbox', 'logo_drawing.png'))
+      alert("Sorry, not supported by your browser");
   });
 
   function demo(param) {

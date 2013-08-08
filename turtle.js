@@ -214,6 +214,10 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
 
   this.clear = function() {
     canvas_ctx.clearRect(0, 0, width, height);
+    var tmp = canvas_ctx.fillStyle;
+    canvas_ctx.fillStyle = this.bgcolor;
+    canvas_ctx.fillRect(0, 0, width, height);
+    canvas_ctx.fillStyle = tmp;
   };
 
   this.home = function() {
@@ -324,6 +328,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
   turtle_ctx.strokeStyle = 'green';
   turtle_ctx.lineWidth = 2;
 
+  this.bgcolor = '#ffffff';
   this.setcolor('#000000');
   this.setwidth(1);
   this.setpenmode('paint');

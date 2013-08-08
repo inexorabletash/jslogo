@@ -45,14 +45,14 @@ body {
   right: 0;
   width: 400px;
   top: 0px;
-  height: 100px;
+  height: 120px;
 }
 
 #sidebar {
   position: absolute;
   right: 0;
   width: 400px;
-  top: 100px;
+  top: 120px;
   bottom: 0;
   overflow: hidden;
 }
@@ -85,6 +85,7 @@ body {
 #sidebar #examples,
 #sidebar #history,
 #sidebar #links,
+#sidebar #extras,
 #sidebar #library {
   position: absolute;
   left: 0; right: 0; top: 0; bottom: 0;
@@ -97,6 +98,7 @@ body {
 #sidebar.examples #examples,
 #sidebar.history #history,
 #sidebar.library #library,
+#sidebar.extras #extras,
 #sidebar.links #links { display: block; }
 
 .snippet pre {
@@ -115,6 +117,7 @@ body {
 #library,
 #history,
 #examples,
+#extras,
 #links {
   margin: 10px;
 }
