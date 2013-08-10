@@ -387,47 +387,41 @@ function LogoInterpreter(turtle, stream, savehook)
     return parse(stringify_nodecorate(list).replace(/([\\;])/g, '\\$1'));
   }
 
-  self.maybegetvar = function(name) {
-    for (var i = self.scopes.length - 1; i >= 0; --i) {
-      if (self.scopes[i].has(name)) {
-        return self.scopes[i].get(name).value;
-      }
-    }
-    return undefined;
-  };
+  function maybegetvar(name) {
+    var lval = lvalue(name);
+    return lval ? lval.value : undefined;
+  }
 
-  self.getvar = function(name) {
-    var value = self.maybegetvar(name);
+  function getvar(name) {
+    var value = maybegetvar(name);
     if (value !== undefined) {
       return value;
     }
     throw new Error(format(__("Don't know about variable {name:U}"), { name: name }));
-  };
+  }
 
-  self.getlvalue = function(name) {
+  function lvalue(name) {
     for (var i = self.scopes.length - 1; i >= 0; --i) {
       if (self.scopes[i].has(name)) {
         return self.scopes[i].get(name);
       }
     }
-    throw new Error(format(__("Don't know about variable {name:U}"), { name: name }));
-  };
+    return undefined;
+  }
 
-  self.setvar = function(name, value) {
+  function setvar(name, value) {
     value = copy(value);
 
     // Find the variable in existing scope
-    for (var i = self.scopes.length - 1; i >= 0; --i) {
-      if (self.scopes[i].has(name)) {
-        self.scopes[i].get(name).value = value;
-        return;
-      }
+    var lval = lvalue(name);
+    if (lval) {
+      lval.value = value;
+    } else {
+      // Otherwise, define a global
+      lval = {value: value};
+      self.scopes[0].set(name, lval);
     }
-
-    // Otherwise, define a global
-    var lvalue = {value: value};
-    self.scopes[0].set(name, lvalue);
-  };
+  }
 
   //----------------------------------------------------------------------
   //
@@ -462,48 +456,47 @@ function LogoInterpreter(turtle, stream, savehook)
 
   }
 
-  self.evaluateExpression = function(list) {
-    return (self.expression(list))();
-  };
+  function evaluateExpression(list) {
+    return (expression(list))();
+  }
 
-  self.expression = function(list) {
-    return self.relationalExpression(list);
+  function expression(list) {
+    return relationalExpression(list);
+  }
 
-  };
-
-  self.relationalExpression = function(list) {
-    var lhs = self.additiveExpression(list);
+  function relationalExpression(list) {
+    var lhs = additiveExpression(list);
     var op;
     while (peek(list, ['=', '<', '>', '<=', '>=', '<>'])) {
       op = list.shift();
 
       lhs = function(lhs) {
-        var rhs = self.additiveExpression(list);
+        var rhs = additiveExpression(list);
 
         switch (op) {
           case "<": return function() { return (aexpr(lhs()) < aexpr(rhs())) ? 1 : 0; };
           case ">": return function() { return (aexpr(lhs()) > aexpr(rhs())) ? 1 : 0; };
-          case "=": return function() { return self.equal(lhs(), rhs()) ? 1 : 0; };
+          case "=": return function() { return equal(lhs(), rhs()) ? 1 : 0; };
 
           case "<=": return function() { return (aexpr(lhs()) <= aexpr(rhs())) ? 1 : 0; };
           case ">=": return function() { return (aexpr(lhs()) >= aexpr(rhs())) ? 1 : 0; };
-          case "<>": return function() { return !self.equal(lhs(), rhs()) ? 1 : 0; };
+          case "<>": return function() { return !equal(lhs(), rhs()) ? 1 : 0; };
           default: throw new Error(__("Internal error in expression parser"));
         }
       } (lhs);
     }
 
     return lhs;
-  };
+  }
 
-  self.additiveExpression = function(list) {
-    var lhs = self.multiplicativeExpression(list);
+  function additiveExpression(list) {
+    var lhs = multiplicativeExpression(list);
     var op;
     while (peek(list, ['+', '-'])) {
       op = list.shift();
 
       lhs = function(lhs) {
-        var rhs = self.multiplicativeExpression(list);
+        var rhs = multiplicativeExpression(list);
         switch (op) {
           case "+": return function() { return aexpr(lhs()) + aexpr(rhs()); };
           case "-": return function() { return aexpr(lhs()) - aexpr(rhs()); };
@@ -513,16 +506,16 @@ function LogoInterpreter(turtle, stream, savehook)
     }
 
     return lhs;
-  };
+  }
 
-  self.multiplicativeExpression = function(list) {
-    var lhs = self.powerExpression(list);
+  function multiplicativeExpression(list) {
+    var lhs = powerExpression(list);
     var op;
     while (peek(list, ['*', '/', '%'])) {
       op = list.shift();
 
       lhs = function(lhs) {
-        var rhs = self.powerExpression(list);
+        var rhs = powerExpression(list);
         switch (op) {
           case "*": return function() { return aexpr(lhs()) * aexpr(rhs()); };
           case "/": return function() {
@@ -541,36 +534,35 @@ function LogoInterpreter(turtle, stream, savehook)
     }
 
     return lhs;
-  };
+  }
 
-  self.powerExpression = function(list) {
-    var lhs = self.unaryExpression(list);
+  function powerExpression(list) {
+    var lhs = unaryExpression(list);
     var op;
     while (peek(list, ['^'])) {
       op = list.shift();
       lhs = function(lhs) {
-        var rhs = self.unaryExpression(list);
+        var rhs = unaryExpression(list);
         return function() { return Math.pow(aexpr(lhs()), aexpr(rhs())); };
       } (lhs);
     }
 
     return lhs;
-  };
+  }
 
-  self.unaryExpression = function(list) {
+  function unaryExpression(list) {
     var rhs, op;
 
     if (peek(list, [UNARY_MINUS])) {
       op = list.shift();
-      rhs = self.unaryExpression(list);
+      rhs = unaryExpression(list);
       return function() { return -aexpr(rhs()); };
     } else {
-      return self.finalExpression(list);
+      return finalExpression(list);
     }
-  };
+  }
 
-
-  self.finalExpression = function(list) {
+  function finalExpression(list) {
     if (!list.length) {
       throw new Error(__("Unexpected end of instructions"));
     }
@@ -600,7 +592,7 @@ function LogoInterpreter(turtle, stream, savehook)
         } else if (atom.charAt(0) === ':') {
           // variable
           varname = atom.substring(1);
-          return function() { return self.getvar(varname); };
+          return function() { return getvar(varname); };
         } else if (atom === '(') {
           // parenthesized expression/procedure call
           if (list.length && Type(list[0]) === 'word' &&
@@ -611,7 +603,7 @@ function LogoInterpreter(turtle, stream, savehook)
             return self.dispatch(atom, list, false);
           } else {
             // Standard parenthesized expression
-            result = self.expression(list);
+            result = expression(list);
 
             if (!list.length) {
               throw new Error(format(__("Expected ')'")));
@@ -647,12 +639,12 @@ function LogoInterpreter(turtle, stream, savehook)
     if (natural) {
       // Natural arity of the function
       for (var i = 0; i < procedure.length; ++i) {
-        args.push(self.expression(tokenlist));
+        args.push(expression(tokenlist));
       }
     } else {
       // Caller specified argument count
       while (tokenlist.length && !peek(tokenlist, [')'])) {
-        args.push(self.expression(tokenlist));
+        args.push(expression(tokenlist));
       }
       tokenlist.shift(); // Consume ')'
     }
@@ -732,7 +724,7 @@ function LogoInterpreter(turtle, stream, savehook)
   // Deep compare of values (numbers, strings, lists)
   // (with optional epsilon compare for numbers)
   //----------------------------------------------------------------------
-  self.equal = function(a, b, epsilon) {
+  function equal(a, b, epsilon) {
     if (Array.isArray(a)) {
       if (!Array.isArray(b)) {
         return false;
@@ -741,7 +733,7 @@ function LogoInterpreter(turtle, stream, savehook)
         return false;
       }
       for (var i = 0; i < a.length; i += 1) {
-        if (!self.equal(a[i], b[i])) {
+        if (!equal(a[i], b[i])) {
           return false;
         }
       }
@@ -753,7 +745,7 @@ function LogoInterpreter(turtle, stream, savehook)
     } else {
       return a === b;
     }
-  };
+  }
 
   //----------------------------------------------------------------------
   //
@@ -771,7 +763,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
     var result;
     while (statements.length) {
-      result = self.evaluateExpression(statements);
+      result = evaluateExpression(statements);
 
       if (result !== undefined && !options.returnResult) {
         throw new Error(format(__("Don't know what to do with {result}"), {result: result}));
@@ -1132,7 +1124,7 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   def("remove", function(thing, list) {
-    return lexpr(list).filter(function(x) { return !self.equal(x, thing); });
+    return lexpr(list).filter(function(x) { return !equal(x, thing); });
   });
 
   def("remdup", function(list) {
@@ -1162,23 +1154,23 @@ function LogoInterpreter(turtle, stream, savehook)
   // Not Supported: .setitem
 
   def("push", function(stackname, thing) {
-    var stack = lexpr(self.getvar(stackname));
+    var stack = lexpr(getvar(stackname));
     stack.unshift(thing);
-    self.setvar(stackname, stack);
+    setvar(stackname, stack);
   });
 
   def("pop", function(stackname) {
-    return self.getvar(stackname).shift();
+    return getvar(stackname).shift();
   });
 
   def("queue", function(stackname, thing) {
-    var stack = lexpr(self.getvar(stackname));
+    var stack = lexpr(getvar(stackname));
     stack.push(thing);
-    self.setvar(stackname, stack);
+    setvar(stackname, stack);
   });
 
   def("dequeue", function(stackname) {
-    return self.getvar(stackname).pop();
+    return getvar(stackname).pop();
   });
 
   //
@@ -1192,8 +1184,8 @@ function LogoInterpreter(turtle, stream, savehook)
   def(["numberp", "number?"], function(thing) { return Type(thing) === 'number' ? 1 : 0; });
   def(["numberwang"], function(thing) { return self.prng.next() < 0.5 ? 1 : 0; });
 
-  def(["equalp", "equal?"], function(a, b) { return self.equal(a, b) ? 1 : 0; });
-  def(["notequalp", "notequal?"], function(a, b) { return !self.equal(a, b) ? 1 : 0; });
+  def(["equalp", "equal?"], function(a, b) { return equal(a, b) ? 1 : 0; });
+  def(["notequalp", "notequal?"], function(a, b) { return !equal(a, b) ? 1 : 0; });
 
   def(["emptyp", "empty?"], function(thing) {
     switch (Type(thing)) {
@@ -1210,7 +1202,7 @@ function LogoInterpreter(turtle, stream, savehook)
   // Not Supported: vbarredp
 
   def(["memberp", "member?"], function(thing, list) {
-    return lexpr(list).some(function(x) { return self.equal(x, thing); }) ? 1 : 0;
+    return lexpr(list).some(function(x) { return equal(x, thing); }) ? 1 : 0;
   });
 
 
@@ -1707,7 +1699,7 @@ function LogoInterpreter(turtle, stream, savehook)
       if (self.routines.get(newname).special) {
         throw new Error(format(__("Can't overwrite special form {name:U}"), { name: newname }));
       }
-      if (self.routines.get(newname).primitive && !self.maybegetvar("redefp")) {
+      if (self.routines.get(newname).primitive && !maybegetvar("redefp")) {
         throw new Error(__("Can't overwrite primitives unless REDEFP is TRUE"));
       }
     }
@@ -1722,11 +1714,11 @@ function LogoInterpreter(turtle, stream, savehook)
   // 7.2 Variable Definition
 
   def("make", function(varname, value) {
-    self.setvar(sexpr(varname), value);
+    setvar(sexpr(varname), value);
   });
 
   def("name", function(value, varname) {
-    self.setvar(sexpr(varname), value);
+    setvar(sexpr(varname), value);
   });
 
   def("local", function(varname) {
@@ -1740,7 +1732,7 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   def("thing", function(varname) {
-    return self.getvar(sexpr(varname));
+    return getvar(sexpr(varname));
   });
 
   def("global", function(varname) {
@@ -1825,7 +1817,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def(["namep", "name?"], function(varname) {
     try {
-      return self.getvar(sexpr(varname)) !== undefined ? 1 : 0;
+      return getvar(sexpr(varname)) !== undefined ? 1 : 0;
     } catch (e) {
       return 0;
     }
@@ -1965,7 +1957,7 @@ function LogoInterpreter(turtle, stream, savehook)
           if (self.routines.get(name).special) {
             throw new Error(format(__("Can't ERASE special form {name:U}"), { name: name }));
           }
-          if (!self.routines.get(name).primitive || self.maybegetvar("redefp")) {
+          if (!self.routines.get(name).primitive || maybegetvar("redefp")) {
             self.routines['delete'](name);
             // TODO: savehook
           } else {
@@ -2359,17 +2351,17 @@ function LogoInterpreter(turtle, stream, savehook)
     function sign(x) { return x < 0 ? -1 : x > 0 ? 1 : 0; }
 
     var varname = sexpr(control.shift());
-    var start = aexpr(self.evaluateExpression(control));
-    var limit = aexpr(self.evaluateExpression(control));
+    var start = aexpr(evaluateExpression(control));
+    var limit = aexpr(evaluateExpression(control));
 
     var step;
     var current = start;
     while (sign(current - limit) !== sign(step)) {
-      self.setvar(varname, current);
+      setvar(varname, current);
       self.execute(statements);
 
       step = (control.length) ?
-        aexpr(self.evaluateExpression(control.slice())) : sign(limit - start);
+        aexpr(evaluateExpression(control.slice())) : sign(limit - start);
       current += step;
     }
   });
@@ -2419,10 +2411,10 @@ function LogoInterpreter(turtle, stream, savehook)
       var clause = lexpr(clauses[i]);
       var first = clause.shift();
       if (Type(first) === 'word' && first.toUpperCase() === 'ELSE') {
-        return self.evaluateExpression(clause);
+        return evaluateExpression(clause);
       }
-      if (lexpr(first).some(function(x) { return self.equal(x, value); })) {
-        return self.evaluateExpression(clause);
+      if (lexpr(first).some(function(x) { return equal(x, value); })) {
+        return evaluateExpression(clause);
       }
     }
     return undefined;
@@ -2435,10 +2427,10 @@ function LogoInterpreter(turtle, stream, savehook)
       var clause = lexpr(clauses[i]);
       var first = clause.shift();
       if (Type(first) === 'word' && first.toUpperCase() === 'ELSE') {
-        return self.evaluateExpression(clause);
+        return evaluateExpression(clause);
       }
-      if (self.evaluateExpression(lexpr(first))) {
-        return self.evaluateExpression(clause);
+      if (evaluateExpression(lexpr(first))) {
+        return evaluateExpression(clause);
       }
     }
     return undefined;
