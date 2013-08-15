@@ -97,7 +97,7 @@ module("Logo Unit Tests", {
   }
 });
 
-test("Parser", 34, function () {
+test("Parser", function () {
 
   //
   // Types
@@ -159,10 +159,28 @@ test("Parser", 34, function () {
   //
 
   this.assert_stream('type .2 + .3', '0.5');
+
+  //
+  // Arrays
+  //
+
+  this.assert_equals('count { a b c }', 3);
+  this.assert_equals('count { a b c }@0', 3);
+  this.assert_equals('count { a b c }@123', 3);
+  this.assert_equals('count { a b c } @ 0', 3);
+
+  //
+  // Nested Structures
+  //
+
+  this.assert_equals('count [ a b [ c d e ] f ]', 4);
+  this.assert_equals('count { a b { c d e } f }', 4);
+  this.assert_equals('count { a b [ c d e ] f }', 4);
+  this.assert_equals('count [ a b { c d e } f ]', 4);
 });
 
 
-test("Data Structure Primitives", 168, function () {
+test("Data Structure Primitives", function () {
 
   //
   // 2.1 Constructors
@@ -379,6 +397,7 @@ test("Data Structure Primitives", 168, function () {
   this.assert_equals('count [ ]', 0);
   this.assert_equals('count [ 1 ]', 1);
   this.assert_equals('count [ 1 2 ]', 2);
+  this.assert_equals('count { 1 2 }@0', 2);
   this.assert_equals('count "', 0);
   this.assert_equals('count "a', 1);
   this.assert_equals('count "ab', 2);

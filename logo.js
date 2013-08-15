@@ -153,6 +153,9 @@ function LogoInterpreter(turtle, stream, savehook)
     },
     list: function() {
       return this.array.slice();
+    },
+    count: function() {
+      return this.array.length;
     }
   };
 
@@ -307,14 +310,14 @@ function LogoInterpreter(turtle, stream, savehook)
     var index = 0,
         list = [],
         atom = '',
-        c;
+        c, r;
 
     while (true) {
       do {
         c = string.charAt(index++);
       } while (isWS(c));
 
-      while (!isWS(c) && c !== '[' && c !== ']' && c !== '') {
+      while (c && !isWS(c) && '[]{}'.indexOf(c) === -1) {
         atom += c;
         c = string.charAt(index++);
       }
@@ -327,34 +330,42 @@ function LogoInterpreter(turtle, stream, savehook)
       if (!c) {
         throw new Error(__("Expected ']'"));
       }
+      if (isWS(c)) {
+        continue;
+      }
       if (c === ']') {
         return { list: list, string: string.substring(index) };
       }
       if (c === '[') {
-        var r = parseList(string.substring(index));
+        r = parseList(string.substring(index));
         list.push(r.list);
         string = r.string;
         index = 0;
+        continue;
       }
+      if (c === '{') {
+        r = parseArray(string.substring(index));
+        list.push(r.array);
+        string = r.string;
+        index = 0;
+        continue;
+      }
+      throw new Error(format(__("Unexpected '{c}'"), {c: c}));
     }
   }
 
-  // NOTE: This parses arrays like lists - flat list of words
-  // TODO: Should list literals be able to contain arrays?
-  // TODO: Should array literals be able to contain lists?
-  // TODO: Should array literals be able to contain arrays?
   function parseArray(string) {
     var index = 0,
         list = [],
         atom = '',
-        c;
+        c, r;
 
     while (true) {
       do {
         c = string.charAt(index++);
       } while (isWS(c));
 
-      while (!isWS(c) && c !== '}' && c !== '') {
+      while (c && !isWS(c) && '[]{}'.indexOf(c) === -1) {
         atom += c;
         c = string.charAt(index++);
       }
@@ -367,6 +378,9 @@ function LogoInterpreter(turtle, stream, savehook)
       if (!c) {
         throw new Error(__("Expected '}'"));
       }
+      if (isWS(c)) {
+        continue;
+      }
       if (c === '}') {
         string = string.substring(index);
         var origin = 1;
@@ -377,9 +391,23 @@ function LogoInterpreter(turtle, stream, savehook)
           origin = RegExp.$1;
           string = RegExp.$2;
         }
-
         return { array: new LogoArray(list, origin), string: string };
       }
+      if (c === '[') {
+        r = parseList(string.substring(index));
+        list.push(r.list);
+        string = r.string;
+        index = 0;
+        continue;
+      }
+      if (c === '{') {
+        r = parseArray(string.substring(index));
+        list.push(r.array);
+        string = r.string;
+        index = 0;
+        continue;
+      }
+      throw new Error(format(__("Unexpected '{c}'"), {c: c}));
     }
   }
 
@@ -1214,7 +1242,10 @@ function LogoInterpreter(turtle, stream, savehook)
   // 2.5 Queries
   //
 
-  def("count", function(thing) { return lexpr(thing).length; });
+  def("count", function(thing) {
+    if (Type(thing) === 'array') { return thing.count(); }
+    return lexpr(thing).length;
+  });
   def("ascii", function(chr) { return sexpr(chr).charCodeAt(0); });
   // Not Supported: rawascii
   def("char", function(integer) { return String.fromCharCode(aexpr(integer)); });
