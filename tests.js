@@ -1053,10 +1053,13 @@ test("Control Structures", 42, function () {
 
 });
 
-test("Error Messages", 63, function () {
+test("Error Messages", function () {
 
   this.assert_error("to foo end show foo", "No output from procedure");
   this.assert_error("[ 1 2", "Expected ']'");
+  this.assert_error("{ 1 2", "Expected '}'");
+  this.assert_error("[ 1 2 }", "Unexpected '}'");
+  this.assert_error("{ 1 2 ]", "Unexpected ']'");
   this.assert_error("!@#$", "Couldn't parse: '!@#$'");
   this.assert_error("show :nosuchvar", "Don't know about variable NOSUCHVAR");
   this.assert_error("1 / 0", "Division by zero");
@@ -1117,7 +1120,6 @@ test("Error Messages", 63, function () {
   this.assert_error('setpos []', 'Expected list of length 2');
   this.assert_error('setpos [1 2 3]', 'Expected list of length 2');
   this.assert_error('towards []', 'Expected list of length 2');
-  this.assert_error('towards [1 2 3]', 'Expected list of length 2');
 });
 
 test("Regression Tests", function() {
