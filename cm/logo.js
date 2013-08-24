@@ -5,14 +5,13 @@ CodeMirror.defineMode('logo', function(config, parserConfig) {
 
   // states are 'normal', 'defn-name', 'defn-args', 'defn-body'
 
-  // TODO: list literals [ a b c ]
-  // TODO: array literals { a b c }@0
+  // TODO: different highlighting inside list [] and array {} literals ?
 
   var regexIdentifier = /^\.?[A-Za-z][A-Za-z0-9_.\?]*/;
   var regexStringLiteral = /^"[^ \[\]\(\)\{\}]*/;
   var regexVariable = /^:[A-Za-z][A-Za-z0-9_]*/;
   var regexNumberLiteral = /^[0-9]*\.?[0-9]+(?:[eE]\s*[\-+]?\s*[0-9]+)?/;
-  var regexOperator = /^\+|\-|\*|\/|%|\^|>=|<=|<>|=|<|>|\[|\]|\{|\}|\(|\)/;
+  var regexOperator = /^\+|\-|\*|\/|%|\^|>=|<=|<>|=|<|>|\[|\]|\{|\}(\s*@\s*\d+)?|\(|\)/;
 
   return {
     electricChars: "[]dD", // for enD

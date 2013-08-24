@@ -386,8 +386,8 @@ function LogoInterpreter(turtle, stream, savehook)
         var origin = 1;
         if (string.match(/^(\s*@\s*)(.*)$/)) {
           string = RegExp.$2;
-          if (!string.match(regexNumberLiteral))
-            throw new Error('Expected number after @');
+          if (!string.match(/^(-?\d+)(.*)$/))
+            throw new Error(__('Expected number after @'));
           origin = RegExp.$1;
           string = RegExp.$2;
         }
