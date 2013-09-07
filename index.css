@@ -1,6 +1,10 @@
 /* General Styles */
 
-body, p, h1, h2, h3 { font-family: sans-serif; }
+@import url(http://fonts.googleapis.com/css?family=Michroma);
+h1 { font-family: "Michroma"; }
+body { font-family: sans-serif; }
+
+
 dt, dd { font-size: 8pt; }
 code { font-family: monospace; }
 
@@ -73,7 +77,8 @@ body {
 #topbar { white-space: nowrap; }
 #topbar h1,
 #topbar p {
-  margin: 6pt; display: inline-block;
+  margin: 2pt 6pt;
+  display: inline-block;
 }
 
 /* Side Bars */
