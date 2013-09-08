@@ -168,7 +168,7 @@ test("Parser", function () {
   this.assert_equals('count { a b c }@0', 3);
   this.assert_equals('count { a b c }@123', 3);
   this.assert_equals('count { a b c } @ 0', 3);
-  this.assert_error('count { 1 2 3 }@1.5', "Don't know what to do with 0.5");
+  this.assert_error('make "a count { 1 2 3 }@1.5', "Don't know what to do with 0.5");
 
   //
   // Nested Structures
@@ -1121,7 +1121,7 @@ test("Error Messages", function () {
   this.assert_error('setpos []', 'Expected list of length 2');
   this.assert_error('setpos [1 2 3]', 'Expected list of length 2');
   this.assert_error('towards []', 'Expected list of length 2');
-  this.assert_error('count { 1 2 3 }@1.5', "Don't know what to do with 0.5");
+  this.assert_error('make "a { 1 2 3 }@1.5', "Don't know what to do with 0.5");
 });
 
 test("Regression Tests", function() {
