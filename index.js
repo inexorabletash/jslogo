@@ -115,7 +115,7 @@ function initStorage(loadhook) {
 //
 // Command history
 //
-var history = (function() {
+var commandHistory = (function() {
   var entries = [], pos = -1;
   return {
     push: function(entry) {
@@ -172,7 +172,10 @@ var input = {};
     return document.body.classList.contains('multi');
   };
 
-  function run() {
+  function run(remote) {
+    if (remote !== true && window.TogetherJS && window.TogetherJS.running) {
+      TogetherJS.send({type: "run"});
+    }
     var error = $('#display #error');
     error.classList.remove('shown');
 
@@ -180,7 +183,7 @@ var input = {};
     if (v === '') {
       return;
     }
-    history.push(v);
+    commandHistory.push(v);
     if (!isMulti()) {
       input.setValue('');
     }
@@ -195,6 +198,8 @@ var input = {};
     }, 100);
   }
 
+  input.run = run;
+
   if ('CodeMirror' in window) {
     var BRACKETS = '()[]{}';
 
@@ -204,14 +209,14 @@ var input = {};
          run();
        },
       'Up': function(cm) {
-        var v = history.prev();
+        var v = commandHistory.prev();
         if (v !== undefined) {
           cm.setValue(v);
           cm.setCursor({line: 0, ch: v.length});
         }
       },
       'Down': function(cm) {
-        var v = history.next();
+        var v = commandHistory.next();
         if (v !== undefined) {
           cm.setValue(v);
           cm.setCursor({line: 0, ch: v.length});
@@ -272,13 +277,13 @@ var input = {};
           run();
         },
         'Up': function(elem) {
-          var v = history.prev();
+          var v = commandHistory.prev();
           if (v !== undefined) {
             elem.value = v;
           }
         },
         'Down': function(elem) {
-          var v = history.next();
+          var v = commandHistory.next();
           if (v !== undefined) {
             elem.value = v;
           }
@@ -509,8 +514,8 @@ window.addEventListener('load', function() {
     anchor.href = dataURL;
     anchor.download = filename;
     var event = document.createEvent('MouseEvents');
-    event.initMouseEvent('click', true, true, false, self,
-                         0, 0, 0, 0, 0, false, false, false, false, 0, null);
+    event.initMouseEvent('click', true, true, window, null,
+                         0, 0, 0, 0, false, false, false, false, 0, null);
     anchor.dispatchEvent(event);
     return true;
   }
@@ -546,3 +551,54 @@ window.addEventListener('load', function() {
   demo(param);
   window.addEventListener('hashchange', function(e) { demo(document.location.hash); } );
 });
+
+window.TogetherJSConfig ={
+
+  hub_on: {
+    "togetherjs.hello": function () {
+      var visible = turtle.isturtlevisible();
+      TogetherJS.send({
+        type: "init",
+        image: $("#sandbox").toDataURL("image/png"),
+        color: turtle.getcolor(),
+        xy: turtle.getxy(),
+        heading: turtle.getheading(),
+        penmode: turtle.getpenmode(),
+        turtlemode: turtle.getturtlemode(),
+        width: turtle.getwidth(),
+        fontsize: turtle.getfontsize(),
+        visible: visible,
+        pendown: turtle.down
+      });
+    },
+
+    "init": function (msg) {
+      var context = $("#sandbox").getContext("2d");
+      var image = new Image();
+      image.src = msg.image;
+      context.drawImage(image, 0, 0);
+      turtle.begin();
+      turtle.penup();
+      turtle.hideturtle();
+      turtle.setturtlemode(msg.turtlemode);
+      turtle.setcolor(msg.color);
+      turtle.setwidth(msg.width);
+      turtle.setfontsize(msg.size);
+      turtle.setposition(msg.xy[0], msg.xy[1]);
+      turtle.setheading(msg.heading);
+      turtle.setpenmode(msg.penmode);
+      if (msg.visible) {
+        turtle.showturtle();
+      }
+      if (msg.pendown) {
+        turtle.pendown();
+      }
+      turtle.end();
+    },
+
+    run: function (msg) {
+      input.run(true);
+    }
+  }
+
+};
