@@ -115,7 +115,7 @@ function initStorage(loadhook) {
 //
 // Command history
 //
-var history = (function() {
+var commandHistory = (function() {
   var entries = [], pos = -1;
   return {
     push: function(entry) {
@@ -180,7 +180,7 @@ var input = {};
     if (v === '') {
       return;
     }
-    history.push(v);
+    commandHistory.push(v);
     if (!isMulti()) {
       input.setValue('');
     }
@@ -204,14 +204,14 @@ var input = {};
          run();
        },
       'Up': function(cm) {
-        var v = history.prev();
+        var v = commandHistory.prev();
         if (v !== undefined) {
           cm.setValue(v);
           cm.setCursor({line: 0, ch: v.length});
         }
       },
       'Down': function(cm) {
-        var v = history.next();
+        var v = commandHistory.next();
         if (v !== undefined) {
           cm.setValue(v);
           cm.setCursor({line: 0, ch: v.length});
@@ -272,13 +272,13 @@ var input = {};
           run();
         },
         'Up': function(elem) {
-          var v = history.prev();
+          var v = commandHistory.prev();
           if (v !== undefined) {
             elem.value = v;
           }
         },
         'Down': function(elem) {
-          var v = history.next();
+          var v = commandHistory.next();
           if (v !== undefined) {
             elem.value = v;
           }
