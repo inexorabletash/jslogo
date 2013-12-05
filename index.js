@@ -172,7 +172,10 @@ var input = {};
     return document.body.classList.contains('multi');
   };
 
-  function run() {
+  function run(remote) {
+    if (remote !== true && window.TogetherJS && window.TogetherJS.running) {
+      TogetherJS.send({type: "run"});
+    }
     var error = $('#display #error');
     error.classList.remove('shown');
 
@@ -194,6 +197,8 @@ var input = {};
       }
     }, 100);
   }
+
+  input.run = run;
 
   if ('CodeMirror' in window) {
     var BRACKETS = '()[]{}';
@@ -546,3 +551,54 @@ window.addEventListener('load', function() {
   demo(param);
   window.addEventListener('hashchange', function(e) { demo(document.location.hash); } );
 });
+
+window.TogetherJSConfig ={
+
+  hub_on: {
+    "togetherjs.hello": function () {
+      var visible = turtle.isturtlevisible();
+      TogetherJS.send({
+        type: "init",
+        image: $("#sandbox").toDataURL("image/png"),
+        color: turtle.getcolor(),
+        xy: turtle.getxy(),
+        heading: turtle.getheading(),
+        penmode: turtle.getpenmode(),
+        turtlemode: turtle.getturtlemode(),
+        width: turtle.getwidth(),
+        fontsize: turtle.getfontsize(),
+        visible: visible,
+        pendown: turtle.down
+      });
+    },
+
+    "init": function (msg) {
+      var context = $("#sandbox").getContext("2d");
+      var image = new Image();
+      image.src = msg.image;
+      context.drawImage(image, 0, 0);
+      turtle.begin();
+      turtle.penup();
+      turtle.hideturtle();
+      turtle.setturtlemode(msg.turtlemode);
+      turtle.setcolor(msg.color);
+      turtle.setwidth(msg.width);
+      turtle.setfontsize(msg.size);
+      turtle.setposition(msg.xy[0], msg.xy[1]);
+      turtle.setheading(msg.heading);
+      turtle.setpenmode(msg.penmode);
+      if (msg.visible) {
+        turtle.showturtle();
+      }
+      if (msg.pendown) {
+        turtle.pendown();
+      }
+      turtle.end();
+    },
+
+    run: function (msg) {
+      input.run(true);
+    }
+  }
+
+};
