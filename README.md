@@ -7,11 +7,7 @@ This is hosted at http://calormen.com/jslogo for playing with live.
 this attempts to implement a subset of [UCBLogo](http://www.cs.berkeley.edu/~bh/v2ch14/manual.html)
 defined in in *Brian Harvey's Computer Science Logo Style*
 
-For older browsers, clone [polyfill](https://github.com/inexorabletash/polyfill) into a sibling directory.
-So you'll end up with a directory structure like:
-
-    jslogo/
-    polyfill/
+Use `git clone --recursive` to get [polyfill](https://github.com/inexorabletash/polyfill) for older browsers.
 
 Logo Examples
 -------------
