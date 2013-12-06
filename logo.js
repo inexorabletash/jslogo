@@ -206,7 +206,8 @@ function LogoInterpreter(turtle, stream, savehook)
     }
   }
 
-  var regexIdentifier = /^(\.?[A-Za-z][A-Za-z0-9_.\?]*)(.*?)$/;
+  // Note: u2190-2193 are unicode arrows
+  var regexIdentifier = /^(\.?[A-Za-z][A-Za-z0-9_.\?]*|[\u2190-\u2193])(.*?)$/;
   var regexStringLiteral = /^("[^ \[\]\(\)\{\}]*)(.*?)$/;
   var regexVariable = /^(:[A-Za-z][A-Za-z0-9_]*)(.*?)$/;
   var regexNumberLiteral = /^([0-9]*\.?[0-9]+(?:[eE]\s*[\-+]?\s*[0-9]+)?)(.*?)$/;
@@ -1545,6 +1546,16 @@ function LogoInterpreter(turtle, stream, savehook)
   def(["back", "bk"], function(a) { turtle.move(-aexpr(a)); });
   def(["left", "lt"], function(a) { turtle.turn(-aexpr(a)); });
   def(["right", "rt"], function(a) { turtle.turn(aexpr(a)); });
+
+  // Left arrow:
+  def(["\u2190"], function() { turtle.turn(-15); });
+  // Right arrow:
+  def(["\u2192"], function() { turtle.turn(-15); });
+  // Up arrow:
+  def(["\u2191"], function() { turtle.move(10); });
+  // Down arrow:
+  def(["\u2193"], function() { turtle.turn(-10); });
+
 
   def("setpos", function(l) {
     l = lexpr(l);
