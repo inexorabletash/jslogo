@@ -560,39 +560,18 @@ window.TogetherJSConfig ={
       TogetherJS.send({
         type: "init",
         image: $("#sandbox").toDataURL("image/png"),
-        color: turtle.getcolor(),
-        xy: turtle.getxy(),
-        heading: turtle.getheading(),
-        penmode: turtle.getpenmode(),
-        turtlemode: turtle.getturtlemode(),
-        width: turtle.getwidth(),
-        fontsize: turtle.getfontsize(),
-        visible: visible,
-        pendown: turtle.down
+        turtle: turtle.getstate()
       });
     },
 
+    // FIXME: we don't align the height/width of the canvases
     "init": function (msg) {
       var context = $("#sandbox").getContext("2d");
       var image = new Image();
       image.src = msg.image;
       context.drawImage(image, 0, 0);
       turtle.begin();
-      turtle.penup();
-      turtle.hideturtle();
-      turtle.setturtlemode(msg.turtlemode);
-      turtle.setcolor(msg.color);
-      turtle.setwidth(msg.width);
-      turtle.setfontsize(msg.size);
-      turtle.setposition(msg.xy[0], msg.xy[1]);
-      turtle.setheading(msg.heading);
-      turtle.setpenmode(msg.penmode);
-      if (msg.visible) {
-        turtle.showturtle();
-      }
-      if (msg.pendown) {
-        turtle.pendown();
-      }
+      turtle.setstate(msg.turtle);
       turtle.end();
     },
 
