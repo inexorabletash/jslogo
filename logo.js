@@ -207,11 +207,11 @@ function LogoInterpreter(turtle, stream, savehook)
   }
 
   // Note: U+2190 ... U+2193 are arrows
-  var regexIdentifier = /^(\.?[A-Za-z][A-Za-z0-9_.\?]*|[\u2190-\u2193])(.*?)$/;
-  var regexStringLiteral = /^("[^ \[\]\(\)\{\}]*)(.*?)$/;
-  var regexVariable = /^(:[A-Za-z][A-Za-z0-9_]*)(.*?)$/;
-  var regexNumberLiteral = /^([0-9]*\.?[0-9]+(?:[eE]\s*[\-+]?\s*[0-9]+)?)(.*?)$/;
-  var regexOperator = /^(\+|\-|\*|\/|%|\^|>=|<=|<>|=|<|>|\[|\]|\{|\}|\(|\))(.*?)$/;
+  var regexIdentifier = /^(\.?[A-Za-z][A-Za-z0-9_.\?]*|[\u2190-\u2193])/;
+  var regexStringLiteral = /^("[^ \[\]\(\)\{\}]*)/;
+  var regexVariable = /^(:[A-Za-z][A-Za-z0-9_]*)/;
+  var regexNumberLiteral = /^([0-9]*\.?[0-9]+(?:[eE]\s*[\-+]?\s*[0-9]+)?)/;
+  var regexOperator = /^(\+|\-|\*|\/|%|\^|>=|<=|<>|=|<|>|\[|\]|\{|\}|\(|\))/;
   var regexInfix = /^(\+|\-|\*|\/|%|\^|>=|<=|<>|=|<|>)$/;
 
   //
@@ -249,7 +249,7 @@ function LogoInterpreter(turtle, stream, savehook)
           string.match(regexNumberLiteral)) {
 
         atom = RegExp.$1;
-        string = RegExp.$2;
+        string = string.substring(atom.length);
 
       } else if (string.charAt(0) === '[') {
         r = parseList(string.substring(1));
@@ -263,7 +263,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
       } else if (string.match(regexOperator)) {
         atom = RegExp.$1;
-        string = RegExp.$2;
+        string = string.substring(atom.length);
 
         // From UCB Logo:
 
