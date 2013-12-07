@@ -206,7 +206,7 @@ function LogoInterpreter(turtle, stream, savehook)
     }
   }
 
-  // Note: u2190-2193 are unicode arrows
+  // Note: U+2190 ... U+2193 are arrows
   var regexIdentifier = /^(\.?[A-Za-z][A-Za-z0-9_.\?]*|[\u2190-\u2193])(.*?)$/;
   var regexStringLiteral = /^("[^ \[\]\(\)\{\}]*)(.*?)$/;
   var regexVariable = /^(:[A-Za-z][A-Za-z0-9_]*)(.*?)$/;

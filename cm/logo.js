@@ -7,7 +7,8 @@ CodeMirror.defineMode('logo', function(config, parserConfig) {
 
   // TODO: different highlighting inside list [] and array {} literals ?
 
-  var regexIdentifier = /^\.?[A-Za-z][A-Za-z0-9_.\?]*/;
+  // Note: U+2190 ... U+2193 are arrows
+  var regexIdentifier = /^(\.?[A-Za-z][A-Za-z0-9_.\?]*|[\u2190-\u2193])/;
   var regexStringLiteral = /^"[^ \[\]\(\)\{\}]*/;
   var regexVariable = /^:[A-Za-z][A-Za-z0-9_]*/;
   var regexNumberLiteral = /^[0-9]*\.?[0-9]+(?:[eE]\s*[\-+]?\s*[0-9]+)?/;
