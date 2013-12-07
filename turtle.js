@@ -301,6 +301,42 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     }
   };
 
+  this.getstate = function () {
+    return {
+      isturtlestate: true,
+      color: this.getcolor(),
+      xy: this.getxy(),
+      heading: this.getheading(),
+      penmode: this.getpenmode(),
+      turtlemode: this.getturtlemode(),
+      width: this.getwidth(),
+      fontsize: this.getfontsize(),
+      visible: this.isturtlevisible(),
+      pendown: this.down
+    };
+  };
+
+  this.setstate = function (state) {
+    if ((! state) || ! state.isturtlestate) {
+      throw new Error("Tried to restore a state that is not a turtle state");
+    }
+    this.penup();
+    this.hideturtle();
+    this.setturtlemode(state.turtlemode);
+    this.setcolor(state.color);
+    this.setwidth(state.width);
+    this.setfontsize(state.size);
+    this.setposition(state.xy[0], state.xy[1]);
+    this.setheading(state.heading);
+    this.setpenmode(state.penmode);
+    if (state.visible) {
+      this.showturtle();
+    }
+    if (state.pendown) {
+      this.pendown();
+    }
+  };
+
   this.begin = function() {
     // Erase turtle
     turtle_ctx.clearRect(0, 0, width, height);
