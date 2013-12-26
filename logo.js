@@ -598,8 +598,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
     var atom = list.shift();
 
-    var args, i, routine, result;
-    var literal, varname;
+    var result, literal, varname;
 
     switch (Type(atom)) {
       case 'number':
@@ -649,7 +648,7 @@ function LogoInterpreter(turtle, stream, savehook)
       break;
         default: throw new Error(__("Internal error in expression parser"));
     }
-  };
+  }
 
   self.dispatch = function(name, tokenlist, natural) {
     var procedure = self.routines.get(name);

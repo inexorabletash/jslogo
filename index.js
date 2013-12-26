@@ -39,7 +39,7 @@ function initStorage(loadhook) {
     return;
 
   var req = indexedDB.open('logo', 3);
-  req.onblocked = function(e) {
+  req.onblocked = function() {
     alert("Please close other Logo pages to allow database upgrade to proceed.");
   };
   req.onerror = function(e) {
@@ -63,8 +63,8 @@ function initStorage(loadhook) {
       if (cursor) {
         try {
           loadhook(cursor.value);
-        } catch (e) {
-          console.error("Error loading procedure: " + e);
+        } catch (ex) {
+          console.error("Error loading procedure: " + ex);
         } finally {
           cursor.continue();
         }
@@ -75,8 +75,8 @@ function initStorage(loadhook) {
       if (cursor) {
         try {
           historyhook(cursor.value);
-        } catch (e) {
-          console.error("Error loading procedure: " + e);
+        } catch (ex) {
+          console.error("Error loading procedure: " + ex);
         } finally {
           cursor.continue();
         }
@@ -314,7 +314,7 @@ var input = {};
     input.setFocus();
   });
 
-  $('#toggle').addEventListener('click', function(e) {
+  $('#toggle').addEventListener('click', function() {
     var v = input.getValue();
     document.body.classList.toggle('single');
     document.body.classList.toggle('multi');
@@ -520,13 +520,13 @@ window.addEventListener('load', function() {
     return true;
   }
 
-  $('#savelibrary').addEventListener('click', function(e) {
+  $('#savelibrary').addEventListener('click', function() {
     var library = logo.procdefs().replace('\n', '\r\n');
     var url = 'data:text/plain,' + encodeURIComponent(library);
     if (!saveDataAs(url, 'logo_library.txt'))
       alert("Sorry, not supported by your browser");
   });
-  $('#screenshot').addEventListener('click', function(e) {
+  $('#screenshot').addEventListener('click', function() {
     var canvas = document.querySelector('#sandbox');
     var url = canvas.toDataURL('image/png');
     if (!saveDataAs(url, 'logo_drawing.png'))
@@ -549,7 +549,7 @@ window.addEventListener('load', function() {
   // Look for a program to run in the query string / hash
   var param = document.location.search || document.location.hash;
   demo(param);
-  window.addEventListener('hashchange', function(e) { demo(document.location.hash); } );
+  window.addEventListener('hashchange', function() { demo(document.location.hash); } );
 });
 
 window.TogetherJSConfig ={
