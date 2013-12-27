@@ -1039,7 +1039,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("word", function(word1, word2) {
     return arguments.length ?
-      mapreduce(arguments, sexpr, function(a, b) { return a + " " + b; }) : "";
+      mapreduce(arguments, sexpr, function(a, b) { return a + b; }) : "";
   });
 
   def("list", function(thing1, thing2) {

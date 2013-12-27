@@ -187,8 +187,8 @@ test("Data Structure Primitives", function () {
   // 2.1 Constructors
   //
 
-  this.assert_equals('word "hello "world', 'hello world');
-  this.assert_equals('(word "a "b "c)', 'a b c');
+  this.assert_equals('word "hello "world', 'helloworld');
+  this.assert_equals('(word "a "b "c)', 'abc');
   this.assert_equals('(word)', '');
 
   this.assert_equals('list 1 2', [1, 2]);
@@ -219,7 +219,7 @@ test("Data Structure Primitives", function () {
   this.assert_equals('fput 0 ( list 1 2 3 )', [0, 1, 2, 3]);
   this.assert_equals('lput 0 ( list 1 2 3 )', [1, 2, 3, 0]);
 
-  this.assert_equals('combine "a "b', 'a b');
+  this.assert_equals('combine "a "b', 'ab');
   this.assert_equals('combine "a [b]', ["a", "b"]);
 
   this.assert_equals('reverse [ a b c ]', ["c", "b", "a"]);
@@ -1039,8 +1039,8 @@ test("Control Structures", 42, function () {
   // 8.2 Template-based Iteration
   //
 
-  this.assert_equals('apply "word ["a "b "c]', '"a "b "c');
-  this.assert_equals('(invoke "word "a "b "c)', 'a b c');
+  this.assert_equals('apply "word ["a "b "c]', '"a"b"c');
+  this.assert_equals('(invoke "word "a "b "c)', 'abc');
   this.assert_equals('make "x 0  to addx :a make "x :x+:a end  foreach "addx [ 1 2 3 4 5 ]  :x', 15);
   this.assert_equals('to double :x output :x * 2 end  map "double [ 1 2 3 ]', [2, 4, 6]);
   this.assert_equals('to odd :x output :x % 2 end  filter "odd [ 1 2 3 ]', ["1", "3"]);
@@ -1145,4 +1145,5 @@ test("Regression Tests", function() {
   this.assert_error('repeat 1 [ make "v "abc;def ]  :v', "Expected ']'");
   this.assert_equals('make "a [ a b c ]  make "b :a  pop "a  :b', ["a", "b", "c"]);
   this.assert_equals('to foo :BAR output :BAR end  foo 1', 1);
+  this.assert_equals('(word "a (char 10) "b)', 'a\nb');
 });
