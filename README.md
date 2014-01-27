@@ -37,5 +37,4 @@ To Do
 -----
 * Document deviations from UCB Logo standard
 * Make these examples all work: [Logo 15-word challenge](http://www.mathcats.com/gallery/15wordcontest.html)
-* Use Workers, so you can see the turtle move
 * Tail-call optimization
