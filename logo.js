@@ -1690,7 +1690,7 @@ function LogoInterpreter(turtle, stream, savehook)
     return turtle.ispendown() ? 1 : 0;
   });
 
-  def(["penmode", "pc"], function() {
+  def("penmode", function() {
     return turtle.getpenmode().toUpperCase();
   });
 
