@@ -1747,7 +1747,8 @@ function LogoInterpreter(turtle, stream, savehook)
 
     self.routines.set(newname, self.routines.get(oldname));
     if (savehook) {
-      savehook(newname, self.definition(newname, self.routines.get(newname)));
+      // TODO: This is broken if copying a built-in, so disable for now
+      //savehook(newname, self.definition(newname, self.routines.get(newname)));
     }
   });
 
