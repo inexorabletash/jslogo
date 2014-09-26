@@ -88,7 +88,10 @@ function initStorage(loadhook) {
       savehook = function(name, def) {
         try {
           var tx = db.transaction('procedures', 'readwrite');
-          tx.objectStore('procedures').put(def, name);
+          if (def)
+            tx.objectStore('procedures').put(def, name);
+          else
+            tx.objectStore('procedures')['delete'](name);
         } catch (e) {
           console.error('Error saving procedure: ' + e);
         } finally {
@@ -397,7 +400,10 @@ window.addEventListener('load', function() {
   savehook = function(name, def) {
     var parent = $('#library');
     try {
-      insertSnippet(def, parent, name);
+      if (def)
+        insertSnippet(def, parent, name);
+      else
+        removeSnippet(parent, name);
     } finally {
       if (orig_savehook)
         orig_savehook(name, def);
@@ -423,7 +429,6 @@ window.addEventListener('load', function() {
 //
 var snippets = {};
 function insertSnippet(text, parent, key) {
-
   var snippet;
   if (key && snippets.hasOwnProperty(key)) {
     snippet = snippets[key];
@@ -459,6 +464,14 @@ function insertSnippet(text, parent, key) {
   if (snippet.parentElement !== parent) {
     parent.appendChild(snippet);
   }
+}
+function removeSnippet(parent, key) {
+  var snippet;
+  if (!key || !snippets.hasOwnProperty(key))
+    return;
+  snippet = snippets[key];
+  parent.removeChild(snippet);
+  delete snippets[key];
 }
 
 

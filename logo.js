@@ -2001,7 +2001,7 @@ function LogoInterpreter(turtle, stream, savehook)
           }
           if (!self.routines.get(name).primitive || maybegetvar("redefp")) {
             self.routines['delete'](name);
-            // TODO: savehook
+            if (savehook) savehook(name);
           } else {
             throw new Error(__("Can't ERASE primitives unless REDEFP is TRUE"));
           }
@@ -2037,6 +2037,7 @@ function LogoInterpreter(turtle, stream, savehook)
       return !self.routines.get(x).primitive && !self.routines.get(x).buried;
     }).forEach(function(name) {
       self.routines['delete'](name);
+      if (savehook) savehook(name);
     });
 
     self.scopes.forEach(function(scope) {
@@ -2058,7 +2059,8 @@ function LogoInterpreter(turtle, stream, savehook)
     self.routines.keys().filter(function(x) {
       return !self.routines.get(x).primitive && !self.routines.get(x).buried;
     }).forEach(function(name) {
-        self.routines['delete'](name);
+      self.routines['delete'](name);
+      if (savehook) savehook(name);
     });
   });
 
