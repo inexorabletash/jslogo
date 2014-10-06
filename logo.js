@@ -1655,10 +1655,16 @@ function LogoInterpreter(turtle, stream, savehook)
   def(["penreverse", "px"], function() { turtle.setpenmode('reverse'); });
 
   def(["setpencolor", "setpc", "setcolor"], function(a) {
+    function adjust(n) {
+      // Clamp into 0...99
+      n = Math.min(99, Math.max(0, Math.floor(n)));
+      // Scale to 0...255
+      return Math.floor(n * 256 / 100);
+    }
     if (arguments.length === 3) {
-      var r = Math.round(aexpr(arguments[0]) * 255 / 99);
-      var g = Math.round(aexpr(arguments[1]) * 255 / 99);
-      var b = Math.round(aexpr(arguments[2]) * 255 / 99);
+      var r = adjust(aexpr(arguments[0]));
+      var g = adjust(aexpr(arguments[1]));
+      var b = adjust(aexpr(arguments[2]));
       var rr = (r < 16 ? "0" : "") + r.toString(16);
       var gg = (g < 16 ? "0" : "") + g.toString(16);
       var bb = (b < 16 ? "0" : "") + b.toString(16);
