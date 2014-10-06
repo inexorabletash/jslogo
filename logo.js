@@ -1654,23 +1654,23 @@ function LogoInterpreter(turtle, stream, savehook)
   def(["penerase", "pe"], function() { turtle.setpenmode('erase'); });
   def(["penreverse", "px"], function() { turtle.setpenmode('reverse'); });
 
-  def(["setpencolor", "setpc", "setcolor"], function(a) {
+  def(["setpencolor", "setpc", "setcolor"], function(color) {
     function adjust(n) {
       // Clamp into 0...99
       n = Math.min(99, Math.max(0, Math.floor(n)));
       // Scale to 0...255
       return Math.floor(n * 256 / 100);
     }
-    if (arguments.length === 3) {
-      var r = adjust(aexpr(arguments[0]));
-      var g = adjust(aexpr(arguments[1]));
-      var b = adjust(aexpr(arguments[2]));
+    if (Type(color) === 'list') {
+      var r = adjust(aexpr(color[0]));
+      var g = adjust(aexpr(color[1]));
+      var b = adjust(aexpr(color[2]));
       var rr = (r < 16 ? "0" : "") + r.toString(16);
       var gg = (g < 16 ? "0" : "") + g.toString(16);
       var bb = (b < 16 ? "0" : "") + b.toString(16);
       turtle.setcolor('#' + rr + gg + bb);
     } else {
-      turtle.setcolor(sexpr(a));
+      turtle.setcolor(sexpr(color));
     }
   });
 
