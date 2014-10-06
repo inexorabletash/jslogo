@@ -238,11 +238,14 @@ var input = {};
     // http://stackoverflow.com/questions/13026285/codemirror-for-just-one-line-textfield
     cm.setSize('100%', cm.defaultTextHeight() + 4 + 4); // 4 = theme padding
 
-    // Handle paste
-    cm.on("beforeChange", function(cm, change) {
-      var newtext = change.text.join('').replace(/\n/g, '  ');
-      change.update(change.from, change.to, [newtext]);
-      return true;
+    // Handle paste - switch to multi-line if input is multiple lines
+    cm.on("change", function(cm, change) {
+      if (change.text.length > 1) {
+        var v = input.getValue();
+        input.setMulti();
+        input.setValue(v);
+        input.setFocus();
+      }
     });
 
     // Multi-Line
