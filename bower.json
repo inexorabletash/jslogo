@@ -1,0 +1,36 @@
+{
+  "name": "jslogo",
+  "main": "index.js",
+  "version": "1.0.1",
+  "homepage": "http://inexorabletash.github.io/jslogo/",
+  "authors": [
+    "Joshua Bell <inexorabletash@gmail.com>"
+  ],
+  "description": "Logo in JavaScript",
+  "keywords": [
+    "logo"
+  ],
+  "license": "Apache-2.0",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "codemirror": "~4.7.0"
+  },
+  "overrides": {
+    "codemirror": {
+      "main": [
+        "lib/codemirror.js",
+        "addon/runmode/runmode.js",
+        "addon/edit/closebrackets.js",
+        "addon/edit/matchbrackets.js",
+        "addon/display/placeholder.js",
+        "lib/codemirror.css"
+      ]
+    }
+  }
+}

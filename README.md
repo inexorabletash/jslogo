@@ -33,6 +33,18 @@ Logo Links
 * [Introduction to Computer Programming](http://www.bfoit.org/itp/itp.html)
 * [LogoForum](http://groups.yahoo.com/group/LogoForum/)
 
+Install
+-------
+Easiest way (if you have NPM installed) is throug grunt,
+it will fetch all required dependencies and link them in index.htm.
+```shell
+git clone git@github.com:inexorabletash/jslogo.git
+cd jslogo
+npm install
+grunt
+```
+Then open index.htm.
+
 To Do
 -----
 * Document deviations from UCB Logo standard
