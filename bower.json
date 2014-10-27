@@ -20,5 +20,17 @@
   ],
   "dependencies": {
     "codemirror": "~4.7.0"
+  },
+  "overrides": {
+    "codemirror": {
+      "main": [
+        "lib/codemirror.js",
+        "addon/runmode/runmode.js",
+        "addon/edit/closebrackets.js",
+        "addon/edit/matchbrackets.js",
+        "addon/display/placeholder.js",
+        "lib/codemirror.css"
+      ]
+    }
   }
 }
