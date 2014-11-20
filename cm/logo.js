@@ -1,7 +1,8 @@
 
 // Really just a lexer
 
-CodeMirror.defineMode('logo', function(config, parserConfig) {
+if (typeof CodeMirror !== 'undefined') {
+  CodeMirror.defineMode('logo', function(config, parserConfig) {
 
   // states are 'normal', 'defn-name', 'defn-args', 'defn-body'
 
@@ -141,3 +142,4 @@ CodeMirror.defineMode('logo', function(config, parserConfig) {
 });
 
 CodeMirror.defineMIME("text/x-logo", "logo");
+}

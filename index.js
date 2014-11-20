@@ -16,10 +16,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-var CodeMirror; // https://github.com/marijnh/CodeMirror
-var LogoInterpreter; // logo.js
-var CanvasTurtle; // turtle.js
-
 if (!('console' in window)) {
   window.console = { log: function(){}, error: function(){} };
 }
@@ -203,7 +199,7 @@ var input = {};
 
   input.run = run;
 
-  if ('CodeMirror' in window) {
+  if (typeof CodeMirror !== 'undefined') {
     var BRACKETS = '()[]{}';
 
     // Single Line
@@ -451,7 +447,7 @@ function insertSnippet(text, parent, key) {
 
   var container = document.createElement('pre');
   snippet.appendChild(container);
-  if ('CodeMirror' in window) {
+  if (typeof CodeMirror !== 'undefined') {
     CodeMirror.runMode(text, 'logo', container);
   } else {
     container.appendChild(document.createTextNode(text));
