@@ -16,6 +16,76 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+<script language="JavaScript" type="text/javascript" src="./eliza.js"></script>
+<script language="JavaScript" type="text/javascript" src="./elizadata.js"></script>
+
+var eliza = new ElizaBot();
+var elizaLines = new Array();
+var logoLines = new Array();
+
+function elizaReset() {
+  eliza.reset();
+  elizaLines.length = 0;
+  logoLines.length = 0;
+  elizaStep();
+}
+
+function elizaStep() {
+  var f = document.forms.e_form;
+  // userinput=e_input
+  var userinput = f.e_input.value;
+  //if e_input==quit, after confirm, start over
+  if (eliza.quit) {
+    f.e_input.value = '';
+    if (confirm("This session is over.\nStart over?")) elizaReset();
+    f.e_input.focus();
+    return;
+  }
+  // response= eliza.transform(userinput)
+  else if (userinput != '') {
+    var usr = 'YOU:   ' + userinput;
+    var rpl ='ELIZA: ' + eliza.transform(userinput)[0];
+    var logo=eliza.transform(userinput)[1]
+    elizaLines.push(usr);
+    elizaLines.push(rpl);
+    logoLines.push(logo.toLowerCase()+";");
+    // display nicely
+    // (fit to textarea with last line free - reserved for extra line caused by word wrap)
+    // e_display:elizaLines
+    // 
+    var temp  = new Array();
+    var l = 0;
+    for (var i=elizaLines.length-1; i>=0; i--) {
+      l += 1 + Math.floor(elizaLines[i].length/displayCols);
+      if (l >= displayRows) break
+      else temp.push(elizaLines[i]);
+    }
+    elizaLines = temp.reverse();
+    f.e_display.value = elizaLines.join('\n');
+    f.command.value = logo.toLowerCase()+";";
+    document.all.code.value= logoLines.join('\n');
+  }
+  else if (elizaLines.length == 0) {
+    // no input and no saved lines -> output initial
+    var initial = 'PiE: ' + eliza.getInitial();
+    elizaLines.push(initial);
+    f.e_display.value = initial + '\n';
+  }
+  f.e_input.value = '';
+  f.e_input.focus();
+
+  var code=document.all.code.value;
+  var line=code.split("\n");
+  console.log(line[line.length-1]);
+
+  // var line = document.all.code.value.spilt("\n");
+
+  if (document.all.command.value!="none"){
+
+    eval(line[line.length-1]);
+  }
+}
+
 if (!('console' in window)) {
   window.console = { log: function(){}, error: function(){} };
 }
@@ -182,6 +252,7 @@ var input = {};
     if (v === '') {
       return;
     }
+
     commandHistory.push(v);
     if (!isMulti()) {
       input.setValue('');
