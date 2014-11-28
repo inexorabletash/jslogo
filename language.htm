@@ -4,6 +4,7 @@
   <title>Logo Language Guide</title>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <script src="polyfill/polyfill.min.js"></script>
 
 <style type="text/css">
 h1, h2, h3, h4, p { margin-bottom: 6pt; margin-top: 6pt; }
@@ -16,12 +17,27 @@ body
   color: black;
   background-color: transparent;
 }
+dd.example:before {
+  content: 'Example:';
+  margin-right: 0.5em;
+  font-family: sans-serif;
+  font-style: italic;
+  color: gray;
+}
+dd.example {
+  font-family: monospace;
+  white-space: pre-wrap;
+  margin-top: 2px;
+  margin-bottom: 2px;
+  color: gray;
+  cursor: pointer;
+}
 </style>
 </head>
 <body>
 <div>
 
-<p>The section numbers are per the <a target="_blank" href="http://www.cs.berkeley.edu/~bh/v2ch14/manual.html">Berkeley Logo Reference Manual</a> in Brian Harvey&apos;s <cite>Computer Science Logo Style volume 2: Advanced Techniques</cite> for ease
+<p>The section numbers are per the <a target="_blank" href="http://www.cs.berkeley.edu/~bh/v2ch14/manual.html">Berkeley Logo Reference Manual</a> in Brian Harvey's <cite>Computer Science Logo Style volume 2: Advanced Techniques</cite> for ease
 of comparison.</p>
 
 <ol>
@@ -38,21 +54,34 @@ of comparison.</p>
 
 <h3 id="types">Types</h3>
 <dl>
-  <dt><code>&quot;<var>word</var></code>
+  <dt><code>"<var>word</var></code>
   <dd>Text string (terminated by whitespace)
+  <dd class=example>show "hello</dd>
+
   <dt><code>:<var>variable</var></code>
   <dd>Input definition/variable reference
+  <dd class=example>show :name</dd>
+
   <dt><code>[ <var>word ...</var> ]</code>
   <dd>List of words or lists, whitespace separated
+  <dd class=example>show [1 2 3]</dd>
+
   <dt><code>{ <var>word ...</var> }</code>
   <dt><code>{ <var>word ...</var> }@<var>origin</var></code>
   <dd>Array of words whitespace separated
+  <dd class=example>show {1 2 3}</dd>
+
   <dt><code> ( <var>expression</var> )</code>
   <dd>Parenthesis can be used to group expressions
+  <dd class=example>show ( 1 + 2 ) * 3</dd>
+
   <dt><code><var>procedure</var> <var>input</var> ...</code>
   <dd>Call procedure with default number of inputs
+  <dd class=example>show "hello</dd>
+
   <dt><code> ( <var>procedure</var> <var>input</var> ... )</code>
   <dd>Call procedure with an arbitrary number of inputs
+  <dd class=example>(show "hello :name)</dd>
 </dl>
 
 <h3 id="sec2">2. Data Structure Primitives</h3>
@@ -62,40 +91,51 @@ of comparison.</p>
   <dt><code>word <var>expr</var> <var>expr</var></code>
   <dt><code>(word <var>expr</var> <var>...</var>)</code>
   <dd>Concatenate two (or more) words into one word
+  <dd class=example>show (word "a "b "c)</dd>
 
   <dt><code>list <var>thing1</var> <var>thing2</var></code>
   <dt><code>(list <var>thing1</var> <var>thing2</var> ...)</code>
   <dd>Create a new list from the inputs
+  <dd class=example>show (list 1+2 2+3 3+4)</dd>
 
   <dt><code>array <var>size</var></code>
   <dt><code>(array <var>size</var> <var>origin</var>)</code>
   <dd>Create a new array. The default origin is 1.
+  <dd class=example>show array 10</dd>
 
   <dt><code>listtoarray <var>list</var></code>
   <dt><code>(listtoarray <var>list</var> <var>origin</var>)</code>
   <dd>Create a new array populated by members of a list
+  <dd class=example>show listtoarray [ 1 3 5 7 ]</dd>
 
   <dt><code>arraytolist <var>array</var></code>
   <dd>Create a new list populated by members of a array
+  <dd class=example>show arraytolist { 2 4 6 8 }</dd>
 
   <dt><code>sentence thing1 thing2</code>
   <dt><code>(sentence thing1 thing2 ...)</code>
   <dt><code>se thing1 thing2</code>
   <dt><code>(se thing1 thing2 ...)</code>
   <dd>Create a new list from the inputs (if non-lists) or members of the inputs (if lists)
+  <dd class=example>show sentence [1 2 3] [and so on]</dd>
 
   <dt><code>fput <var>thing</var> <var>list</var></code>
   <dt><code>lput <var>thing</var> <var>list</var></code>
   <dd>Outputs list, but with thing added as a new first/last item
+  <dd class=example>show fput 0 [ 1 2 3 ]</dd>
+  <dd class=example>show lput 4 [ 1 2 3 ]</dd>
 
   <dt><code>combine thing1 thing2</code>
   <dd>If thing2 is a word, like <code>word</code>; otherwise, like <code>fput</code>
+  <dd class=example>show combine "a [b c]</dd>
 
   <dt><code>reverse <var>list</var></code>
   <dd>Outputs a list with the items in reverse order
+  <dd class=example>show reverse [ 1 2 3 ]</dd>
 
   <dt><code>gensym</code>
   <dd>Outputs a unique string, e.g. <samp>G1</samp>, <samp>G2</samp>, etc.
+  <dd class=example>show gensym</dd>
 </dl>
 
 <h4>2.2 Data Selectors</h4>
@@ -103,46 +143,58 @@ of comparison.</p>
   <dt><code>first <var>list</var></code>
   <dt><code>last <var>list</var></code>
   <dd>Outputs the first or last item from the list, respectively
+  <dd class=example>show first [ 1 2 3 ]</dd>
+  <dd class=example>show last [ 1 2 3 ]</dd>
 
   <dt><code>butfirst <var>list</var></code>
   <dt><code>bf <var>list</var></code>
   <dt><code>butlast <var>list</var></code>
   <dt><code>bl <var>list</var></code>
   <dd>Outputs the list, except for the first/last item
+  <dd class=example>show butfirst [ 1 2 3 ]</dd>
+  <dd class=example>show butlast [ 1 2 3 ]</dd>
 
   <dt><code>firsts <var>listoflists</var></code>
   <dd>Outputs a list of the first item of each sublist
+  <dd class=example>show firsts [ [1 2 3] [a b c] ]</dd>
 
   <dt><code>butfirsts <var>listoflists</var></code>
   <dt><code>bfs <var>listoflists</var></code>
   <dd>Outputs a list of sublists without the first item
+  <dd class=example>show butfirsts [ [ 1 2 3 ] [ a b c ] ]</dd>
 
   <dt><code>pick <var>list</var></code>
   <dd>Outputs one item from a list, at random
+  <dd class=example>show pick [ 1 2 3 ]</dd>
 
   <dt><code>item <var>index</var> <var>thing</var></code>
   <dd>Outputs the indexth item of the list or array
+  <dd class=example>show item 2 [ 1 2 3 ]</dd>
 
   <dt><code>setitem <var>index</var> <var>array</var> <var>value</var></code>
   <dd>Sets the indexth item of the array to value
+  <dd class=example>make "a { 1 2 3 }   setitem 2 :a "x   show :a</dd>
 
   <dt><code>remove <var>thing</var> <var>list</var></code>
   <dd>Outputs the list with any occurences of thing removed
+  <dd class=example>show remove "b [ a b c ]</dd>
 
   <dt><code>remdup <var>list</var></code>
   <dd>Outputs the list with duplicates removed
+  <dd class=example>show remdup [ 1 2 3 2 3 4 3 4 5 4 5 6 ]</dd>
 </dl>
 
 <h4>2.3 Data Mutators</h4>
 <dl>
   <dt><code>push <var>stackname</var> <var>thing</var></code>
   <dt><code>pop <var>stackname</var></code>
-  <dd>Push to/pop from a stack i.e. list variable, e.g. <code>make &quot;s []</code> then <code>push &quot;s 1</code>. Stacks grow from the front.
+  <dd>Push to/pop from a stack i.e. list variable. Stacks grow from the front.
+  <dd class=example>make "s [ 2 1 ]  push "s 3  show :s  show pop "s</dd>
 
   <dt><code>queue <var>stackname</var> <var>thing</var></code>
   <dt><code>dequeue <var>stackname</var></code>
-  <dd>Add/remove from a queue i.e. list variable, e.g. <code>make &quot;q []</code> then <code>queue &quot;q 1</code>. Queues grow from the end
-
+  <dd>Add/remove from a queue i.e. list variable, Queues grow from the end.
+  <dd class=example>make "q [ 1 2 ]  queue "q 3  show :q  show dequeue "q</dd>
 </dl>
 
 <h4>2.4 Predicates</h4>
@@ -181,23 +233,28 @@ of comparison.</p>
   <dt><code>substringp <var>thing1</var> <var>thing2</var></code>
   <dt><code>substring? <var>thing1</var> <var>thing2</var></code>
   <dd>Test if thing1 is a substring of thing2.
-
 </dl>
 
 <h4>2.5 Queries</h4>
 <dl>
   <dt><code>count <var>thing</var></code>
   <dd>Outputs length of a list or number of characters in a string
+  <dd class=example>show count [ 1 2 3 ]</dd>
+  <dd class=example>show count "hello</dd>
 
   <dt><code>ascii <var>expr</var></code>
   <dd>Outputs ASCII (actually, Unicode) code point for first character of string
+  <dd class=example>show ascii "abc</dd>
 
   <dt><code>char <var>expr</var></code>
   <dd>Outputs Unicode character at specified code point
+  <dd class=example>show char 97</dd>
 
   <dt><code>uppercase <var>expr</var></code>
   <dt><code>lowercase <var>expr</var></code>
   <dd>Outputs string converted to upper/lowercase
+  <dd class=example>show uppercase "abc</dd>
+  <dd class=example>show lowercase "ABC</dd>
 </dl>
 
 
@@ -210,15 +267,17 @@ of comparison.</p>
   <dt>(<code>pr <var>thing1</var> <var>thing2</var> ...)</code>
   <dd>Print inputs to the text screen, separated by spaces, and followed by a newline.
   Square brackets are only put around sublists.
+  <dd class=example>print "hello</dd>
 
   <dt><code>type <var>thing</var></code>
   <dt>(<code>type <var>thing1</var> <var>thing2</var> ...)</code>
   <dd>Like <code>print</code> but with no trailing newline.
+  <dd class=example>type "hel  type "lo</dd>
 
   <dt><code>show <var>thing</var></code>
   <dt>(<code>show <var>thing1</var> <var>thing2</var> ...)</code>
   <dd>Like <code>print</code> but with square brackets around list inputs.
-
+  <dd class=example>show "hello</dd>
 </dl>
 
 
@@ -227,6 +286,7 @@ of comparison.</p>
   <dt><code>readword</code>
   <dt><code>(readword <var>promptstr</var>)</code>
   <dd>Prompt the user for a line of input. The result (including spaces) is the single word output.
+  <dd class=example>show readword</dd>
 </dl>
 
 <!--
@@ -264,7 +324,6 @@ of comparison.</p>
       Add, subtract, multiply, divide, and raise-to-the-power-of respectively.
       A single input to quotient returns the reciprocal.
 
-
   <dt><code>remainder <var>expr</var> <var>expr</var></code>
   <dt><code><var>expr</var> % <var>expr</var></code>
   <dt><code>modulo <var>expr</var> <var>expr</var></code>
@@ -273,13 +332,11 @@ of comparison.</p>
     the result has the same sign as the first input; for <code>modulo</code> the
     result has the same sign as a the second input.
 
-
   <dt><code>minus <var>expr</var></code>
   <dt><code>- <var>expr</var></code>
   <dd>
     Unary minus sign must begin a top-level expression, follow an infix
     operator, or have a leading space and no trailing space.
-
 
   <dt><code>abs <var>num</var></code>
   <dd>Absolute value
@@ -310,9 +367,11 @@ of comparison.</p>
 
   <dt><code>iseq <var>first</var> <var>last</var></code>
   <dd>Outputs a list with integers from <var>first</var> to <var>last</var>, inclusive
+  <dd class=example>show iseq 1 10</dd>
 
   <dt><code>rseq <var>first</var> <var>last</var> <var>count</var></code>
   <dd>Outputs a list of <var>count</var> numbers from <var>first</var> to <var>last</var>, inclusive
+  <dd class=example>show rseq 1 9 5</dd>
 </dl>
 
 <h4>4.2 Numeric Predicates</h4>
@@ -348,6 +407,7 @@ of comparison.</p>
   <dt><code>form <var>expr</var> <var>width</var> <var>precision</var></code>
   <dd>Returns a formatted string with the result of a numeric expression with <var>precision</var> decimal places and
   padded on the left with spaces (if necessary) to be at least <var>width</width> characters long.
+  <dd class=example>show form 1/3 10 3</dd>
 </dl>
 
 <h4>4.5 Bitwise Operations</h4>
@@ -382,7 +442,7 @@ of comparison.</p>
   <dt><code>xor <var>expr</var> <var>expr</var></code>
   <dt><code>(xor <var>expr</var> <var>...</var>)</code>
   <dt><code>not <var>expr</var></code>
-  <dd>Logical &quot;and&quot;, &quot;or&quot;, &quot;exclusive-or&quot;, and &quot;not&quot;, respectively.
+  <dd>Logical "and", "or", "exclusive-or", and "not", respectively.
   Inputs are numbers or numeric expressions, output is 1 (true) or 0 (false).
 </dl>
 
@@ -395,34 +455,41 @@ of comparison.</p>
   <dt><code>forward <var>expr</var></code>
   <dt><code>fd <var>expr</var></code>
   <dd>Move turtle forward <var>expr</var> pixels
+  <dd class=example>fd 100</dd>
 
   <dt><code>back <var>expr</var></code>
   <dt><code>bk <var>expr</var></code>
   <dd>Move turtle backward <var>expr</var> pixels
+  <dd class=example>bk 100</dd>
 
   <dt><code>left <var>expr</var></code>
   <dt><code>lt <var>expr</var></code>
   <dd>Rotate <var>expr</var> degrees counterclockwise
+  <dd class=example>lt 90</dd>
 
   <dt><code>right <var>expr</var></code>
   <dt><code>rt <var>expr</var></code>
   <dd>Rotate <var>expr</var> degrees clockwise
+  <dd class=example>rt 90</dd>
 
   <dt><code>setpos [ <var>expr</var> <var>expr</var> ]</code>
   <dt><code>setxy <var>expr</var> <var>expr</var></code>
   <dt><code>setx <var>expr</var></code>
   <dt><code>sety <var>expr</var></code>
-  <dd>Move turtle to the specified location without drawing
+  <dd>Move turtle to the specified location
+  <dd class=example>setxy -100 100</dd>
 
   <dt><code>setheading <var>expr</var></code>
   <dt><code>seth <var>expr</var></code>
   <dd>Rotate the turtle to the specified heading
+  <dd class=example>seth 45</dd>
 
   <dt><code>home</code>
   <dd>Moves the turtle to center, pointing upwards
 
   <dt><code>arc <var>angle</var> <var>radius</var></code>
-  <dd>Without moving the turtle, draws an arc centered on the turtle, starting at the turtle&apos;s heading.
+  <dd>Without moving the turtle, draws an arc centered on the turtle, starting at the turtle's heading.
+  <dd class=example>arc 180 100</dd>
 </dl>
 
 <h4>6.2 Turtle Motion Queries</h4>
@@ -431,12 +498,15 @@ of comparison.</p>
   <dt><code>xcor</code>
   <dt><code>ycor</code>
   <dd>Outputs the current turtle position as [ x y ], x or y respectively
+  <dd class=example>show pos</dd>
 
   <dt><code>heading</code>
   <dd>Outputs the current turtle heading
+  <dd class=example>show heading</dd>
 
   <dt><code>towards [ <var>expr</var> <var>expr</var> ]</code>
   <dd>Outputs the heading towards the specified [ x y ] coordinates
+  <dd class=example>show towards [ 0 0 ]</dd>
 </dl>
 
 <h4>6.3 Turtle and Window Control</h4>
@@ -467,19 +537,22 @@ of comparison.</p>
   <dd>The turtle attempts to move past the edge of the screen it will stop.
 
   <dt><code>fill</code>
-  <dd>Does a paint bucket flood fill at the turtle&apos;s position.
+  <dd>Does a paint bucket flood fill at the turtle's position.
+  <dd class=example>arc 360 100  fill</dd>
 
   <dt><code>filled <var>fillcolor</var> [ <var>statements ...</var> ]</code>
   <dd>Execute <var>statements</var> without drawing but keeping track of turtle movements.
     When complete, fill the region traced by the turtle with <var>fillcolor</var>
     and outline the region with the current pen style.
+  <dd class=example>filled "red [ repeat 5 [ fd 100  rt 144 ] ]</dd>
 
   <dt><code>label <var>expr</var></code>
   <dd>Draw a word (same logic as <code>print</code>) on the graphics display at the turtle location
+  <dd class=example>repeat 8 [ label "Logo  rt 45 ]</dd>
 
   <dt><code>setlabelheight <var>expr</var></code>
   <dd>Set the height for text drawn by <code>label</code>, in pixels
-
+  <dd class=example>setlabelheight 100  label "Logo</dd>
 </dl>
 
 <h4>6.4 Turtle and Window Queries</h4>
@@ -514,9 +587,8 @@ of comparison.</p>
   <dt><code>setpencolor <var>logocolor</var></code>
   <dt><code>setpencolor <var>csscolor</var></code>
   <dt><code>setpencolor [<var>r</var> <var>g</var> <var>b</var>]</code>
-  <dd>
-  <p>Set pen/text color. Color can be a standard Logo color number (0-15), CSS color string (<a target="_blank" href="http://www.w3.org/TR/CSS21/syndata.html#value-def-color">CSS color names or #rrggbb</a>), or in the 3-input version, r/g/b values in 0...99.</p>
-  <p>The standard Logo colors are:</p>
+  <dd>Set pen/text color. Color can be a standard Logo color number (0-15), CSS color string (<a target="_blank" href="http://www.w3.org/TR/CSS21/syndata.html#value-def-color">CSS color names or #rrggbb</a>), or in the 3-input version, r/g/b values in 0...99.
+  <dd>The standard Logo colors are:
   <style>
     #colortable td { width: 25%; padding-left: 4px; padding-right: 4px;}
   </style>
@@ -542,7 +614,10 @@ of comparison.</p>
       <td style="background-color: orange;">14: orange
       <td style="background-color: gray;">15: gray
   </table>
-
+  <dd class=example>setpencolor 4</dd>
+  <dd class=example>setpencolor "red</dd>
+  <dd class=example>setpencolor "#ff0000</dd>
+  <dd class=example>setpencolor [ 99 0 0 ]</dd>
 
   <dt><code>setpensize <var>expr</var></code>
   <dd>Set pen width in pixels. If <var>expr</var> is a list, the first member is used.
@@ -579,36 +654,45 @@ of comparison.</p>
 <dl>
   <dt><code>to <var>procname</var> <var>inputs ...</var> <var>statements ...</var> end</code>
   <dd>Define a new named procedure with optional inputs
+  <dd class=example>to star :n repeat 5 [ fd :n rt 144 ] end</dd>
 
   <dt><code>def <var>procname</var></code>
   <dd>Outputs the definition of a named procedure as a string
+  <dd class=example>show def "star</dd>
 
   <dt><code>copydef <var>newname</var> <var>oldname</var></code>
   <dd>Copy a procedure. If a procedure <var>newname</var> already existed it will
-  be overridden. Primitive procedures can&apos;t be overridden unless <code>REDEFP</code> is <code>TRUE</code>.
+  be overridden. Primitive procedures can't be overridden unless <code>REDEFP</code> is <code>TRUE</code>.
+  <dd class=example>copydef "new "old</dd>
 </dl>
 
 <h4>7.2 Variable Definition</h4>
 <dl>
   <dt><code>make <var>varname</var> <var>expr</var></code>
   <dd>Update a variable or define a new global variable. The variable name must
-  be quoted, e.g. <code>make &quot;foo 5</code>
+  be quoted
+  <dd class=example>make "myvar 5</dd>
 
   <dt><code>name <var>expr</var> <var>varname</var></code>
   <dd>Like <code>make</code> but with the inputs reversed
+  <dd class=example>name 5 "myvar</dd>
 
   <dt><code>local <var>varname</var></code>
   <dt><code>(local <var>varname</var> ...)</code>
   <dd>A subsequent <code>make</code> will create the variable(s) in the local scope instead of the global scope
+  <dd class=example>local "myvar</dd>
 
   <dt><code>localmake <var>varname</var> <var>expr</var></code>
   <dd>Define a variable in the local scope (shortcut for <code>local</code> then <code>make</code>
+  <dd class=example>localmake "myvar 5</dd>
 
   <dt><code>thing <var>varname</var></code>
-  <dd>Outputs the value of variable. <code>:foo</code> is a shortcut for <code>thing &quot;foo</code>
+  <dd>Outputs the value of variable. <code>:foo</code> is a shortcut for <code>thing "foo</code>
+  <dd class=example>show thing "myvar</dd>
 
   <dt><code>global <var>varname</var></code>
-  <dd>Reserve the variable at the global scope. This doesn&apos;t do anything useful.
+  <dd>Reserve the variable at the global scope. This doesn't do anything useful.
+  <dd class=example>global "myvar</dd>
 </dl>
 
 <h4>7.3 Property Lists</h4>
@@ -701,7 +785,8 @@ of comparison.</p>
   <dt><code>erase <var>contentslist</var></code>
   <dd>Takes a three member list, where the first is a list of user-defined procedure names to erase,
   the second is a list of defined variables to erase, the third is a list of property lists to erase.
-  Primitive procedures can&apos;t be erased unless <code>REDEFP</code> is <code>TRUE</code>.
+  Primitive procedures can't be erased unless <code>REDEFP</code> is <code>TRUE</code>.
+  <dd class=example>erase [ [myproc] [myvar] [] ]</dd>
 
   <dt><code>erall</code>
   <dd>Erase all non-buried user-defined procedures, variables and property lists.
@@ -749,6 +834,7 @@ of comparison.</p>
 <dl>
   <dt><code>run [ <var>statements ...</var> ]</code>
   <dd>Run the specified statements once
+  <dd class=example>run [ fd 100 rt 90 ]</dd>
 
   <dt><code>runresult [ <var>statements ...</var> ]</code>
   <dd>Run the specified statements once. If the statements return a value, the result is a
@@ -756,19 +842,24 @@ of comparison.</p>
 
   <dt><code>repeat <var>expr</var> [ <var>statements ...</var> ]</code>
   <dd>Repeat statements <var>expr</var> times
+  <dd class=example>repeat 4 [ fd 100 rt 90 ]</dd>
 
   <dt><code>forever [ <var>statements ...</var> ]</code>
   <dd>Repeat statements forever. Used inside a user-defined procedure
-  that terminates with <code>output</code> or <code>stop</code>
+  that terminates with <code>output</code>, <code>stop</code> or <code>bye</code>
+  <dd class=example>forever [ make "n random 100  show :n  if :n == 0 [ bye ] ]</dd>
 
   <dt><code>repcount</code>
   <dd>Outputs the current iteration number of the current <code>repeat</code> or <code>forever</code>
+  <dd class=example>repeat 10 [ show repcount ]</dd>
 
   <dt><code>if <var>expr</var> [ <var>statements ...</var> ]</code>
   <dd>Execute statements if the expression is non-zero
+  <dd class=example>if 2 > 1 [ show "yep ]</dd>
 
   <dt><code>ifelse <var>expr</var> [ <var>statements ...</var> ] [ <var>statements ...</var> ]</code>
   <dd>Execute first set of statements if the expression is non-zero, otherwise execute the second set
+  <dd class=example>ifelse 1 > 2 [ show "yep ] [ show "nope ]</dd>
 
   <dt><code>test <var>expr</var></code>
   <dd>Test the specified expression, save the result in the local scope for subsequent use by <code>iftrue</code> or <code>iffalse</code>
@@ -778,6 +869,7 @@ of comparison.</p>
   <dt><code>iffalse [ <var>statements ...</var>]</code>
   <dt><code>iff [ <var>statements ...</var>]</code>
   <dd>Run the statements if the result of the last local <code>test</code> was non-zero (true) or zero (false) respectively.
+  <dd class=example>test 1 > 2  iftrue [ show "yep ]  iffalse [ show "nope ]</dd>
 
   <dt><code>stop</code>
   <dd>End the running procedure with no output value
@@ -792,26 +884,32 @@ of comparison.</p>
   <dt><code>.maybeoutput <var>expr</var></code>
   <dd>Like <code>output</code> if <var>expr</var> returns a value, like <code>stop</code> otherwise
 
-
   <dt><code>ignore <var>expr</var></code>
   <dd>Evaluate and ignore results of the expression
+  <dd class=example>make "q [ 1 2 3 ]  ignore dequeue "q</dd>
 
   <dt><code>for <var>controllist</var> [ <var>statements ...</var>]</code>
   <dd>Typical <code>for</code> loop. The <var>controllist</var> specifies three or four members:
   the local <var>varname</var>, <var>start</var> value, <var>limit</var> value,
   and optional <var>step</var> size.
+  <dd class=example>for [ a 1 10 ] [ show :a ]</dd>
+  <dd class=example>for [ a 0 20 2 ] [ show :a ]</dd>
 
   <dt><code>do.while [ <var>statements ...</var>] <var>expr</var></code>
   <dd>Runs the specified statements at least once, and repeats while the expression is non-zero (true).
+  <dd class=example>do.while [ make "a random 10  show :a ] :a < 8</dd>
 
   <dt><code>while <var>expr</var> [ <var>statements ...</var>]</code>
   <dd>Runs the specified statements only while the expression remains non-zero (true).
+  <dd class=example>while (random 2) = 0 [ show "zero ] show "one</dd>
 
   <dt><code>do.until [ <var>statements ...</var>] <var>expr</var></code>
   <dd>Runs the specified statements at least once, and repeats while the expression is zero (false).
+  <dd class=example>do.until [ make "a random 10  show :a ] :a < 8</dd>
 
   <dt><code>until <var>expr</var> [ <var>statements ...</var>]</code>
   <dd>Runs the specified statements only while the expression remains zero (false).
+  <dd class=example>until (random 2) = 0 [ show "one ] show "zero</dd>
 
   <dt><code>case <var>value</var> [ <var>clauses ...</var> ] </code>
   <dd>For each clause in order:
@@ -820,6 +918,7 @@ of comparison.</p>
     Otherwise, if the clause is of the form <code>[ [ <var>matches</var> ] <var>expr</var> ]</code>
     and <var>value</var> is a member of <var>matches</var>
     then <var>expr</var> is evaluated and returned.
+  <dd class=example>show case :var [ [ ["a] "AAA ] [ ["b] "BBB ] [ else "other ] ]</dd>
 
   <dt><code>cond [ <var>clauses ...</var> ] </code>
   <dd>For each clause in order:
@@ -827,6 +926,7 @@ of comparison.</p>
     then <var>expr</var> is evaluated and returned.
     Otherwise, if the clause is of the form <code>[ [ <var>expr1</var> ] <var>expr2</var> ]</code>
     and <var>expr1</var> evaluates to non-zero (true) then <var>expr2</var> is evaluated and returned.
+  <dd class=example>show cond [ [ [:var = 1] "one] [ [:var = 2] "two] [ else "other ] ]</dd>
 </dl>
 
 <h4>8.2 Template-based Iteration</h4>
@@ -841,27 +941,46 @@ The first input is the name of a procedure to call.</p>
   <dt><code>invoke <var>procname</var> <var>input1</var></code>
   <dt><code>(invoke <var>procname</var> <var>input1</var> ...)</code>
   <dd>Call <var>procname</var> with the specified inputs as inputs
+  <dd class=example>invoke "show "hello</dd>
 
   <dt><code>foreach <var>procname</var> <var>list</var></code>
   <dd>call <var>procname</var> for each item in the list
+  <dd class=example>foreach "show [1 2 3]</dd>
 
   <dt><code>map <var>procname</var> <var>list</var></code>
   <dd>Outputs a list composed of the results of calling <var>procname</var> for each item in the list
+  <dd class=example>to double :n output :n * 2 end  show map "double [1 2 3]</dd>
 
   <dt><code>filter <var>procname</var> <var>list</var></code>
   <dd>Outputs a list composed of the input list where procname called on the item returns non-zero (true)
+  <dd class=example>to oddp :n output bitand :n 1 end  show filter "oddp [ 1 2 3 4 5 ]</dd>
 
   <dt><code>find <var>procname</var> <var>list</var></code>
   <dd>Outputs the first item in <var>list</var> for which calling <var>procname</var> on it returns non-zero (true).
   If not found, the empty list is returned.
+  <dd class=example>to oddp :n output bitand :n 1 end  show find "oddp [ 2 8 4 7 10 9 ]</dd>
 
   <dt><code>reduce <var>procname</var> <var>list</var></code>
   <dt><code>(reduce <var>procname</var> <var>list</var> <var>initial</var>)</code>
   <dd>Call <var>procname</var> repeatedly with two inputs - the current value and the next list item. If <var>initial</var> is not specified, the first list element is used instead.
+  <dd class=example>show reduce "sum [ 1 2 3 4 5 ]</dd>
 </dl>
 
 
 </div>
 
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  [].forEach.call(document.querySelectorAll('.example'), function(e) {
+    e.addEventListener('click', function() {
+      if (!window.parent) return;
+      var text = this.textContent || this.innerText;
+      window.parent.postMessage({
+        example: text
+      }, '*');
+    });
+  });
+});
+</script>
 </body>
 </html>

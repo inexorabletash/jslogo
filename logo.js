@@ -1659,7 +1659,7 @@ function LogoInterpreter(turtle, stream, savehook)
       // Clamp into 0...99
       n = Math.min(99, Math.max(0, Math.floor(n)));
       // Scale to 0...255
-      return Math.floor(n * 256 / 100);
+      return Math.floor(n * 255 / 99);
     }
     if (Type(color) === 'list') {
       var r = adjust(aexpr(color[0]));
@@ -2512,7 +2512,7 @@ function LogoInterpreter(turtle, stream, savehook)
     return routine.apply(null, lexpr(list));
   });
 
-  def("invoke", function(procname) {
+  def("invoke", function(procname, input1) {
     procname = sexpr(procname);
 
     var routine = self.routines.get(procname);
@@ -2544,7 +2544,7 @@ function LogoInterpreter(turtle, stream, savehook)
                              { proc: "FOREACH", name: procname }));
     }
 
-    lexpr(list).forEach(routine);
+    lexpr(list).forEach(function(n) { return routine(n); });
   });
 
 

@@ -167,6 +167,12 @@ var input = {};
     document.body.classList.add('multi');
   };
 
+  input.setSingle = function() {
+    // TODO: Collapse these to a single class?
+    document.body.classList.remove('multi');
+    document.body.classList.add('single');
+  };
+
   var isMulti = function() {
     return document.body.classList.contains('multi');
   };
@@ -330,6 +336,16 @@ var input = {};
   });
 
   $('#run').addEventListener('click', run);
+
+
+  window.addEventListener('message', function(e) {
+    if ('example' in e.data) {
+      var text = e.data.example;
+      input.setSingle();
+      input.setValue(text);
+      input.setFocus();
+    }
+  });
 }());
 
 

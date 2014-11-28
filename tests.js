@@ -413,7 +413,8 @@ test("Data Structure Primitives", function () {
 });
 
 
-test("Communication", 18, function () {
+test("Communication", function () {
+  expect(18);
 
   // 3.1 Transmitters
 
@@ -454,7 +455,8 @@ test("Communication", 18, function () {
 });
 
 
-test("Arithmetic", 137, function () {
+test("Arithmetic", function () {
+  expect(137);
 
   //
   // 4.1 Numeric Operations
@@ -633,7 +635,8 @@ test("Arithmetic", 137, function () {
 });
 
 
-test("Logical Operations", 29, function () {
+test("Logical Operations", function () {
+  expect(29);
 
   this.assert_equals('true', 1);
   this.assert_equals('false', 0);
@@ -672,7 +675,8 @@ test("Logical Operations", 29, function () {
 });
 
 
-test("Graphics", 69, function () {
+test("Graphics", function () {
+  expect(69);
 
   // NOTE: test canvas is 300,300 (so -150...150 coordinates before hitting)
   // edge
@@ -775,7 +779,7 @@ test("Graphics", 69, function () {
   this.assert_equals('setpencolor 0 pencolor', 'black');
   this.assert_equals('setpc 0 pencolor', 'black');
   this.assert_equals('setpencolor "#123456 pencolor', '#123456');
-  this.assert_equals('(setpencolor 0 50 99) pencolor', '#0081ff');
+  this.assert_equals('setpencolor [0 50 99] pencolor', '#0080ff');
 
   this.assert_equals('setpensize 6 pensize', [6, 6]);
   this.assert_equals('setpensize [6 6] pensize', [6, 6]);
@@ -799,7 +803,8 @@ test("Graphics", 69, function () {
   // 6.8 Mouse Queries
 });
 
-test("Workspace Management", 92, function () {
+test("Workspace Management", function () {
+  expect(92);
 
   //
   // 7.1 Procedure Definition
@@ -965,8 +970,8 @@ test("Workspace Management", 92, function () {
 
 });
 
-test("Control Structures", 42, function () {
-
+test("Control Structures", function () {
+  expect(44);
   //
   // 8.1 Control
   //
@@ -1040,7 +1045,9 @@ test("Control Structures", 42, function () {
   //
 
   this.assert_equals('apply "word ["a "b "c]', '"a"b"c');
+  this.assert_equals('invoke "word "a', 'a');
   this.assert_equals('(invoke "word "a "b "c)', 'abc');
+  this.assert_equals('(invoke "word)', '');
   this.assert_equals('make "x 0  to addx :a make "x :x+:a end  foreach "addx [ 1 2 3 4 5 ]  :x', 15);
   this.assert_equals('to double :x output :x * 2 end  map "double [ 1 2 3 ]', [2, 4, 6]);
   this.assert_equals('to odd :x output :x % 2 end  filter "odd [ 1 2 3 ]', ["1", "3"]);
