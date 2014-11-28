@@ -181,7 +181,7 @@ of comparison.</p>
 
   <dt><code>remdup <var>list</var></code>
   <dd>Outputs the list with duplicates removed
-  <dd class=example>show remdup [ 1 2 3 2 3 4 3 4 5 4 5 6 ]</dd>
+  <dd class=example>show remdup [ 1 2 3 2 3 4 3 4 5 ]</dd>
 </dl>
 
 <h4>2.3 Data Mutators</h4>
@@ -287,6 +287,7 @@ of comparison.</p>
   <dt><code>(readword <var>promptstr</var>)</code>
   <dd>Prompt the user for a line of input. The result (including spaces) is the single word output.
   <dd class=example>show readword</dd>
+  <dd class=example>make "name (readword [What is your name?])  show :name</dd>
 </dl>
 
 <!--
@@ -972,6 +973,7 @@ The first input is the name of a procedure to call.</p>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
   [].forEach.call(document.querySelectorAll('.example'), function(e) {
+    e.title = 'Click to try this example';
     e.addEventListener('click', function() {
       if (!window.parent) return;
       var text = this.textContent || this.innerText;

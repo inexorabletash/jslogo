@@ -34,7 +34,8 @@ module("Logo Unit Tests", {
     this.stream = {
       inputbuffer: "",
 
-      read: function() {
+      read: function(prompt) {
+        this.last_prompt = prompt;
         var res = this.inputbuffer;
         this.inputbuffer = "";
         return res;
@@ -50,6 +51,7 @@ module("Logo Unit Tests", {
 
       clear: function() {
         this.outputbuffer = "";
+        this.last_prompt = undefined;
       }
     };
 
@@ -72,6 +74,14 @@ module("Logo Unit Tests", {
       this.stream.clear();
       this.interpreter.run(expression, {returnResult: true});
       var actual = this.stream.outputbuffer;
+      this.stream.clear();
+      equal(actual, expected, expression);
+    };
+
+    this.assert_prompt = function (expression, expected) {
+      this.stream.clear();
+      this.interpreter.run(expression, {returnResult: true});
+      var actual = this.stream.last_prompt;
       this.stream.clear();
       equal(actual, expected, expression);
     };
@@ -414,7 +424,7 @@ test("Data Structure Primitives", function () {
 
 
 test("Communication", function () {
-  expect(18);
+  expect(22);
 
   // 3.1 Transmitters
 
@@ -443,6 +453,11 @@ test("Communication", function () {
 
   this.stream.inputbuffer = "a b c 1 2 3";
   this.assert_equals('readword', 'a b c 1 2 3');
+
+  this.assert_prompt('readword', undefined);
+  this.assert_prompt('(readword "query)', 'query');
+  this.assert_prompt('(readword "query "extra)', 'query');
+  this.assert_prompt('(readword [a b c])', 'a b c');
 
   // 3.3 File Access
   // 3.4 Terminal Access

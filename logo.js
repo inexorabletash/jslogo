@@ -1282,7 +1282,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("readword", function() {
     if (arguments.length > 0) {
-      return stream.read(sexpr(arguments[0]));
+      return stream.read(stringify_nodecorate(arguments[0]));
     } else {
       return stream.read();
     }
