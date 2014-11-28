@@ -10,7 +10,7 @@ if (typeof CodeMirror !== 'undefined') {
 
   // Note: U+2190 ... U+2193 are arrows
   var regexIdentifier = /^(\.?[A-Za-z\u00A1-\u1FFF][A-Za-z0-9_.\?\u00A1-\u1FFF]*|[\u2190-\u2193])/;
-  var regexStringLiteral = /^"[^ \[\]\(\)\{\}]*/;
+  var regexStringLiteral = /^["'][^ \[\]\(\)\{\}]*/;
   var regexVariable = /^:[A-Za-z\u00A1-\u1FFF][A-Za-z0-9_\u00A1-\u1FFF]*/;
   var regexNumberLiteral = /^[0-9]*\.?[0-9]+(?:[eE]\s*[\-+]?\s*[0-9]+)?/;
   var regexOperator = /^\+|\-|\*|\/|%|\^|>=|<=|<>|=|<|>|\[|\]|\{|\}(\s*@\s*\d+)?|\(|\)/;
