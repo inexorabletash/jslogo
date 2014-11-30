@@ -24,7 +24,9 @@
 #### Basics in Programming
 ##### Condition
 * Condition in programming is similar to the choices in real life. Such as: if it rains, I should bring the umbrella, otherwise, I should not. In PiE-LOGO, Try ``If `` 
-
+##### Loop
+* Loop is a faster way to get things done if you want to repeat several commands over and over again. Try ``Can you go forward 100 steps?`` ``Turn left`` ``can you repeat last 2 commands for 3 times?`` What do you get? A square!
+* 
 
 
 ```
