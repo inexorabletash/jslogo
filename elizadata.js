@@ -165,7 +165,7 @@ var elizaKeywords = [
 ]],
 
 ["repeat", 0, [
- ["* repeat last * commands for * times", [
+ ["* repeat * last * commands for * times", [
      "Okay, Let's repeat last #2# commands for #3# times!",
      ],"repeat #3# \"last\" #2#"]
  
