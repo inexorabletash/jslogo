@@ -1,0 +1,217 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+<style>
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p,
+blockquote {
+    margin: 0;
+    padding: 0;
+}
+body {
+    font-family: "Helvetica Neue", Helvetica, "Hiragino Sans GB", Arial, sans-serif;
+    font-size: 13px;
+    line-height: 18px;
+    color: #737373;
+    background-color: white;
+    margin: 10px 13px 10px 13px;
+}
+table {
+	margin: 10px 0 15px 0;
+	border-collapse: collapse;
+}
+td,th {	
+	border: 1px solid #ddd;
+	padding: 3px 10px;
+}
+th {
+	padding: 5px 10px;	
+}
+
+a {
+    color: #0069d6;
+}
+a:hover {
+    color: #0050a3;
+    text-decoration: none;
+}
+a img {
+    border: none;
+}
+p {
+    margin-bottom: 9px;
+}
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    color: #404040;
+    line-height: 36px;
+}
+h1 {
+    margin-bottom: 18px;
+    font-size: 30px;
+}
+h2 {
+    font-size: 24px;
+}
+h3 {
+    font-size: 18px;
+}
+h4 {
+    font-size: 16px;
+}
+h5 {
+    font-size: 14px;
+}
+h6 {
+    font-size: 13px;
+}
+hr {
+    margin: 0 0 19px;
+    border: 0;
+    border-bottom: 1px solid #ccc;
+}
+blockquote {
+    padding: 13px 13px 21px 15px;
+    margin-bottom: 18px;
+    font-family:georgia,serif;
+    font-style: italic;
+}
+blockquote:before {
+    content:"\201C";
+    font-size:40px;
+    margin-left:-10px;
+    font-family:georgia,serif;
+    color:#eee;
+}
+blockquote p {
+    font-size: 14px;
+    font-weight: 300;
+    line-height: 18px;
+    margin-bottom: 0;
+    font-style: italic;
+}
+code, pre {
+    font-family: Monaco, Andale Mono, Courier New, monospace;
+}
+code {
+    background-color: #fee9cc;
+    color: rgba(0, 0, 0, 0.75);
+    padding: 1px 3px;
+    font-size: 12px;
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+}
+pre {
+    display: block;
+    padding: 14px;
+    margin: 0 0 18px;
+    line-height: 16px;
+    font-size: 11px;
+    border: 1px solid #d9d9d9;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+pre code {
+    background-color: #fff;
+    color:#737373;
+    font-size: 11px;
+    padding: 0;
+}
+sup {
+    font-size: 0.83em;
+    vertical-align: super;
+    line-height: 0;
+}
+* {
+	-webkit-print-color-adjust: exact;
+}
+@media screen and (min-width: 914px) {
+    body {
+        width: 854px;
+        margin:10px auto;
+    }
+}
+@media print {
+	body,code,pre code,h1,h2,h3,h4,h5,h6 {
+		color: black;
+	}
+	table, pre {
+		page-break-inside: avoid;
+	}
+}
+</style>
+<title>Tutorial</title>
+
+</head>
+<body>
+<h1>Tutorial</h1>
+
+<h2>Introduction</h2>
+
+<h3>Get in a dialogue with PiE</h3>
+
+<h4>First Try</h4>
+
+<ul>
+<li>Type in <code>Can you forward 150 steps?</code> and Click the <code>Talk</code>. See what happen?</li>
+<li>Great! The "turtle" just move forward 100 steps! And PiE confirmed your command in the response box.</li>
+<li>Then Type in <code>Turn left 90 degrees!</code> and Click the <code>Talk</code>. You can also type the <code>Enter</code> on the keyboard.</li>
+<li>You will then see the "turtle" turn left 90 degrees!</li>
+<li>Next, let's try move the turtle quicker by using <code>repeat</code>.</li>
+<li>Type in <code>Repeat last 2 commands for 3 times!</code>.</li>
+<li>Yeah! You got a square! right?</li>
+</ul>
+
+
+<h4>Attributes can be modified</h4>
+
+<ul>
+<li>Change the width of the line by <code>Can you use a bolder pen?</code> and <code>Can you use a lighter pen?</code>.</li>
+<li>Change the color of the line by <code>Can you change to color red?</code>. You can change to any other colors like: <code>grey</code> <code>purple</code> <code>green</code> <code>yellow</code> <code>black</code> <code>blue</code> <code>red</code>.</li>
+<li>Suspend the turtle by <code>Get up!</code> and the turtle will be off the canvas. There will be no trace left when the turtle is off the paper. You can try <code>Can you forward 150 steps?</code> to double check.</li>
+<li>Put down the turtle</li>
+</ul>
+
+
+<h4>Move the turtle</h4>
+
+<ul>
+<li>The turtle can move forward and backward. Try <code>Go forward 150 steps!</code> and <code>Get back 150 Steps</code>.</li>
+<li>The turtle can turn clockwise or anti-clockwise. Try <code>Turn left 90 degrees</code> and <code>Turn right 90 degrees</code>. You can name any degree between 0 to 360. In addition, try <code>Turn left</code> and <code>Turn right</code>. The turtle will by default turn 90 degrees.</li>
+</ul>
+
+
+<h4>Basics in Programming</h4>
+
+<h5>Condition</h5>
+
+<ul>
+<li>Condition in programming is similar to the choices in real life. Such as: if it rains, I should bring the umbrella, otherwise, I should not. In PiE-LOGO, Try <code>If</code></li>
+</ul>
+
+
+<pre><code>clearscreen window
+repeat 144 [
+  setlabelheight repcount
+  penup
+  fd repcount * repcount / 30
+  label "Logo
+  bk repcount * repcount / 30
+  pendown
+  rt 10
+]
+</code></pre>
+</body>
+</html>

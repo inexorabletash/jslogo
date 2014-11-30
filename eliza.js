@@ -22,6 +22,10 @@ ElizaBot.prototype.reset = function() {
 	}
 }
 
+function printt(param) {
+	console.log(param);
+}
+
 ElizaBot.prototype._dataParsed = false;
 
 ElizaBot.prototype._init = function() {

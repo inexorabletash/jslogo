@@ -1707,7 +1707,7 @@ function LogoInterpreter(turtle, stream, savehook)
   // Not Supported: palette
 
   def("pensize", function() {
-    return [turtle.getwidth(), turtle.getwidth()];
+    return turtle.getwidth()
   });
 
   // Not Supported: pen

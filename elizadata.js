@@ -105,32 +105,168 @@ var elizaKeywords = [
  ["* clear *", [
      "Let's clear the screen!",
      "Okay, let's clear up all the drawings!"
-     ],"clear()"]
+     ],"cs"]
  
 ]],
 
+// Move the turtle
 ["forward", 0, [
  ["* forward * steps *", [
      "Let's forward #2# steps!",
      "Okay, let's move ahead #2# steps!"
-     ],"forward (#2#)"]
+     ],"forward #2#"]
  
 ]],
 
-["left", 0, [
+["left", 1, [
  ["* turn left * degrees *", [
-     "Let's turn left (2) steps!",
-     "Okay, let's turn (2) degrees to the left!"
-     ],"left (#2#)"]
- 
+     "Let's turn left #2# degrees!",
+     "Okay, let's turn #2# degrees to the left!"
+     ],"left #2#"] 
+]],
+
+["left", 1, [
+ ["* turn * degrees to the left*", [
+     "Let's turn #2# degrees to the left!",
+     "Okay, let's turn #2# degrees to the left!"
+     ],"left #2#"] 
+]],
+
+
+["left", 0, [
+ ["* turn left", [
+     "Let's turn left!",
+     "Okay, let's turn to the left!"
+     ],"left 90"]
+]],
+
+
+
+["right", 1, [
+ ["* turn right * degrees *", [
+     "Let's turn right #2# degrees!",
+     "Okay, let's turn #2# degrees to the right!"
+     ],"right #2#"] 
+]],
+
+["right", 1, [
+ ["* turn * degrees to the right*", [
+     "Let's turn #2# degrees to the right!",
+     "Okay, let's turn #2# degrees to the right!"
+     ],"right #2#"] 
+]],
+
+
+["right", 0, [
+ ["* turn right", [
+     "Let's turn right!",
+     "Okay, let's turn to the right!"
+     ],"right 90"]
 ]],
 
 ["repeat", 0, [
  ["* repeat last * commands for * times", [
      "Okay, Let's repeat last #2# commands for #3# times!",
-     ],"repeat (\"last\",#2#,#3#)"]
+     ],"repeat #3# \"last\" #2#"]
  
 ]],
+
+// change attributes
+["bolder", 0, [
+ ["* bolder *", [
+     "Okay, Let's make the line bolder!",
+     ],"setpensize pensize+1"]
+ 
+]],
+
+["lighter", 0, [
+ ["* lighter *", [
+     "Okay, Let's make the line lighter!",
+     ],"setpensize pensize-1"]
+ 
+]],
+
+["red", 0, [
+ ["* red *", [
+     "Okay, Let's make the pen color be red!",
+     ],"setpencolor 4"]
+ 
+]],
+
+["blue", 0, [
+ ["* blue *", [
+     "Okay, Let's make the pen color be blue!",
+     ],"setpencolor 1"]
+ 
+]],
+
+["black", 0, [
+ ["* black *", [
+     "Okay, Let's make the pen color be black!",
+     ],"setpencolor 0"]
+ 
+]],
+
+["yellow", 0, [
+ ["* yellow *", [
+     "Okay, Let's make the pen color be yellow!",
+     ],"setpencolor 6"]
+ 
+]],
+
+["green", 0, [
+ ["* green *", [
+     "Okay, Let's make the pen color be green!",
+     ],"setpencolor 2"]
+ 
+]],
+
+["purple", 0, [
+ ["* purple *", [
+     "Okay, Let's make the pen color be purple!",
+     ],"setpencolor 13"]
+ 
+]],
+
+["grey", 0, [
+ ["* grey *", [
+     "Okay, Let's make the pen color be grey!",
+     ],"setpencolor 15"]
+ 
+]],
+
+["up", 0, [
+ ["* get up *", [
+     "Okay, Let's lift the turtle off the canvas!",
+     ],"penup"]
+ 
+]],
+
+["down", 0, [
+ ["* get down *", [
+     "Okay, Let's put the turtle back on the canvas!",
+     ],"pendown"]
+ 
+]],
+
+["down", 0, [
+ ["* get down *", [
+     "Okay, Let's put the turtle back on the canvas!",
+     ],"pendown"]
+ 
+]],
+
+// scope
+
+["if", 1, [
+ ["* get down *", [
+     "Okay, Let's put the turtle back on the canvas!",
+     ],"pendown"]
+ 
+]],
+
+
+
 
 
 
