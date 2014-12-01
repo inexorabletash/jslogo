@@ -30,7 +30,15 @@
 <script language="JavaScript" type="text/javascript" src="elizadata.js"></script>
 <script language="JavaScript" type="text/javascript">
 
+// save
 
+function saveAsLocalImage () {  
+                var myCanvas = document.getElementById("turtle");  
+                // here is the most important part because if you dont replace you will get a DOM 18 exception.  
+                // var image = myCanvas.toDataURL("image/png").replace("image/png", "image/octet-stream;Content-Disposition: attachment;filename=foobar.png");  
+                var image = myCanvas.toDataURL("image/png").replace("image/png", "image/octet-stream");   
+                window.location.href=image; // it will save locally  
+            }   
 // var eliza = new ElizaBot();
 // var elizaLines = new Array();
 // var logoLines = new Array();
@@ -101,7 +109,7 @@
 // </script>
 
   <h1>PiE-LOGO</h1>
-<!--   <p>
+ <button id="downloadImageBtn" onclick="saveAsLocalImage ()">Download Image</button>  <!--   <p>
     By <a href="mailto:inexorabletash@gmail.com">Joshua Bell</a>
     | <a target="_blank" href="tests.htm">Unit Tests</a>
     | <a target="_blank" href="https://github.com/inexorabletash/jslogo">Source</a>
@@ -121,7 +129,6 @@
     </div>
   </div>
 </div>
-
 <div id="dialogue-panel" class="panel">
   <div id="dialogue">
     <div class="inner">

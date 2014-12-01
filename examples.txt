@@ -24,9 +24,10 @@ end the repeat
 
 --------------------------------------
 Task1: (1)Now, can you draw an octagon(8 sides)？ 
-Try modifying the code! 
+Try modifying the code! Save the pic by 
+Clicking on "Download Image".
 How about (2)decagon(10 sides) and 
-(3)dodecagon(12 sides)?
+(3)dodecagon(12 sides)? Save the Image.
 --------------------------------------
 
 **************************************
@@ -51,7 +52,7 @@ end the repeat
 
 --------------------------------------
 Task2: Now, can you draw a (4)Nine-pointed star？
-How about (5)Twelve-pointed star?
+How about (5)Twelve-pointed star? Save the Image.
 Hint: The angle turned in each round has
 relationship with how many points and 180.
 --------------------------------------
@@ -75,7 +76,7 @@ end the repeat
 
 --------------------------------------
 Task3: Now, (6)can you use color red and draw 
-these LOGOs again? 
+these LOGOs again? Save the Image.
 Then, (7)if I have already implemented a function 
 called set randomcolor, can you call the function 
 and make the LOGO's color changed in each round?
