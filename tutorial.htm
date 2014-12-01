@@ -114,6 +114,8 @@ code {
     border-radius: 3px;
 }
 pre {
+    background-color: #fee9cc;
+    color: rgba(0, 0, 0, 0.75);
     display: block;
     padding: 14px;
     margin: 0 0 18px;
@@ -124,8 +126,8 @@ pre {
     word-wrap: break-word;
 }
 pre code {
-    background-color: #fff;
-    color:#737373;
+    background-color: #fee9cc;
+    color:rgba(0, 0, 0, 0.75);
     font-size: 11px;
     padding: 0;
 }
@@ -160,7 +162,7 @@ sup {
 
 <h3>Brief Introduction</h3>
 
-<p>PiE (Programming in Eliza/English) is a tool that helps beginers to learn how to program. By interacting in Natural Langugage, currently we only can handle English, user can manipulate the "Turtle" (which is represented as an triangle in this design) on the canvas. The turtle will leave the trace whereever it goes and these traces will be a beautiful pattern.</p>
+<p>PiE (Programming in Eliza/English) is a tool that helps beginners to learn how to program. By interacting in Natural Language, currently we only can handle English, user can manipulate the "Turtle" (which is represented as an triangle in this design) on the canvas. The turtle will leave the trace whereever it goes and these traces will be a beautiful pattern.</p>
 
 <h3>Get in a dialogue with PiE</h3>
 
@@ -168,10 +170,10 @@ sup {
 
 <ul>
 <li>Type in <code>Can you forward 150 steps?</code> and Click the <code>Talk</code>. See what happen?</li>
-<li>Great! The "turtle" just move forward 100 steps! And PiE confirmed your command in the response box.</li>
-<li>Then Type in <code>Turn left 90 degrees!</code> and Click the <code>Talk</code>. You can also type the <code>Enter</code> on the keyboard.</li>
+<li>Great! The "turtle" just move forward 150 steps! And PiE confirmed your command in the response box.</li>
+<li>Then Type in <code>Turn left 90 degrees!</code> and Click the <code>Talk</code>. You can also type the <code>Enter</code> on the keyboard instead of the Click.</li>
 <li>You will then see the "turtle" turn left 90 degrees!</li>
-<li>Next, let's try move the turtle quicker by using <code>repeat</code>.</li>
+<li>Next, let's try move the turtle quicker and more fluently by using repeat.</li>
 <li>Type in <code>Repeat last 2 commands for 3 times!</code>.</li>
 <li>Yeah! You got a square! right?</li>
 <li>You can clear the screen by <code>Clear the screen!</code></li>
@@ -180,20 +182,22 @@ sup {
 <h4>Move the turtle</h4>
 
 <ul>
-<li>The turtle can move forward and backward. Try <code>Go forward 150 steps!</code> and <code>Get back 150 Steps</code>.</li>
-<li>The turtle can turn clockwise or anti-clockwise. Try <code>Turn left 90 degrees</code> and <code>Turn right 90 degrees</code>. You can name any degree between 0 to 360. In addition, try <code>Turn left</code> and <code>Turn right</code>. The turtle will by default turn 90 degrees.</li>
+<li>Basically, the turtle can move forward and backward. Try <code>Go forward 150 steps!</code> and <code>Get back 150 Steps</code>.</li>
+<li>Besides, staight move, the turtle can turn clockwise(right) or anti-clockwise(left). Try <code>Turn left 90 degrees</code> and <code>Turn right 90 degrees</code>. You can name any degree between 0 to 360. In addition, try <code>Turn left.</code> and <code>Turn right</code>. The turtle will by default turn 90 degrees.</li>
+<li>If you do not want the pattern any more, just <code>Clear the screen!</code>!</li>
 </ul>
 
 
 <h4>Attributes can be modified</h4>
 
 <ul>
-<li>Change the width of the line by <code>Can you use a bolder pen?</code> and <code>Can you use a lighter pen?</code>.</li>
-<li>Test with <code>Forward 100 steps</code>, to see whether the pen width has been bolder or lighter.</li>
-<li>Change the color of the line by <code>Can you change to color red?</code>. You can change to any other colors like: <code>grey</code> <code>purple</code> <code>green</code> <code>yellow</code> <code>black</code> <code>blue</code> <code>red</code>.</li>
-<li>Test with <code>Forward 100 steps</code>.
-<li>Suspend the turtle by <code>Get up!</code> and the turtle will be off the canvas. There will be no trace left when the turtle is off the paper. You can try <code>Can you forward 150 steps?</code> to double check.</li>
-<li>Test with <code>Forward 100 steps</code>, 
+<li>The turtle can draw with its movements. If you want to change how the trace looks like, please go on with this section.</li>
+<li>First, let's try to make the line bolder. Type in <code>Can you use a bolder pen?</code> and then try <code>Go forward 100 steps!</code>. How it look?
+<li>Then, let's make the line lighter. Type in <code>Use a lighter pen</code> and try again <code>Go forward 100 steps!</code>. See the difference?
+<li>You can also change the color of the line by <code>Can you change to color red?</code>. You can change to any other colors like: <code>grey</code> <code>purple</code> <code>green</code> <code>yellow</code> <code>black</code> <code>blue</code> <code>red</code>.</li>
+<li>Test with <code>Forward 100 steps</code>. Your turtle might hit the wall if you continued three 100 step forward. After it hit the wall, it will appear from the other side.
+<li>Sometimes, you just want to move the turtle but not leave any traces. In this case, let's suspend the turtle.</li>
+<li>Suspend the turtle by <code>Get up!</code> and the turtle will be off the canvas. There will be no trace left when the turtle is off the paper. You can try <code>Can you forward 50 steps?</code> to double check.</li>
 <li>Put down the turtle by <code>Get down!</code></li>
 <li>Test with <code>Forward 100 steps</code>
 </ul>
@@ -205,17 +209,27 @@ sup {
 <li>In this section, we will tell you some basics in programming.
 
 <h5>Loop</h5></li>
-<li>Loop is a faster way to get things done if you want to repeat several commands over and over again. Try these commands one by one<br/>
-<code>Can you go forward 100 steps?</code>
+<li>Loop is a faster way to get things done if you want to repeat several commands over and over again. Let's see how to use it.
+<li>First, let's try these commands one by one.
+    <code>Forward 150 steps</code>
+    <code>Turn left 90 degrees</code>
+    <code>Forward 150 steps</code>
+    <code>Turn left 90 degrees</code>
+    <code>Forward 150 steps</code>
+    <code>Turn left 90 degrees</code>
+    <code>Forward 150 steps</code>
+    <code>Turn left 90 degrees</code>
+    What do you get? A square! But how to use less commands to realize the same thing?</li>
+<li>Try these commands one by one<br/>
+<code>Go forward 100 steps.</code>
 <code>Turn left</code>
 <code>can you repeat last 2 commands for 3 times?</code></li>
-<li>What do you get? A square!
+<li>You see. We use 3 commands to draw a square instead of 8 commands.
 
 <h5>Function</h5></li>
 <li>You can read this part after the next section "Write in Scripts".</li>
 <li>Function helps to reuse some capsulated commands. Try the following commands:</li>
 </ul>
-
 
 <pre><code>  Let's define a function called Square
     Repeat the following commands for 4 times
@@ -225,6 +239,11 @@ sup {
   End the function
   Then Clear the screen
   Call the function square
+</code></pre>
+
+<li>To experience the benefit from Function, you can go on with</li>
+<pre><code>  Turn right 60 degrees
+  Again, Call the function square 
 </code></pre>
 
 <h3>Write in Scripts</h3>
@@ -244,7 +263,7 @@ End the Repeat
 
 <ul>
 <li>After the copy-paste, click on the <code>Talk</code> button. What do you get?</li>
-<li>You can revise the script in the <code>Multi-line mode</code> by add or delete in the box. Try add <code>Repeat the following commands for 36 times</code> after <code>Let the pen be bolder</code> and <code>Turn left 10 degrees</code> and <code>End the repeat</code> after the original <code>End the Repeat</code>. What do you get?</li>
+<li>You can revise the script in the <code>Multi-line mode</code> by adding or deleting in the box. Try add <code>Repeat the following commands for 36 times</code> after <code>Let the pen be bolder</code> and <code>Turn left 10 degrees</code> and <code>End the repeat</code> after the original <code>End the Repeat</code>. What do you get?</li>
 </ul>
 
 
@@ -260,7 +279,7 @@ End the second repeat
 </code></pre>
 
 <ul>
-<li>What? Did not see it clearly. Let's try it step by step. Change 36 into 4, 8, 12, 16 respectively. Do you understand now?</li>
+<li>What? Did not see it clearly. Let's try it step by step. In the third command, change "36" into 1, 2, 4, 8, 12, 16 respectively. Do you understand now?</li>
 </ul>
 
 

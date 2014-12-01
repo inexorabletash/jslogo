@@ -233,7 +233,7 @@ var input = {};
     var dialogue="";
     for (var i=0; i<split.length; i++) {
       v=v+eliza.transform(split[i])[1]+"\n";
-      dialogue=dialogue+eliza.transform(split[i])[0]+" ";
+      dialogue=dialogue+eliza.transform(split[i])[0]+"\n";
     }
     // var v=eliza.transform(nl)[1]
     document.all.response.value=dialogue;
