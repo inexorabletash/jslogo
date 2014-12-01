@@ -1,54 +1,86 @@
-to star
-  repeat 5 [ fd 100 rt 144 ]
-end
-clearscreen
-star
+**************************************
+<1>Draw polygon!
+Try the following commands first: 
+You can click on the block of commands!
+**************************************
 
-to square :length
-  repeat 4 [ fd :length rt 90 ]
-end
-clearscreen
-repeat 36 [ square 50 rt 10 ]
+clear the screen
+Repeat the following for 4 times:
+  Go forward 150 steps
+  turn right
+end the repeat
 
-to randomcolor
-  setcolor pick [ red orange yellow green blue violet ]
-end
-clearscreen
-repeat 36 [ randomcolor square random 200 rt 10 ]
+clear the screen
+Repeat the following for 5 times:
+  Go forward 150 steps
+  turn right 72 degrees 
+end the repeat
 
-clearscreen window
-repeat 144 [
-  setlabelheight repcount
-  penup
-  fd repcount * repcount / 30
-  label "Logo
-  bk repcount * repcount / 30
-  pendown
-  rt 10
-]
+clear the screen
+Repeat the following for 6 times:
+  Go forward 150 steps
+  turn right 60 degrees 
+end the repeat
 
-to tree :size
-   if :size < 5 [forward :size back :size stop]
-   forward :size/3
-   left 30 tree :size*2/3 right 30
-   forward :size/6
-   right 25 tree :size/2 left 25
-   forward :size/3
-   right 25 tree :size/2 left 25
-   forward :size/6
-   back :size
-end
-clearscreen
-tree 150
+--------------------------------------
+Task1: (1)Now, can you draw an octagon(8 sides)？ 
+Try modifying the code! 
+How about (2)decagon(10 sides) and 
+(3)dodecagon(12 sides)?
+--------------------------------------
 
-to fern :size :sign
-  if :size < 1 [ stop ]
-  fd :size
-  rt 70 * :sign fern :size * 0.5 :sign * -1 lt 70 * :sign
-  fd :size
-  lt 70 * :sign fern :size * 0.5 :sign rt 70 * :sign
-  rt 7 * :sign fern :size - 1 :sign lt 7 * :sign
-  bk :size * 2
-end
-window clearscreen pu bk 150 pd
-fern 25 1
+**************************************
+<2> Draw Stars!
+Try the following commands first: 
+You can click on the block of commands!
+**************************************
+
+clear the screen
+Use a red pen!
+repeat the following commands for 5 times:
+  Can you forward 150 steps?
+  turn right 144 degrees please!
+end the repeat
+
+clear the screen
+Use a red pen!
+repeat the following commands for 7 times:
+  Can you forward 150 steps?
+  turn right 154 degrees please!
+end the repeat
+
+--------------------------------------
+Task2: Now, can you draw a (4)Nine-pointed star？
+How about (5)Twelve-pointed star?
+Hint: The angle turned in each round has
+relationship with how many points and 180.
+--------------------------------------
+
+**************************************
+<3> Draw Spiral LOGO!
+Try the following commands first: 
+You can click on the block of commands!
+**************************************
+
+clear the screen
+repeat the following for 90 times
+  let the label height be the same as the repeat count
+  put the pen off the paper
+  move forward repcount * repcount / 30 steps
+  put the label Logo here
+  move back repcount * repcount / 30 steps
+  put the pen down
+  turn right 10 degrees
+end the repeat
+
+--------------------------------------
+Task3: Now, (6)can you use color red and draw 
+these LOGOs again? 
+Then, (7)if I have already implemented a function 
+called set randomcolor, can you call the function 
+and make the LOGO's color changed in each round?
+--------------------------------------
+
+
+
+

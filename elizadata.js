@@ -114,7 +114,15 @@ var elizaKeywords = [
  ["* forward * steps *", [
      "Let's forward #2# steps!",
      "Okay, let's move ahead #2# steps!"
-     ],"forward #2#"]
+     ],"fd #2#"]
+ 
+]],
+
+["back", 0, [
+ ["* back * steps *", [
+     "Let's get back #2# steps!",
+     "Okay, let's move back #2# steps!"
+     ],"bk #2#"]
  
 ]],
 
@@ -242,6 +250,20 @@ var elizaKeywords = [
  
 ]],
 
+["pen", 0, [
+ ["* pen off * paper *", [
+     "Okay, Let's lift the turtle off the canvas!",
+     ],"penup"]
+ 
+]],
+
+["pen", 0, [
+ ["* pen off * canvas *", [
+     "Okay, Let's lift the turtle off the canvas!",
+     ],"penup"]
+ 
+]],
+
 ["down", 0, [
  ["* get down *", [
      "Okay, Let's put the turtle back on the canvas!",
@@ -250,7 +272,7 @@ var elizaKeywords = [
 ]],
 
 ["down", 0, [
- ["* get down *", [
+ ["* pen down *", [
      "Okay, Let's put the turtle back on the canvas!",
      ],"pendown"]
  
@@ -263,6 +285,55 @@ var elizaKeywords = [
      "Okay, Let's put the turtle back on the canvas!",
      ],"pendown"]
  
+]],
+
+["repeat", 1, [
+ ["* repeat * following * for * times", [
+     "Okay, Let's repeat these commands for #4# times!",
+     ],"repeat #4# \["]
+]],
+
+["end", 0, [
+ ["* end * repeat*", [
+     "Okay, Let's end the repeat!",
+     ],"\]"]
+]],
+
+["end", 0, [
+ ["* end * function*", [
+     "Okay, Let's end the repeat!",
+     ],"END"]
+]],
+
+["function", 1, [
+ ["* function called *", [
+     "Okay, Let's define #2# as a function!",
+     ],"TO #2#"]
+]],
+
+["function", 1, [
+ ["* call the function *", [
+     "Okay, Let's call #2#!",
+     ],"#2#"]
+]],
+
+ // let the label height be the same as repeat count
+["label", 1, [
+ ["* label height * repeat count *", [
+     "Okay, Let's make the label height the same as the repeat count!",
+     ],"setlabelheight repcount"]
+]],
+
+["label", 1, [
+ ["* put the label * here *", [
+     "Okay, Let's put the label #2# here!",
+     ],"label \"#2#"]
+]],
+
+["randomcolor", 3, [
+ ["* randomcolor *", [
+     "Okay, Let's use random color!",
+     ],"TO randomcolor setcolor pick \[ red orange yellow green blue violet \] END randomcolor"]
 ]],
 
 

@@ -218,6 +218,7 @@ var input = {};
     // if (v === '') {
     //   return;
     // } 
+    // "Can you forward 100 steps↵turn left "
     var nl = input.getValue();
     if (nl === '') {
       return;
@@ -227,8 +228,15 @@ var input = {};
     
     var eliza = new ElizaBot();
     // console.log(eliza.transform("can you go forward 100 steps")[1]);
-    var v=eliza.transform(nl)[1]
-    document.all.response.value=eliza.transform(nl)[0];
+    var split= nl.split("\n")
+    var v="";
+    var dialogue="";
+    for (var i=0; i<split.length; i++) {
+      v=v+eliza.transform(split[i])[1]+"\n";
+      dialogue=dialogue+eliza.transform(split[i])[0]+" ";
+    }
+    // var v=eliza.transform(nl)[1]
+    document.all.response.value=dialogue;
     // var v=elizaStep();
     console.log("before "+v);
     v=substitution(v, commandHistory);

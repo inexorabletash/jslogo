@@ -20,7 +20,7 @@ body {
     font-size: 13px;
     line-height: 18px;
     color: #737373;
-    background-color: white;
+    background-color: transparent;
     margin: 10px 13px 10px 13px;
 }
 table {
@@ -156,9 +156,11 @@ sup {
 
 </head>
 <body>
-<h1>Tutorial</h1>
+<h2>Tutorial</h2>
 
-<h2>Introduction</h2>
+<h3>Brief Introduction</h3>
+
+<p>PiE (Programming in Eliza/English) is a tool that helps beginers to learn how to program. By interacting in Natural Langugage, currently we only can handle English, user can manipulate the "Turtle" (which is represented as an triangle in this design) on the canvas. The turtle will leave the trace whereever it goes and these traces will be a beautiful pattern.</p>
 
 <h3>Get in a dialogue with PiE</h3>
 
@@ -195,27 +197,71 @@ sup {
 
 <h4>Basics in Programming</h4>
 
-<h5>Condition</h5>
-
 <ul>
-<li>Condition in programming is similar to the choices in real life. Such as: if it rains, I should bring the umbrella, otherwise, I should not. In PiE-LOGO, Try <code>If</code>
+<li>In this section, we will tell you some basics in programming.
 
 <h5>Loop</h5></li>
-<li>Loop is a faster way to get things done if you want to repeat several commands over and over again. Try <code>Can you go forward 100 steps?</code> <code>Turn left</code> <code>can you repeat last 2 commands for 3 times?</code> What do you get? A square!</li>
-<li></li>
+<li>Loop is a faster way to get things done if you want to repeat several commands over and over again. Try these commands one by one<br/>
+<code>Can you go forward 100 steps?</code>
+<code>Turn left</code>
+<code>can you repeat last 2 commands for 3 times?</code></li>
+<li>What do you get? A square!
+
+<h5>Function</h5></li>
+<li>You can read this part after the next section "Write in Scripts".</li>
+<li>Function helps to reuse some capsulated commands. Try the following commands:</li>
 </ul>
 
 
-<pre><code>clearscreen window
-repeat 144 [
-  setlabelheight repcount
-  penup
-  fd repcount * repcount / 30
-  label "Logo
-  bk repcount * repcount / 30
-  pendown
-  rt 10
-]
+<pre><code>  Let's define a function called Square
+    Repeat the following commands for 4 times
+        Go forward 100 Steps        
+        Turn left 90 degrees
+    End the Repeat
+  End the function
+  Then Clear the screen
+  Call the function square
 </code></pre>
+
+<h3>Write in Scripts</h3>
+
+<ul>
+<li>You can write down a few sentences to manipulate the turtle at a time instead of being involved in the tedious dialogue. Take the square as an example. Try copy-paste the following commands in the <code>Multi-line Mode</code> by clicking on the arrow beside the <code>Talk</code> button.</li>
+</ul>
+
+
+<pre><code>Use a red pen
+Let the pen be bolder
+Repeat the following commands for 4 times
+  Go forward 100 Steps
+  Turn left 90 degrees
+End the Repeat
+</code></pre>
+
+<ul>
+<li>After the copy-paste, click on the <code>Talk</code> button. What do you get?</li>
+<li>You can revise the script in the <code>Multi-line mode</code> by add or delete in the box. Try add <code>Repeat the following commands for 36 times</code> after <code>Let the pen be bolder</code> and <code>Turn left 10 degrees</code> and <code>End the repeat</code> after the original <code>End the Repeat</code>. What do you get?</li>
+</ul>
+
+
+<pre><code>Use a red pen
+Let the pen be bolder
+Repeat the following commands for 36 times
+  Repeat the following commands for 4 times
+    Go forward 100 Steps
+    Turn left 90 degrees
+    End the first Repeat
+  Turn left 10 degrees
+End the second repeat
+</code></pre>
+
+<ul>
+<li>What? Did not see it clearly. Let's try it step by step. Change 36 into 4, 8, 12, 16 respectively. Do you understand now?</li>
+</ul>
+
+
+<h3>Try More</h3>
+
+<p><code>Till Now, you are good with basics in programming and You can handle most cases in LOGO to draw any graphs. Don't believe it? Try the Examples!</code></p>
 </body>
 </html>
