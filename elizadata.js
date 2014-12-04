@@ -126,6 +126,55 @@ var elizaKeywords = [
  
 ]],
 
+["ahead", 0, [
+ ["* ahead * steps *", [
+     "Let's forward #2# steps!",
+     "Okay, let's move ahead #2# steps!"
+     ],"fd #2#"]
+ 
+]],
+
+["backwards", 0, [
+ ["* backwards * steps *", [
+     "Let's get back #2# steps!",
+     "Okay, let's move back #2# steps!"
+     ],"bk #2#"]
+ 
+]],
+
+["forward", 0, [
+ ["* forward * step *", [
+     "Let's forward #2# steps!",
+     "Okay, let's move ahead #2# steps!"
+     ],"fd #2#"]
+ 
+]],
+
+["back", 0, [
+ ["* back * step *", [
+     "Let's get back #2# steps!",
+     "Okay, let's move back #2# steps!"
+     ],"bk #2#"]
+ 
+]],
+
+["ahead", 0, [
+ ["* ahead * step *", [
+     "Let's forward #2# steps!",
+     "Okay, let's move ahead #2# steps!"
+     ],"fd #2#"]
+ 
+]],
+
+["backwards", 0, [
+ ["* backwards * step *", [
+     "Let's get back #2# steps!",
+     "Okay, let's move back #2# steps!"
+     ],"bk #2#"]
+ 
+]],
+
+
 ["left", 1, [
  ["* turn left * degrees *", [
      "Let's turn left #2# degrees!",
