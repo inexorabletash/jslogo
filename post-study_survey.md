@@ -56,11 +56,12 @@ A. 3
 B. 9
 C. 6
 D. 2
-E. I'm not sure
+E. 1
+F. I'm not sure
 ```
 
 ```
-6. In a loop, there is a function followed by another loop
+6. In a 3 time repeated loop, there is a function followed by another loop , when we execute the commands, how many times will the inside loop be repeated?
 A. 3
 B. 9
 C. 6
