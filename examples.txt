@@ -75,7 +75,7 @@ repeat the following for 90 times
 end the repeat
 
 --------------------------------------
-Task3: Now, (6)can you use color red and draw 
+Task3: Now, (6)can you use color green and draw 
 these LOGOs again? Save the Image.
 Then, (7)if I have already implemented a function 
 called set randomcolor, can you call the function 

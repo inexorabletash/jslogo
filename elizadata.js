@@ -172,6 +172,39 @@ var elizaKeywords = [
      ],"right 90"]
 ]],
 
+
+["left", 1, [
+ ["* turn left * degree *", [
+     "Let's turn left #2# degree!",
+     "Okay, let's turn #2# degree to the left!"
+     ],"left #2#"] 
+]],
+
+["left", 1, [
+ ["* turn * degree to the left*", [
+     "Let's turn #2# degree to the left!",
+     "Okay, let's turn #2# degree to the left!"
+     ],"left #2#"] 
+]],
+
+
+
+
+["right", 1, [
+ ["* turn right * degree *", [
+     "Let's turn right #2# degree!",
+     "Okay, let's turn #2# degree to the right!"
+     ],"right #2#"] 
+]],
+
+["right", 1, [
+ ["* turn * degree to the right*", [
+     "Let's turn #2# degree to the right!",
+     "Okay, let's turn #2# degree to the right!"
+     ],"right #2#"] 
+]],
+
+
 ["repeat", 0, [
  ["* repeat * last * commands for * times", [
      "Okay, Let's repeat last #3# commands for #4# times!",
