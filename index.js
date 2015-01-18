@@ -2,7 +2,7 @@
 // Logo Interpreter in Javascript
 //
 
-// Copyright (C) 2011-2013 Joshua Bell
+// Copyright (C) 2011-2015 Joshua Bell
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,6 +30,7 @@ var logo, turtle;
 //
 var savehook;
 var historyhook;
+var clearhistoryhook;
 function initStorage(loadhook) {
   if (!window.indexedDB)
     return;
@@ -107,6 +108,18 @@ function initStorage(loadhook) {
             orig_historyhook(entry);
         }
       };
+      var orig_clearhistoryhook = clearhistoryhook;
+      clearhistoryhook = function() {
+        try {
+          var tx = db.transaction('history', 'readwrite');
+          tx.objectStore('history').clear();
+        } catch (e) {
+          console.error('Error clearing history: ' + e);
+        } finally {
+          if (orig_clearhistoryhook)
+            orig_clearhistoryhook();
+        }
+      };
     };
   };
 }
@@ -149,6 +162,17 @@ var commandHistory = (function() {
         pos = (pos === 0) ? entries.length - 1 : pos - 1;
       }
       return entries[pos];
+    }
+  };
+
+  var orig_clearhistoryhook = clearhistoryhook;
+  clearhistoryhook = function() {
+    try {
+      entries = [];
+      pos = -1;
+    } finally {
+      if (orig_clearhistoryhook)
+        orig_clearhistoryhook();
     }
   };
 }());
@@ -436,6 +460,17 @@ window.addEventListener('load', function() {
     }
   };
 
+  var orig_clearhistoryhook = clearhistoryhook;
+  clearhistoryhook = function() {
+    var parent = $('#history');
+    try {
+      while (parent.firstChild)
+        parent.removeChild(parent.firstChild);
+    } finally {
+      if (orig_clearhistoryhook)
+        orig_clearhistoryhook();
+    }
+  };
 }());
 
 
@@ -559,6 +594,18 @@ window.addEventListener('load', function() {
     var url = canvas.toDataURL('image/png');
     if (!saveDataAs(url, 'logo_drawing.png'))
       alert("Sorry, not supported by your browser");
+  });
+  $('#clearhistory').addEventListener('click', function() {
+    if (!confirm('Clear history: Are you sure?')) return;
+    clearhistoryhook();
+    var div = document.getElementById('history');
+    while(div.firstChild){
+      div.removeChild(div.firstChild);
+    }
+  });
+  $('#clearlibrary').addEventListener('click', function() {
+    if (!confirm('Clear library: Are you sure?')) return;
+    logo.run('erall');
   });
 
   function demo(param) {
