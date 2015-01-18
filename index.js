@@ -28,9 +28,23 @@ var logo, turtle;
 //
 // Storage hooks
 //
+// TODO: Replace these with events and/or data binding/observers
+
+function hook(orig, func) {
+  return function() {
+    try {
+      func.apply(this, arguments);
+    } finally {
+      if (orig)
+        orig.apply(this, arguments);
+    }
+  };
+}
+
 var savehook;
 var historyhook;
 var clearhistoryhook;
+
 function initStorage(loadhook) {
   if (!window.indexedDB)
     return;
@@ -81,45 +95,23 @@ function initStorage(loadhook) {
     };
 
     tx.oncomplete = function() {
-      var orig_savehook = savehook;
-      savehook = function(name, def) {
-        try {
-          var tx = db.transaction('procedures', 'readwrite');
-          if (def)
-            tx.objectStore('procedures').put(def, name);
-          else
-            tx.objectStore('procedures')['delete'](name);
-        } catch (e) {
-          console.error('Error saving procedure: ' + e);
-        } finally {
-          if (orig_savehook)
-            orig_savehook(name, def);
-        }
-      };
-      var orig_historyhook = historyhook;
-      historyhook = function(entry) {
-        try {
-          var tx = db.transaction('history', 'readwrite');
-          tx.objectStore('history').put(entry);
-        } catch (e) {
-          console.error('Error saving history: ' + e);
-        } finally {
-          if (orig_historyhook)
-            orig_historyhook(entry);
-        }
-      };
-      var orig_clearhistoryhook = clearhistoryhook;
-      clearhistoryhook = function() {
-        try {
-          var tx = db.transaction('history', 'readwrite');
-          tx.objectStore('history').clear();
-        } catch (e) {
-          console.error('Error clearing history: ' + e);
-        } finally {
-          if (orig_clearhistoryhook)
-            orig_clearhistoryhook();
-        }
-      };
+      savehook = hook(savehook, function(name, def) {
+        var tx = db.transaction('procedures', 'readwrite');
+        if (def)
+          tx.objectStore('procedures').put(def, name);
+        else
+          tx.objectStore('procedures')['delete'](name);
+      });
+
+      historyhook = hook(historyhook, function(entry) {
+        var tx = db.transaction('history', 'readwrite');
+        tx.objectStore('history').put(entry);
+      });
+
+      clearhistoryhook = hook(clearhistoryhook, function() {
+        var tx = db.transaction('history', 'readwrite');
+        tx.objectStore('history').clear();
+      });
     };
   };
 }
@@ -165,16 +157,10 @@ var commandHistory = (function() {
     }
   };
 
-  var orig_clearhistoryhook = clearhistoryhook;
-  clearhistoryhook = function() {
-    try {
-      entries = [];
-      pos = -1;
-    } finally {
-      if (orig_clearhistoryhook)
-        orig_clearhistoryhook();
-    }
-  };
+  clearhistoryhook = hook(clearhistoryhook, function() {
+    entries = [];
+    pos = -1;
+  });
 }());
 
 
@@ -434,43 +420,24 @@ window.addEventListener('load', function() {
 // Hooks for Library and History sidebars
 //
 (function() {
-
-  var orig_savehook = savehook;
-  savehook = function(name, def) {
+  savehook = hook(savehook, function(name, def) {
     var parent = $('#library');
-    try {
-      if (def)
-        insertSnippet(def, parent, name);
-      else
-        removeSnippet(parent, name);
-    } finally {
-      if (orig_savehook)
-        orig_savehook(name, def);
-    }
-  };
+    if (def)
+      insertSnippet(def, parent, name);
+    else
+      removeSnippet(parent, name);
+  });
 
-  var orig_historyhook = historyhook;
-  historyhook = function(entry) {
+  historyhook = hook(historyhook, function(entry) {
     var parent = $('#history');
-    try {
-      insertSnippet(entry, parent);
-    } finally {
-      if (orig_historyhook)
-        orig_historyhook(entry);
-    }
-  };
+    insertSnippet(entry, parent);
+  });
 
-  var orig_clearhistoryhook = clearhistoryhook;
-  clearhistoryhook = function() {
+  clearhistoryhook = hook(clearhistoryhook, function() {
     var parent = $('#history');
-    try {
-      while (parent.firstChild)
-        parent.removeChild(parent.firstChild);
-    } finally {
-      if (orig_clearhistoryhook)
-        orig_clearhistoryhook();
-    }
-  };
+    while (parent.firstChild)
+      parent.removeChild(parent.firstChild);
+  });
 }());
 
 
@@ -598,10 +565,6 @@ window.addEventListener('load', function() {
   $('#clearhistory').addEventListener('click', function() {
     if (!confirm('Clear history: Are you sure?')) return;
     clearhistoryhook();
-    var div = document.getElementById('history');
-    while(div.firstChild){
-      div.removeChild(div.firstChild);
-    }
   });
   $('#clearlibrary').addEventListener('click', function() {
     if (!confirm('Clear library: Are you sure?')) return;
