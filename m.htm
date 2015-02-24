@@ -1,130 +1,103 @@
 <!DOCTYPE html>
-<html>
-<head>
 <title>Logo Interpreter</title>
-<link rel="Alternate" type="application/atom+xml" href="http://code.google.com/feeds/p/jslogo/gitchanges/basic">
-<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-<meta name="apple-mobile-web-app-capable" content="yes" />
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-<script type="text/javascript" src="../polyfill/polyfill.js?update=2011-10-12"></script>
-<script type="text/javascript" src="logo.js?update=2011-12-31"></script> <!-- Logo interpreter -->
-<script type="text/javascript" src="turtle.js?update=2011-12-31"></script> <!-- Canvas turtle -->
+<script type="text/javascript" src="polyfill/polyfill.js"></script>
+<script type="text/javascript" src="floodfill.js"></script>
+<script type="text/javascript" src="logo.js"></script>
+<script type="text/javascript" src="turtle.js"></script>
 <script type="text/javascript">
 //
 // Logo Interpreter in Javascript
 //
 
 // Copyright 2009 Joshua Bell
-// 
+//
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
-// 
+//
 // http://www.apache.org/licenses/LICENSE-2.0
-// 
+//
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*global window, CanvasTurtle, LogoInterpreter */
+document.addEventListener('DOMContentLoaded', function() {
+  var $ = function(s) { return document.querySelector(s); };
 
-var g_logo;
-
-var KEY = {
-    RETURN: 10,
-    ENTER: 13
-};
-
-function onenter() {
-    var element = document.getElementById("entry");
-    var val = element.value;
-    if (val !== "") {
-        element.value = "";
-
-        var o = document.createElement("option");
-        o.appendChild( document.createTextNode(val));
-        var history = document.getElementById("history");
-        history.insertBefore( o, history.firstChild );
-        history.selectedIndex = -1;
-
-        try {
-            g_logo.run(val);
-        }
-        catch (e) {
-            window.alert("Error: " + e);
-        }
+  var stream = {
+    read: function() {
+      alert('Reading not supported');
+    },
+    write: function() {
+      var div = $('#overlay');
+      for (var i = 0; i < arguments.length; i += 1)
+        div.innerHTML += arguments[i];
+      div.scrollTop = div.scrollHeight;
+    },
+    clear: function() {
+      var div = $('#overlay');
+      div.innerHTML = '';
+    },
+    readback: function() {
+      var div = $('#overlay');
+      return div.innerHTML;
     }
-}
+  };
 
-function onkey(e)
-{
-    e = e ? e : window.event;
-    var key = e.keyCode  || e.which;
-    if (key == KEY.RETURN || key == KEY.ENTER) {
-        onenter();
+  var canvas_element = $('#sandbox');
+  var turtle_element = $('#turtle');
+  var turtle = new CanvasTurtle(
+    canvas_element.getContext('2d'),
+    turtle_element.getContext('2d'),
+    canvas_element.width, canvas_element.height);
 
-        e.preventDefault();
-        return false;
+  var interpreter = new LogoInterpreter(turtle, stream);
+
+  var KEY = { RETURN: 10, ENTER: 13 };
+  var entry = $('#entry');
+  var history = $('#history');
+  entry.addEventListener('keydown', function(e) {
+    var key = e.keyCode || e.which;
+    if (key !== KEY.RETURN && key !== KEY.ENTER)
+      return;
+    e.preventDefault();
+
+    var val = entry.value;
+    if (val === '')
+      return;
+    entry.value = '';
+
+    var o = document.createElement('option');
+    o.appendChild(document.createTextNode(val));
+    history.insertBefore(o, history.firstChild);
+    history.selectedIndex = -1;
+
+    try {
+      interpreter.run(val);
+    } catch (e) {
+      window.alert('Error: ' + e);
     }
+  });
 
-    return true;
-}
+  entry.addEventListener('focus', function() {
+    setTimeout(function() { window.scrollTo(0, 1); }, 50);
+  });
 
-window.onload = function() {
-
-    var stream = {
-        read: function() {
-            alert("Reading not supported");
-        },
-        write: function() {
-            var div = document.getElementById('overlay');
-            for (var i = 0; i < arguments.length; i += 1) {
-                div.innerHTML += arguments[i];
-            }
-            div.scrollTop = div.scrollHeight;
-        },
-        clear: function() {
-            var div = document.getElementById('overlay');
-            div.innerHTML = "";
-        },
-        readback: function() {
-            var div = document.getElementById('overlay');
-            return div.innerHTML;
-        }
-    };
-
-    var canvas_element = document.getElementById("sandbox");
-    var turtle_element = document.getElementById("turtle");
-    var turtle = new CanvasTurtle(
-        canvas_element.getContext('2d'),
-        turtle_element.getContext('2d'),
-        canvas_element.width, canvas_element.height);
-
-    g_logo = new LogoInterpreter(turtle, stream);
-
-    var entry = document.getElementById('entry');
-    entry.onkeydown = onkey;
-
-    entry.onfocus = function() { setTimeout(function() { window.scrollTo(0, 1); }, 50); };
-    
-    var history = document.getElementById('history');
-    history.onchange = function() {
-        if( this.selectedIndex !== -1 )
-        {
-            var val = this.options[this.selectedIndex].value; 
-            entry.value = val;
-		}
-    }
-};
+  history.addEventListener('change', function() {
+    if (history.selectedIndex === -1) return;
+    entry.value = history.options[history.selectedIndex].value
+  });
+});
 
 </script>
-</head>
-<body>
 
 <div id="display" style="width: 300px; height: 160px; position: relative;">
     <canvas id="sandbox" width="300" height="160" style="position: absolute; border: solid 1px black; z-index: 0;"></canvas>
@@ -132,12 +105,10 @@ window.onload = function() {
     <div id="overlay" style="width: 280px; height: 140px; padding: 10px; margin: 0; position: absolute; z-index: 2; background-color: transparent; overflow: hidden; white-space: pre-wrap; font-family: Monospace;"></div>
 </div>
 
-
 <div id="input" style="padding: 0; padding-top: 5px;">
-    <input id="entry" type="text" style="width: 270px; font-family: monospace;" 
+    <input id="entry" type="text" style="width: 270px; font-family: monospace;"
         autocorrect="off"
-        autocapitalize="off"
-    />
+        autocapitalize="off">
     <select id="history" style="width: 25px; -webkit-appearance: button;">
         <option></option>
         <option>to star repeat 5 [ fd 100 rt 144 ] end</option>
@@ -151,6 +122,3 @@ window.onload = function() {
 <div>
     <a title="Language Reference" href="language.htm" target="_blank">Language Reference</a>
 </div>
-
-</body>
-</html>
