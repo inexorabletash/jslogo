@@ -746,7 +746,7 @@ function LogoInterpreter(turtle, stream, savehook)
     if (Type(a) !== Type(b)) return false;
     switch (Type(a)) {
     case 'word':
-      if (isNumber(a) || isNumber(b))
+      if (typeof a === 'number' || typeof b === 'number')
         return Number(a) === Number(b);
       else
         return String(a) === String(b);

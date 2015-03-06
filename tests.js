@@ -1170,4 +1170,12 @@ test("Regression Tests", function() {
   this.assert_equals('make "a [ a b c ]  make "b :a  pop "a  :b', ["a", "b", "c"]);
   this.assert_equals('to foo :BAR output :BAR end  foo 1', 1);
   this.assert_equals('(word "a (char 10) "b)', 'a\nb');
+
+  this.assert_equals('equalp "1 1', 1);
+  this.assert_equals('equalp 1 "1', 1);
+  this.assert_equals('equalp "1.0 1', 1);
+  this.assert_equals('equalp 1.0 "1', 1);
+  this.assert_equals('equalp "1 1.0', 1);
+  this.assert_equals('equalp 1 "1.0', 1);
+  this.assert_equals('equalp "1 "1.0', 0);
 });
