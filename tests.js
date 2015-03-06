@@ -254,8 +254,14 @@ test("Data Structure Primitives", function () {
   this.assert_equals('last  "123', '3');
   this.assert_equals('first "abc', 'a');
   this.assert_equals('last  "abc', 'c');
-  //assert_equals('butfirst "123', '23');
-  //assert_equals('butlast  "123', '12');
+  this.assert_equals('butfirst "123', '23');
+  this.assert_equals('butlast  "123', '12');
+
+  this.assert_equals('first 123', '1');
+  this.assert_equals('last  123', '3');
+  this.assert_equals('butfirst 123', '23');
+  this.assert_equals('butlast  123', '12');
+
 
   this.assert_error('item 0 [ a b c ]', 'Index out of bounds');
   this.assert_equals('item 1 [ a b c ]', "a");
@@ -303,11 +309,11 @@ test("Data Structure Primitives", function () {
   //
 
   this.assert_equals('wordp "a', 1);
-  this.assert_equals('wordp 1', 0);
+  this.assert_equals('wordp 1', 1);
   this.assert_equals('wordp [ 1 ]', 0);
   this.assert_equals('wordp { 1 }', 0);
   this.assert_equals('word? "a', 1);
-  this.assert_equals('word? 1', 0);
+  this.assert_equals('word? 1', 1);
   this.assert_equals('word? [ 1 ]', 0);
   this.assert_equals('word? { 1 }', 0);
 
@@ -1136,10 +1142,6 @@ test("Error Messages", function () {
   this.assert_error("0", "Don't know what to do with 0");
   this.assert_error("1 + 2", "Don't know what to do with 3");
   this.assert_error("to foo output 123 end  foo", "Don't know what to do with 123");
-  this.assert_error('first 123', 'Expected list');
-  this.assert_error('last  123', 'Expected list');
-  this.assert_error('butfirst 123', 'Expected list');
-  this.assert_error('butlast  123', 'Expected list');
   this.assert_error('setpos []', 'Expected list of length 2');
   this.assert_error('setpos [1 2 3]', 'Expected list of length 2');
   this.assert_error('towards []', 'Expected list of length 2');

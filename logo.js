@@ -191,10 +191,8 @@ function LogoInterpreter(turtle, stream, savehook)
     if (atom === undefined) {
       // TODO: Should be caught higher upstream than this
       throw new Error(__("No output from procedure"));
-    } else if (typeof atom === 'string') {
+    } else if (typeof atom === 'string' || typeof atom === 'number') {
       return 'word';
-    } else if (typeof atom === 'number') {
-      return 'number';
     } else if (Array.isArray(atom)) {
       return 'list';
     } else if (atom instanceof LogoArray) {
@@ -601,52 +599,51 @@ function LogoInterpreter(turtle, stream, savehook)
     var result, literal, varname;
 
     switch (Type(atom)) {
-      case 'number':
-        throw new Error(__("Unexpected atom type: number"));
+    case 'array':
+    case 'list':
+      return function() { return atom; };
 
-      case 'array':
-      case 'list':
+    case 'word':
+      if (isNumber(atom)) {
+        // number literal
+        atom = parseFloat(atom);
         return function() { return atom; };
+      }
 
-      case 'word':
-        if (isNumber(atom)) {
-          // number literal
-          atom = parseFloat(atom);
-          return function() { return atom; };
-        } else if (atom.charAt(0) === '"' || atom.charAt(0) === "'") {
-          // string literal
-          literal = atom.substring(1);
-          return function() { return literal; };
-        } else if (atom.charAt(0) === ':') {
-          // variable
-          varname = atom.substring(1);
-          return function() { return getvar(varname); };
-        } else if (atom === '(') {
-          // parenthesized expression/procedure call
-          if (list.length && Type(list[0]) === 'word' &&
-              self.routines.has(String(list[0]))) {
+      atom = String(atom);
+      if (atom.charAt(0) === '"' || atom.charAt(0) === "'") {
+        // string literal
+        literal = atom.substring(1);
+        return function() { return literal; };
+      }
+      if (atom.charAt(0) === ':') {
+        // variable
+        varname = atom.substring(1);
+        return function() { return getvar(varname); };
+      }
+      if (atom === '(') {
+        // parenthesized expression/procedure call
+        if (list.length && Type(list[0]) === 'word' &&
+            self.routines.has(String(list[0]))) {
 
-            // Lisp-style (procedure input ...) calling syntax
-            atom = list.shift();
-            return self.dispatch(atom, list, false);
-          } else {
-            // Standard parenthesized expression
-            result = expression(list);
-
-            if (!list.length) {
-              throw new Error(format(__("Expected ')'")));
-            } else if (!peek(list, [')'])) {
-              throw new Error(format(__("Expected ')', saw {word}"), { word: list.shift() }));
-            }
-            list.shift();
-            return result;
-          }
-        } else {
-          // Procedure dispatch
-          return self.dispatch(atom, list, true);
+          // Lisp-style (procedure input ...) calling syntax
+          atom = list.shift();
+          return self.dispatch(atom, list, false);
         }
-      break;
-        default: throw new Error(__("Internal error in expression parser"));
+        // Standard parenthesized expression
+        result = expression(list);
+
+        if (!list.length)
+          throw new Error(format(__("Expected ')'")));
+        if (!peek(list, [')']))
+          throw new Error(format(__("Expected ')', saw {word}"), { word: list.shift() }));
+        list.shift();
+        return result;
+      }
+      // Procedure dispatch
+      return self.dispatch(atom, list, true);
+
+    default: throw new Error(__("Internal error in expression parser"));
     }
   }
 
@@ -696,8 +693,6 @@ function LogoInterpreter(turtle, stream, savehook)
       throw new Error(__("Expected number"));
     }
     switch (Type(atom)) {
-    case 'number':
-      return atom;
     case 'word':
       if (isNumber(atom))
         return parseFloat(atom);
@@ -711,13 +706,8 @@ function LogoInterpreter(turtle, stream, savehook)
   //----------------------------------------------------------------------
   function sexpr(atom) {
     if (atom === undefined) { throw new Error(__("Expected string")); }
-    if (atom === UNARY_MINUS) { return '-'; }
-    switch (Type(atom)) {
-    case 'word':
-      return atom;
-    case 'number':
-      return String(atom);
-    }
+    if (atom === UNARY_MINUS) return '-';
+    if (Type(atom) === 'word') return String(atom);
 
     throw new Error(__("Expected string"));
   }
@@ -731,7 +721,7 @@ function LogoInterpreter(turtle, stream, savehook)
     if (atom === undefined) { throw new Error(__("Expected list")); }
     switch (Type(atom)) {
     case 'word':
-      return [].slice.call(atom);
+      return [].slice.call(String(atom));
     case 'list':
       return copy(atom);
     }
@@ -753,25 +743,22 @@ function LogoInterpreter(turtle, stream, savehook)
   // (with optional epsilon compare for numbers)
   //----------------------------------------------------------------------
   function equal(a, b, epsilon) {
-    if (Array.isArray(a)) {
-      if (!Array.isArray(b)) {
+    if (Type(a) !== Type(b)) return false;
+    switch (Type(a)) {
+    case 'word':
+      if (isNumber(a) || isNumber(b))
+        return Number(a) === Number(b);
+      else
+        return String(a) === String(b);
+    case 'list':
+    case 'array':
+      if (a.length !== b.length)
         return false;
-      }
-      if (a.length !== b.length) {
-        return false;
-      }
       for (var i = 0; i < a.length; i += 1) {
-        if (!equal(a[i], b[i])) {
+        if (!equal(a[i], b[i]))
           return false;
-        }
       }
       return true;
-    } else if (typeof a !== typeof b) {
-      return false;
-    } else if (epsilon !== undefined && typeof a === 'number') {
-      return Math.abs(a - b) < epsilon;
-    } else {
-      return a === b;
     }
   }
 
@@ -830,8 +817,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
     function defn(atom) {
       switch (Type(atom)) {
-        case 'word': return atom;
-        case 'number': return String(atom);
+        case 'word': return String(atom);
         case 'list': return '[ ' + atom.map(defn).join(' ') + ' ]';
         case 'array': return '{ ' + atom.list().map(defn).join(' ') + ' }' +
           (atom.origin === 1 ? '' : '@' + atom.origin);
@@ -958,10 +944,10 @@ function LogoInterpreter(turtle, stream, savehook)
     var state_inputs = true, sawEnd = false;
     while (list.length) {
       var atom = list.shift();
-      if (Type(atom) === 'word' && atom.toUpperCase() === 'END') {
+      if (Type(atom) === 'word' && String(atom).toUpperCase() === 'END') {
         sawEnd = true;
         break;
-      } else if (state_inputs && Type(atom) === 'word' && atom.charAt(0) === ':') {
+      } else if (state_inputs && Type(atom) === 'word' && String(atom).charAt(0) === ':') {
         inputs.push(atom.substring(1));
       } else {
         state_inputs = false;
@@ -1120,13 +1106,17 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("last", function(list) { list = lexpr(list); return list[list.length - 1]; });
 
-  def(["butfirst", "bf"], function(list) { return lexpr(list).slice(1); });
+  def(["butfirst", "bf"], function(list) {
+    return Type(list) === 'word' ? String(list).substring(1) : lexpr(list).slice(1);
+  });
 
   def(["butfirsts", "bfs"], function(list) {
     return lexpr(list).map(function(x) { return lexpr(x).slice(1); });
   });
 
-  def(["butlast", "bl"], function(list) { return lexpr(list).slice(0, -1); });
+  def(["butlast", "bl"], function(list) {
+    return Type(list) === 'word' ? String(list).slice(0, -1) : lexpr(list).slice(0, -1);
+  });
 
   def("item", function(index, thing) {
     index = aexpr(index);
@@ -1209,7 +1199,9 @@ function LogoInterpreter(turtle, stream, savehook)
   def(["wordp", "word?"], function(thing) { return Type(thing) === 'word' ? 1 : 0; });
   def(["listp", "list?"], function(thing) { return Type(thing) === 'list' ? 1 : 0; });
   def(["arrayp", "array?"], function(thing) { return Type(thing) === 'array' ? 1 : 0; });
-  def(["numberp", "number?"], function(thing) { return Type(thing) === 'number' ? 1 : 0; });
+  def(["numberp", "number?"], function(thing) {
+    return Type(thing) === 'word' && isNumber(thing) ? 1 : 0;
+  });
   def(["numberwang"], function(thing) { return self.prng.next() < 0.5 ? 1 : 0; });
 
   def(["equalp", "equal?"], function(a, b) { return equal(a, b) ? 1 : 0; });
@@ -1217,7 +1209,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def(["emptyp", "empty?"], function(thing) {
     switch (Type(thing)) {
-    case 'word': return thing.length === 0 ? 1 : 0;
+    case 'word': return String(thing).length === 0 ? 1 : 0;
     case 'list': return thing.length === 0 ? 1 : 0;
     default: return 0;
     }
@@ -2460,7 +2452,7 @@ function LogoInterpreter(turtle, stream, savehook)
     for (var i = 0; i < clauses.length; ++i) {
       var clause = lexpr(clauses[i]);
       var first = clause.shift();
-      if (Type(first) === 'word' && first.toUpperCase() === 'ELSE') {
+      if (Type(first) === 'word' && String(first).toUpperCase() === 'ELSE') {
         return evaluateExpression(clause);
       }
       if (lexpr(first).some(function(x) { return equal(x, value); })) {
@@ -2476,7 +2468,7 @@ function LogoInterpreter(turtle, stream, savehook)
     for (var i = 0; i < clauses.length; ++i) {
       var clause = lexpr(clauses[i]);
       var first = clause.shift();
-      if (Type(first) === 'word' && first.toUpperCase() === 'ELSE') {
+      if (Type(first) === 'word' && String(first).toUpperCase() === 'ELSE') {
         return evaluateExpression(clause);
       }
       if (evaluateExpression(lexpr(first))) {
