@@ -762,6 +762,10 @@ function LogoInterpreter(turtle, stream, savehook)
     }
   }
 
+  self.settranslation = function(t) {
+    __ = t;
+  }
+
   //----------------------------------------------------------------------
   //
   // Execute a script
