@@ -1,2 +1,3 @@
 en English
 eo Esperanto (Example)
+he עברית
