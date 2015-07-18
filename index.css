@@ -254,7 +254,7 @@ body {
   user-select: none;
 
   position: absolute;
-  top: 5px; bottom: 10px; right: 5px; width: 70px;
+  top: 5px; bottom: 30px; right: 5px; width: 70px;
   border: 2px solid black;
   border-radius: 5px;
   background-color: white;
@@ -265,6 +265,33 @@ body {
 }
 
 #run .label {
+  position: absolute;
+  top: 0; bottom: 0; left: 0; right: 0;
+  margin: auto;
+  height: 20px;
+  text-align: center;
+  display: block;
+}
+
+#clear {
+  cursor: pointer;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+
+  position: absolute;
+  height: 20px; bottom: 5px; right: 5px; width: 70px;
+  border: 2px solid black;
+  border-radius: 5px;
+  background-color: white;
+}
+
+#clear:hover {
+  background-color: #eeeeee;
+}
+
+#clear .label {
   position: absolute;
   top: 0; bottom: 0; left: 0; right: 0;
   margin: auto;
