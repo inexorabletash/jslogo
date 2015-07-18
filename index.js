@@ -216,6 +216,14 @@ var input = {};
 
   input.run = run;
 
+  function clear(remote) {
+    if (remote !== true && window.TogetherJS && window.TogetherJS.running) {
+      TogetherJS.send({type: "clear"});
+    }
+    input.setValue('');
+  }
+  input.clear = clear;
+
   if (typeof CodeMirror !== 'undefined') {
     var BRACKETS = '()[]{}';
 
@@ -347,6 +355,7 @@ var input = {};
   });
 
   $('#run').addEventListener('click', run);
+  $('#clear').addEventListener('click', clear);
 
 
   window.addEventListener('message', function(e) {
@@ -616,6 +625,10 @@ window.TogetherJSConfig ={
 
     run: function (msg) {
       input.run(true);
+    },
+
+    clear: function (msg) {
+      input.clear(true);
     }
   }
 
