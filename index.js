@@ -68,7 +68,7 @@ function initStorage(loadhook) {
   req.onsuccess = function() {
     var db = req.result;
 
-    var tx = db.transaction(['procedures', 'history']);
+    var tx = db.transaction('procedures');
     tx.objectStore('procedures').openCursor().onsuccess = function(e) {
       var cursor = e.target.result;
       if (cursor) {
@@ -81,6 +81,7 @@ function initStorage(loadhook) {
         }
       }
     };
+    tx = db.transaction('history');
     tx.objectStore('history').openCursor().onsuccess = function(e) {
       var cursor = e.target.result;
       if (cursor) {
