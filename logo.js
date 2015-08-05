@@ -123,17 +123,18 @@ function LogoInterpreter(turtle, stream, savehook)
     };
   }
 
-  function LogoArray(init, origin) {
-    if (typeof init === 'object' && init && 'length' in init) {
-      this.array = [].slice.call(init);
-    } else {
-      this.array = new Array(Number(init));
-      for (var i = 0; i < this.array.length; ++i) {
-        this.array[i] = '';
-      }
-    }
+  function LogoArray(size, origin) {
+    this.array = [];
+    this.array.length = size;
+    for (var i = 0; i < this.array.length; ++i)
+      this.array[i] = '';
     this.origin = origin;
   }
+  LogoArray.from = function(list, origin) {
+    var array = new LogoArray(0, origin);
+    array.array = Array.from(list);
+    return array;
+  };
   LogoArray.prototype = {
     item: function(i) {
       i = Number(i)|0;
@@ -390,7 +391,7 @@ function LogoInterpreter(turtle, stream, savehook)
           origin = RegExp.$1;
           string = RegExp.$2;
         }
-        return { array: new LogoArray(list, origin), string: string };
+        return { array: LogoArray.from(list, origin), string: string };
       }
       if (c === '[') {
         r = parseList(string.substring(index));
@@ -1068,7 +1069,7 @@ function LogoInterpreter(turtle, stream, savehook)
     if (arguments.length > 1) {
       origin = aexpr(arguments[1]);
     }
-    return new LogoArray(list, origin);
+    return LogoArray.from(list, origin);
   });
 
   def("arraytolist", function(array) {

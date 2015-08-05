@@ -1,8 +1,7 @@
 <!DOCTYPE html>
 <title>Logo Unit Tests</title>
 
-<!--[if lt IE 9]><script type="text/javascript" src="../polyfill/flashcanvas.js"></script><![endif]-->
-<!--[if lt IE 9]><script type="text/javascript" src="../polyfill/polyfill.js"></script><![endif]-->
+<script src="polyfill/polyfill.min.js"></script>
 
 <script type="text/javascript" src="http://code.jquery.com/qunit/qunit-1.12.0.js"></script>
 <link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.12.0.css" type="text/css" media="screen" />
@@ -14,7 +13,6 @@
 <ol id="qunit-tests"></ol>
 <div id="qunit-fixture">test markup, will be hidden</div>
 
-<!-- flashcanvas doesn't like this being inside fixture -->
 <div id="my-fixture" style="display: none">
 <div id="display" style="width: 200px; height: 200px; position: relative;">
     <canvas id="sandbox" width="300" height="300" style="position: absolute; border: solid 1px black; z-index: 0;">
@@ -29,4 +27,3 @@
 <script type="text/javascript" src="logo.js"></script> <!-- Logo interpreter -->
 <script type="text/javascript" src="turtle.js"></script> <!-- Canvas turtle -->
 <script type="text/javascript" src="tests.js"></script> <!-- Unit tests -->
-
