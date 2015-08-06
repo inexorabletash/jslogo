@@ -499,6 +499,7 @@ function removeSnippet(parent, key) {
 window.addEventListener('load', function() {
 
   var stream = {
+    cursor: 0,
     read: function(s) {
       return window.prompt(s ? s : "");
     },
@@ -512,10 +513,28 @@ window.addEventListener('load', function() {
     clear: function() {
       var div = $('#overlay');
       div.innerHTML = "";
+      for (var i = this.cursor; i > 0; i -= 1){
+        div = $("#overlay" + i);
+        div.remove();
+      }
+      this.cursor = 0;
     },
     readback: function() {
       var div = $('#overlay');
       return div.innerHTML;
+    },
+    setcursor: function(x, y){
+      var canvas_x_coord = x % $('#sandbox').width;
+      var canvas_y_coord = y % $('#sandbox').height;
+
+      this.cursor += 1;
+      var prev_cursor = $('#overlay').cloneNode(true);
+      prev_cursor.id = $('#overlay').id + this.cursor;
+      $('#overlay').parentElement.appendChild(prev_cursor);
+
+      $('#overlay').style.top = canvas_y_coord + "px";
+      $('#overlay').style.left = canvas_x_coord + "px";
+      $('#overlay').innerHTML = "";
     }
   };
 
