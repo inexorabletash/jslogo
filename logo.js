@@ -874,18 +874,6 @@ function LogoInterpreter(turtle, stream, savehook)
   //   * used for repeat evaluation (DO.WHILE, WHILE, DO.UNTIL, UNTIL)
   //
 
-
-  function mapreduce(list, mapfunc, reducefunc, initial) {
-    // NOTE: Uses Array.XXX format to handle array-like types: arguments and strings
-    if (initial === undefined) {
-      return [].reduce.call(
-        [].map.call(list, mapfunc), reducefunc);
-    } else {
-      return [].reduce.call(
-        [].map.call(list, mapfunc), reducefunc, initial);
-    }
-  }
-
   function stringify(thing) {
     switch (Type(thing)) {
     case 'list':
@@ -1026,7 +1014,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("word", function(word1, word2) {
     return arguments.length ?
-      mapreduce(arguments, sexpr, function(a, b) { return a + b; }) : "";
+      [].map.call(arguments, sexpr).reduce(function(a, b) { return a + b; }) : "";
   });
 
   def("list", function(thing1, thing2) {
@@ -1339,7 +1327,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
 
   def("sum", function(a, b) {
-    return mapreduce(arguments, aexpr, function(a, b) { return a + b; }, 0);
+    return [].map.call(arguments, aexpr).reduce(function(a, b) { return a + b; }, 0);
   });
 
   def("difference", function(a, b) {
@@ -1349,7 +1337,7 @@ function LogoInterpreter(turtle, stream, savehook)
   def("minus", function(a) { return -aexpr(a); });
 
   def("product", function(a, b) {
-    return mapreduce(arguments, aexpr, function(a, b) { return a * b; }, 1);
+    return [].map.call(arguments, aexpr).reduce(function(a, b) { return a * b; }, 1);
   });
 
   def("quotient", function(a, b) {
@@ -1476,13 +1464,13 @@ function LogoInterpreter(turtle, stream, savehook)
 
 
   def("bitand", function(num1, num2) {
-    return mapreduce(arguments, aexpr, function(a, b) { return a & b; }, -1);
+    return [].map.call(arguments, aexpr).reduce(function(a, b) { return a & b; }, -1);
   });
   def("bitor", function(num1, num2) {
-    return mapreduce(arguments, aexpr, function(a, b) { return a | b; }, 0);
+    return [].map.call(arguments, aexpr).reduce(function(a, b) { return a | b; }, 0);
   });
   def("bitxor", function(num1, num2) {
-    return mapreduce(arguments, aexpr, function(a, b) { return a ^ b; }, 0);
+    return [].map.call(arguments, aexpr).reduce(function(a, b) { return a ^ b; }, 0);
   });
   def("bitnot", function(num) {
     return ~aexpr(num);
@@ -1520,9 +1508,10 @@ function LogoInterpreter(turtle, stream, savehook)
   }, {noeval: true});
 
   def("xor", function(a, b) {
-    return mapreduce(arguments, aexpr,
-                     function(a, b) { return Boolean(a) !== Boolean(b); }, 0) ? 1 : 0;
+    return [].map.call(arguments, aexpr)
+      .reduce(function(a, b) { return Boolean(a) !== Boolean(b); }, 0) ? 1 : 0;
   });
+
   def("not", function(a) {
     return !aexpr(a) ? 1 : 0;
   });
