@@ -87,40 +87,38 @@ function LogoInterpreter(turtle, stream, savehook)
   }
 
   function StringMap(case_fold) {
-    var map = Object.create(null);
-    return {
+    var map = new Map();
+    Object.assign(this, {
       get: function(key) {
-        if (case_fold) key = String(key).toLowerCase();
-        return map['$' + key];
+        key = case_fold ? String(key).toLowerCase() : String(key);
+        return map.get(key);
       },
-      set: function (key, value) {
-        if (case_fold) key = String(key).toLowerCase();
-        map['$' + key] = value;
+      set: function(key, value) {
+        key = case_fold ? String(key).toLowerCase() : String(key);
+        map.set(key, value);
       },
-      has: function (key) {
-        if (case_fold) key = String(key).toLowerCase();
-        return (('$' + key) in map);
+      has: function(key) {
+        key = case_fold ? String(key).toLowerCase() : String(key);
+        return map.has(key);
       },
-      'delete': function (key) {
-        if (case_fold) key = String(key).toLowerCase();
-        return delete map['$' + key];
+      'delete': function(key) {
+        key = case_fold ? String(key).toLowerCase() : String(key);
+        return map['delete'](key);
       },
-      keys: function () {
-        return Object.keys(map).map(
-          function (key) {
-            return key.substring(1);
-          }
-        );
+      keys: function() {
+        var keys = [];
+        map.forEach(function(value, key) { keys.push(key); });
+        return keys;
       },
       empty: function() {
-        return Object.keys(map).length === 0;
+        return map.size === 0;
       },
       forEach: function(fn) {
-        return Object.keys(map).forEach(function(key) {
-          fn(key.substring(1), map[key]);
+        return map.forEach(function(value, key) {
+          fn(key, value);
         });
       }
-    };
+    });
   }
 
   function LogoArray(size, origin) {
