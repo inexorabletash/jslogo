@@ -741,9 +741,8 @@ function LogoInterpreter(turtle, stream, savehook)
 
   //----------------------------------------------------------------------
   // Deep compare of values (numbers, strings, lists)
-  // (with optional epsilon compare for numbers)
   //----------------------------------------------------------------------
-  function equal(a, b, epsilon) {
+  function equal(a, b) {
     if (Type(a) !== Type(b)) return false;
     switch (Type(a)) {
     case 'word':
