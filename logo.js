@@ -731,6 +731,8 @@ function LogoInterpreter(turtle, stream, savehook)
   }
 
   //----------------------------------------------------------------------
+  // Returns a deep copy of a value (word or list). Arrays are copied
+  // by reference.
   //----------------------------------------------------------------------
   function copy(value) {
     switch (Type(value)) {

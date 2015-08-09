@@ -1178,4 +1178,6 @@ test("Regression Tests", function() {
   this.assert_equals('equalp "1 1.0', 1);
   this.assert_equals('equalp 1 "1.0', 1);
   this.assert_equals('equalp "1 "1.0', 0);
+
+  this.assert_equals('make "a { 1 }  make "b :a  setitem 1 :a 2  item 1 :b', 2);
 });
