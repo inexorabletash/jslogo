@@ -24,6 +24,7 @@ var $ = document.querySelector.bind(document);
 
 // Globals
 var logo, turtle;
+var examples = 'examples.txt';
 
 //
 // Storage hooks
@@ -216,6 +217,14 @@ var input = {};
 
   input.run = run;
 
+  function clear(remote) {
+    if (remote !== true && window.TogetherJS && window.TogetherJS.running) {
+      TogetherJS.send({type: "clear"});
+    }
+    input.setValue('');
+  }
+  input.clear = clear;
+
   if (typeof CodeMirror !== 'undefined') {
     var BRACKETS = '()[]{}';
 
@@ -347,6 +356,7 @@ var input = {};
   });
 
   $('#run').addEventListener('click', run);
+  $('#clear').addEventListener('click', clear);
 
 
   window.addEventListener('message', function(e) {
@@ -386,7 +396,7 @@ var input = {};
 //
 window.addEventListener('load', function() {
   var xhr = new XMLHttpRequest();
-  xhr.open('GET', 'examples.txt', true);
+  xhr.open('GET', examples, true);
   xhr.onreadystatechange = function () {
     if (xhr.readyState === XMLHttpRequest.DONE) {
       if (xhr.status === 200 || xhr.status === 0) {
@@ -616,6 +626,10 @@ window.TogetherJSConfig ={
 
     run: function (msg) {
       input.run(true);
+    },
+
+    clear: function (msg) {
+      input.clear(true);
     }
   }
 

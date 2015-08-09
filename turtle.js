@@ -20,6 +20,11 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
   width = Number(width);
   height = Number(height);
 
+  function __colors__(string) {
+    // TODO: look up string in translation table
+    return string;
+  }
+
   function deg2rad(d) { return d / 180 * Math.PI; }
   function rad2deg(r) { return r * 180 / Math.PI; }
 
@@ -114,6 +119,10 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     }
   }
 
+  this.settranslation_colors = function(t) {
+    __colors__ = t;
+  }
+
   this.move = function(distance) {
     var x, y, point, saved_x, saved_y, EPSILON = 1e-3;
 
@@ -163,6 +172,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
   };
 
   function parseColor(color) {
+    color = __colors__(color);
     if (STANDARD_COLORS[color] !== undefined) {
       return STANDARD_COLORS[color];
     } else {
