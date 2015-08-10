@@ -720,7 +720,7 @@ function LogoInterpreter(turtle, stream, savehook)
     if (atom === undefined) { throw new Error(__("Expected list")); }
     switch (Type(atom)) {
     case 'word':
-      return [].slice.call(String(atom));
+      return Array.from(String(atom));
     case 'list':
       return copy(atom);
     }
@@ -1013,11 +1013,11 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("word", function(word1, word2) {
     return arguments.length ?
-      [].map.call(arguments, sexpr).reduce(function(a, b) { return a + b; }) : "";
+      Array.from(arguments).map(sexpr).reduce(function(a, b) { return a + b; }) : "";
   });
 
   def("list", function(thing1, thing2) {
-    return [].map.call(arguments, function(x) { return x; }); // Make a copy
+    return Array.from(arguments).map(function(x) { return x; }); // Make a copy
   });
 
   def(["sentence", "se"], function(thing1, thing2) {
@@ -1244,15 +1244,15 @@ function LogoInterpreter(turtle, stream, savehook)
   // 3.1 Transmitters
 
   def(["print", "pr"], function(thing) {
-    var s = [].map.call(arguments, stringify_nodecorate).join(" ");
+    var s = Array.from(arguments).map(stringify_nodecorate).join(" ");
     self.stream.write(s, "\n");
   });
   def("type", function(thing) {
-    var s = [].map.call(arguments, stringify_nodecorate).join("");
+    var s = Array.from(arguments).map(stringify_nodecorate).join("");
     self.stream.write(s);
   });
   def("show", function(thing) {
-    var s = [].map.call(arguments, stringify).join(" ");
+    var s = Array.from(arguments).map(stringify).join(" ");
     self.stream.write(s, "\n");
   });
 
@@ -1326,7 +1326,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
 
   def("sum", function(a, b) {
-    return [].map.call(arguments, aexpr).reduce(function(a, b) { return a + b; }, 0);
+    return Array.from(arguments).map(aexpr).reduce(function(a, b) { return a + b; }, 0);
   });
 
   def("difference", function(a, b) {
@@ -1336,7 +1336,7 @@ function LogoInterpreter(turtle, stream, savehook)
   def("minus", function(a) { return -aexpr(a); });
 
   def("product", function(a, b) {
-    return [].map.call(arguments, aexpr).reduce(function(a, b) { return a * b; }, 1);
+    return Array.from(arguments).map(aexpr).reduce(function(a, b) { return a * b; }, 1);
   });
 
   def("quotient", function(a, b) {
@@ -1463,13 +1463,13 @@ function LogoInterpreter(turtle, stream, savehook)
 
 
   def("bitand", function(num1, num2) {
-    return [].map.call(arguments, aexpr).reduce(function(a, b) { return a & b; }, -1);
+    return Array.from(arguments).map(aexpr).reduce(function(a, b) { return a & b; }, -1);
   });
   def("bitor", function(num1, num2) {
-    return [].map.call(arguments, aexpr).reduce(function(a, b) { return a | b; }, 0);
+    return Array.from(arguments).map(aexpr).reduce(function(a, b) { return a | b; }, 0);
   });
   def("bitxor", function(num1, num2) {
-    return [].map.call(arguments, aexpr).reduce(function(a, b) { return a ^ b; }, 0);
+    return Array.from(arguments).map(aexpr).reduce(function(a, b) { return a ^ b; }, 0);
   });
   def("bitnot", function(num) {
     return ~aexpr(num);
@@ -1499,15 +1499,15 @@ function LogoInterpreter(turtle, stream, savehook)
   def("false", function() { return 0; });
 
   def("and", function(a, b) {
-    return [].every.call(arguments, function(f) { return f(); }) ? 1 : 0;
+    return Array.from(arguments).every(function(f) { return f(); }) ? 1 : 0;
   }, {noeval: true});
 
   def("or", function(a, b) {
-    return [].some.call(arguments, function(f) { return f(); }) ? 1 : 0;
+    return Array.from(arguments).some(function(f) { return f(); }) ? 1 : 0;
   }, {noeval: true});
 
   def("xor", function(a, b) {
-    return [].map.call(arguments, aexpr)
+    return Array.from(arguments).map(aexpr)
       .reduce(function(a, b) { return Boolean(a) !== Boolean(b); }, 0) ? 1 : 0;
   });
 
@@ -1594,7 +1594,7 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   def("label", function(a) {
-    var s = [].map.call(arguments, stringify_nodecorate).join(" ");
+    var s = Array.from(arguments).map(stringify_nodecorate).join(" ");
     turtle.drawtext(s);
   });
 
@@ -1752,7 +1752,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("local", function(varname) {
     var localscope = self.scopes[self.scopes.length - 1];
-    [].forEach.call(arguments, function(name) { localscope.set(sexpr(name), {value: undefined}); });
+    Array.from(arguments).forEach(function(name) { localscope.set(sexpr(name), {value: undefined}); });
   });
 
   def("localmake", function(varname, value) {
@@ -1766,8 +1766,8 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("global", function(varname) {
     var globalscope = self.scopes[0];
-    [].forEach.call(arguments,
-                    function(name) { globalscope.set(sexpr(name), {value: undefined}); });
+    Array.from(arguments).forEach(function(name) {
+      globalscope.set(sexpr(name), {value: undefined}); });
   });
 
   //

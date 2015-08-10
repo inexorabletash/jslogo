@@ -975,7 +975,7 @@ The first input is the name of a procedure to call.</p>
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  [].forEach.call(document.querySelectorAll('.example'), function(e) {
+  Array.from(document.querySelectorAll('.example')).forEach(function(e) {
     e.title = 'Click to try this example';
     e.addEventListener('click', function() {
       if (!window.parent) return;

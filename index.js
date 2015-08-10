@@ -20,7 +20,8 @@ if (!('console' in window)) {
   window.console = { log: function(){}, error: function(){} };
 }
 
-var $ = document.querySelector.bind(document);
+function $(s) { return document.querySelector(s); }
+function $$(s) { return document.querySelectorAll(s); }
 
 // Globals
 var logo, turtle;
@@ -416,7 +417,7 @@ window.addEventListener('load', function() {
 // Hook up sidebar links
 //
 (function() {
-  var sidebars = [].slice.call(document.querySelectorAll('#sidebar .choice')).map(
+  var sidebars = Array.from($$('#sidebar .choice')).map(
     function(elem) { return elem.id; });
   sidebars.forEach(function(k) {
     $('#sb-link-' + k).addEventListener('click', function() {
