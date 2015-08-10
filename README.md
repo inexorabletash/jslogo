@@ -3,7 +3,7 @@ jslogo - Logo in JavaScript
 
 This is hosted at http://inexorabletash.github.io/jslogo/ for playing with live.
 
-[Language Reference](http://htmlpreview.github.com/?https://github.com/inexorabletash/jslogo/blob/master/language.htm) -
+[Language Reference](http://htmlpreview.github.com/?https://github.com/inexorabletash/jslogo/blob/master/language.html) -
 this attempts to implement a subset of [UCBLogo](http://www.cs.berkeley.edu/~bh/v2ch14/manual.html)
 defined in in *Brian Harvey's Computer Science Logo Style*
 
