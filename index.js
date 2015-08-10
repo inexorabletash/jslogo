@@ -396,9 +396,9 @@ var input = {};
 
 
 //
-// Populate "Examples" sidebar via XHR
+// Populate "Examples" sidebar
 //
-window.addEventListener('load', function() {
+window.addEventListener('DOMContentLoaded', function() {
   fetch(examples)
     .then(function(response) {
       if (!response.ok) throw Error(response.statusText);
@@ -508,7 +508,7 @@ function removeSnippet(parent, key) {
 //
 // Main page logic
 //
-window.addEventListener('load', function() {
+window.addEventListener('DOMContentLoaded', function() {
 
   var stream = {
     read: function(s) {
