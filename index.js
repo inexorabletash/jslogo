@@ -24,6 +24,7 @@ var $ = document.querySelector.bind(document);
 
 // Globals
 var logo, turtle;
+var examples = 'examples.txt';
 
 //
 // Storage hooks
@@ -395,7 +396,7 @@ var input = {};
 //
 window.addEventListener('load', function() {
   var xhr = new XMLHttpRequest();
-  xhr.open('GET', 'examples.txt', true);
+  xhr.open('GET', examples, true);
   xhr.onreadystatechange = function () {
     if (xhr.readyState === XMLHttpRequest.DONE) {
       if (xhr.status === 200 || xhr.status === 0) {
