@@ -101,9 +101,9 @@ function LogoInterpreter(turtle, stream, savehook)
         key = case_fold ? String(key).toLowerCase() : String(key);
         return map.has(key);
       },
-      'delete': function(key) {
+      delete: function(key) {
         key = case_fold ? String(key).toLowerCase() : String(key);
-        return map['delete'](key);
+        return map.delete(key);
       },
       keys: function() {
         var keys = [];

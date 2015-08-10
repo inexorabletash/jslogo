@@ -457,11 +457,11 @@ window.addEventListener('DOMContentLoaded', function() {
 //
 // Code snippets
 //
-var snippets = {};
+var snippets = new Map();
 function insertSnippet(text, parent, key) {
   var snippet;
-  if (key && snippets.hasOwnProperty(key)) {
-    snippet = snippets[key];
+  if (key && snippets.has(key)) {
+    snippet = snippets.get(key);
     snippet.innerHTML = '';
   } else {
     snippet = document.createElement('div');
@@ -472,7 +472,7 @@ function insertSnippet(text, parent, key) {
       input.setValue(text);
     });
     if (key) {
-      snippets[key] = snippet;
+      snippets.set(key, snippet);
     }
   }
 
@@ -497,11 +497,11 @@ function insertSnippet(text, parent, key) {
 }
 function removeSnippet(parent, key) {
   var snippet;
-  if (!key || !snippets.hasOwnProperty(key))
+  if (!key || !snippets.has(key))
     return;
-  snippet = snippets[key];
+  snippet = snippets.get(key);
   parent.removeChild(snippet);
-  delete snippets[key];
+  snippets.delete(key);
 }
 
 
