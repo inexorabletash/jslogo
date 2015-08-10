@@ -176,10 +176,13 @@ body {
 
 #overlay {
   left: 0; top: 0; right: 0; bottom: 0;
+  z-index: 2;
+}
+
+.cursor {
   padding: 10px;
   margin: 0;
   position: absolute;
-  z-index: 2;
   background-color: transparent;
   overflow: hidden;
   white-space: pre-wrap;

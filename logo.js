@@ -1308,6 +1308,11 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   // Not Supported: setcursor
+  def("setcursor", function(vector) {
+    // a vector is just a list
+    list = lexpr(vector);
+    self.stream.setcursor(list[0], list[1]);
+  });
   // Not Supported: cursor
   // Not Supported: setmargins
   // Not Supported: settextcolor
