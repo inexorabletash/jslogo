@@ -27,7 +27,7 @@ body {
   left: 0;
   right: 400px;
   top: 50px;
-  bottom: 60px;
+  bottom: 65px;
 }
 .multi #display-panel {
   bottom: 150px;
@@ -38,7 +38,7 @@ body {
   left: 0;
   right: 400px;
   bottom: 0;
-  height: 60px;
+  height: 65px;
 }
 .multi #input-panel {
   height: 150px;
@@ -246,7 +246,7 @@ body {
 .single #toggle #collapse-label { display: none; }
 .multi  #toggle #expand-label { display: none; }
 
-#run {
+#run, #clear {
   cursor: pointer;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -254,44 +254,24 @@ body {
   user-select: none;
 
   position: absolute;
-  top: 5px; bottom: 30px; right: 5px; width: 70px;
   border: 2px solid black;
   border-radius: 5px;
   background-color: white;
 }
 
-#run:hover {
-  background-color: #eeeeee;
-}
-
-#run .label {
-  position: absolute;
-  top: 0; bottom: 0; left: 0; right: 0;
-  margin: auto;
-  height: 20px;
-  text-align: center;
-  display: block;
+#run {
+  top: 5px; bottom: 35px; right: 5px; width: 70px;
 }
 
 #clear {
-  cursor: pointer;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
-
-  position: absolute;
-  height: 20px; bottom: 5px; right: 5px; width: 70px;
-  border: 2px solid black;
-  border-radius: 5px;
-  background-color: white;
+  height: 19px; bottom: 10px; right: 5px; width: 70px;
 }
 
-#clear:hover {
+#run:hover, #clear:hover {
   background-color: #eeeeee;
 }
 
-#clear .label {
+#run .label, #clear .label {
   position: absolute;
   top: 0; bottom: 0; left: 0; right: 0;
   margin: auto;
