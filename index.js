@@ -24,6 +24,9 @@ var $ = document.querySelector.bind(document);
 
 // Globals
 var logo, turtle;
+
+// Later scripts may override this to customize the examples.
+// Leave it exposed as a global.
 var examples = 'examples.txt';
 
 //
@@ -395,19 +398,17 @@ var input = {};
 // Populate "Examples" sidebar via XHR
 //
 window.addEventListener('load', function() {
-  var xhr = new XMLHttpRequest();
-  xhr.open('GET', examples, true);
-  xhr.onreadystatechange = function () {
-    if (xhr.readyState === XMLHttpRequest.DONE) {
-      if (xhr.status === 200 || xhr.status === 0) {
-         var parent = $('#examples');
-         xhr.responseText.split(/\n\n/g).forEach(function(line) {
-           insertSnippet(line, parent);
-         });
-        }
-      }
-    };
-  xhr.send();
+  fetch(examples)
+    .then(function(response) {
+      if (!response.ok) throw Error(response.statusText);
+      return response.text();
+    })
+    .then(function(text) {
+      var parent = $('#examples');
+      text.split(/\n\n/g).forEach(function(line) {
+        insertSnippet(line, parent);
+      });
+    });
 });
 
 
