@@ -1183,11 +1183,31 @@ test("Regression Tests", function() {
 });
 
 test("API Tests", function() {
-  // copydef(newname, oldname)
+  // LogoInterpeter#copydef(newname, oldname)
   this.assert_error('yup', "Don't know how to YUP");
   this.assert_error('nope', "Don't know how to NOPE");
   this.interpreter.copydef('yup', 'true');
   this.interpreter.copydef('nope', 'false');
   this.assert_equals('yup', 1);
   this.assert_equals('nope', 0);
+
+  // LogoInterpreter#localize
+  this.assert_error("1 / 0", "Division by zero");
+  this.assert_error("item 5 [ 1 2 ]", "Index out of bounds");
+  this.interpreter.localize = function(s) {
+    return {
+      'Division by zero': 'Divido per nulo',
+      'Index out of bounds': 'Indekso ekster limojn'
+    }[s];
+  };
+  this.assert_error("1 / 0", "Divido per nulo");
+  this.assert_error("item 5 [ 1 2 ]", "Indekso ekster limojn");
+
+  // CanvasTurtle#colorAlias
+  var hookCalled = false;
+  this.turtle.colorAlias = function(s) {
+    hookCalled = hookCalled || (s === 'internationalorange');
+  };
+  this.interpreter.run('setpencolor "internationalorange');
+  ok(hookCalled);
 });

@@ -40,8 +40,18 @@ function LogoInterpreter(turtle, stream, savehook)
     });
   }
 
+  // To support localized/customized messages, assign a lookup function:
+  // instance.localize = function(s) {
+  //   return {
+  //     'Division by zero': 'Divido per nulo',
+  //     'Index out of bounds': 'Indekso ekster limojn',
+  //     ...
+  //   }[s];
+  // };
+  this.localize = null;
   function __(string) {
-    // TODO: look up string in translation table
+    if (self.localize)
+      return self.localize(string) || string;
     return string;
   }
 
