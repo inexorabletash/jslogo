@@ -155,6 +155,12 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
 
   this.ispendown = function() { return this.down; };
 
+  // To handle additional color names (localizations, etc):
+  // turtle.colorAlias = function(name) {
+  //   return {internationalorange: '#FF4F00', ... }[name];
+  // };
+  this.colorAlias = null;
+
   var STANDARD_COLORS = {
     0: "black", 1: "blue", 2: "lime", 3: "cyan",
     4: "red", 5: "magenta", 6: "yellow", 7: "white",
@@ -163,17 +169,18 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
   };
 
   function parseColor(color) {
-    if (STANDARD_COLORS[color] !== undefined) {
+    color = String(color);
+    if (STANDARD_COLORS.hasOwnProperty(color))
       return STANDARD_COLORS[color];
-    } else {
-      return color;
-    }
+    if (self.colorAlias)
+      return self.colorAlias(color) || color;
+    return color;
   }
 
   this.setcolor = function(color) {
-    this.color = parseColor(color);
-    canvas_ctx.strokeStyle = this.color;
-    canvas_ctx.fillStyle = this.color;
+    this.color = color;
+    canvas_ctx.strokeStyle = parseColor(this.color);
+    canvas_ctx.fillStyle = parseColor(this.color);
   };
   this.getcolor = function() { return this.color; };
 
@@ -215,7 +222,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
   this.clear = function() {
     canvas_ctx.clearRect(0, 0, width, height);
     var tmp = canvas_ctx.fillStyle;
-    canvas_ctx.fillStyle = this.bgcolor;
+    canvas_ctx.fillStyle = parseColor(this.bgcolor);
     canvas_ctx.fillRect(0, 0, width, height);
     canvas_ctx.fillStyle = tmp;
   };
