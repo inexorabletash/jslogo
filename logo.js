@@ -848,6 +848,11 @@ function LogoInterpreter(turtle, stream, savehook)
     return defs.join("\n\n");
   };
 
+  // API to allow aliasing. Can be used for localization. Does not
+  // check for errors.
+  self.copydef = function(newname, oldname) {
+    self.routines.set(newname, self.routines.get(oldname));
+  };
 
   //----------------------------------------------------------------------
   //

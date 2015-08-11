@@ -797,8 +797,8 @@ test("Graphics", function () {
   this.assert_equals('penerase penmode', 'ERASE');
   this.assert_equals('penreverse penmode', 'REVERSE');
 
-  this.assert_equals('setpencolor 0 pencolor', 'black');
-  this.assert_equals('setpc 0 pencolor', 'black');
+  this.assert_equals('setpencolor 0 pencolor', '0');
+  this.assert_equals('setpc 0 pencolor', '0');
   this.assert_equals('setpencolor "#123456 pencolor', '#123456');
   this.assert_equals('setpencolor [0 50 99] pencolor', '#0080ff');
 
@@ -816,7 +816,7 @@ test("Graphics", function () {
   this.assert_equals('penerase penmode', 'ERASE');
   this.assert_equals('penreverse penmode', 'REVERSE');
 
-  this.assert_equals('setpencolor 0 pencolor', 'black');
+  this.assert_equals('setpencolor 0 pencolor', '0');
   this.assert_equals('setpencolor "#123456 pencolor', '#123456');
   this.assert_equals('setpensize 6 pensize', [6, 6]);
 
@@ -1180,4 +1180,14 @@ test("Regression Tests", function() {
   this.assert_equals('equalp "1 "1.0', 0);
 
   this.assert_equals('make "a { 1 }  make "b :a  setitem 1 :a 2  item 1 :b', 2);
+});
+
+test("API Tests", function() {
+  // copydef(newname, oldname)
+  this.assert_error('yup', "Don't know how to YUP");
+  this.assert_error('nope', "Don't know how to NOPE");
+  this.interpreter.copydef('yup', 'true');
+  this.interpreter.copydef('nope', 'false');
+  this.assert_equals('yup', 1);
+  this.assert_equals('nope', 0);
 });
