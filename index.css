@@ -16,16 +16,12 @@ body {
 
 #topbar {
   position: absolute;
-  left: 0;
-  right: 400px;
   top: 0;
   height: 50px;
 }
 
 #display-panel {
   position: absolute;
-  left: 0;
-  right: 400px;
   top: 50px;
   bottom: 65px;
 }
@@ -35,8 +31,6 @@ body {
 
 #input-panel {
   position: absolute;
-  left: 0;
-  right: 400px;
   bottom: 0;
   height: 65px;
 }
@@ -44,21 +38,32 @@ body {
   height: 150px;
 }
 
+#topbar, #display-panel, #input-panel {
+  left: 0; right: 400px;
+}
+[dir=rtl] #topbar, [dir=rtl] #display-panel, [dir=rtl] #input-panel {
+  right: 0; left: 400px;
+}
+
+
 #sidebar-header {
   position: absolute;
-  right: 0;
   width: 400px;
   top: 0px;
   height: 120px;
 }
-
 #sidebar {
   position: absolute;
-  right: 0;
   width: 400px;
   top: 120px;
   bottom: 0;
   overflow: hidden;
+}
+#sidebar-header, #sidebar {
+  left: auto; right: 0;
+}
+[dir=rtl] #sidebar-header, [dir=rtl] #sidebar {
+  right: auto; left: 0;
 }
 
 .panel {
@@ -136,16 +141,19 @@ body {
 #display {
   position: absolute;
   overflow: hidden;
-  left: 10px; right: 5px; top: 5px; bottom: 5px;
+  top: 5px; bottom: 5px;
   border: 2px solid black;
   border-radius: 5px;
   background-color: white;
+  left: 10px; right: 5px;
+}
+[dir=rtl] #display {
+  right: 10px; left: 5px;
 }
 
 #display #error {
   position: absolute;
   padding: 3px 20px;
-  left: 0;
   bottom: 0;
   border-radius: 2px;
 
@@ -155,7 +163,12 @@ body {
   background-color: #e01010;
   display: none;
   z-index: 9999;
+  left: 0; right: auto;
 }
+[dir=rtl] #display #error {
+  right: 0; left: auto;
+}
+
 #display #error.shown {
   display: block;
 }
@@ -191,12 +204,17 @@ body {
 #input {
   position: absolute;
   overflow: hidden;
-  top: 5px; bottom: 10px; left: 10px; right: 85px;
+  top: 5px; bottom: 10px;
   border: 2px solid black;
   border-radius: 5px;
   color: black;
   background-color: white;
+  left: 10px; right: 85px;
 }
+[dir=rtl] #input {
+  right: 10px; left: 85px;
+}
+
 
 #logo-cm-multi-line,
 #logo-cm-single-line,
@@ -239,9 +257,13 @@ body {
   position: absolute;
   overflow: hidden;
   z-index: 1000;
-  top: 1px; right: 1px;
+  top: 1px;
   width: 20px; height: 20px;
   text-shadow: 0 0 1px black;
+  left: auto; right: 1px;
+}
+[dir=rtl] #input #toggle {
+  right: auto; left: 1px;
 }
 .single #toggle #collapse-label { display: none; }
 .multi  #toggle #expand-label { display: none; }
@@ -260,11 +282,18 @@ body {
 }
 
 #run {
-  top: 5px; bottom: 35px; right: 5px; width: 70px;
+  top: 5px; bottom: 35px; width: 70px;
 }
 
 #clear {
-  height: 19px; bottom: 10px; right: 5px; width: 70px;
+  height: 19px; bottom: 10px; width: 70px;
+}
+
+#run, #clear {
+  right: 5px; left: auto;
+}
+[dir=rtl] #run, [dir=rtl] #clear {
+  left: 5px; right: auto;
 }
 
 #run:hover, #clear:hover {
