@@ -2502,7 +2502,7 @@ function LogoInterpreter(turtle, stream, savehook)
     }
     if (routine.special || routine.noeval) {
       throw new Error(format(__("Can't apply {proc} to special {name:U}"),
-                             { proc: "APPLY", name: procname }));
+                             { proc: __("APPLY"), name: procname }));
     }
 
     return routine.apply(null, lexpr(list));
@@ -2517,7 +2517,7 @@ function LogoInterpreter(turtle, stream, savehook)
     }
     if (routine.special || routine.noeval) {
       throw new Error(format(__("Can't apply {proc} to special {name:U}"),
-                             { proc: "INVOKE", name: procname }));
+                             { proc: __("INVOKE"), name: procname }));
     }
 
     var args = [];
@@ -2537,7 +2537,7 @@ function LogoInterpreter(turtle, stream, savehook)
     }
     if (routine.special || routine.noeval) {
       throw new Error(format(__("Can't apply {proc} to special {name:U}"),
-                             { proc: "FOREACH", name: procname }));
+                             { proc: __("FOREACH"), name: procname }));
     }
 
     lexpr(list).forEach(function(n) { return routine(n); });
@@ -2553,7 +2553,7 @@ function LogoInterpreter(turtle, stream, savehook)
     }
     if (routine.special || routine.noeval) {
       throw new Error(format(__("Can't apply {proc} to special {name:U}"),
-                             { proc: "MAP", name: procname }));
+                             { proc: __("MAP"), name: procname }));
     }
 
     return lexpr(list).map(routine);
@@ -2570,7 +2570,7 @@ function LogoInterpreter(turtle, stream, savehook)
     }
     if (routine.special || routine.noeval) {
       throw new Error(format(__("Can't apply {proc} to special {name:U}"),
-                             { proc: "FILTER", name: procname }));
+                             { proc: __("FILTER"), name: procname }));
     }
 
     return lexpr(list).filter(function(x) { return routine(x); });
@@ -2585,7 +2585,7 @@ function LogoInterpreter(turtle, stream, savehook)
     }
     if (routine.special || routine.noeval) {
       throw new Error(format(__("Can't apply {proc} to special {name:U}"),
-                             { proc: "FIND", name: procname }));
+                             { proc: __("FIND"), name: procname }));
     }
 
     list = lexpr(list);
@@ -2609,7 +2609,7 @@ function LogoInterpreter(turtle, stream, savehook)
     }
     if (procedure.special || procedure.noeval) {
       throw new Error(format(__("Can't apply {proc} to special {name:U}"),
-                             { proc: "REDUCE", name: procname }));
+                             { proc: __("REDUCE"), name: procname }));
     }
 
     // NOTE: Can't use procedure directly as reduce calls
