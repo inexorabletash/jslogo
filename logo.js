@@ -55,6 +55,27 @@ function LogoInterpreter(turtle, stream, savehook)
     return string;
   }
 
+  // To handle additional keyword aliases (localizations, etc),
+  // assign a function to keywordAlias. Input will be the uppercased
+  // word, output must be one of the keywords (ELSE or END), or
+  // undefined. For example:
+  // logo.keywordAlias = function(name) {
+  //   return {
+  //     'ALIE': 'ELSE',
+  //     'FINO': 'END'
+  //     ...
+  //   }[name];
+  // };
+  this.keywordAlias = null;
+  function isKeyword(atom, match) {
+    if (Type(atom) !== 'word')
+      return false;
+    atom = String(atom).toUpperCase();
+    if (self.keywordAlias)
+      atom = self.keywordAlias(atom) || atom;
+    return atom === match;
+  }
+
   // Based on: http://www.jbouchard.net/chris/blog/2008/01/currying-in-javascript-fun-for-whole.html
   function to_arity(func, arity) {
     var parms = [];
@@ -395,7 +416,7 @@ function LogoInterpreter(turtle, stream, savehook)
         if (string.match(/^(\s*@\s*)(.*)$/)) {
           string = RegExp.$2;
           if (!string.match(/^(-?\d+)(.*)$/))
-            throw new Error(__('Expected number after @'));
+            throw new Error(__("Expected number after @"));
           origin = RegExp.$1;
           string = RegExp.$2;
         }
@@ -947,7 +968,7 @@ function LogoInterpreter(turtle, stream, savehook)
     var state_inputs = true, sawEnd = false;
     while (list.length) {
       var atom = list.shift();
-      if (Type(atom) === 'word' && String(atom).toUpperCase() === 'END') {
+      if (isKeyword(atom, 'END')) {
         sawEnd = true;
         break;
       } else if (state_inputs && Type(atom) === 'word' && String(atom).charAt(0) === ':') {
@@ -958,7 +979,7 @@ function LogoInterpreter(turtle, stream, savehook)
       }
     }
     if (!sawEnd) {
-      throw new Error(__("Expected END"));
+      throw new Error(format(__("Expected END")));
     }
 
     // Closure over inputs and block to handle scopes, arguments and outputs
@@ -1740,7 +1761,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
     if (self.routines.has(newname)) {
       if (self.routines.get(newname).special) {
-        throw new Error(format(__("Can't overwrite special form {name:U}"), { name: newname }));
+        throw new Error(format(__("Can't overwrite special {name:U}"), { name: newname }));
       }
       if (self.routines.get(newname).primitive && !maybegetvar("redefp")) {
         throw new Error(__("Can't overwrite primitives unless REDEFP is TRUE"));
@@ -2456,7 +2477,7 @@ function LogoInterpreter(turtle, stream, savehook)
     for (var i = 0; i < clauses.length; ++i) {
       var clause = lexpr(clauses[i]);
       var first = clause.shift();
-      if (Type(first) === 'word' && String(first).toUpperCase() === 'ELSE') {
+      if (isKeyword(first, 'ELSE')) {
         return evaluateExpression(clause);
       }
       if (lexpr(first).some(function(x) { return equal(x, value); })) {
@@ -2472,7 +2493,7 @@ function LogoInterpreter(turtle, stream, savehook)
     for (var i = 0; i < clauses.length; ++i) {
       var clause = lexpr(clauses[i]);
       var first = clause.shift();
-      if (Type(first) === 'word' && String(first).toUpperCase() === 'ELSE') {
+      if (isKeyword(first, 'ELSE')) {
         return evaluateExpression(clause);
       }
       if (evaluateExpression(lexpr(first))) {
@@ -2501,8 +2522,8 @@ function LogoInterpreter(turtle, stream, savehook)
       throw new Error(format(__("Don't know how to {name:U}"), { name: procname }));
     }
     if (routine.special || routine.noeval) {
-      throw new Error(format(__("Can't apply {proc} to special {name:U}"),
-                             { proc: __("APPLY"), name: procname }));
+      throw new Error(format(__("Can't apply APPLY to special {name:U}"),
+                             { name: procname }));
     }
 
     return routine.apply(null, lexpr(list));
@@ -2516,8 +2537,8 @@ function LogoInterpreter(turtle, stream, savehook)
       throw new Error(format(__("Don't know how to {name:U}"), { name: procname }));
     }
     if (routine.special || routine.noeval) {
-      throw new Error(format(__("Can't apply {proc} to special {name:U}"),
-                             { proc: __("INVOKE"), name: procname }));
+      throw new Error(format(__("Can't apply INVOKE to special {name:U}"),
+                             { name: procname }));
     }
 
     var args = [];
@@ -2536,8 +2557,8 @@ function LogoInterpreter(turtle, stream, savehook)
       throw new Error(format(__("Don't know how to {name:U}"), { name: procname }));
     }
     if (routine.special || routine.noeval) {
-      throw new Error(format(__("Can't apply {proc} to special {name:U}"),
-                             { proc: __("FOREACH"), name: procname }));
+      throw new Error(format(__("Can't apply FOREACH to special {name:U}"),
+                             { name: procname }));
     }
 
     lexpr(list).forEach(function(n) { return routine(n); });
@@ -2552,8 +2573,8 @@ function LogoInterpreter(turtle, stream, savehook)
       throw new Error(format(__("Don't know how to {name:U}"), { name: procname }));
     }
     if (routine.special || routine.noeval) {
-      throw new Error(format(__("Can't apply {proc} to special {name:U}"),
-                             { proc: __("MAP"), name: procname }));
+      throw new Error(format(__("Can't apply MAP to special {name:U}"),
+                             { name: procname }));
     }
 
     return lexpr(list).map(routine);
@@ -2569,8 +2590,8 @@ function LogoInterpreter(turtle, stream, savehook)
       throw new Error(format(__("Don't know how to {name:U}"), { name: procname }));
     }
     if (routine.special || routine.noeval) {
-      throw new Error(format(__("Can't apply {proc} to special {name:U}"),
-                             { proc: __("FILTER"), name: procname }));
+      throw new Error(format(__("Can't apply FILTER to special {name:U}"),
+                             { name: procname }));
     }
 
     return lexpr(list).filter(function(x) { return routine(x); });
@@ -2584,8 +2605,8 @@ function LogoInterpreter(turtle, stream, savehook)
       throw new Error(format(__("Don't know how to {name:U}"), { name: procname }));
     }
     if (routine.special || routine.noeval) {
-      throw new Error(format(__("Can't apply {proc} to special {name:U}"),
-                             { proc: __("FIND"), name: procname }));
+      throw new Error(format(__("Can't apply FIND to special {name:U}"),
+                             { name: procname }));
     }
 
     list = lexpr(list);
@@ -2608,8 +2629,8 @@ function LogoInterpreter(turtle, stream, savehook)
       throw new Error(format(__("Don't know how to {name:U}"), { name: procname }));
     }
     if (procedure.special || procedure.noeval) {
-      throw new Error(format(__("Can't apply {proc} to special {name:U}"),
-                             { proc: __("REDUCE"), name: procname }));
+      throw new Error(format(__("Can't apply REDUCE to special {name:U}"),
+                             { name: procname }));
     }
 
     // NOTE: Can't use procedure directly as reduce calls

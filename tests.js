@@ -1203,6 +1203,18 @@ test("API Tests", function() {
   this.assert_error("1 / 0", "Divido per nulo");
   this.assert_error("item 5 [ 1 2 ]", "Indekso ekster limojn");
 
+  // LogoInterpreter#keywordAlias
+  this.assert_error('to foo output 2 fino  foo', "Expected END");
+  this.assert_equals('case 2 [[[1] "a"] [alie "b]]', undefined);
+  this.interpreter.keywordAlias = function(s) {
+    return {
+      'FINO': 'END',
+      'ALIE': 'ELSE'
+    }[s];
+  };
+  this.assert_equals('case 2 [[[1] "a"] [alie "b]]', 'b');
+  this.assert_equals('to foo output 2 fino  foo', 2);
+
   // CanvasTurtle#colorAlias
   var hookCalled = false;
   this.turtle.colorAlias = function(s) {
