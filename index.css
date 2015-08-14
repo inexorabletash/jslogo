@@ -2,7 +2,7 @@
 
 @import url(http://fonts.googleapis.com/css?family=Michroma);
 h1 { font-family: "Michroma"; }
-body { font-family: sans-serif; }
+body { font-family: sans-serif; overflow: hidden; }
 
 
 dt, dd { font-size: 8pt; }
