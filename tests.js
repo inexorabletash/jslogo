@@ -92,9 +92,9 @@ QUnit.module("Logo Unit Tests", {
     this.assert_error = function(expression, expected) {
       try {
         this.interpreter.run(expression);
-        t.ok(false, 'Expected to error but did not: ' + expression);
+        t.push(false, '(no error)', expected, 'Expected to error but did not: ' + expression);
       } catch (ex) {
-        t.equal(ex.message, expected, expression);
+        t.push(ex.message === expected, ex.message, expected, 'Expected error from: ' + expression);
       }
     };
   }
@@ -181,7 +181,6 @@ QUnit.test("Parser", function(t) {
   this.assert_equals('count { a b [ c d e ] f }', 4);
   this.assert_equals('count [ a b { c d e } f ]', 4);
 });
-
 
 QUnit.test("Data Structure Primitives", function(t) {
   //
@@ -416,9 +415,7 @@ QUnit.test("Data Structure Primitives", function(t) {
   this.assert_equals('lowercase "ABcd', 'abcd');
   this.assert_equals('uppercase "ABcd', 'ABCD');
   this.assert_equals('standout "whatever', 'whatever');
-
 });
-
 
 QUnit.test("Communication", function(t) {
   t.expect(22);
@@ -463,9 +460,7 @@ QUnit.test("Communication", function(t) {
   this.assert_stream('print "a ct', '');
 
   this.stream.clear();
-
 });
-
 
 QUnit.test("Arithmetic", function(t) {
   t.expect(137);
@@ -643,9 +638,7 @@ QUnit.test("Arithmetic", function(t) {
   this.assert_equals('ashift -1024 -1', -512);
   this.assert_equals('ashift -1 -1', -1);
   this.assert_equals('lshift -1 -1', 0x7fffffff);
-
 });
-
 
 QUnit.test("Logical Operations", function(t) {
   t.expect(29);
@@ -683,9 +676,7 @@ QUnit.test("Logical Operations", function(t) {
 
   this.assert_stream('and 1 (type "yup)', 'yup');
   this.assert_stream('or 0 (type "yup)', 'yup');
-
 });
-
 
 QUnit.test("Graphics", function(t) {
   t.expect(69);
@@ -979,7 +970,6 @@ QUnit.test("Workspace Management", function(t) {
 
   // 7.6 Workspace Inspection
   // 7.7 Workspace Control
-
 });
 
 QUnit.test("Control Structures", function(t) {
@@ -1070,7 +1060,6 @@ QUnit.test("Control Structures", function(t) {
 
   // TODO: Order of operations
   // TODO: Structures, lists of lists
-
 });
 
 QUnit.test("Error Messages", function(t) {
