@@ -19,8 +19,8 @@
 var canvas_element = document.getElementById("sandbox"), canvas_ctx;
 var turtle_element = document.getElementById("turtle"), turtle_ctx;
 
-module("Logo Unit Tests", {
-  setup: function() {
+QUnit.module("Logo Unit Tests", {
+  setup: function(t) {
     // TODO: Replace with mock
     canvas_ctx = canvas_ctx || canvas_element.getContext('2d');
     turtle_ctx = turtle_ctx || turtle_element.getContext('2d');
@@ -61,11 +61,11 @@ module("Logo Unit Tests", {
     this.assert_equals = function(expression, expected) {
       var actual = this.interpreter.run(expression, {returnResult: true});
       if (typeof expected === 'object') {
-        deepEqual(actual, expected, expression);
+        t.deepEqual(actual, expected, expression);
       } else if (typeof expected === 'number' && typeof actual === 'number') {
-        ok(Math.abs(actual - expected) < EPSILON, expression);
+        t.ok(Math.abs(actual - expected) < EPSILON, expression);
       } else {
-        strictEqual(actual, expected, expression);
+        t.strictEqual(actual, expected, expression);
       }
     };
 
@@ -74,7 +74,7 @@ module("Logo Unit Tests", {
       this.interpreter.run(expression, {returnResult: true});
       var actual = this.stream.outputbuffer;
       this.stream.clear();
-      equal(actual, expected, expression);
+      t.equal(actual, expected, expression);
     };
 
     this.assert_prompt = function(expression, expected) {
@@ -82,25 +82,25 @@ module("Logo Unit Tests", {
       this.interpreter.run(expression, {returnResult: true});
       var actual = this.stream.last_prompt;
       this.stream.clear();
-      equal(actual, expected, expression);
+      t.equal(actual, expected, expression);
     };
 
     this.assert_predicate = function(expression, predicate) {
-      ok(predicate(this.interpreter.run(expression, {returnResult: true})), expression);
+      t.ok(predicate(this.interpreter.run(expression, {returnResult: true})), expression);
     };
 
     this.assert_error = function(expression, expected) {
       try {
         this.interpreter.run(expression);
-        ok(false, 'Expected to error but did not: ' + expression);
+        t.ok(false, 'Expected to error but did not: ' + expression);
       } catch (ex) {
-        equal(ex.message, expected, expression);
+        t.equal(ex.message, expected, expression);
       }
     };
   }
 });
 
-test("Parser", function() {
+QUnit.test("Parser", function(t) {
   //
   // Types
   //
@@ -183,7 +183,7 @@ test("Parser", function() {
 });
 
 
-test("Data Structure Primitives", function() {
+QUnit.test("Data Structure Primitives", function(t) {
   //
   // 2.1 Constructors
   //
@@ -420,8 +420,8 @@ test("Data Structure Primitives", function() {
 });
 
 
-test("Communication", function() {
-  expect(22);
+QUnit.test("Communication", function(t) {
+  t.expect(22);
 
   // 3.1 Transmitters
 
@@ -467,8 +467,8 @@ test("Communication", function() {
 });
 
 
-test("Arithmetic", function() {
-  expect(137);
+QUnit.test("Arithmetic", function(t) {
+  t.expect(137);
 
   //
   // 4.1 Numeric Operations
@@ -647,8 +647,8 @@ test("Arithmetic", function() {
 });
 
 
-test("Logical Operations", function() {
-  expect(29);
+QUnit.test("Logical Operations", function(t) {
+  t.expect(29);
 
   this.assert_equals('true', 1);
   this.assert_equals('false', 0);
@@ -687,8 +687,8 @@ test("Logical Operations", function() {
 });
 
 
-test("Graphics", function() {
-  expect(69);
+QUnit.test("Graphics", function(t) {
+  t.expect(69);
 
   // NOTE: test canvas is 300,300 (so -150...150 coordinates before hitting)
   // edge
@@ -815,8 +815,8 @@ test("Graphics", function() {
   // 6.8 Mouse Queries
 });
 
-test("Workspace Management", function() {
-  expect(92);
+QUnit.test("Workspace Management", function(t) {
+  t.expect(92);
 
   //
   // 7.1 Procedure Definition
@@ -982,8 +982,8 @@ test("Workspace Management", function() {
 
 });
 
-test("Control Structures", function() {
-  expect(44);
+QUnit.test("Control Structures", function(t) {
+  t.expect(44);
   //
   // 8.1 Control
   //
@@ -1073,8 +1073,7 @@ test("Control Structures", function() {
 
 });
 
-test("Error Messages", function() {
-
+QUnit.test("Error Messages", function(t) {
   this.assert_error("to foo end show foo", "No output from procedure");
   this.assert_error("[ 1 2", "Expected ']'");
   this.assert_error("{ 1 2", "Expected '}'");
@@ -1139,7 +1138,7 @@ test("Error Messages", function() {
   this.assert_error('make "a { 1 2 3 }@1.5', "Don't know what to do with 0.5");
 });
 
-test("Regression Tests", function() {
+QUnit.test("Regression Tests", function(t) {
   this.assert_equals('make "x 0  repeat 3 [ for [ i 1 4 ] [ make "x :x + 1 ] ]  :x', 12);
   this.assert_equals('make "x 0  for [i 0 100 :i + 1] [make "x :x + :i]  :x', 120);
   this.assert_error("fd 100 50 rt 90", "Don't know what to do with 50");
@@ -1173,7 +1172,7 @@ test("Regression Tests", function() {
   this.assert_equals('make "a { 1 }  make "b :a  setitem 1 :a 2  item 1 :b', 2);
 });
 
-test("API Tests", function() {
+QUnit.test("API Tests", function(t) {
   // LogoInterpeter#copydef(newname, oldname)
   this.assert_error('yup', "Don't know how to YUP");
   this.assert_error('nope', "Don't know how to NOPE");
@@ -1212,5 +1211,5 @@ test("API Tests", function() {
     hookCalled = hookCalled || (s === 'internationalorange');
   };
   this.interpreter.run('setpencolor "internationalorange');
-  ok(hookCalled);
+  t.ok(hookCalled);
 });
