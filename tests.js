@@ -21,7 +21,6 @@ var turtle_element = document.getElementById("turtle"), turtle_ctx;
 
 module("Logo Unit Tests", {
   setup: function() {
-
     // TODO: Replace with mock
     canvas_ctx = canvas_ctx || canvas_element.getContext('2d');
     turtle_ctx = turtle_ctx || turtle_element.getContext('2d');
@@ -59,7 +58,7 @@ module("Logo Unit Tests", {
 
     var EPSILON = 1e-12;
 
-    this.assert_equals = function (expression, expected) {
+    this.assert_equals = function(expression, expected) {
       var actual = this.interpreter.run(expression, {returnResult: true});
       if (typeof expected === 'object') {
         deepEqual(actual, expected, expression);
@@ -70,7 +69,7 @@ module("Logo Unit Tests", {
       }
     };
 
-    this.assert_stream = function (expression, expected) {
+    this.assert_stream = function(expression, expected) {
       this.stream.clear();
       this.interpreter.run(expression, {returnResult: true});
       var actual = this.stream.outputbuffer;
@@ -78,7 +77,7 @@ module("Logo Unit Tests", {
       equal(actual, expected, expression);
     };
 
-    this.assert_prompt = function (expression, expected) {
+    this.assert_prompt = function(expression, expected) {
       this.stream.clear();
       this.interpreter.run(expression, {returnResult: true});
       var actual = this.stream.last_prompt;
@@ -91,24 +90,17 @@ module("Logo Unit Tests", {
     };
 
     this.assert_error = function(expression, expected) {
-      raises(
-        function() {
-          this.interpreter.run(expression);
-        }.bind(this),
-        function(e) {
-          if (e.message !== expected) {
-            console.log("mismatch: ", e.message, expected);
-          }
-          return e.message === expected;
-        },
-        expression
-      );
+      try {
+        this.interpreter.run(expression);
+        ok(false, 'Expected to error but did not: ' + expression);
+      } catch (ex) {
+        equal(ex.message, expected, expression);
+      }
     };
   }
 });
 
-test("Parser", function () {
-
+test("Parser", function() {
   //
   // Types
   //
@@ -191,8 +183,7 @@ test("Parser", function () {
 });
 
 
-test("Data Structure Primitives", function () {
-
+test("Data Structure Primitives", function() {
   //
   // 2.1 Constructors
   //
@@ -429,7 +420,7 @@ test("Data Structure Primitives", function () {
 });
 
 
-test("Communication", function () {
+test("Communication", function() {
   expect(22);
 
   // 3.1 Transmitters
@@ -476,7 +467,7 @@ test("Communication", function () {
 });
 
 
-test("Arithmetic", function () {
+test("Arithmetic", function() {
   expect(137);
 
   //
@@ -656,7 +647,7 @@ test("Arithmetic", function () {
 });
 
 
-test("Logical Operations", function () {
+test("Logical Operations", function() {
   expect(29);
 
   this.assert_equals('true', 1);
@@ -696,7 +687,7 @@ test("Logical Operations", function () {
 });
 
 
-test("Graphics", function () {
+test("Graphics", function() {
   expect(69);
 
   // NOTE: test canvas is 300,300 (so -150...150 coordinates before hitting)
@@ -824,7 +815,7 @@ test("Graphics", function () {
   // 6.8 Mouse Queries
 });
 
-test("Workspace Management", function () {
+test("Workspace Management", function() {
   expect(92);
 
   //
@@ -991,7 +982,7 @@ test("Workspace Management", function () {
 
 });
 
-test("Control Structures", function () {
+test("Control Structures", function() {
   expect(44);
   //
   // 8.1 Control
@@ -1082,7 +1073,7 @@ test("Control Structures", function () {
 
 });
 
-test("Error Messages", function () {
+test("Error Messages", function() {
 
   this.assert_error("to foo end show foo", "No output from procedure");
   this.assert_error("[ 1 2", "Expected ']'");
@@ -1110,9 +1101,9 @@ test("Error Messages", function () {
   this.assert_error("def \"def", "Can't show definition of primitive DEF");
   this.assert_error("item 5 [ 1 2 ]", "Index out of bounds");
   this.assert_error("copydef \"newname \"nosuchproc", "Don't know how to NOSUCHPROC");
-  this.assert_error("to foo end  copydef \"to \"foo", "Can't overwrite special form TO");
+  this.assert_error("to foo end  copydef \"to \"foo", "Can't overwrite special TO");
   this.assert_error("to foo end  copydef \"show \"foo", "Can't overwrite primitives unless REDEFP is TRUE");
-  this.assert_error("erase [ [ TO ] [ ] ]", "Can't ERASE special form TO");
+  this.assert_error("erase [ [ TO ] [ ] ]", "Can't ERASE special TO");
   this.assert_error("erase [ [ SHOW ] [ ] ]", "Can't ERASE primitives unless REDEFP is TRUE");
   this.assert_error("do.while 1 2", "Expected block");
   this.assert_error("while 1 2", "Expected block");

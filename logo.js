@@ -2020,7 +2020,7 @@ function LogoInterpreter(turtle, stream, savehook)
         name = sexpr(name);
         if (self.routines.has(name)) {
           if (self.routines.get(name).special) {
-            throw new Error(format(__("Can't ERASE special form {name:U}"), { name: name }));
+            throw new Error(format(__("Can't ERASE special {name:U}"), { name: name }));
           }
           if (!self.routines.get(name).primitive || maybegetvar("redefp")) {
             self.routines['delete'](name);
