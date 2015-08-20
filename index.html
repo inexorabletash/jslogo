@@ -23,12 +23,12 @@
 <body class="single">
 
 <div id="topbar" class="panel">
-  <h1>Logo Interpreter</h1>
+  <h1 id="tl-title">Logo Interpreter</h1>
   <p>
-    By <a href="mailto:inexorabletash@gmail.com">Joshua Bell</a>
-    | <a target="_blank" href="tests.html">Unit Tests</a>
-    | <a target="_blank" href="https://github.com/inexorabletash/jslogo">Source</a>
-    | <a title="Collaborate with TogetherJS" href="#" id="start-togetherjs" onclick="TogetherJS(); return false">Collaborate</a><sup><i>New!</i></sup>
+    <span id="tl-byauthor">By</span> <a href="mailto:inexorabletash@gmail.com">Joshua Bell</a>
+    | <a id="tl-tests" target="_blank" href="tests.html">Unit Tests</a>
+    | <a id="tl-source" target="_blank" href="https://github.com/inexorabletash/jslogo">Source</a>
+    | <a title="Collaborate with TogetherJS" href="#" id="start-togetherjs" onclick="TogetherJS(); return false">Collaborate</a><sup><i><span id="tl-new">New!</span></i></sup>
   </p>
 </div>
 
@@ -47,8 +47,8 @@
 
 <div id="input-panel" class="panel">
   <!-- TODO: Make this a button or anchor -->
-  <div id="run"><div class="label">Run</div></div>
-  <div id="clear"><div class="label">Clear</div></div>
+  <div id="run"><div id="ip-button-run" class="label">Run</div></div>
+  <div id="clear"><div id="ip-button-clear" class="label">Clear</div></div>
   <div id="input">
     <div class="inner">
       <div id="toggle">
@@ -63,12 +63,12 @@
 
 <div id="sidebar-header" class="panel">
   <ul>
-    <li><a id="sb-link-reference" href="#">Reference</a> - the Logo language
-    <li><a id="sb-link-library" href="#">Library</a> - your procedures
-    <li><a id="sb-link-history" href="#">History</a> - everything you&apos;ve done here
-    <li><a id="sb-link-examples" href="#">Examples</a> - fun things to try out
-    <li><a id="sb-link-extras" href="#">Extras</a> - helpful utilities
-    <li><a id="sb-link-links" href="#">Links</a> - other Logo resources
+    <li><a id="sb-link-reference" href="#">Reference</a> - <span id="sb-link-text-reference">the Logo language</span>
+    <li><a id="sb-link-library" href="#">Library</a> - <span id="sb-link-text-library">your procedures</span>
+    <li><a id="sb-link-history" href="#">History</a> - <span id="sb-link-text-history">everything you&apos;ve done here</span>
+    <li><a id="sb-link-examples" href="#">Examples</a> - <span id="sb-link-text-examples">fun things to try out</span>
+    <li><a id="sb-link-extras" href="#">Extras</a> - <span id="sb-link-text-extras">helpful utilities</span>
+    <li><a id="sb-link-links" href="#">Links</a> - <span id="sb-link-text-links">other Logo resources<span>
   </ul>
 </div>
 
