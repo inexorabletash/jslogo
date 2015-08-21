@@ -23,12 +23,12 @@
 <body class="single">
 
 <div id="topbar" class="panel">
-  <h1 id="tl-title">Logo Interpreter</h1>
+  <h1 data-l10n-id="tl-title">Logo Interpreter</h1>
   <p>
-    <span id="tl-byauthor">By</span> <a href="mailto:inexorabletash@gmail.com">Joshua Bell</a>
-    | <a id="tl-tests" target="_blank" href="tests.html">Unit Tests</a>
-    | <a id="tl-source" target="_blank" href="https://github.com/inexorabletash/jslogo">Source</a>
-    | <a title="Collaborate with TogetherJS" href="#" id="start-togetherjs" onclick="TogetherJS(); return false">Collaborate</a><sup><i><span id="tl-new">New!</span></i></sup>
+    <span data-l10n-id="tl-byauthor">By</span> <a href="mailto:inexorabletash@gmail.com">Joshua Bell</a>
+    | <a data-l10n-id="tl-tests" target="_blank" href="tests.html">Unit Tests</a>
+    | <a data-l10n-id="tl-source" target="_blank" href="https://github.com/inexorabletash/jslogo">Source</a>
+    | <a title="Collaborate with TogetherJS" href="#" data-l10n-id="start-togetherjs" onclick="TogetherJS(); return false">Collaborate</a>
   </p>
 </div>
 
@@ -36,7 +36,7 @@
   <div id="display">
     <div class="inner">
       <canvas id="sandbox" width="450" height="250">
-        <span>Your browser does not support the canvas element - sorry!</span>
+        <span data-l10n-id="no-canvas">Your browser does not support the canvas element - sorry!</span>
       </canvas>
       <canvas id="turtle" width="450" height="250"></canvas>
       <div id="overlay"></div>
@@ -47,8 +47,8 @@
 
 <div id="input-panel" class="panel">
   <!-- TODO: Make this a button or anchor -->
-  <div id="run"><div id="ip-button-run" class="label">Run</div></div>
-  <div id="clear"><div id="ip-button-clear" class="label">Clear</div></div>
+  <div id="run"><div data-l10n-id="ip-button-run" class="label">Run</div></div>
+  <div id="clear"><div data-l10n-id="ip-button-clear" class="label">Clear</div></div>
   <div id="input">
     <div class="inner">
       <div id="toggle">
@@ -63,12 +63,12 @@
 
 <div id="sidebar-header" class="panel">
   <ul>
-    <li><a id="sb-link-reference" href="#">Reference</a> - <span id="sb-link-text-reference">the Logo language</span>
-    <li><a id="sb-link-library" href="#">Library</a> - <span id="sb-link-text-library">your procedures</span>
-    <li><a id="sb-link-history" href="#">History</a> - <span id="sb-link-text-history">everything you&apos;ve done here</span>
-    <li><a id="sb-link-examples" href="#">Examples</a> - <span id="sb-link-text-examples">fun things to try out</span>
-    <li><a id="sb-link-extras" href="#">Extras</a> - <span id="sb-link-text-extras">helpful utilities</span>
-    <li><a id="sb-link-links" href="#">Links</a> - <span id="sb-link-text-links">other Logo resources<span>
+    <li><a data-l10n-id="sb-link-reference" id="sb-link-reference" href="#">Reference</a> - <span data-l10n-id="sb-link-text-reference">the Logo language</span>
+    <li><a data-l10n-id="sb-link-library" id="sb-link-library" href="#">Library</a> - <span data-l10n-id="sb-link-text-library">your procedures</span>
+    <li><a data-l10n-id="sb-link-history" id="sb-link-history" href="#">History</a> - <span data-l10n-id="sb-link-text-history">everything you&apos;ve done here</span>
+    <li><a data-l10n-id="sb-link-examples" id="sb-link-examples" href="#">Examples</a> - <span data-l10n-id="sb-link-text-examples">fun things to try out</span>
+    <li><a data-l10n-id="sb-link-extras" id="sb-link-extras" href="#">Extras</a> - <span data-l10n-id="sb-link-text-extras">helpful utilities</span>
+    <li><a data-l10n-id="sb-link-links" id="sb-link-links" href="#">Links</a> - <span data-l10n-id="sb-link-text-links">other Logo resources</span>
   </ul>
 </div>
 
@@ -107,10 +107,10 @@
   </div>
   <div class="choice" id="extras">
     <ul>
-      <li><a id="savelibrary" href="#">Download Library</a></li>
-      <li><a id="screenshot" href="#">Download Drawing</a></li>
-      <li><a id="clearhistory" href="#">Clear history</a></li>
-      <li><a id="clearlibrary" href="#">Clear library</a> </li>
+      <li><a data-l10n-id="extras-download-library" id="savelibrary" href="#">Download Library</a></li>
+      <li><a data-l10n-id="extras-download-drawing"id="screenshot" href="#">Download Drawing</a></li>
+      <li><a data-l10n-id="extras-clear-history"id="clearhistory" href="#">Clear history</a></li>
+      <li><a data-l10n-id="extras-clear-library"id="clearlibrary" href="#">Clear library</a> </li>
     </ul>
   </div>
 </div>
@@ -136,7 +136,7 @@
 
 <style>
 </style>
-<a class=forkme target="_blank" href="https://github.com/inexorabletash/jslogo">Fork me on GitHub</a>
+<a data-l10n-id="github-forkme" class=forkme target="_blank" href="https://github.com/inexorabletash/jslogo">Fork me on GitHub</a>
 
 </body>
 </html>
