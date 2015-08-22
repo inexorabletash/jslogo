@@ -654,12 +654,6 @@ window.TogetherJSConfig ={
 
 // Localization
 window.addEventListener('DOMContentLoaded', function() {
-  function loadScript(url) {
-    var s = document.createElement('script');
-    s.src = url;
-    document.body.appendChild(s);
-  }
-
   var lang = queryParams.lang || navigator.language || navigator.userLanguage;
   if (!lang) return;
 
@@ -668,7 +662,12 @@ window.addEventListener('DOMContentLoaded', function() {
   if (lang === 'en') return;
 
   document.body.lang = lang;
-  loadScript('l10n/logo.' + lang + '.js');
-  loadScript('l10n/turtle.' + lang + '.js');
-  loadScript('l10n/index.' + lang + '.js');
+  fetch('l10n/lang-' + lang + '.js')
+    .then(function(response) {
+      if (!response.ok) throw Error(response.statusText);
+      return response.text();
+    })
+    .then(function(text) {
+      (1, eval)(text);
+    });
 });
