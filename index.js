@@ -30,6 +30,21 @@ var logo, turtle;
 // Leave it exposed as a global.
 var examples = 'examples.txt';
 
+// Parse query string
+var queryParams = {}, queryRest;
+(function() {
+  if (document.location.search) {
+    document.location.search.substring(1).split('&').forEach(function(entry) {
+      var match = /^(\w+)=(.*)$/.exec(entry);
+      if (match)
+        queryParams[decodeURIComponent(match[1])] = decodeURIComponent(match[2]);
+      else
+        queryRest = '?' + entry;
+    });
+  }
+}());
+
+
 //
 // Storage hooks
 //
@@ -379,7 +394,7 @@ var input = {};
 //
 (function() {
   window.addEventListener('resize', resize);
-  window.addEventListener('load', resize);
+  window.addEventListener('DOMContentLoaded', resize);
   function resize() {
     var box = $('#display-panel .inner'), rect = box.getBoundingClientRect(),
         w = rect.width, h = rect.height;
@@ -598,7 +613,7 @@ window.addEventListener('DOMContentLoaded', function() {
   }
 
   // Look for a program to run in the query string / hash
-  var param = document.location.search || document.location.hash;
+  var param = queryRest || document.location.hash;
   demo(param);
   window.addEventListener('hashchange', function() { demo(document.location.hash); } );
 });
@@ -636,3 +651,19 @@ window.TogetherJSConfig ={
   }
 
 };
+
+// Localization
+(function() {
+  function loadScript(url) {
+    var s = document.createElement('script');
+    s.src = url;
+    document.body.appendChild(s);
+  }
+
+  if ('lang' in queryParams && /^[a-z]{2,}$/.test(queryParams.lang)) {
+    document.body.lang = queryParams.lang;
+    loadScript('l10n/logo.' + queryParams.lang + '.js');
+    loadScript('l10n/turtle.' + queryParams.lang + '.js');
+    loadScript('l10n/index.' + queryParams.lang + '.js');
+  }
+}());
