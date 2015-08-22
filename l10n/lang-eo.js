@@ -18,7 +18,11 @@
         console.warn('Missing translation: ' + id);
         return;
       }
-      element.textContent = translation[id];
+      if (element.placeholder) {
+        element.placeholder = translation[id];
+      } else {
+        element.textContent = translation[id];
+      }
     });
     // TODO: Support localizing attributes (e.g. placeholder, title)
   }({
