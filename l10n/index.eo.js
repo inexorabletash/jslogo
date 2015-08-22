@@ -4,7 +4,22 @@
   // For RTL languages:
   //document.body.dir = 'rtl';
 
-  var translations = {
+  // Override examples link e.g.:
+  // examples = "l10n/examples.txt"
+
+  (function(translation) {
+    Array.from(document.querySelectorAll('[data-l10n-id]')).forEach(function(element) {
+      var id = element.getAttribute('data-l10n-id');
+      if (!translation.hasOwnProperty(id)) {
+        console.warn('Missing translation: ' + id);
+        return;
+      }
+      element.textContent = translation[id];
+    });
+
+    // TODO: Support localizing attributes (e.g. placeholder, title)
+
+  }({
     // data-l10n-id: replacement-text
     "tl-title": "Logo Interpretisto",
     "tl-byauthor": "Per",
@@ -31,14 +46,6 @@
     "extras-clear-history": "Klara Historio",
     "extras-clear-library": "Klara Biblioteko",
     "github-forkme": "Forko min sur GitHub"
-  };
-
-  Object.keys(translations).forEach(function(id) {
-    var element = document.querySelector('[data-l10n-id=' + id + ']');
-    if (!element) return;
-    element.textContent = translations[id];
-  });
-
-  // TODO: Support localizing attributes (e.g. placeholder, title)
+  }));
 
 }());

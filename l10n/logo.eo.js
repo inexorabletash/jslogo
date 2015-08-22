@@ -21,8 +21,17 @@
     }[name];
   };
 
-  // Procedures - alias, keyword
-  logo.copydef('vera', 'true');
-  logo.copydef('falsa', 'false');
+  // Procedures
+  (function(defs) {
+    Object.keys(defs).forEach(function(def) {
+      defs[def].forEach(function(alias) {
+        logo.copydef(alias, def);
+      });
+    });
+  }({
+    // procname: [alias, ...]
+    'true': ['vera'],
+    'false': ['falsa']
+  }));
 
 }());

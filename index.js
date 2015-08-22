@@ -653,17 +653,22 @@ window.TogetherJSConfig ={
 };
 
 // Localization
-(function() {
+window.addEventListener('DOMContentLoaded', function() {
   function loadScript(url) {
     var s = document.createElement('script');
     s.src = url;
     document.body.appendChild(s);
   }
 
-  if ('lang' in queryParams && /^[a-z]{2,}$/.test(queryParams.lang)) {
-    document.body.lang = queryParams.lang;
-    loadScript('l10n/logo.' + queryParams.lang + '.js');
-    loadScript('l10n/turtle.' + queryParams.lang + '.js');
-    loadScript('l10n/index.' + queryParams.lang + '.js');
-  }
-}());
+  var lang = queryParams.lang || navigator.language || navigator.userLanguage;
+  if (!lang) return;
+
+  // TODO: Support locale/fallback
+  lang = lang.split('-')[0];
+  if (lang === 'en') return;
+
+  document.body.lang = lang;
+  loadScript('l10n/logo.' + lang + '.js');
+  loadScript('l10n/turtle.' + lang + '.js');
+  loadScript('l10n/index.' + lang + '.js');
+});
