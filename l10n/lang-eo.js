@@ -1,4 +1,4 @@
-// Esperanto Localization
+// Esperanto Localization (Sample)
 (function() {
 
   //////////////////////////////////////////////////

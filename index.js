@@ -669,5 +669,9 @@ window.addEventListener('DOMContentLoaded', function() {
     })
     .then(function(text) {
       (1, eval)(text);
+    })
+    .catch(function(reason) {
+      console.warn('Error loading localization file for "' +
+                   lang + '": ' + reason.message);
     });
 });
