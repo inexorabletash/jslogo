@@ -592,9 +592,9 @@ window.addEventListener('DOMContentLoaded', function() {
 
     // TODO: Support locale/fallback
     lang = lang.split('-')[0];
-    if (lang === 'en') return Promise.resolve();
-
     document.body.lang = lang;
+
+    if (lang === 'en') return Promise.resolve();
     return fetch('l10n/lang-' + lang + '.js')
       .then(function(response) {
         if (!response.ok) throw Error(response.statusText);
@@ -608,6 +608,30 @@ window.addEventListener('DOMContentLoaded', function() {
                      lang + '": ' + reason.message);
       });
   }());
+
+  // Populate languages selection list
+  fetch('l10n/languages.txt')
+    .then(function(response) {
+      if (!response.ok) throw Error(response.statusText);
+      return response.text();
+    })
+    .then(function(text) {
+      var select = $('#select-lang');
+      text.split(/\r?\n/g).forEach(function(entry) {
+        var match = /^(\w+)\s+(.*)$/.exec(entry);
+        if (!match) return;
+        var opt = document.createElement('option');
+        opt.value = match[1];
+        opt.textContent = match[2];
+        select.appendChild(opt);
+      });
+      select.value = document.body.lang;
+      select.addEventListener('change', function() {
+        var url = String(document.location);
+        url = url.replace(/[\?#].*/, '');
+        document.location = url + '?lang=' + select.value;
+      });
+    });
 
 
   //
