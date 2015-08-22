@@ -30,20 +30,6 @@ var logo, turtle;
 // Leave it exposed as a global.
 var examples = 'examples.txt';
 
-// Parse query string
-var queryParams = {}, queryRest;
-(function() {
-  if (document.location.search) {
-    document.location.search.substring(1).split('&').forEach(function(entry) {
-      var match = /^(\w+)=(.*)$/.exec(entry);
-      if (match)
-        queryParams[decodeURIComponent(match[1])] = decodeURIComponent(match[2]);
-      else
-        queryRest = '?' + entry;
-    });
-  }
-}());
-
 
 //
 // Storage hooks
@@ -411,24 +397,6 @@ var input = {};
 
 
 //
-// Populate "Examples" sidebar
-//
-window.addEventListener('DOMContentLoaded', function() {
-  fetch(examples)
-    .then(function(response) {
-      if (!response.ok) throw Error(response.statusText);
-      return response.text();
-    })
-    .then(function(text) {
-      var parent = $('#examples');
-      text.split(/\n\n/g).forEach(function(line) {
-        insertSnippet(line, parent);
-      });
-    });
-});
-
-
-//
 // Hook up sidebar links
 //
 (function() {
@@ -525,6 +493,21 @@ function removeSnippet(parent, key) {
 //
 window.addEventListener('DOMContentLoaded', function() {
 
+  // Parse query string
+  var queryParams = {}, queryRest;
+  (function() {
+    if (document.location.search) {
+      document.location.search.substring(1).split('&').forEach(function(entry) {
+        var match = /^(\w+)=(.*)$/.exec(entry);
+        if (match)
+          queryParams[decodeURIComponent(match[1])] = decodeURIComponent(match[2]);
+        else
+          queryRest = '?' + entry;
+      });
+    }
+  }());
+
+
   var stream = {
     read: function(s) {
       return window.prompt(s ? s : "");
@@ -599,6 +582,56 @@ window.addEventListener('DOMContentLoaded', function() {
     logo.run('erall');
   });
 
+
+  //
+  // Localization
+  //
+  var localizationComplete = (function() {
+    var lang = queryParams.lang || navigator.language || navigator.userLanguage;
+    if (!lang) return Promise.resolve();
+
+    // TODO: Support locale/fallback
+    lang = lang.split('-')[0];
+    if (lang === 'en') return Promise.resolve();
+
+    document.body.lang = lang;
+    return fetch('l10n/lang-' + lang + '.js')
+      .then(function(response) {
+        if (!response.ok) throw Error(response.statusText);
+        return response.text();
+      })
+      .then(function(text) {
+        (1, eval)(text);
+      })
+      .catch(function(reason) {
+        console.warn('Error loading localization file for "' +
+                     lang + '": ' + reason.message);
+      });
+  }());
+
+
+  //
+  // Populate "Examples" sidebar
+  // (URL may be overwritten by localization file)
+  //
+  localizationComplete.then(function() {
+    fetch(examples)
+      .then(function(response) {
+        if (!response.ok) throw Error(response.statusText);
+        return response.text();
+      })
+      .then(function(text) {
+        var parent = $('#examples');
+        text.split(/\n\n/g).forEach(function(line) {
+          insertSnippet(line, parent);
+        });
+      });
+  });
+
+  //
+  // Demo
+  //
+
   function demo(param) {
     param = String(param);
     if (param.length > 0) {
@@ -616,6 +649,7 @@ window.addEventListener('DOMContentLoaded', function() {
   var param = queryRest || document.location.hash;
   demo(param);
   window.addEventListener('hashchange', function() { demo(document.location.hash); } );
+
 });
 
 window.TogetherJSConfig ={
@@ -651,27 +685,3 @@ window.TogetherJSConfig ={
   }
 
 };
-
-// Localization
-window.addEventListener('DOMContentLoaded', function() {
-  var lang = queryParams.lang || navigator.language || navigator.userLanguage;
-  if (!lang) return;
-
-  // TODO: Support locale/fallback
-  lang = lang.split('-')[0];
-  if (lang === 'en') return;
-
-  document.body.lang = lang;
-  fetch('l10n/lang-' + lang + '.js')
-    .then(function(response) {
-      if (!response.ok) throw Error(response.statusText);
-      return response.text();
-    })
-    .then(function(text) {
-      (1, eval)(text);
-    })
-    .catch(function(reason) {
-      console.warn('Error loading localization file for "' +
-                   lang + '": ' + reason.message);
-    });
-});
