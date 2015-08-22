@@ -441,7 +441,9 @@ var input = {};
 // Code snippets
 //
 var snippets = new Map();
-function insertSnippet(text, parent, key) {
+function insertSnippet(text, parent, key, options) {
+  options = options || {};
+
   var snippet;
   if (key && snippets.has(key)) {
     snippet = snippets.get(key);
@@ -467,16 +469,17 @@ function insertSnippet(text, parent, key) {
     container.appendChild(document.createTextNode(text));
   }
 
-  if (parent.scrollTimeoutId) {
-    clearTimeout(parent.scrollTimeoutId);
+  if (!options.noScroll) {
+    if (parent.scrollTimeoutId)
+      clearTimeout(parent.scrollTimeoutId);
+    parent.scrollTimeoutId = setTimeout(function() {
+      parent.scrollTimeoutId = null;
+      parent.scrollTop = snippet.offsetTop;
+    }, 100);
   }
-  parent.scrollTimeoutId = setTimeout(function() {
-    parent.scrollTimeoutId = null;
-    parent.scrollTop = snippet.offsetTop;
-  }, 100);
-  if (snippet.parentElement !== parent) {
+
+  if (snippet.parentElement !== parent)
     parent.appendChild(snippet);
-  }
 }
 function removeSnippet(parent, key) {
   var snippet;
@@ -647,7 +650,9 @@ window.addEventListener('DOMContentLoaded', function() {
       .then(function(text) {
         var parent = $('#examples');
         text.split(/\n\n/g).forEach(function(line) {
-          insertSnippet(line, parent);
+          insertSnippet(line, parent, undefined, {
+            noScroll: true
+          });
         });
       });
   });
