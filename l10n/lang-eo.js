@@ -18,11 +18,11 @@
         console.warn('Missing translation: ' + id);
         return;
       }
-      if (element.placeholder) {
+      // TODO: Generalize this somehow
+      if (element.placeholder)
         element.placeholder = translation[id];
-      } else {
+      else
         element.textContent = translation[id];
-      }
     });
     // TODO: Support localizing attributes (e.g. placeholder, title)
   }({
@@ -35,6 +35,8 @@
     "no-canvas": "Via retumilo ne subtenas la kanvaso elemento - Mizera !",
     "ip-button-run": "Run",
     "ip-button-clear": "Klara",
+    "logo-ta-single-line": "Tajpu vian kodon ĉi tie...",
+    "logo-ta-multi-line": "Tajpu vian kodon ĉi tie...",
     "sb-link-reference": "Referenco",
     "sb-link-text-reference": "la Logo lingvo",
     "sb-link-library": "Biblioteko",

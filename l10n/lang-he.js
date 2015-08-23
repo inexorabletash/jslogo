@@ -18,11 +18,10 @@
         console.warn('Missing translation: ' + id);
         return;
       }
-      if (element.placeholder) {
+      if (element.placeholder)
         element.placeholder = translation[id];
-      } else {
+      else
         element.textContent = translation[id];
-      }
     });
   }({
     // data-l10n-id: replacement-text
