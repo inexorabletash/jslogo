@@ -358,11 +358,39 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
       ctx.save();
       ctx.translate(this.x, this.y);
       ctx.rotate(Math.PI/2 - this.r);
-
       ctx.beginPath();
-      ctx.moveTo(0, -18.5);
-      ctx.lineTo(8.5, 6);
-      ctx.lineTo(-8.5, 6);
+
+      var points = [
+        [0, -20], // Head
+        [2.5, -17],
+        [3, -12],
+
+        [6, -10],
+        [9, -13], // Arm
+        [13, -12],
+        [18, -4],
+        [18, 0],
+        [14, -1],
+        [10, -7],
+
+        [8, -6], // Shell
+        [10, -2],
+        [9, 3],
+        [6, 10],
+
+        [9, 13], // Foot
+        [6, 15],
+        [3, 12],
+
+        [0, 13],
+      ];
+      function invert(p) { return [-p[0], p[1]]; }
+
+      points.concat(points.slice(1, -1).reverse().map(invert))
+        .forEach(function(pair, index) {
+          ctx[index ? 'lineTo' : 'moveTo'](pair[0], pair[1]);
+        });
+
       ctx.closePath();
       ctx.stroke();
 
