@@ -221,10 +221,13 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
 
   this.clear = function() {
     canvas_ctx.clearRect(0, 0, width, height);
-    var tmp = canvas_ctx.fillStyle;
-    canvas_ctx.fillStyle = parseColor(this.bgcolor);
-    canvas_ctx.fillRect(0, 0, width, height);
-    canvas_ctx.fillStyle = tmp;
+    canvas_ctx.save();
+    try {
+      canvas_ctx.fillStyle = parseColor(this.bgcolor);
+      canvas_ctx.fillRect(0, 0, width, height);
+    } finally {
+      canvas_ctx.restore();
+    }
   };
 
   this.home = function() {
@@ -398,31 +401,42 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     }
   };
 
-
-  canvas_ctx.lineCap = 'round';
-
-  turtle_ctx.lineCap = 'round';
-  turtle_ctx.strokeStyle = 'green';
-  turtle_ctx.lineWidth = 2;
-
-  this.bgcolor = '#ffffff';
-  this.setcolor('#000000');
-  this.setwidth(1);
-  this.setpenmode('paint');
-  this.setfontsize(14);
-  this.setturtlemode('wrap');
-  this.showturtle(true);
-  this.pendown(true);
-
   this.x = width / 2;
   this.y = height / 2;
   this.r = Math.PI / 2;
 
+  this.bgcolor = '#ffffff';
+  this.color = '#000000';
+  this.width = 1;
+  this.penmode = 'paint';
+  this.fontsize = 14;
+  this.turtlemode = 'wrap';
+  this.visible = true;
+  this.down = true;
+
+  function init() {
+    turtle_ctx.lineCap = 'round';
+    turtle_ctx.strokeStyle = 'green';
+    turtle_ctx.lineWidth = 2;
+
+    canvas_ctx.lineCap = 'round';
+
+    canvas_ctx.strokeStyle = parseColor(self.color);
+    canvas_ctx.fillStyle = parseColor(self.color);
+    canvas_ctx.lineWidth = self.width;
+    canvas_ctx.font = self.fontsize + 'px sans-serif';
+    canvas_ctx.globalCompositeOperation =
+      (self.penmode === 'erase') ? 'destination-out' :
+      (self.penmode === 'reverse') ? 'xor' : 'source-over';
+  }
+
   this.resize = function(w, h) {
     width = w;
     height = h;
+    init();
   };
 
+  init();
   this.begin();
   this.end();
 }
