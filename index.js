@@ -175,8 +175,7 @@ var commandHistory = (function() {
 // Input UI
 //
 var input = {};
-
-(function() {
+function initInput() {
 
   input.setMulti = function() {
     // TODO: Collapse these to a single class?
@@ -372,7 +371,7 @@ var input = {};
       input.setFocus();
     }
   });
-}());
+}
 
 
 //
@@ -636,6 +635,7 @@ window.addEventListener('DOMContentLoaded', function() {
       });
     });
 
+  localizationComplete.then(initInput);
 
   //
   // Populate "Examples" sidebar
