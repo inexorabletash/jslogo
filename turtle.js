@@ -355,12 +355,18 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
   this.end = function() {
     if (this.visible) {
       var ctx = turtle_ctx;
+      ctx.save();
+      ctx.translate(this.x, this.y);
+      ctx.rotate(Math.PI/2 - this.r);
+
       ctx.beginPath();
-      ctx.moveTo(this.x + Math.cos(this.r) * 20, this.y - Math.sin(this.r) * 20);
-      ctx.lineTo(this.x + Math.cos(this.r - Math.PI * 2 / 3) * 10, this.y - Math.sin(this.r - Math.PI * 2 / 3) * 10);
-      ctx.lineTo(this.x + Math.cos(this.r + Math.PI * 2 / 3) * 10, this.y - Math.sin(this.r + Math.PI * 2 / 3) * 10);
-      ctx.lineTo(this.x + Math.cos(this.r) * 20, this.y - Math.sin(this.r) * 20);
+      ctx.moveTo(0, -18.5);
+      ctx.lineTo(8.5, 6);
+      ctx.lineTo(-8.5, 6);
+      ctx.closePath();
       ctx.stroke();
+
+      ctx.restore();
     }
   };
 
