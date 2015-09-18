@@ -36,6 +36,7 @@
     "tl-contact": "קשר",
     "tl-tests": "בדיקות",
     "tl-source": "קוד",
+    "tl-reference": "מדריך",
     "start-togetherjs": "שתף",
     "logo-ta-single-line.placeholder": "כתוב את התוכנית כאן",
     "logo-ta-multi-line.placeholder": "כתוב את התוכנית כאן",

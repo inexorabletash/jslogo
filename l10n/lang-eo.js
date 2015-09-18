@@ -36,6 +36,7 @@
     "tl-contact": "Kontakton",
     "tl-tests": "Testoj",
     "tl-source": "Fonto",
+    "tl-reference": "Referenco",
     "start-togetherjs": "Kunlabori",
     "no-canvas": "Via retumilo ne subtenas la kanvaso elemento - Mizera !",
     "ip-button-run": "Run",

@@ -24,12 +24,15 @@
 
 <div id="topbar" class="panel">
   <h1 data-l10n-id="tl-title">Logo Interpreter</h1>
-  <p>
+  <p id="topbar-links">
     <a data-l10n-id="tl-contact" href="mailto:inexorabletash@gmail.com">Contact</a>
     | <a data-l10n-id="tl-tests" target="_blank" href="tests.html">Tests</a>
     | <a data-l10n-id="tl-source" target="_blank" href="https://github.com/inexorabletash/jslogo">Source</a>
     | <a title="Collaborate with TogetherJS" href="#" data-l10n-id="start-togetherjs" onclick="TogetherJS(); return false">Collaborate</a>
     | <select id="select-lang"></select>
+  </p>
+  <p id="topbar-altlinks">
+    <a target="_blank" href="language.html" data-l10n-id="tl-reference">Reference</a>
   </p>
 </div>
 
@@ -64,12 +67,18 @@
 
 <div id="sidebar-header" class="panel">
   <ul>
-    <li><a data-l10n-id="sb-link-reference" id="sb-link-reference" href="#">Reference</a> - <span data-l10n-id="sb-link-text-reference">the Logo language</span>
-    <li><a data-l10n-id="sb-link-library" id="sb-link-library" href="#">Library</a> - <span data-l10n-id="sb-link-text-library">your procedures</span>
-    <li><a data-l10n-id="sb-link-history" id="sb-link-history" href="#">History</a> - <span data-l10n-id="sb-link-text-history">everything you&apos;ve done here</span>
-    <li><a data-l10n-id="sb-link-examples" id="sb-link-examples" href="#">Examples</a> - <span data-l10n-id="sb-link-text-examples">fun things to try out</span>
-    <li><a data-l10n-id="sb-link-extras" id="sb-link-extras" href="#">Extras</a> - <span data-l10n-id="sb-link-text-extras">helpful utilities</span>
-    <li><a data-l10n-id="sb-link-links" id="sb-link-links" href="#">Links</a> - <span data-l10n-id="sb-link-text-links">other Logo resources</span>
+    <li><a data-l10n-id="sb-link-reference" id="sb-link-reference" href="#">Reference</a>
+      <span class="linkdesc">&ndash; <span data-l10n-id="sb-link-text-reference">the Logo language</span></span>
+    <li><a data-l10n-id="sb-link-library" id="sb-link-library" href="#">Library</a>
+      <span class="linkdesc">&ndash; <span data-l10n-id="sb-link-text-library">your procedures</span></span>
+    <li><a data-l10n-id="sb-link-history" id="sb-link-history" href="#">History</a>
+      <span class="linkdesc">&ndash; <span data-l10n-id="sb-link-text-history">everything you&apos;ve done here</span></span>
+    <li><a data-l10n-id="sb-link-examples" id="sb-link-examples" href="#">Examples</a>
+      <span class="linkdesc">&ndash; <span data-l10n-id="sb-link-text-examples">fun things to try out</span></span>
+    <li><a data-l10n-id="sb-link-extras" id="sb-link-extras" href="#">Extras</a>
+      <span class="linkdesc">&ndash; <span data-l10n-id="sb-link-text-extras">helpful utilities</span></span>
+    <li><a data-l10n-id="sb-link-links" id="sb-link-links" href="#">Links</a>
+      <span class="linkdesc">&ndash; <span data-l10n-id="sb-link-text-links">other Logo resources</span></span>
   </ul>
 </div>
 

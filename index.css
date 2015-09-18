@@ -81,9 +81,12 @@ body {
 
 #topbar { white-space: nowrap; }
 #topbar h1,
-#topbar p {
+#topbar-links {
   margin: 2pt 6pt;
   display: inline-block;
+}
+#topbar-altlinks {
+  display: none;
 }
 
 /* Side Bars */
@@ -339,4 +342,31 @@ a.forkme {
 
 a:hover.forkme {
   background: #f82;
+}
+
+@media only screen and (max-width: 1000px) {
+  #topbar-links { display: none; }
+}
+@media only screen and (max-width: 800px) {
+  #topbar, #display-panel, #input-panel {
+    left: 0; right: 200px;
+  }
+  [dir=rtl] #topbar, [dir=rtl] #display-panel, [dir=rtl] #input-panel {
+    right: 0; left: 200px;
+  }
+  #sidebar-header, #sidebar { width: 200px;; }
+  .linkdesc { display: none; }
+  a.forkme { display: none; }
+}
+
+@media only screen and (max-width: 600px) {
+  #topbar, #display-panel, #input-panel {
+    left: 0; right: 0;
+  }
+  [dir=rtl] #topbar, [dir=rtl] #display-panel, [dir=rtl] #input-panel {
+    right: 0; left: 0;
+  }
+  #sidebar-header, #sidebar { display: none; }
+  a.forkme { display: none; }
+  #topbar-altlinks { display: inline-block; }
 }
