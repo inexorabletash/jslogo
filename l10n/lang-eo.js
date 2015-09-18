@@ -33,8 +33,8 @@
     // data-l10n-id.attribute: replacement-text
     "title": "Logo Interpretisto",
     "tl-title": "Logo Interpretisto",
-    "tl-byauthor": "Per",
-    "tl-tests": "Unuo Testoj",
+    "tl-contact": "Kontakton",
+    "tl-tests": "Testoj",
     "tl-source": "Fonto",
     "start-togetherjs": "Kunlabori",
     "no-canvas": "Via retumilo ne subtenas la kanvaso elemento - Mizera !",

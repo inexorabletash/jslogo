@@ -33,7 +33,7 @@
     "no-canvas": "הדפדפן אינו תומך בציור, לא ניתן לפעול.",
     "title": "לוגו",
     "tl-title": "לוגו",
-    "tl-byauthor": "מאת",
+    "tl-contact": "קשר",
     "tl-tests": "בדיקות",
     "tl-source": "קוד",
     "start-togetherjs": "שתף",
