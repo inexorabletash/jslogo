@@ -79,10 +79,11 @@ body {
 
 /* Header */
 
-#topbar { white-space: nowrap; }
+#topbar { white-space: nowrap; padding-left: 8pt; }
 #topbar h1,
-#topbar-links {
-  margin: 2pt 6pt;
+#topbar-links,
+#topbar-altlinks {
+  margin: 2pt;
   display: inline-block;
 }
 #topbar-altlinks {
@@ -369,4 +370,8 @@ a:hover.forkme {
   #sidebar-header, #sidebar { display: none; }
   a.forkme { display: none; }
   #topbar-altlinks { display: inline-block; }
+
+  #topbar h1 { font-size: 14pt; }
+  #topbar { height: 28px; }
+  #display-panel { top: 28px; }
 }

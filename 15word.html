@@ -269,7 +269,7 @@ function escapeHtml(string) {
 document.write('<ul>')
 while(programs.length) {
   var program = programs.shift();
-  document.write('<li><a href="index.html?' + encodeURIComponent(program) + '">' + escapeHtml(program) + '</a>');
+  document.write('<li><a href="./?' + encodeURIComponent(program) + '">' + escapeHtml(program) + '</a>');
 }
 document.write('</ul>')
 
