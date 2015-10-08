@@ -377,6 +377,6 @@ a:hover.forkme {
 }
 
 @media only screen and (max-width: 420px) {
-  #run { height: 45px; }
+  #run { height: auto; bottom: 10px; }
   #clear { display: none; }
 }
