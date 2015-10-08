@@ -375,3 +375,8 @@ a:hover.forkme {
   #topbar { height: 28px; }
   #display-panel { top: 28px; }
 }
+
+@media only screen and (max-width: 420px) {
+  #run { height: 45px; }
+  #clear { display: none; }
+}
