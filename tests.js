@@ -297,8 +297,16 @@ QUnit.test("Data Structure Primitives", function(t) {
   this.assert_error('make "a { 1 }  setitem 1 :a :a', "SETITEM can't create circular array");
   this.assert_error('make "a { 1 }  make "b { 1 }  setitem 1 :b :a  setitem 1 :a :b', "SETITEM can't create circular array");
 
+  this.assert_equals('make "a []  .setfirst :a "s  :a', ['s']);
+  this.assert_error('.setfirst "x "y', '.SETFIRST expected list');
+
+  this.assert_equals('make "a [a]  .setbf :a [b c]  :a', ['a', 'b', 'c']);
+  this.assert_error('.setbf "x [1]', '.SETBF expected non-empty list');
+  this.assert_error('.setbf [] [1]', '.SETBF expected non-empty list');
+
   this.assert_equals('make "a { 1 }  make "b :a  .setitem 1 :a 2  item 1 :b', 2);
   this.assert_equals('make "a { 1 }  .setitem 1 :a :a  equalp item 1 :a :a', 1);
+  this.assert_error('.setitem 1 "x 123', 'Expected array');
 
   //
   // 2.4 Predicates

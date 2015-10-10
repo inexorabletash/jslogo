@@ -186,11 +186,19 @@ of comparison.</p>
 <dl>
   <dt><code>setitem <var>index</var> <var>array</var> <var>value</var></code>
   <dd>Sets the indexth item of the array to value (circular arrays prevented)
-  <dd class=example>make "a { 1 2 3 }   setitem 2 :a "x   show :a</dd>
+  <dd class=example>make "a { 1 2 3 }  setitem 2 :a "x  show :a</dd>
 
   <dt><code>.setitem <var>index</var> <var>array</var> <var>value</var></code>
   <dd>Sets the indexth item of the array to value (circular arrays allowed)
-  <dd class=example>make "a { 1 2 3 }   setitem 2 :a "x   show :a</dd>
+  <dd class=example>make "a { 1 2 3 }  setitem 2 :a "x  show :a</dd>
+
+  <dt><code>.setfirst <var>list</var> <var>value</var></code>
+  <dd>Sets the first item of the list to value
+  <dd class=example>make "a [ 1 2 3 ]  .setfirst :a "7  show :a</dd>
+
+  <dt><code>.setbf <var>list</var> <var>value</var></code>
+  <dd>Sets the 'butfirst' of the list to the items in value (a list)
+  <dd class=example>make "a [ 1 2 3 ]  .setbf :a [ 4 9 ]  show :a</dd>
 
   <dt><code>push <var>stackname</var> <var>thing</var></code>
   <dt><code>pop <var>stackname</var></code>

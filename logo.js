@@ -1206,8 +1206,22 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   // Not Supported: mdsetitem
-  // Not Supported: .setfirst
-  // Not Supported: .setbf
+
+  def(".setfirst", function(list, value) {
+     if (Type(list) !== 'list')
+      throw new Error(__(".SETFIRST expected list"));
+    list[0] = value;
+  });
+
+  def(".setbf", function(list, value) {
+    if (Type(list) !== 'list')
+      throw new Error(__(".SETBF expected non-empty list"));
+    if (list.length < 1)
+      throw new Error(__(".SETBF expected non-empty list"));
+    value = lexpr(value);
+    list.length = 1;
+    list.push.apply(list, value);
+  });
 
   def(".setitem", function(index, array, value) {
     index = aexpr(index);
