@@ -147,6 +147,10 @@ of comparison.</p>
   <dd class=example>show first [ 1 2 3 ]</dd>
   <dd class=example>show last [ 1 2 3 ]</dd>
 
+  <dt><code>firsts <var>listoflists</var></code>
+  <dd>Outputs a list of the first item of each sublist
+  <dd class=example>show firsts [ [1 2 3] [a b c] ]</dd>
+
   <dt><code>butfirst <var>list</var></code>
   <dt><code>bf <var>list</var></code>
   <dt><code>butlast <var>list</var></code>
@@ -155,26 +159,18 @@ of comparison.</p>
   <dd class=example>show butfirst [ 1 2 3 ]</dd>
   <dd class=example>show butlast [ 1 2 3 ]</dd>
 
-  <dt><code>firsts <var>listoflists</var></code>
-  <dd>Outputs a list of the first item of each sublist
-  <dd class=example>show firsts [ [1 2 3] [a b c] ]</dd>
-
   <dt><code>butfirsts <var>listoflists</var></code>
   <dt><code>bfs <var>listoflists</var></code>
   <dd>Outputs a list of sublists without the first item
   <dd class=example>show butfirsts [ [ 1 2 3 ] [ a b c ] ]</dd>
 
-  <dt><code>pick <var>list</var></code>
-  <dd>Outputs one item from a list, at random
-  <dd class=example>show pick [ 1 2 3 ]</dd>
-
   <dt><code>item <var>index</var> <var>thing</var></code>
   <dd>Outputs the indexth item of the list or array
   <dd class=example>show item 2 [ 1 2 3 ]</dd>
 
-  <dt><code>setitem <var>index</var> <var>array</var> <var>value</var></code>
-  <dd>Sets the indexth item of the array to value
-  <dd class=example>make "a { 1 2 3 }   setitem 2 :a "x   show :a</dd>
+  <dt><code>pick <var>list</var></code>
+  <dd>Outputs one item from a list, at random
+  <dd class=example>show pick [ 1 2 3 ]</dd>
 
   <dt><code>remove <var>thing</var> <var>list</var></code>
   <dd>Outputs the list with any occurences of thing removed
@@ -183,10 +179,19 @@ of comparison.</p>
   <dt><code>remdup <var>list</var></code>
   <dd>Outputs the list with duplicates removed
   <dd class=example>show remdup [ 1 2 3 2 3 4 3 4 5 ]</dd>
+
 </dl>
 
 <h4>2.3 Data Mutators</h4>
 <dl>
+  <dt><code>setitem <var>index</var> <var>array</var> <var>value</var></code>
+  <dd>Sets the indexth item of the array to value (circular arrays prevented)
+  <dd class=example>make "a { 1 2 3 }   setitem 2 :a "x   show :a</dd>
+
+  <dt><code>.setitem <var>index</var> <var>array</var> <var>value</var></code>
+  <dd>Sets the indexth item of the array to value (circular arrays allowed)
+  <dd class=example>make "a { 1 2 3 }   setitem 2 :a "x   show :a</dd>
+
   <dt><code>push <var>stackname</var> <var>thing</var></code>
   <dt><code>pop <var>stackname</var></code>
   <dd>Push to/pop from a stack i.e. list variable. Stacks grow from the front.
@@ -196,6 +201,7 @@ of comparison.</p>
   <dt><code>dequeue <var>stackname</var></code>
   <dd>Add/remove from a queue i.e. list variable, Queues grow from the end.
   <dd class=example>make "q [ 1 2 ]  queue "q 3  show :q  show dequeue "q</dd>
+
 </dl>
 
 <h4>2.4 Predicates</h4>

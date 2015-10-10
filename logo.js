@@ -1184,16 +1184,38 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("setitem", function(index, array, value) {
     index = aexpr(index);
-    if (Type(array) !== 'array') {
+    if (Type(array) !== 'array')
       throw new Error(__("Expected array"));
+
+    function contains(atom, value) {
+      if (atom === value) return true;
+      switch (Type(atom)) {
+      case 'list':
+        return atom.some(function(a) { return contains(a, value); });
+      case 'array':
+        return atom.list().some(function(a) { return contains(a, value); });
+      default:
+        return false;
+      }
     }
+
+    if (contains(value, array))
+      throw new Error(__("SETITEM can't create circular array"));
+
     array.setItem(index, value);
   });
 
   // Not Supported: mdsetitem
   // Not Supported: .setfirst
   // Not Supported: .setbf
-  // Not Supported: .setitem
+
+  def(".setitem", function(index, array, value) {
+    index = aexpr(index);
+    if (Type(array) !== 'array') {
+      throw new Error(__("Expected array"));
+    }
+    array.setItem(index, value);
+  });
 
   def("push", function(stackname, thing) {
     var stack = lexpr(getvar(stackname));
