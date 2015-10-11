@@ -1755,7 +1755,7 @@ function LogoInterpreter(turtle, stream, savehook)
     }
   });
 
-  // Not Supported: setpallete
+  // Not Supported: setpalette
 
   def(["setpensize", "setwidth", "setpw"], function(a) {
     if (Type(a) === 'list') {
