@@ -99,6 +99,19 @@ of comparison.</p>
   <dd>Create a new list from the inputs
   <dd class=example>show (list 1+2 2+3 3+4)</dd>
 
+  <dt><code>sentence thing1 thing2</code>
+  <dt><code>(sentence thing1 thing2 ...)</code>
+  <dt><code>se thing1 thing2</code>
+  <dt><code>(se thing1 thing2 ...)</code>
+  <dd>Create a new list from the inputs (if non-lists) or members of the inputs (if lists)
+  <dd class=example>show sentence [1 2 3] [and so on]</dd>
+
+  <dt><code>fput <var>thing</var> <var>list</var></code>
+  <dt><code>lput <var>thing</var> <var>list</var></code>
+  <dd>Outputs list, but with thing added as a new first/last item
+  <dd class=example>show fput 0 [ 1 2 3 ]</dd>
+  <dd class=example>show lput 4 [ 1 2 3 ]</dd>
+
   <dt><code>array <var>size</var></code>
   <dt><code>(array <var>size</var> <var>origin</var>)</code>
   <dd>Create a new array. The default origin is 1.
@@ -112,19 +125,6 @@ of comparison.</p>
   <dt><code>arraytolist <var>array</var></code>
   <dd>Create a new list populated by members of a array
   <dd class=example>show arraytolist { 2 4 6 8 }</dd>
-
-  <dt><code>sentence thing1 thing2</code>
-  <dt><code>(sentence thing1 thing2 ...)</code>
-  <dt><code>se thing1 thing2</code>
-  <dt><code>(se thing1 thing2 ...)</code>
-  <dd>Create a new list from the inputs (if non-lists) or members of the inputs (if lists)
-  <dd class=example>show sentence [1 2 3] [and so on]</dd>
-
-  <dt><code>fput <var>thing</var> <var>list</var></code>
-  <dt><code>lput <var>thing</var> <var>list</var></code>
-  <dd>Outputs list, but with thing added as a new first/last item
-  <dd class=example>show fput 0 [ 1 2 3 ]</dd>
-  <dd class=example>show lput 4 [ 1 2 3 ]</dd>
 
   <dt><code>combine thing1 thing2</code>
   <dd>If thing2 is a word, like <code>word</code>; otherwise, like <code>fput</code>
@@ -188,10 +188,6 @@ of comparison.</p>
   <dd>Sets the indexth item of the array to value (circular arrays prevented)
   <dd class=example>make "a { 1 2 3 }  setitem 2 :a "x  show :a</dd>
 
-  <dt><code>.setitem <var>index</var> <var>array</var> <var>value</var></code>
-  <dd>Sets the indexth item of the array to value (circular arrays allowed)
-  <dd class=example>make "a { 1 2 3 }  setitem 2 :a "x  show :a</dd>
-
   <dt><code>.setfirst <var>list</var> <var>value</var></code>
   <dd>Sets the first item of the list to value
   <dd class=example>make "a [ 1 2 3 ]  .setfirst :a "7  show :a</dd>
@@ -199,6 +195,10 @@ of comparison.</p>
   <dt><code>.setbf <var>list</var> <var>value</var></code>
   <dd>Sets the 'butfirst' of the list to the items in value (a list)
   <dd class=example>make "a [ 1 2 3 ]  .setbf :a [ 4 9 ]  show :a</dd>
+
+  <dt><code>.setitem <var>index</var> <var>array</var> <var>value</var></code>
+  <dd>Sets the indexth item of the array to value (circular arrays allowed)
+  <dd class=example>make "a { 1 2 3 }  setitem 2 :a "x  show :a</dd>
 
   <dt><code>push <var>stackname</var> <var>thing</var></code>
   <dt><code>pop <var>stackname</var></code>
@@ -225,6 +225,10 @@ of comparison.</p>
   <dt><code>number? <var>thing</var></code>
   <dd>Test if thing is a word, list, array, or number respectively.
 
+  <dt><code>emptyp <var>expr</var></code>
+  <dt><code>empty? <var>expr</var></code>
+  <dd>Test if thing is an empty list or empty string.
+
   <dt><code>equalp <var>expr</var> <var>expr</var></code>
   <dt><code>equal? <var>expr</var> <var>expr</var></code>
   <dt><code><var>expr</var> = <var>expr</var></code>
@@ -232,10 +236,6 @@ of comparison.</p>
   <dt><code>notequal? <var>expr</var> <var>expr</var></code>
   <dt><code><var>expr</var> &lt;&gt; <var>expr</var></code>
   <dd>Equality/inequality tests. Compares strings, numbers, or lists (equal if length and all members are equal).
-
-  <dt><code>emptyp <var>expr</var></code>
-  <dt><code>empty? <var>expr</var></code>
-  <dd>Test if thing is an empty list or empty string.
 
   <dt><code>beforep <var>thing1</var> <var>thing2</var></code>
   <dt><code>before? <var>thing1</var> <var>thing2</var></code>
@@ -392,19 +392,23 @@ of comparison.</p>
 
 <h4>4.2 Numeric Predicates</h4>
 <dl>
+  <dt><code>lessp <var>expr</var> <var>expr</var></code>
+  <dt><code>less? <var>expr</var> <var>expr</var></code>
+  <dt><code><var>expr</var> &lt; <var>expr</var></code>
+
   <dt><code>greaterp <var>expr</var> <var>expr</var></code>
   <dt><code>greater? <var>expr</var> <var>expr</var></code>
   <dt><code><var>expr</var> &gt; <var>expr</var></code>
-  <dt><code>greaterequalp <var>expr</var> <var>expr</var></code>
-  <dt><code>greaterequal? <var>expr</var> <var>expr</var></code>
-  <dt><code><var>expr</var> &gt;= <var>expr</var></code>
-  <dt><code>lessp <var>expr</var> <var>expr</var></code>
-  <dt><code>less? <var>expr</var> <var>expr</var></code>
-  <dt><code><var>expr</var> &lt;= <var>expr</var></code>
+
   <dt><code>lessequalp <var>expr</var> <var>expr</var></code>
   <dt><code>lessequal? <var>expr</var> <var>expr</var></code>
   <dt><code><var>expr</var> &lt;= <var>expr</var></code>
-  <dd>Greater than, greater than or equal to, less than, less than or equal to,
+
+  <dt><code>greaterequalp <var>expr</var> <var>expr</var></code>
+  <dt><code>greaterequal? <var>expr</var> <var>expr</var></code>
+  <dt><code><var>expr</var> &gt;= <var>expr</var></code>
+
+  <dd>Less than, greater than, less than or equal to, greater than or equal to,
   respectively. Inputs are numbers or numeric expressions, output is 1 (true) or 0 (false).
 </dl>
 

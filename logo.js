@@ -1194,7 +1194,7 @@ function LogoInterpreter(turtle, stream, savehook)
     }));
   });
 
-  // TODO: quoted
+  // Not Supported: quoted
 
   //
   // 2.3 Data Mutators
@@ -2448,9 +2448,9 @@ function LogoInterpreter(turtle, stream, savehook)
     throw new Output(atom);
   });
 
-  // TODO: catch
-  // TODO: throw
-  // TODO: error
+  // Not Supported: catch
+  // Not Supported: throw
+  // Not Supported: error
   // Not Supported: pause
   // Not Supported: continue
   // Not Supported: wait
