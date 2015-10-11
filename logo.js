@@ -745,9 +745,13 @@ function LogoInterpreter(turtle, stream, savehook)
   //----------------------------------------------------------------------
   // List expression convenience function
   //----------------------------------------------------------------------
-  function lexpr(atom) {
-    // TODO: If this is an input, output needs to be re-stringified
 
+  // 'list expression'
+  // Takes an atom - if it is a list is is returned unchanged. If it is
+  // a word a list of the characters is returned. If the procedure
+  // returns a list, the output type should match the input type, so
+  // use sifw().
+  function lexpr(atom) {
     if (atom === undefined) { throw new Error(__("Expected list")); }
     switch (Type(atom)) {
     case 'word':
@@ -757,6 +761,13 @@ function LogoInterpreter(turtle, stream, savehook)
     }
 
     throw new Error(__("Expected list"));
+  }
+
+  // 'stringify if word'
+  // Takes an atom which is to be the subject of lexpr() and a result
+  // list. If the atom is a word, returns a word, otherwise a list.
+  function sifw(atom, list) {
+    return (Type(atom) === 'word') ? list.join('') : list;
   }
 
   //----------------------------------------------------------------------
@@ -1070,9 +1081,13 @@ function LogoInterpreter(turtle, stream, savehook)
     return list;
   });
 
-  def("fput", function(thing, list) { list = lexpr(list); list.unshift(thing); return list; });
+  def("fput", function(thing, list) {
+    var l = lexpr(list); l.unshift(thing); return sifw(list, l);
+  });
 
-  def("lput", function(thing, list) { list = lexpr(list); list.push(thing); return list; });
+  def("lput", function(thing, list) {
+    var l = lexpr(list); l.push(thing); return sifw(list, l);
+  });
 
   def("array", function(size) {
     size = aexpr(size);
@@ -1110,7 +1125,9 @@ function LogoInterpreter(turtle, stream, savehook)
     }
   });
 
-  def("reverse", function(list) { return lexpr(list).reverse(); });
+  def("reverse", function(list) {
+    return sifw(list, lexpr(list).reverse());
+  });
 
   var gensym_index = 0;
   def("gensym", function() {
@@ -1131,11 +1148,11 @@ function LogoInterpreter(turtle, stream, savehook)
   def("last", function(list) { list = lexpr(list); return list[list.length - 1]; });
 
   def(["butfirst", "bf"], function(list) {
-    return Type(list) === 'word' ? String(list).substring(1) : lexpr(list).slice(1);
+    return sifw(list, lexpr(list).slice(1));
   });
 
   def(["butfirsts", "bfs"], function(list) {
-    return lexpr(list).map(function(x) { return lexpr(x).slice(1); });
+    return lexpr(list).map(function(x) { return sifw(x, lexpr(x).slice(1)); });
   });
 
   def(["butlast", "bl"], function(list) {
@@ -1166,14 +1183,15 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   def("remove", function(thing, list) {
-    return lexpr(list).filter(function(x) { return !equal(x, thing); });
+    return sifw(list, lexpr(list).filter(function(x) { return !equal(x, thing); }));
   });
 
   def("remdup", function(list) {
-    var dict = Object.create(null);
-    return lexpr(list).filter(function(x) {
-      if (!dict[x]) { dict[x] = true; return true; } else { return false; }
-    });
+    // TODO: This only works with JS equality. Use equalp.
+    var set = new Set();
+    return sifw(list, lexpr(list).filter(function(x) {
+      if (set.has(x)) { return false; } else { set.add(x); return true; }
+    }));
   });
 
   // TODO: quoted
@@ -1232,29 +1250,39 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   def("push", function(stackname, thing) {
-    var stack = lexpr(getvar(stackname));
+    var got = getvar(stackname);
+    var stack = lexpr(got);
     stack.unshift(thing);
-    setvar(stackname, stack);
+    setvar(stackname, sifw(got, stack));
   });
 
   def("pop", function(stackname) {
-    return getvar(stackname).shift();
+    var got = getvar(stackname);
+    var stack = lexpr(got);
+    var atom = stack.shift();
+    setvar(stackname, sifw(got, stack));
+    return atom;
   });
 
   def("queue", function(stackname, thing) {
-    var stack = lexpr(getvar(stackname));
-    stack.push(thing);
-    setvar(stackname, stack);
+    var got = getvar(stackname);
+    var queue = lexpr(got);
+    queue.push(thing);
+    setvar(stackname, sifw(got, queue));
   });
 
   def("dequeue", function(stackname) {
-    return getvar(stackname).pop();
+    var got = getvar(stackname);
+    var queue = lexpr(got);
+    var atom = queue.pop();
+    setvar(stackname, sifw(got, queue));
+    return atom;
   });
+
 
   //
   // 2.4 Predicates
   //
-
 
   def(["wordp", "word?"], function(thing) { return Type(thing) === 'word' ? 1 : 0; });
   def(["listp", "list?"], function(thing) { return Type(thing) === 'list' ? 1 : 0; });

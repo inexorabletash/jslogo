@@ -217,12 +217,16 @@ QUnit.test("Data Structure Primitives", function(t) {
   this.assert_equals('sentence 1 [2 3]', [1, "2", "3"]);
 
   this.assert_equals('fput 0 ( list 1 2 3 )', [0, 1, 2, 3]);
+  this.assert_equals('fput "x "abc', 'xabc');
+
   this.assert_equals('lput 0 ( list 1 2 3 )', [1, 2, 3, 0]);
+  this.assert_equals('lput "x "abc', 'abcx');
 
   this.assert_equals('combine "a "b', 'ab');
   this.assert_equals('combine "a [b]', ["a", "b"]);
 
   this.assert_equals('reverse [ a b c ]', ["c", "b", "a"]);
+  this.assert_equals('reverse "abc', 'cba');
 
   this.assert_equals('gensym <> gensym', 1);
 
@@ -234,8 +238,10 @@ QUnit.test("Data Structure Primitives", function(t) {
   this.assert_equals('firsts [ [ 1 2 3 ] [ "a "b "c] ]', ["1", '"a']);
   this.assert_equals('last [ a b c ]', "c");
   this.assert_equals('butfirst [ a b c ]', ["b", "c"]);
+  this.assert_equals('butfirst "abc', 'bc');
   this.assert_equals('bf [ a b c ]', ["b", "c"]);
   this.assert_equals('butfirsts [ [ 1 2 3 ] [ "a "b "c] ]', [["2", "3"], ['"b', '"c']]);
+  this.assert_equals('butfirsts [ 123 abc ]', ['23', 'bc']);
   this.assert_equals('bfs [ [ 1 2 3 ] [ "a "b "c] ]', [["2", "3"], ['"b', '"c']]);
   this.assert_equals('butlast  [ a b c ]', ["a", "b"]);
   this.assert_equals('bl [ a b c ]', ["a", "b"]);
@@ -283,16 +289,31 @@ QUnit.test("Data Structure Primitives", function(t) {
   }
   this.assert_equals('remove "b [ a b c ]', ["a", "c"]);
   this.assert_equals('remove "d [ a b c ]', ["a", "b", "c"]);
+  this.assert_equals('remove "b "abc', 'ac');
+
   this.assert_equals('remdup [ a b c a b c ]', ["a", "b", "c"]);
+  this.assert_equals('remdup "abcabc', 'abc');
 
   //
   // 2.3 Data Mutators
   //
 
   this.assert_equals('make "s [] repeat 5 [ push "s repcount ] :s', [5, 4, 3, 2, 1]);
+  this.assert_equals('make "s "0 repeat 5 [ push "s repcount ] :s', '543210');
+
   this.assert_equals('make "s [ a b c ] (list pop "s pop "s pop "s)', ["a", "b", "c"]);
+  this.assert_equals('make "s [ a b c ] pop "s pop "s  :s', ["c"]);
+  this.assert_equals('make "s "abc (list pop "s pop "s pop "s)', ["a", "b", "c"]);
+  this.assert_equals('make "s "abc  pop "s  :s', 'bc');
+
   this.assert_equals('make "q [] repeat 5 [ queue "q repcount ] :q', [1, 2, 3, 4, 5]);
+  this.assert_equals('make "q "0 repeat 5 [ queue "q repcount ] :q', '012345');
+
   this.assert_equals('make "q [ a b c ] (list dequeue "q dequeue "q dequeue "q)', ["c", "b", "a"]);
+  this.assert_equals('make "q [ a b c ]  dequeue "q  dequeue "q  :q', ["a"]);
+  this.assert_equals('make "q "abc  (list dequeue "q dequeue "q dequeue "q)', ["c", "b", "a"]);
+  this.assert_equals('make "q "abc  dequeue "q  :q', "ab");
+
   this.assert_equals('make "a { 1 }  make "b :a  setitem 1 :a 2  item 1 :b', 2);
   this.assert_error('make "a { 1 }  setitem 1 :a :a', "SETITEM can't create circular array");
   this.assert_error('make "a { 1 }  make "b { 1 }  setitem 1 :b :a  setitem 1 :a :b', "SETITEM can't create circular array");
