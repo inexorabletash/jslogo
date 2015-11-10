@@ -7,9 +7,6 @@ star
 to square :length
   repeat 4 [ fd :length rt 90 ]
 end
-clearscreen
-repeat 36 [ square 50 rt 10 ]
-
 to randomcolor
   setcolor pick [ red orange yellow green blue violet ]
 end
