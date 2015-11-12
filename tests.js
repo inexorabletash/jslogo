@@ -1008,13 +1008,16 @@ QUnit.test("Workspace Management", function(t) {
 });
 
 QUnit.test("Control Structures", function(t) {
-  t.expect(46);
+  t.expect(58);
   //
   // 8.1 Control
   //
 
   this.assert_equals('make "c 0  run [ ]  :c', 0);
   this.assert_equals('make "c 0  run [ make "c 5 ]  :c', 5);
+
+  this.assert_equals('run [1]', 1);
+  this.assert_error('show run [ ]', 'No output from procedure');
 
   this.assert_equals('runresult [ make "x 1 ]', []);
   this.assert_equals('runresult [ 1 + 2 ]', [3]);
@@ -1024,8 +1027,16 @@ QUnit.test("Control Structures", function(t) {
 
   this.assert_equals('make "c 0  to foo forever [ make "c :c + 1 if repcount = 5 [ stop ] ] end  foo  :c', 5);
   this.assert_equals('make "c 0  to foo forever [ make "c :c + repcount if repcount = 4 [ stop ] ] end  foo  :c', 10);
+
+  this.assert_equals('make "r "a  if 1 [ make "r "b ]  :r', 'b');
+  this.assert_equals('make "r "a  if 0 [ make "r "b ]  :r', 'a');
+  this.assert_equals('if 1 [ "a ]', 'a');
+  this.assert_error('show if 0 [ "a ]', 'No output from procedure');
+
   this.assert_equals('ifelse 1 [ make "r "a ] [ make "r "b ]  :r', 'a');
   this.assert_equals('ifelse 0 [ make "r "a ] [ make "r "b ]  :r', 'b');
+  this.assert_equals('ifelse 1 [ "a ] [ "b ]', 'a');
+  this.assert_equals('ifelse 0 [ "a ] [ "b ]', 'b');
 
   this.assert_equals('to foo if 1 [ output "a ] output "b end  foo', 'a');
   this.assert_equals('to foo if 0 [ output "a ] output "b end  foo', 'b');
@@ -1034,6 +1045,11 @@ QUnit.test("Control Structures", function(t) {
   this.assert_equals('make "c 1  test 2 > 1  ift  [ make "c 2 ]  :c', 2);
   this.assert_equals('make "c 1  test 2 > 1  iffalse [ make "c 2 ]  :c', 1);
   this.assert_equals('make "c 1  test 2 > 1  iff [ make "c 2 ]  :c', 1);
+
+  this.assert_equals('test 2 > 1  iftrue  [ "a ]', 'a');
+  this.assert_error('test 1 > 2  show iftrue  [ "a ]', 'No output from procedure');
+  this.assert_equals('test 1 > 2  iffalse [ "a ]', 'a');
+  this.assert_error('test 2 > 1  show iffalse [ "a ]', 'No output from procedure');
 
   this.assert_equals('to foo forever [ if repcount = 5 [ make "c 234 stop ] ] end  foo  :c', 234);
 

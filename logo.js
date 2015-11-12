@@ -2363,7 +2363,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("run", function(statements) {
     statements = reparse(lexpr(statements));
-    return self.execute(statements);
+    return self.execute(statements, {returnResult: true});
   });
 
   def("runresult", function(statements) {
@@ -2411,7 +2411,7 @@ function LogoInterpreter(turtle, stream, savehook)
     test = aexpr(test);
     statements = reparse(lexpr(statements));
 
-    if (test) { self.execute(statements); }
+    if (test) { return self.execute(statements, {returnResult: true}); }
   });
 
   def("ifelse", function(test, statements1, statements2) {
@@ -2419,7 +2419,7 @@ function LogoInterpreter(turtle, stream, savehook)
     statements1 = reparse(lexpr(statements1));
     statements2 = reparse(lexpr(statements2));
 
-    self.execute(test ? statements1 : statements2);
+    return self.execute(test ? statements1 : statements2, {returnResult: true});
   });
 
   def("test", function(tf) {
@@ -2431,13 +2431,13 @@ function LogoInterpreter(turtle, stream, savehook)
   def(["iftrue", "ift"], function(statements) {
     statements = reparse(lexpr(statements));
     var tf = self.scopes[self.scopes.length - 1]._test;
-    if (tf) { self.execute(statements); }
+    if (tf) { return self.execute(statements, {returnResult: true}); }
   });
 
   def(["iffalse", "iff"], function(statements) {
     statements = reparse(lexpr(statements));
     var tf = self.scopes[self.scopes.length - 1]._test;
-    if (!tf) { self.execute(statements); }
+    if (!tf) { return self.execute(statements, {returnResult: true}); }
   });
 
   def("stop", function() {
