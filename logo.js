@@ -2560,7 +2560,7 @@ function LogoInterpreter(turtle, stream, savehook)
       if (isKeyword(first, 'ELSE')) {
         return evaluateExpression(clause);
       }
-      if (evaluateExpression(lexpr(first))) {
+      if (evaluateExpression(reparse(lexpr(first)))) {
         return evaluateExpression(clause);
       }
     }

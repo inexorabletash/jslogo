@@ -1008,7 +1008,7 @@ QUnit.test("Workspace Management", function(t) {
 });
 
 QUnit.test("Control Structures", function(t) {
-  t.expect(44);
+  t.expect(46);
   //
   // 8.1 Control
   //
@@ -1076,6 +1076,9 @@ QUnit.test("Control Structures", function(t) {
                      ' ] ' +
                      'end ' +
                      'evens [ 1 2 3 4 5 6 ]', ['2', '4', '6']);
+
+  this.assert_equals('cond [ [ [2<3] "yep ] [ else "nope ]]', 'yep');
+  this.assert_equals('cond [ [ [2>3] "yep ] [ else "nope ]]', 'nope');
 
   //
   // 8.2 Template-based Iteration
