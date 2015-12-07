@@ -108,9 +108,11 @@ of comparison.</p>
 
   <dt><code>fput <var>thing</var> <var>list</var></code>
   <dt><code>lput <var>thing</var> <var>list</var></code>
-  <dd>Outputs list, but with thing added as a new first/last item
+  <dd>Outputs list, but with thing added as a new first/last item; if list is a word, concatenates
   <dd class=example>show fput 0 [ 1 2 3 ]</dd>
+  <dd class=example>show fput "a "bcd</dd>
   <dd class=example>show lput 4 [ 1 2 3 ]</dd>
+  <dd class=example>show lput "e "bcd</dd>
 
   <dt><code>array <var>size</var></code>
   <dt><code>(array <var>size</var> <var>origin</var>)</code>
@@ -131,8 +133,9 @@ of comparison.</p>
   <dd class=example>show combine "a [b c]</dd>
 
   <dt><code>reverse <var>list</var></code>
-  <dd>Outputs a list with the items in reverse order
+  <dd>Outputs a list with the items in reverse order; if input is a word, reverses characters
   <dd class=example>show reverse [ 1 2 3 ]</dd>
+  <dd class=example>show reverse "abc</dd>
 
   <dt><code>gensym</code>
   <dd>Outputs a unique string, e.g. <samp>G1</samp>, <samp>G2</samp>, etc.
@@ -143,42 +146,52 @@ of comparison.</p>
 <dl>
   <dt><code>first <var>list</var></code>
   <dt><code>last <var>list</var></code>
-  <dd>Outputs the first or last item from the list, respectively
+  <dd>Outputs the first or last item (or character) from the list (or word), respectively
   <dd class=example>show first [ 1 2 3 ]</dd>
+  <dd class=example>show first "abc</dd>
   <dd class=example>show last [ 1 2 3 ]</dd>
+  <dd class=example>show last "abc</dd>
 
   <dt><code>firsts <var>listoflists</var></code>
-  <dd>Outputs a list of the first item of each sublist
+  <dd>Outputs a list of the first item (or character) of each sublist (or word)
   <dd class=example>show firsts [ [1 2 3] [a b c] ]</dd>
+  <dd class=example>show firsts [ abc def ]</dd>
 
   <dt><code>butfirst <var>list</var></code>
   <dt><code>bf <var>list</var></code>
   <dt><code>butlast <var>list</var></code>
   <dt><code>bl <var>list</var></code>
-  <dd>Outputs the list, except for the first/last item
+  <dd>Outputs the list (or word), except for the first/last item (or character)
   <dd class=example>show butfirst [ 1 2 3 ]</dd>
+  <dd class=example>show butfirst "abc</dd>
   <dd class=example>show butlast [ 1 2 3 ]</dd>
+  <dd class=example>show butlast "abc</dd>
 
   <dt><code>butfirsts <var>listoflists</var></code>
   <dt><code>bfs <var>listoflists</var></code>
-  <dd>Outputs a list of sublists without the first item
+  <dd>Outputs a list of sublists (or words) without the first item (or characters)
   <dd class=example>show butfirsts [ [ 1 2 3 ] [ a b c ] ]</dd>
+  <dd class=example>show butfirsts [ abc def ]</dd>
 
   <dt><code>item <var>index</var> <var>thing</var></code>
-  <dd>Outputs the indexth item of the list or array
+  <dd>Outputs the indexth item of the list or array or word
   <dd class=example>show item 2 [ 1 2 3 ]</dd>
+  <dd class=example>show item 2 "abc</dd>
 
   <dt><code>pick <var>list</var></code>
-  <dd>Outputs one item from a list, at random
+  <dd>Outputs one item from a list (or word), at random
   <dd class=example>show pick [ 1 2 3 ]</dd>
+  <dd class=example>show pick "abc</dd>
 
   <dt><code>remove <var>thing</var> <var>list</var></code>
-  <dd>Outputs the list with any occurences of thing removed
+  <dd>Outputs the list (or word) with any occurences of thing removed
   <dd class=example>show remove "b [ a b c ]</dd>
+  <dd class=example>show remove "a "banana</dd>
 
   <dt><code>remdup <var>list</var></code>
-  <dd>Outputs the list with duplicates removed
+  <dd>Outputs the list (or word) with duplicates removed
   <dd class=example>show remdup [ 1 2 3 2 3 4 3 4 5 ]</dd>
+  <dd class=example>show remdup "banana</dd>
 
 </dl>
 
@@ -202,13 +215,15 @@ of comparison.</p>
 
   <dt><code>push <var>stackname</var> <var>thing</var></code>
   <dt><code>pop <var>stackname</var></code>
-  <dd>Push to/pop from a stack i.e. list variable. Stacks grow from the front.
+  <dd>Push to/pop from a stack i.e. list variable. Stacks grow from the front. Works on words.
   <dd class=example>make "s [ 2 1 ]  push "s 3  show :s  show pop "s</dd>
+  <dd class=example>make "s "ba  push "s "c  show :s  show pop "s</dd>
 
   <dt><code>queue <var>stackname</var> <var>thing</var></code>
   <dt><code>dequeue <var>stackname</var></code>
-  <dd>Add/remove from a queue i.e. list variable, Queues grow from the end.
+  <dd>Add/remove from a queue i.e. list variable, Queues grow from the end. Works on words.
   <dd class=example>make "q [ 1 2 ]  queue "q 3  show :q  show dequeue "q</dd>
+  <dd class=example>make "q "ab  queue "q "c  show :q  show dequeue "q</dd>
 
 </dl>
 

@@ -276,6 +276,18 @@ QUnit.test("Data Structure Primitives", function(t) {
   this.assert_equals('item 2 { a b c }@0', 'c');
   this.assert_error('item 3 { a b c }@0', 'Index out of bounds');
 
+  this.assert_error('item 0 "abc', 'Index out of bounds');
+  this.assert_equals('item 1 "abc', "a");
+  this.assert_equals('item 2 "abc', "b");
+  this.assert_equals('item 3 "abc', "c");
+  this.assert_error('item 4 "abc', 'Index out of bounds');
+
+  this.assert_error('item 0 456', 'Index out of bounds');
+  this.assert_equals('item 1 456', "4");
+  this.assert_equals('item 2 456', "5");
+  this.assert_equals('item 3 456', "6");
+  this.assert_error('item 4 456', 'Index out of bounds');
+
   this.assert_stream('make "a { a b c } ' +
                      'setitem 2 :a "q ' +
                      'show :a', '{a q c}\n');

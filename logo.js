@@ -1163,14 +1163,16 @@ function LogoInterpreter(turtle, stream, savehook)
     index = aexpr(index);
     switch (Type(thing)) {
     case 'list':
-      if (index < 1 || index > thing.length) {
+      if (index < 1 || index > thing.length)
         throw new Error(__("Index out of bounds"));
-      }
       return thing[index - 1];
     case 'array':
       return thing.item(index);
     default:
-      return sexpr(thing).charAt(index);
+      thing = sexpr(thing);
+      if (index < 1 || index > thing.length)
+        throw new Error(__("Index out of bounds"));
+      return thing.charAt(index - 1);
     }
   });
 
