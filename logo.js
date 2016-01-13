@@ -80,10 +80,6 @@ function LogoInterpreter(turtle, stream, savehook)
     return value && value.then && value.catch;
   }
 
-  function makePromise(value) {
-    return isPromise(value) ? value : Promise.resolve(value);
-  }
-
   // Based on: http://www.jbouchard.net/chris/blog/2008/01/currying-in-javascript-fun-for-whole.html
   function to_arity(func, arity) {
     var parms = [];
@@ -2660,7 +2656,7 @@ function LogoInterpreter(turtle, stream, savehook)
     block = checkevalblock(block);
     return whilechunk(function () {
       return new Promise(function (resolve, reject) {
-        var blockresult = makePromise(self.execute(block));
+        var blockresult = Promise.resolve(self.execute(block));
         blockresult.then(function () {
           var cond = tf();
           if (isPromise(cond)) {

@@ -91,9 +91,7 @@ QUnit.module("Logo Unit Tests", {
     this.assert_stream = function(expression, expected) {
       this.stream.clear();
       var result = this.interpreter.run(expression, {returnResult: true});
-      if (! (result && result.then)) {
-        result = Promise.resolve(result);
-      }
+      result = Promise.resolve(result);
       var done = t.async();
       result.then((function () {
         var actual = this.stream.outputbuffer;
