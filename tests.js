@@ -60,9 +60,28 @@ QUnit.module("Logo Unit Tests", {
 
     this.assert_equals = function(expression, expected) {
       var actual = this.interpreter.run(expression, {returnResult: true});
+      if (actual && actual.then) {
+        var done = t.async();
+        actual.then(function (result) {
+          if (typeof expected === 'object') {
+            t.deepEqual(result, expected, expression);
+          } else if (typeof expected === 'number' && typeof result === 'number' &&
+                     (Math.floor(expected) != expected || Math.floor(result) != result)) {
+            t.ok(Math.abs(result - expected) < EPSILON, expression);
+          } else {
+            t.strictEqual(result, expected, expression);
+          }
+          done();
+        }, function (failure) {
+          t.strictEqual(failure, expected, expression);
+          done();
+        });
+        return;
+      }
       if (typeof expected === 'object') {
         t.deepEqual(actual, expected, expression);
-      } else if (typeof expected === 'number' && typeof actual === 'number') {
+      } else if (typeof expected === 'number' && typeof actual === 'number' &&
+                 (Math.floor(expected) != expected || Math.floor(actual) != actual)) {
         t.ok(Math.abs(actual - expected) < EPSILON, expression);
       } else {
         t.strictEqual(actual, expected, expression);
@@ -71,10 +90,22 @@ QUnit.module("Logo Unit Tests", {
 
     this.assert_stream = function(expression, expected) {
       this.stream.clear();
-      this.interpreter.run(expression, {returnResult: true});
-      var actual = this.stream.outputbuffer;
-      this.stream.clear();
-      t.equal(actual, expected, expression);
+      var result = this.interpreter.run(expression, {returnResult: true});
+      if (! (result && result.then)) {
+        result = Promise.resolve(result);
+      }
+      var done = t.async();
+      result.then((function () {
+        var actual = this.stream.outputbuffer;
+        this.stream.clear();
+        t.equal(actual, expected, expression);
+        done();
+      }).bind(this), (function (err) {
+        var actual = this.stream.outputbuffer + "\nError: " + err;
+        this.stream.clear();
+        t.equal(actual, expected, expression);
+        done();
+      }).bind(this));
     };
 
     this.assert_prompt = function(expression, expected) {
@@ -86,13 +117,35 @@ QUnit.module("Logo Unit Tests", {
     };
 
     this.assert_predicate = function(expression, predicate) {
-      t.ok(predicate(this.interpreter.run(expression, {returnResult: true})), expression);
+      var result = this.interpreter.run(expression, {returnResult: true});
+      if (result && result.then) {
+        var done = t.async();
+        result.then(function (value) {
+          t.ok(predicate(value), expression);
+          done();
+        }, function (err) {
+          t.equal("(no error)", err, expression);
+          done();
+        });
+      } else {
+        t.ok(predicate(result), expression);
+      }
     };
 
     this.assert_error = function(expression, expected) {
       try {
-        this.interpreter.run(expression);
-        t.push(false, '(no error)', expected, 'Expected to error but did not: ' + expression);
+        var result = this.interpreter.run(expression);
+        if (result && result.then) {
+          var done = t.async();
+          result.then(function (result) {
+            t.push(false, '(no error)', expected, 'Expected to error but did not: ' + expression);
+            done();
+          }, function (ex) {
+            t.push(ex.message === expected, ex.message, expected, 'Expected error from: ' + expression);
+          });
+        } else {
+          t.push(false, '(no error)', expected, 'Expected to error but did not: ' + expression);
+        }
       } catch (ex) {
         t.push(ex.message === expected, ex.message, expected, 'Expected error from: ' + expression);
       }

@@ -76,6 +76,14 @@ function LogoInterpreter(turtle, stream, savehook)
     return atom === match;
   }
 
+  function isPromise(value) {
+    return value && value.then && value.catch;
+  }
+
+  function makePromise(value) {
+    return isPromise(value) ? value : Promise.resolve(value);
+  }
+
   // Based on: http://www.jbouchard.net/chris/blog/2008/01/currying-in-javascript-fun-for-whole.html
   function to_arity(func, arity) {
     var parms = [];
@@ -227,6 +235,8 @@ function LogoInterpreter(turtle, stream, savehook)
       return 'list';
     } else if (atom instanceof LogoArray) {
       return 'array';
+    } else if (isPromise(atom)) {
+      throw new Error(__("Unexpected value: a promise"));
     } else if (!atom) {
       throw new Error(__("Unexpected value: null"));
     } else {
@@ -531,19 +541,45 @@ function LogoInterpreter(turtle, stream, savehook)
         var rhs = additiveExpression(list);
 
         switch (op) {
-          case "<": return function() { return (aexpr(lhs()) < aexpr(rhs())) ? 1 : 0; };
-          case ">": return function() { return (aexpr(lhs()) > aexpr(rhs())) ? 1 : 0; };
-          case "=": return function() { return equal(lhs(), rhs()) ? 1 : 0; };
+          case "<": return defer(function(lhs, rhs) { return (aexpr(lhs) < aexpr(rhs)) ? 1 : 0; }, lhs, rhs);
+          case ">": return defer(function(lhs, rhs) { return (aexpr(lhs) > aexpr(rhs)) ? 1 : 0; }, lhs, rhs);
+          case "=": return defer(function(lhs, rhs) { return equal(lhs, rhs) ? 1 : 0; }, lhs, rhs);
 
-          case "<=": return function() { return (aexpr(lhs()) <= aexpr(rhs())) ? 1 : 0; };
-          case ">=": return function() { return (aexpr(lhs()) >= aexpr(rhs())) ? 1 : 0; };
-          case "<>": return function() { return !equal(lhs(), rhs()) ? 1 : 0; };
+          case "<=": return defer(function(lhs, rhs) { return (aexpr(lhs) <= aexpr(rhs)) ? 1 : 0; }, lhs, rhs);
+          case ">=": return defer(function(lhs, rhs) { return (aexpr(lhs) >= aexpr(rhs)) ? 1 : 0; }, lhs, rhs);
+          case "<>": return defer(function(lhs, rhs) { return !equal(lhs, rhs) ? 1 : 0; }, lhs, rhs);
           default: throw new Error(__("Internal error in expression parser"));
         }
       } (lhs);
     }
 
     return lhs;
+  }
+
+  function defer(func) {
+    var input = Array.prototype.slice.call(arguments, 1);
+    return function () {
+      var args = [];
+      var index = 0;
+      return new Promise(function (resolve, reject) {
+        function resolveLoop() {
+          while (index < input.length) {
+            var item = input[index]();
+            index++;
+            if (isPromise(item)) {
+              item.then(function (result) {
+                args.push(result);
+                resolveLoop();
+              }).catch(reject);
+              return;
+            }
+            args.push(item);
+          }
+          resolve(func.apply(null, args));
+        }
+        resolveLoop();
+      });
+    };
   }
 
   function additiveExpression(list) {
@@ -555,8 +591,8 @@ function LogoInterpreter(turtle, stream, savehook)
       lhs = function(lhs) {
         var rhs = multiplicativeExpression(list);
         switch (op) {
-          case "+": return function() { return aexpr(lhs()) + aexpr(rhs()); };
-          case "-": return function() { return aexpr(lhs()) - aexpr(rhs()); };
+          case "+": return defer(function(lhs, rhs) { return aexpr(lhs) + aexpr(rhs); }, lhs, rhs);
+          case "-": return defer(function(lhs, rhs) { return aexpr(lhs) - aexpr(rhs); }, lhs, rhs);
           default: throw new Error(__("Internal error in expression parser"));
         }
       } (lhs);
@@ -574,17 +610,17 @@ function LogoInterpreter(turtle, stream, savehook)
       lhs = function(lhs) {
         var rhs = powerExpression(list);
         switch (op) {
-          case "*": return function() { return aexpr(lhs()) * aexpr(rhs()); };
-          case "/": return function() {
-            var n = aexpr(lhs()), d = aexpr(rhs());
+          case "*": return defer(function(lhs, rhs) { return aexpr(lhs) * aexpr(rhs); }, lhs, rhs);
+          case "/": return defer(function(lhs, rhs) {
+            var n = aexpr(lhs), d = aexpr(rhs);
             if (d === 0) { throw new Error(__("Division by zero")); }
             return n / d;
-          };
-          case "%": return function() {
-            var n = aexpr(lhs()), d = aexpr(rhs());
+          }, lhs, rhs);
+          case "%": return defer(function(lhs, rhs) {
+            var n = aexpr(lhs), d = aexpr(rhs);
             if (d === 0) { throw new Error(__("Division by zero")); }
             return n % d;
-          };
+          }, lhs, rhs);
           default: throw new Error(__("Internal error in expression parser"));
         }
       } (lhs);
@@ -600,7 +636,7 @@ function LogoInterpreter(turtle, stream, savehook)
       op = list.shift();
       lhs = function(lhs) {
         var rhs = unaryExpression(list);
-        return function() { return Math.pow(aexpr(lhs()), aexpr(rhs())); };
+        return defer(function(lhs, rhs) { return Math.pow(aexpr(lhs), aexpr(rhs)); }, lhs, rhs);
       } (lhs);
     }
 
@@ -613,7 +649,7 @@ function LogoInterpreter(turtle, stream, savehook)
     if (peek(list, [UNARY_MINUS])) {
       op = list.shift();
       rhs = unaryExpression(list);
-      return function() { return -aexpr(rhs()); };
+      return defer(function(rhs) { return -aexpr(rhs); }, rhs);
     } else {
       return finalExpression(list);
     }
@@ -710,7 +746,29 @@ function LogoInterpreter(turtle, stream, savehook)
       };
     } else {
       return function() {
-        return procedure.apply(null, args.map(function(a) { return a(); }));
+        var evaluatedArgs = [];
+        var index = 0;
+        return new Promise(function (resolve, reject) {
+          function doEvalLoop() {
+            while (index < args.length) {
+              var result = args[index]();
+              index++;
+              if (isPromise(result)) {
+                result.then(function (value) {
+                  evaluatedArgs.push(value);
+                  doEvalLoop();
+                }).catch(function (err) {
+                  index = args.length;
+                  reject(err);
+                });
+                return;
+              }
+              evaluatedArgs.push(result);
+            }
+            resolve(procedure.apply(null, evaluatedArgs));
+          }
+          doEvalLoop();
+        });
       };
     }
   };
@@ -807,17 +865,29 @@ function LogoInterpreter(turtle, stream, savehook)
     // Operate on a copy so the original is not destroyed
     statements = statements.slice();
 
-    var result;
-    while (statements.length) {
-      result = evaluateExpression(statements);
-
-      if (result !== undefined && !options.returnResult) {
-        throw new Error(format(__("Don't know what to do with {result}"), {result: result}));
+    return new Promise(function (resolve, reject) {
+      var lastResult;
+      function runLoop() {
+        while (statements.length) {
+          var result = evaluateExpression(statements);
+          if (isPromise(result)) {
+            result.then(function (value) {
+              lastResult = value;
+              runLoop();
+            }).catch(function (err) {
+              reject(err);
+            });
+            return;
+          }
+          lastResult = result;
+        }
+        if (lastResult !== undefined && !options.returnResult) {
+          reject(new Error(format(__("Don't know what to do with {result}"), {result: lastResult})));
+        }
+        resolve(lastResult);
       }
-    }
-
-    // Return last result
-    return result;
+      runLoop();
+    });
   };
 
 
@@ -832,6 +902,7 @@ function LogoInterpreter(turtle, stream, savehook)
       // And execute it!
       return self.execute(atoms, options);
     } catch (e) {
+      // FIXME: doesn't work with promises
       if (e instanceof Bye) {
         // clean exit
         return undefined;
@@ -995,7 +1066,16 @@ function LogoInterpreter(turtle, stream, savehook)
       try {
         // Execute the block
         try {
-          return self.execute(block);
+          var result = self.execute(block);
+          if (isPromise(result)) {
+            return result.then(null, function (err) {
+              if (err && err.special == "output") {
+                return err.value;
+              }
+              throw err;
+            });
+          }
+          return result;
         } catch (e) {
           // From OUTPUT
           if (e instanceof Output) {
@@ -1534,10 +1614,12 @@ function LogoInterpreter(turtle, stream, savehook)
   def("true", function() { return 1; });
   def("false", function() { return 0; });
 
+// FIXME: needs to handle promises
   def("and", function(a, b) {
     return Array.from(arguments).every(function(f) { return f(); }) ? 1 : 0;
   }, {noeval: true});
 
+// FIXME: needs to handle promises
   def("or", function(a, b) {
     return Array.from(arguments).some(function(f) { return f(); }) ? 1 : 0;
   }, {noeval: true});
@@ -2305,7 +2387,11 @@ function LogoInterpreter(turtle, stream, savehook)
   def("runresult", function(statements) {
     statements = reparse(lexpr(statements));
     var result = self.execute(statements, {returnResult: true});
-    if (result !== undefined) {
+    if (isPromise(result)) {
+      return result.then(function (r) {
+        return [r];
+      });
+    } else if (result !== undefined) {
       return [result];
     } else {
       return [];
@@ -2313,32 +2399,67 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   def("repeat", function(count, statements) {
-    count = aexpr(count);
-    statements = reparse(lexpr(statements));
-    for (var i = 1; i <= count; ++i) {
-      var old_repcount = self.repcount;
-      self.repcount = i;
-      try {
-        self.execute(statements);
-      } finally {
-        self.repcount = old_repcount;
+    return new Promise(function (resolve, reject) {
+      count = aexpr(count);
+      statements = reparse(lexpr(statements));
+      var i = 1;
+      function runLoop() {
+        while (i <= count) {
+          var old_repcount = self.repcount;
+          self.repcount = i;
+          i++;
+          var result;
+          try {
+            result = self.execute(statements);
+          } finally {
+            self.repcount = old_repcount;
+          }
+          if (isPromise(result)) {
+            result.then(runLoop).catch(function (err) {
+              i = count;
+              reject(err);
+            });
+            break;
+          }
+        }
+        if (i <= count) {
+          resolve();
+        }
       }
-    }
+      runLoop();
+    });
   });
 
   def("forever", function(statements) {
     statements = reparse(lexpr(statements));
-    for (var i = 1; true; ++i) {
-      var old_repcount = self.repcount;
-      self.repcount = i;
-      try {
-        self.execute(statements);
-      } finally {
-        self.repcount = old_repcount;
+    return new Promise(function (resolve, reject) {
+      var stop = false;
+      var i = 1;
+      function runLoop() {
+        while (! stop) {
+          var old_repcount = self.repcount;
+          self.repcount = i;
+          i++;
+          var result;
+          try {
+            result = self.execute(statements);
+          } finally {
+            self.repcount = old_repcount;
+          }
+          if (isPromise(result)) {
+            result.then(runLoop).catch(function (err) {
+              stop = true;
+              reject(err);
+            });
+            break;
+          }
+        }
       }
-    }
+      runLoop();
+    });
   });
 
+// FIXME: this probably doesn't work
   def("repcount", function() {
     return self.repcount;
   });
@@ -2347,7 +2468,7 @@ function LogoInterpreter(turtle, stream, savehook)
     test = aexpr(test);
     statements = reparse(lexpr(statements));
 
-    if (test) { self.execute(statements); }
+    if (test) { return self.execute(statements); }
   });
 
   def("ifelse", function(test, statements1, statements2) {
@@ -2355,7 +2476,7 @@ function LogoInterpreter(turtle, stream, savehook)
     statements1 = reparse(lexpr(statements1));
     statements2 = reparse(lexpr(statements2));
 
-    self.execute(test ? statements1 : statements2);
+    return self.execute(test ? statements1 : statements2);
   });
 
   def("test", function(tf) {
@@ -2367,21 +2488,21 @@ function LogoInterpreter(turtle, stream, savehook)
   def(["iftrue", "ift"], function(statements) {
     statements = reparse(lexpr(statements));
     var tf = self.scopes[self.scopes.length - 1]._test;
-    if (tf) { self.execute(statements); }
+    if (tf) { return self.execute(statements); }
   });
 
   def(["iffalse", "iff"], function(statements) {
     statements = reparse(lexpr(statements));
     var tf = self.scopes[self.scopes.length - 1]._test;
-    if (!tf) { self.execute(statements); }
+    if (!tf) { return self.execute(statements); }
   });
 
   def("stop", function() {
-    throw new Output();
+    return Promise.reject({special: "stop"});
   });
 
   def(["output", "op"], function(atom) {
-    throw new Output(atom);
+    return Promise.reject({special: "output", value: atom});
   });
 
   // TODO: catch
@@ -2392,14 +2513,14 @@ function LogoInterpreter(turtle, stream, savehook)
   // Not Supported: wait
 
   def("bye", function() {
-    throw new Bye();
+    return Promise.reject({special: "bye"});
   });
 
   def(".maybeoutput", function(value) {
     if (value !== undefined) {
-      throw new Output(value);
+      return Promise.reject({special: "output", value: value});
     } else {
-      throw new Output();
+      return Promise.reject({special: "output"});
     }
   });
 
@@ -2423,14 +2544,26 @@ function LogoInterpreter(turtle, stream, savehook)
 
     var step;
     var current = start;
-    while (sign(current - limit) !== sign(step)) {
-      setvar(varname, current);
-      self.execute(statements);
-
-      step = (control.length) ?
-        aexpr(evaluateExpression(control.slice())) : sign(limit - start);
-      current += step;
-    }
+    var stop = false;
+    return new Promise(function (resolve, reject) {
+      function runLoop() {
+        while ((! stop) && sign(current - limit) !== sign(step)) {
+          setvar(varname, current);
+          var result = self.execute(statements);
+          step = (control.length) ?
+            aexpr(evaluateExpression(control.slice())) : sign(limit - start);
+          current += step;
+          if (isPromise(result)) {
+            result.then(runLoop).catch(function (err) {
+              stop = true;
+              reject(err);
+            });
+            break;
+          }
+        }
+      }
+      runLoop();
+    });
   });
 
   function checkevalblock(block) {
@@ -2439,38 +2572,103 @@ function LogoInterpreter(turtle, stream, savehook)
     throw new Error(__("Expected block"));
   }
 
+  function whilechunk(runner) {
+    return new Promise(function (resolve, reject) {
+      function runLoop() {
+        var result = runner();
+        result.then(function (result) {
+          if (result) {
+            runLoop();
+          } else {
+            resolve();
+          }
+        }).catch(function (err) {
+          reject(err);
+        });
+      }
+      runLoop();
+    });
+  }
+
   def("do.while", function(block, tf) {
     block = checkevalblock(block);
-
-    do {
-      self.execute(block);
-    } while (tf());
+    return whilechunk(function () {
+      return new Promise(function (resolve, reject) {
+        var blockresult = makePromise(self.execute(block));
+        blockresult.then(function () {
+          var cond = tf();
+          if (isPromise(cond)) {
+            cond.then(function (result) {
+              resolve(result);
+            }).catch(reject);
+          } else {
+            resolve(cond);
+          }
+        }).catch(reject);
+      });
+    });
   }, {noeval: true});
 
   def("while", function(tf, block) {
     block = checkevalblock(block);
-
-    while (tf()) {
-      self.execute(block);
-    }
+    return whilechunk(function () {
+      return new Promise(function (resolve, reject) {
+        var cond = tf();
+        if (isPromise(cond)) {
+          cond.then(function (result) {
+            if (! result) {
+              resolve(result);
+              return;
+            }
+            var blockresult = self.execute(block);
+            if (isPromise(blockresult)) {
+              blockresult.then(function () {
+                resolve(cond);
+              }).catch(reject);
+            } else {
+              resolve(result);
+            }
+          });
+        } else if (cond) {
+          var blockresult = self.execute(block);
+          if (isPromise(blockresult)) {
+            blockresult.then(function () {
+              resolve(cond);
+            }).catch(reject);
+          } else {
+            resolve(cond);
+          }
+        } else {
+          resolve(cond);
+        }
+      });
+    });
   }, {noeval: true});
+
+  function notpromise(tf) {
+    var cond = tf();
+    if (cond && cond.then) {
+      return cond.then(function (result) {
+        return ! result;
+      });
+    } else {
+      return ! cond;
+    }
+  }
 
   def("do.until", function(block, tf) {
     block = checkevalblock(block);
-
-    do {
-      self.execute(block);
-    } while (!tf());
+    var nottf = function () {return notpromise(tf)};
+    return self.routines["do.while"](block, nottf);
   }, {noeval: true});
 
   def("until", function(tf, block) {
     block = checkevalblock(block);
-
-    while (!tf()) {
-      self.execute(block);
-    }
+    var nottf = function () {return notpromise(tf)};
+    return self.routines["while"](nottf, block);
   }, {noeval: true});
 
+// FIXME: not done
   def("case", function(value, clauses) {
     clauses = lexpr(clauses);
 
@@ -2487,6 +2685,7 @@ function LogoInterpreter(turtle, stream, savehook)
     return undefined;
   });
 
+// FIXME: not done
   def("cond", function(clauses) {
     clauses = lexpr(clauses);
 
@@ -2560,8 +2759,25 @@ function LogoInterpreter(turtle, stream, savehook)
       throw new Error(format(__("Can't apply FOREACH to special {name:U}"),
                              { name: procname }));
     }
-
-    lexpr(list).forEach(function(n) { return routine(n); });
+    list = lexpr(list);
+    var index = 0;
+    return new Promise(function (resolve, reject) {
+      function runLoop() {
+        while (index < list.length) {
+          var result = routine(list[index]);
+          index++;
+          if (isPromise(result)) {
+            result.then(runLoop).catch(function (err) {
+              index = list.length;
+              reject(err);
+            });
+            return;
+          }
+        }
+        resolve();
+      }
+      runLoop();
+    });
   });
 
 
@@ -2577,7 +2793,31 @@ function LogoInterpreter(turtle, stream, savehook)
                              { name: procname }));
     }
 
-    return lexpr(list).map(routine);
+    list = lexpr(list);
+    var mapped = [];
+    var index = 0;
+    return new Promise(function (resolve, reject) {
+      function runLoop() {
+        while (index < list.length) {
+          var result = routine(list[index]);
+          index++;
+          if (isPromise(result)) {
+            result.then(function (value) {
+              mapped.push(value);
+              runLoop();
+            }).catch(function (err) {
+              index = list.length;
+              reject(err);
+            });
+            return;
+          } else {
+            mapped.push(result);
+          }
+        }
+        resolve(mapped);
+      }
+      runLoop();
+    });
   });
 
   // Not Supported: map.se
@@ -2594,7 +2834,35 @@ function LogoInterpreter(turtle, stream, savehook)
                              { name: procname }));
     }
 
-    return lexpr(list).filter(function(x) { return routine(x); });
+    list = lexpr(list);
+    var filtered = [];
+    var index = 0;
+    return new Promise(function (resolve, reject) {
+      function runLoop() {
+        while (index < list.length) {
+          var item = list[index];
+          var result = routine(item);
+          index++;
+          if (isPromise(result)) {
+            result.then(function (value) {
+              if (value) {
+                // FIXME: item isn't well closed here
+                filtered.push(item);
+              }
+              runLoop();
+            }).catch(function (err) {
+              index = list.length;
+              reject(err);
+            });
+            return;
+          } else if (result) {
+            filtered.push(item);
+          }
+        }
+        resolve(filtered);
+      }
+      runLoop();
+    });
   });
 
   def("find", function(procname, list) {
@@ -2610,15 +2878,39 @@ function LogoInterpreter(turtle, stream, savehook)
     }
 
     list = lexpr(list);
-    for (var i = 0; i < list.length; i += 1) {
-      var item = list[i];
-      if (routine(item)) {
-        return item;
+    var index = 0;
+    return new Promise(function (resolve, reject) {
+      function runLoop() {
+        while (index < list.length) {
+          var item = list[index];
+          var result = routine(item);
+          index++;
+          if (isPromise(result)) {
+            result.then(function (value) {
+              if (value) {
+                // FIXME: not well closed
+                resolve(item);
+              } else {
+                runLoop();
+              }
+            }).catch(function (err) {
+              index = list.length;
+              reject(err);
+            });
+            return;
+          }
+          if (result) {
+            resolve(item);
+            break;
+          }
+        }
+        resolve([]);
       }
-    }
-    return [];
+      runLoop();
+    });
   });
 
+// FIXME: not done
   def("reduce", function(procname, list) {
     procname = sexpr(procname);
     list = lexpr(list);
