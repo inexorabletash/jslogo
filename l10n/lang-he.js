@@ -6,33 +6,40 @@
 
   examples = "l10n/examples.he.txt";
 
-  document.title = "לוגו";
   document.body.parentNode.dir = 'rtl';
   document.getElementById("links").style.direction = "ltr";
 
   // UI Text
   (function(translation) {
-    Array.from(document.querySelectorAll('[data-l10n-id]')).forEach(function(element) {
-      var id = element.getAttribute('data-l10n-id');
-      if (!translation.hasOwnProperty(id)) {
-        console.warn('Missing translation: ' + id);
-        return;
-      }
-      if (element.placeholder)
-        element.placeholder = translation[id];
+    var ids = new Set();
+    Object.keys(translation).forEach(function(key) {
+      var parts = key.split('.'), id = parts[0], attr = parts[1], s = translation[key];
+      ids.add(id);
+      var elem = document.querySelector('[data-l10n-id="'+id+'"]');
+      if (!elem)
+        console.warn('Unused translation: ' + id);
+      else if (attr)
+        elem.setAttribute(attr, s);
       else
-        element.textContent = translation[id];
+        elem.textContent = s;
     });
+    Array.from(document.querySelectorAll('[data-l10n-id]'))
+      .map(function(element) { return element.getAttribute('data-l10n-id'); })
+      .filter(function(id) { return !ids.has(id); })
+      .forEach(function(id) { console.warn('Missing translation: ' + id); });
   }({
     // data-l10n-id: replacement-text
+    // data-l10n-id.attribute: replacement-text
     "no-canvas": "הדפדפן אינו תומך בציור, לא ניתן לפעול.",
+    "title": "לוגו",
     "tl-title": "לוגו",
-    "tl-byauthor": "מאת",
+    "tl-contact": "קשר",
     "tl-tests": "בדיקות",
     "tl-source": "קוד",
+    "tl-reference": "מדריך",
     "start-togetherjs": "שתף",
-    "logo-ta-single-line": "כתוב את התוכנית כאן",
-    "logo-ta-multi-line": "כתוב את התוכנית כאן",
+    "logo-ta-single-line.placeholder": "כתוב את התוכנית כאן",
+    "logo-ta-multi-line.placeholder": "כתוב את התוכנית כאן",
     "ip-button-run": "הרץ",
     "ip-button-clear": "נקה",
     "sb-link-reference": "מדריך",

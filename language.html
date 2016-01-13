@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <title>Logo Language Guide</title>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <script src="polyfill/polyfill.min.js"></script>
+<title>Logo Language Guide</title>
+<meta charset="utf-8">
 
-<style type="text/css">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<script src="polyfill/polyfill.min.js"></script>
+
+<style>
 h1, h2, h3, h4, p { margin-bottom: 6pt; margin-top: 6pt; }
 body, p, h1, h2, h3 { font-family: sans-serif; }
 dl { margin-top: 6pt; }
@@ -33,8 +32,7 @@ dd.example {
   cursor: pointer;
 }
 </style>
-</head>
-<body>
+
 <div>
 
 <p>The section numbers are per the <a target="_blank" href="http://www.cs.berkeley.edu/~bh/v2ch14/manual.html">Berkeley Logo Reference Manual</a> in Brian Harvey's <cite>Computer Science Logo Style volume 2: Advanced Techniques</cite> for ease
@@ -101,6 +99,21 @@ of comparison.</p>
   <dd>Create a new list from the inputs
   <dd class=example>show (list 1+2 2+3 3+4)</dd>
 
+  <dt><code>sentence thing1 thing2</code>
+  <dt><code>(sentence thing1 thing2 ...)</code>
+  <dt><code>se thing1 thing2</code>
+  <dt><code>(se thing1 thing2 ...)</code>
+  <dd>Create a new list from the inputs (if non-lists) or members of the inputs (if lists)
+  <dd class=example>show sentence [1 2 3] [and so on]</dd>
+
+  <dt><code>fput <var>thing</var> <var>list</var></code>
+  <dt><code>lput <var>thing</var> <var>list</var></code>
+  <dd>Outputs list, but with thing added as a new first/last item; if list is a word, concatenates
+  <dd class=example>show fput 0 [ 1 2 3 ]</dd>
+  <dd class=example>show fput "a "bcd</dd>
+  <dd class=example>show lput 4 [ 1 2 3 ]</dd>
+  <dd class=example>show lput "e "bcd</dd>
+
   <dt><code>array <var>size</var></code>
   <dt><code>(array <var>size</var> <var>origin</var>)</code>
   <dd>Create a new array. The default origin is 1.
@@ -115,26 +128,14 @@ of comparison.</p>
   <dd>Create a new list populated by members of a array
   <dd class=example>show arraytolist { 2 4 6 8 }</dd>
 
-  <dt><code>sentence thing1 thing2</code>
-  <dt><code>(sentence thing1 thing2 ...)</code>
-  <dt><code>se thing1 thing2</code>
-  <dt><code>(se thing1 thing2 ...)</code>
-  <dd>Create a new list from the inputs (if non-lists) or members of the inputs (if lists)
-  <dd class=example>show sentence [1 2 3] [and so on]</dd>
-
-  <dt><code>fput <var>thing</var> <var>list</var></code>
-  <dt><code>lput <var>thing</var> <var>list</var></code>
-  <dd>Outputs list, but with thing added as a new first/last item
-  <dd class=example>show fput 0 [ 1 2 3 ]</dd>
-  <dd class=example>show lput 4 [ 1 2 3 ]</dd>
-
   <dt><code>combine thing1 thing2</code>
   <dd>If thing2 is a word, like <code>word</code>; otherwise, like <code>fput</code>
   <dd class=example>show combine "a [b c]</dd>
 
   <dt><code>reverse <var>list</var></code>
-  <dd>Outputs a list with the items in reverse order
+  <dd>Outputs a list with the items in reverse order; if input is a word, reverses characters
   <dd class=example>show reverse [ 1 2 3 ]</dd>
+  <dd class=example>show reverse "abc</dd>
 
   <dt><code>gensym</code>
   <dd>Outputs a unique string, e.g. <samp>G1</samp>, <samp>G2</samp>, etc.
@@ -145,59 +146,85 @@ of comparison.</p>
 <dl>
   <dt><code>first <var>list</var></code>
   <dt><code>last <var>list</var></code>
-  <dd>Outputs the first or last item from the list, respectively
+  <dd>Outputs the first or last item (or character) from the list (or word), respectively
   <dd class=example>show first [ 1 2 3 ]</dd>
+  <dd class=example>show first "abc</dd>
   <dd class=example>show last [ 1 2 3 ]</dd>
+  <dd class=example>show last "abc</dd>
+
+  <dt><code>firsts <var>listoflists</var></code>
+  <dd>Outputs a list of the first item (or character) of each sublist (or word)
+  <dd class=example>show firsts [ [1 2 3] [a b c] ]</dd>
+  <dd class=example>show firsts [ abc def ]</dd>
 
   <dt><code>butfirst <var>list</var></code>
   <dt><code>bf <var>list</var></code>
   <dt><code>butlast <var>list</var></code>
   <dt><code>bl <var>list</var></code>
-  <dd>Outputs the list, except for the first/last item
+  <dd>Outputs the list (or word), except for the first/last item (or character)
   <dd class=example>show butfirst [ 1 2 3 ]</dd>
+  <dd class=example>show butfirst "abc</dd>
   <dd class=example>show butlast [ 1 2 3 ]</dd>
-
-  <dt><code>firsts <var>listoflists</var></code>
-  <dd>Outputs a list of the first item of each sublist
-  <dd class=example>show firsts [ [1 2 3] [a b c] ]</dd>
+  <dd class=example>show butlast "abc</dd>
 
   <dt><code>butfirsts <var>listoflists</var></code>
   <dt><code>bfs <var>listoflists</var></code>
-  <dd>Outputs a list of sublists without the first item
+  <dd>Outputs a list of sublists (or words) without the first item (or characters)
   <dd class=example>show butfirsts [ [ 1 2 3 ] [ a b c ] ]</dd>
-
-  <dt><code>pick <var>list</var></code>
-  <dd>Outputs one item from a list, at random
-  <dd class=example>show pick [ 1 2 3 ]</dd>
+  <dd class=example>show butfirsts [ abc def ]</dd>
 
   <dt><code>item <var>index</var> <var>thing</var></code>
-  <dd>Outputs the indexth item of the list or array
+  <dd>Outputs the indexth item of the list or array or word
   <dd class=example>show item 2 [ 1 2 3 ]</dd>
+  <dd class=example>show item 2 "abc</dd>
 
-  <dt><code>setitem <var>index</var> <var>array</var> <var>value</var></code>
-  <dd>Sets the indexth item of the array to value
-  <dd class=example>make "a { 1 2 3 }   setitem 2 :a "x   show :a</dd>
+  <dt><code>pick <var>list</var></code>
+  <dd>Outputs one item from a list (or word), at random
+  <dd class=example>show pick [ 1 2 3 ]</dd>
+  <dd class=example>show pick "abc</dd>
 
   <dt><code>remove <var>thing</var> <var>list</var></code>
-  <dd>Outputs the list with any occurences of thing removed
+  <dd>Outputs the list (or word) with any occurences of thing removed
   <dd class=example>show remove "b [ a b c ]</dd>
+  <dd class=example>show remove "a "banana</dd>
 
   <dt><code>remdup <var>list</var></code>
-  <dd>Outputs the list with duplicates removed
+  <dd>Outputs the list (or word) with duplicates removed
   <dd class=example>show remdup [ 1 2 3 2 3 4 3 4 5 ]</dd>
+  <dd class=example>show remdup "banana</dd>
+
 </dl>
 
 <h4>2.3 Data Mutators</h4>
 <dl>
+  <dt><code>setitem <var>index</var> <var>array</var> <var>value</var></code>
+  <dd>Sets the indexth item of the array to value (circular arrays prevented)
+  <dd class=example>make "a { 1 2 3 }  setitem 2 :a "x  show :a</dd>
+
+  <dt><code>.setfirst <var>list</var> <var>value</var></code>
+  <dd>Sets the first item of the list to value
+  <dd class=example>make "a [ 1 2 3 ]  .setfirst :a "7  show :a</dd>
+
+  <dt><code>.setbf <var>list</var> <var>value</var></code>
+  <dd>Sets the 'butfirst' of the list to the items in value (a list)
+  <dd class=example>make "a [ 1 2 3 ]  .setbf :a [ 4 9 ]  show :a</dd>
+
+  <dt><code>.setitem <var>index</var> <var>array</var> <var>value</var></code>
+  <dd>Sets the indexth item of the array to value (circular arrays allowed)
+  <dd class=example>make "a { 1 2 3 }  setitem 2 :a "x  show :a</dd>
+
   <dt><code>push <var>stackname</var> <var>thing</var></code>
   <dt><code>pop <var>stackname</var></code>
-  <dd>Push to/pop from a stack i.e. list variable. Stacks grow from the front.
+  <dd>Push to/pop from a stack i.e. list variable. Stacks grow from the front. Works on words.
   <dd class=example>make "s [ 2 1 ]  push "s 3  show :s  show pop "s</dd>
+  <dd class=example>make "s "ba  push "s "c  show :s  show pop "s</dd>
 
   <dt><code>queue <var>stackname</var> <var>thing</var></code>
   <dt><code>dequeue <var>stackname</var></code>
-  <dd>Add/remove from a queue i.e. list variable, Queues grow from the end.
+  <dd>Add/remove from a queue i.e. list variable, Queues grow from the end. Works on words.
   <dd class=example>make "q [ 1 2 ]  queue "q 3  show :q  show dequeue "q</dd>
+  <dd class=example>make "q "ab  queue "q "c  show :q  show dequeue "q</dd>
+
 </dl>
 
 <h4>2.4 Predicates</h4>
@@ -213,6 +240,10 @@ of comparison.</p>
   <dt><code>number? <var>thing</var></code>
   <dd>Test if thing is a word, list, array, or number respectively.
 
+  <dt><code>emptyp <var>expr</var></code>
+  <dt><code>empty? <var>expr</var></code>
+  <dd>Test if thing is an empty list or empty string.
+
   <dt><code>equalp <var>expr</var> <var>expr</var></code>
   <dt><code>equal? <var>expr</var> <var>expr</var></code>
   <dt><code><var>expr</var> = <var>expr</var></code>
@@ -220,10 +251,6 @@ of comparison.</p>
   <dt><code>notequal? <var>expr</var> <var>expr</var></code>
   <dt><code><var>expr</var> &lt;&gt; <var>expr</var></code>
   <dd>Equality/inequality tests. Compares strings, numbers, or lists (equal if length and all members are equal).
-
-  <dt><code>emptyp <var>expr</var></code>
-  <dt><code>empty? <var>expr</var></code>
-  <dd>Test if thing is an empty list or empty string.
 
   <dt><code>beforep <var>thing1</var> <var>thing2</var></code>
   <dt><code>before? <var>thing1</var> <var>thing2</var></code>
@@ -380,19 +407,23 @@ of comparison.</p>
 
 <h4>4.2 Numeric Predicates</h4>
 <dl>
+  <dt><code>lessp <var>expr</var> <var>expr</var></code>
+  <dt><code>less? <var>expr</var> <var>expr</var></code>
+  <dt><code><var>expr</var> &lt; <var>expr</var></code>
+
   <dt><code>greaterp <var>expr</var> <var>expr</var></code>
   <dt><code>greater? <var>expr</var> <var>expr</var></code>
   <dt><code><var>expr</var> &gt; <var>expr</var></code>
-  <dt><code>greaterequalp <var>expr</var> <var>expr</var></code>
-  <dt><code>greaterequal? <var>expr</var> <var>expr</var></code>
-  <dt><code><var>expr</var> &gt;= <var>expr</var></code>
-  <dt><code>lessp <var>expr</var> <var>expr</var></code>
-  <dt><code>less? <var>expr</var> <var>expr</var></code>
-  <dt><code><var>expr</var> &lt;= <var>expr</var></code>
+
   <dt><code>lessequalp <var>expr</var> <var>expr</var></code>
   <dt><code>lessequal? <var>expr</var> <var>expr</var></code>
   <dt><code><var>expr</var> &lt;= <var>expr</var></code>
-  <dd>Greater than, greater than or equal to, less than, less than or equal to,
+
+  <dt><code>greaterequalp <var>expr</var> <var>expr</var></code>
+  <dt><code>greaterequal? <var>expr</var> <var>expr</var></code>
+  <dt><code><var>expr</var> &gt;= <var>expr</var></code>
+
+  <dd>Less than, greater than, less than or equal to, greater than or equal to,
   respectively. Inputs are numbers or numeric expressions, output is 1 (true) or 0 (false).
 </dl>
 
@@ -987,5 +1018,3 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 });
 </script>
-</body>
-</html>

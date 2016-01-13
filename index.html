@@ -1,19 +1,21 @@
 <!DOCTYPE html>
+<title data-l10n-id="title">Logo Interpreter</title>
+<meta charset="utf-8">
 
-<title>Logo Interpreter</title>
-<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
+<meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=0, width=device-width">
+
 <link rel="alternate" type="application/atom+xml" href="https://github.com/inexorabletash/jslogo/commits/master.atom">
 <link rel="shortcut icon" href="favicon.ico">
 
 <script src="polyfill/polyfill.min.js"></script>
 
 <!-- CodeMirror, add-ons, and Logo-specific highlighting -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.5.0/codemirror.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.5.0/addon/runmode/runmode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.5.0/addon/edit/closebrackets.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.5.0/addon/edit/matchbrackets.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.5.0/addon/display/placeholder.min.js"></script>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.5.0/codemirror.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.6.0/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.6.0/addon/runmode/runmode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.6.0/addon/edit/closebrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.6.0/addon/edit/matchbrackets.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.6.0/addon/display/placeholder.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.6.0/codemirror.css">
 <script src="cm/logo.js"></script>
 
 <link rel="stylesheet" href="cm/logo.css">
@@ -24,12 +26,15 @@
 
 <div id="topbar" class="panel">
   <h1 data-l10n-id="tl-title">Logo Interpreter</h1>
-  <p>
-    <span data-l10n-id="tl-byauthor">By</span> <a href="mailto:inexorabletash@gmail.com">Joshua Bell</a>
-    | <a data-l10n-id="tl-tests" target="_blank" href="tests.html">Unit Tests</a>
+  <p id="topbar-links">
+    <a data-l10n-id="tl-contact" href="mailto:inexorabletash@gmail.com">Contact</a>
+    | <a data-l10n-id="tl-tests" target="_blank" href="tests.html">Tests</a>
     | <a data-l10n-id="tl-source" target="_blank" href="https://github.com/inexorabletash/jslogo">Source</a>
     | <a title="Collaborate with TogetherJS" href="#" data-l10n-id="start-togetherjs" onclick="TogetherJS(); return false">Collaborate</a>
     | <select id="select-lang"></select>
+  </p>
+  <p id="topbar-altlinks">
+    <a target="_blank" href="language.html" data-l10n-id="tl-reference">Reference</a>
   </p>
 </div>
 
@@ -64,12 +69,18 @@
 
 <div id="sidebar-header" class="panel">
   <ul>
-    <li><a data-l10n-id="sb-link-reference" id="sb-link-reference" href="#">Reference</a> - <span data-l10n-id="sb-link-text-reference">the Logo language</span>
-    <li><a data-l10n-id="sb-link-library" id="sb-link-library" href="#">Library</a> - <span data-l10n-id="sb-link-text-library">your procedures</span>
-    <li><a data-l10n-id="sb-link-history" id="sb-link-history" href="#">History</a> - <span data-l10n-id="sb-link-text-history">everything you&apos;ve done here</span>
-    <li><a data-l10n-id="sb-link-examples" id="sb-link-examples" href="#">Examples</a> - <span data-l10n-id="sb-link-text-examples">fun things to try out</span>
-    <li><a data-l10n-id="sb-link-extras" id="sb-link-extras" href="#">Extras</a> - <span data-l10n-id="sb-link-text-extras">helpful utilities</span>
-    <li><a data-l10n-id="sb-link-links" id="sb-link-links" href="#">Links</a> - <span data-l10n-id="sb-link-text-links">other Logo resources</span>
+    <li><a data-l10n-id="sb-link-reference" id="sb-link-reference" href="#">Reference</a>
+      <span class="linkdesc">&ndash; <span data-l10n-id="sb-link-text-reference">the Logo language</span></span>
+    <li><a data-l10n-id="sb-link-library" id="sb-link-library" href="#">Library</a>
+      <span class="linkdesc">&ndash; <span data-l10n-id="sb-link-text-library">your procedures</span></span>
+    <li><a data-l10n-id="sb-link-history" id="sb-link-history" href="#">History</a>
+      <span class="linkdesc">&ndash; <span data-l10n-id="sb-link-text-history">everything you&apos;ve done here</span></span>
+    <li><a data-l10n-id="sb-link-examples" id="sb-link-examples" href="#">Examples</a>
+      <span class="linkdesc">&ndash; <span data-l10n-id="sb-link-text-examples">fun things to try out</span></span>
+    <li><a data-l10n-id="sb-link-extras" id="sb-link-extras" href="#">Extras</a>
+      <span class="linkdesc">&ndash; <span data-l10n-id="sb-link-text-extras">helpful utilities</span></span>
+    <li><a data-l10n-id="sb-link-links" id="sb-link-links" href="#">Links</a>
+      <span class="linkdesc">&ndash; <span data-l10n-id="sb-link-text-links">other Logo resources</span></span>
   </ul>
 </div>
 
@@ -77,10 +88,19 @@
   <iframe frameBorder="0" allowtransparency="true" src="language.html" class="choice" id="reference"></iframe>
   <div class="choice snippets" id="examples">
   </div>
-  <div class="choice snippets" id="history">
-    <!-- TODO: Add "clear history" button -->
+  <div class="choice" id="history">
+    <div style="text-align: center; padding: 5px">
+      <a id="clearhistory" href="#" data-l10n-id="extras-clear-history">Clear History</a>
+    </div>
+    <div class="snippets">
+    </div>
   </div>
-  <div class="choice snippets" id="library">
+  <div class="choice" id="library">
+    <div style="text-align: center; padding: 5px">
+      <a id="clearlibrary" href="#" data-l10n-id="extras-clear-library">Clear Library</a>
+    </div>
+    <div class="snippets">
+    </div>
   </div>
   <div class="choice" id="links">
 
@@ -109,9 +129,7 @@
   <div class="choice" id="extras">
     <ul>
       <li><a data-l10n-id="extras-download-library" id="savelibrary" href="#">Download Library</a></li>
-      <li><a data-l10n-id="extras-download-drawing"id="screenshot" href="#">Download Drawing</a></li>
-      <li><a data-l10n-id="extras-clear-history"id="clearhistory" href="#">Clear history</a></li>
-      <li><a data-l10n-id="extras-clear-library"id="clearlibrary" href="#">Clear library</a> </li>
+      <li><a data-l10n-id="extras-download-drawing" id="screenshot" href="#">Download Drawing</a></li>
     </ul>
   </div>
 </div>
@@ -124,17 +142,5 @@
 <script src="index.js"></script>
 <!-- TogetherJS Collaboration -->
 <script src="https://togetherjs.com/togetherjs-min.js"></script>
-
-<script type="text/javascript">
-  var _gaq = _gaq || [];
-  _gaq.push(['_setAccount', 'UA-18610679-3']);
-  _gaq.push(['_trackPageview']);
-
-  (function() {
-    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-  })();
-</script>
 
 </body>

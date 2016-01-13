@@ -270,12 +270,16 @@ QUnit.test("Data Structure Primitives", function(t) {
   this.assert_equals('sentence 1 [2 3]', [1, "2", "3"]);
 
   this.assert_equals('fput 0 ( list 1 2 3 )', [0, 1, 2, 3]);
+  this.assert_equals('fput "x "abc', 'xabc');
+
   this.assert_equals('lput 0 ( list 1 2 3 )', [1, 2, 3, 0]);
+  this.assert_equals('lput "x "abc', 'abcx');
 
   this.assert_equals('combine "a "b', 'ab');
   this.assert_equals('combine "a [b]', ["a", "b"]);
 
   this.assert_equals('reverse [ a b c ]', ["c", "b", "a"]);
+  this.assert_equals('reverse "abc', 'cba');
 
   this.assert_equals('gensym <> gensym', 1);
 
@@ -287,8 +291,10 @@ QUnit.test("Data Structure Primitives", function(t) {
   this.assert_equals('firsts [ [ 1 2 3 ] [ "a "b "c] ]', ["1", '"a']);
   this.assert_equals('last [ a b c ]', "c");
   this.assert_equals('butfirst [ a b c ]', ["b", "c"]);
+  this.assert_equals('butfirst "abc', 'bc');
   this.assert_equals('bf [ a b c ]', ["b", "c"]);
   this.assert_equals('butfirsts [ [ 1 2 3 ] [ "a "b "c] ]', [["2", "3"], ['"b', '"c']]);
+  this.assert_equals('butfirsts [ 123 abc ]', ['23', 'bc']);
   this.assert_equals('bfs [ [ 1 2 3 ] [ "a "b "c] ]', [["2", "3"], ['"b', '"c']]);
   this.assert_equals('butlast  [ a b c ]', ["a", "b"]);
   this.assert_equals('bl [ a b c ]', ["a", "b"]);
@@ -323,6 +329,18 @@ QUnit.test("Data Structure Primitives", function(t) {
   this.assert_equals('item 2 { a b c }@0', 'c');
   this.assert_error('item 3 { a b c }@0', 'Index out of bounds');
 
+  this.assert_error('item 0 "abc', 'Index out of bounds');
+  this.assert_equals('item 1 "abc', "a");
+  this.assert_equals('item 2 "abc', "b");
+  this.assert_equals('item 3 "abc', "c");
+  this.assert_error('item 4 "abc', 'Index out of bounds');
+
+  this.assert_error('item 0 456', 'Index out of bounds');
+  this.assert_equals('item 1 456', "4");
+  this.assert_equals('item 2 456', "5");
+  this.assert_equals('item 3 456', "6");
+  this.assert_error('item 4 456', 'Index out of bounds');
+
   this.assert_stream('make "a { a b c } ' +
                      'setitem 2 :a "q ' +
                      'show :a', '{a q c}\n');
@@ -336,16 +354,45 @@ QUnit.test("Data Structure Primitives", function(t) {
   }
   this.assert_equals('remove "b [ a b c ]', ["a", "c"]);
   this.assert_equals('remove "d [ a b c ]', ["a", "b", "c"]);
+  this.assert_equals('remove "b "abc', 'ac');
+
   this.assert_equals('remdup [ a b c a b c ]', ["a", "b", "c"]);
+  this.assert_equals('remdup "abcabc', 'abc');
 
   //
   // 2.3 Data Mutators
   //
 
   this.assert_equals('make "s [] repeat 5 [ push "s repcount ] :s', [5, 4, 3, 2, 1]);
+  this.assert_equals('make "s "0 repeat 5 [ push "s repcount ] :s', '543210');
+
   this.assert_equals('make "s [ a b c ] (list pop "s pop "s pop "s)', ["a", "b", "c"]);
+  this.assert_equals('make "s [ a b c ] pop "s pop "s  :s', ["c"]);
+  this.assert_equals('make "s "abc (list pop "s pop "s pop "s)', ["a", "b", "c"]);
+  this.assert_equals('make "s "abc  pop "s  :s', 'bc');
+
   this.assert_equals('make "q [] repeat 5 [ queue "q repcount ] :q', [1, 2, 3, 4, 5]);
+  this.assert_equals('make "q "0 repeat 5 [ queue "q repcount ] :q', '012345');
+
   this.assert_equals('make "q [ a b c ] (list dequeue "q dequeue "q dequeue "q)', ["c", "b", "a"]);
+  this.assert_equals('make "q [ a b c ]  dequeue "q  dequeue "q  :q', ["a"]);
+  this.assert_equals('make "q "abc  (list dequeue "q dequeue "q dequeue "q)', ["c", "b", "a"]);
+  this.assert_equals('make "q "abc  dequeue "q  :q', "ab");
+
+  this.assert_equals('make "a { 1 }  make "b :a  setitem 1 :a 2  item 1 :b', 2);
+  this.assert_error('make "a { 1 }  setitem 1 :a :a', "SETITEM can't create circular array");
+  this.assert_error('make "a { 1 }  make "b { 1 }  setitem 1 :b :a  setitem 1 :a :b', "SETITEM can't create circular array");
+
+  this.assert_equals('make "a []  .setfirst :a "s  :a', ['s']);
+  this.assert_error('.setfirst "x "y', '.SETFIRST expected list');
+
+  this.assert_equals('make "a [a]  .setbf :a [b c]  :a', ['a', 'b', 'c']);
+  this.assert_error('.setbf "x [1]', '.SETBF expected non-empty list');
+  this.assert_error('.setbf [] [1]', '.SETBF expected non-empty list');
+
+  this.assert_equals('make "a { 1 }  make "b :a  .setitem 1 :a 2  item 1 :b', 2);
+  this.assert_equals('make "a { 1 }  .setitem 1 :a :a  equalp item 1 :a :a', 1);
+  this.assert_error('.setitem 1 "x 123', 'Expected array');
 
   //
   // 2.4 Predicates
@@ -1026,13 +1073,16 @@ QUnit.test("Workspace Management", function(t) {
 });
 
 QUnit.test("Control Structures", function(t) {
-  t.expect(44);
+  t.expect(58);
   //
   // 8.1 Control
   //
 
   this.assert_equals('make "c 0  run [ ]  :c', 0);
   this.assert_equals('make "c 0  run [ make "c 5 ]  :c', 5);
+
+  this.assert_equals('run [1]', 1);
+  this.assert_error('show run [ ]', 'No output from procedure');
 
   this.assert_equals('runresult [ make "x 1 ]', []);
   this.assert_equals('runresult [ 1 + 2 ]', [3]);
@@ -1042,8 +1092,16 @@ QUnit.test("Control Structures", function(t) {
 
   this.assert_equals('make "c 0  to foo forever [ make "c :c + 1 if repcount = 5 [ stop ] ] end  foo  :c', 5);
   this.assert_equals('make "c 0  to foo forever [ make "c :c + repcount if repcount = 4 [ stop ] ] end  foo  :c', 10);
+
+  this.assert_equals('make "r "a  if 1 [ make "r "b ]  :r', 'b');
+  this.assert_equals('make "r "a  if 0 [ make "r "b ]  :r', 'a');
+  this.assert_equals('if 1 [ "a ]', 'a');
+  this.assert_error('show if 0 [ "a ]', 'No output from procedure');
+
   this.assert_equals('ifelse 1 [ make "r "a ] [ make "r "b ]  :r', 'a');
   this.assert_equals('ifelse 0 [ make "r "a ] [ make "r "b ]  :r', 'b');
+  this.assert_equals('ifelse 1 [ "a ] [ "b ]', 'a');
+  this.assert_equals('ifelse 0 [ "a ] [ "b ]', 'b');
 
   this.assert_equals('to foo if 1 [ output "a ] output "b end  foo', 'a');
   this.assert_equals('to foo if 0 [ output "a ] output "b end  foo', 'b');
@@ -1052,6 +1110,11 @@ QUnit.test("Control Structures", function(t) {
   this.assert_equals('make "c 1  test 2 > 1  ift  [ make "c 2 ]  :c', 2);
   this.assert_equals('make "c 1  test 2 > 1  iffalse [ make "c 2 ]  :c', 1);
   this.assert_equals('make "c 1  test 2 > 1  iff [ make "c 2 ]  :c', 1);
+
+  this.assert_equals('test 2 > 1  iftrue  [ "a ]', 'a');
+  this.assert_error('test 1 > 2  show iftrue  [ "a ]', 'No output from procedure');
+  this.assert_equals('test 1 > 2  iffalse [ "a ]', 'a');
+  this.assert_error('test 2 > 1  show iffalse [ "a ]', 'No output from procedure');
 
   this.assert_equals('to foo forever [ if repcount = 5 [ make "c 234 stop ] ] end  foo  :c', 234);
 
@@ -1094,6 +1157,9 @@ QUnit.test("Control Structures", function(t) {
                      ' ] ' +
                      'end ' +
                      'evens [ 1 2 3 4 5 6 ]', ['2', '4', '6']);
+
+  this.assert_equals('cond [ [ [2<3] "yep ] [ else "nope ]]', 'yep');
+  this.assert_equals('cond [ [ [2>3] "yep ] [ else "nope ]]', 'nope');
 
   //
   // 8.2 Template-based Iteration

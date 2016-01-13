@@ -12,31 +12,37 @@
 
   // UI Text
   (function(translation) {
-    Array.from(document.querySelectorAll('[data-l10n-id]')).forEach(function(element) {
-      var id = element.getAttribute('data-l10n-id');
-      if (!translation.hasOwnProperty(id)) {
-        console.warn('Missing translation: ' + id);
-        return;
-      }
-      // TODO: Generalize this somehow
-      if (element.placeholder)
-        element.placeholder = translation[id];
+    var ids = new Set();
+    Object.keys(translation).forEach(function(key) {
+      var parts = key.split('.'), id = parts[0], attr = parts[1], s = translation[key];
+      ids.add(id);
+      var elem = document.querySelector('[data-l10n-id="'+id+'"]');
+      if (!elem)
+        console.warn('Unused translation: ' + id);
+      else if (attr)
+        elem.setAttribute(attr, s);
       else
-        element.textContent = translation[id];
+        elem.textContent = s;
     });
-    // TODO: Support localizing attributes (e.g. placeholder, title)
+    Array.from(document.querySelectorAll('[data-l10n-id]'))
+      .map(function(element) { return element.getAttribute('data-l10n-id'); })
+      .filter(function(id) { return !ids.has(id); })
+      .forEach(function(id) { console.warn('Missing translation: ' + id); });
   }({
     // data-l10n-id: replacement-text
+    // data-l10n-id.attribute: replacement-text
+    "title": "Logo Interpretisto",
     "tl-title": "Logo Interpretisto",
-    "tl-byauthor": "Per",
-    "tl-tests": "Unuo Testoj",
+    "tl-contact": "Kontakton",
+    "tl-tests": "Testoj",
     "tl-source": "Fonto",
+    "tl-reference": "Referenco",
     "start-togetherjs": "Kunlabori",
     "no-canvas": "Via retumilo ne subtenas la kanvaso elemento - Mizera !",
     "ip-button-run": "Run",
     "ip-button-clear": "Klara",
-    "logo-ta-single-line": "Tajpu vian kodon ĉi tie...",
-    "logo-ta-multi-line": "Tajpu vian kodon ĉi tie...",
+    "logo-ta-single-line.placeholder": "Tajpu vian kodon ĉi tie...",
+    "logo-ta-multi-line.placeholder": "Tajpu vian kodon ĉi tie...",
     "sb-link-reference": "Referenco",
     "sb-link-text-reference": "la Logo lingvo",
     "sb-link-library": "Biblioteko",

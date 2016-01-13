@@ -803,9 +803,13 @@ function LogoInterpreter(turtle, stream, savehook)
   //----------------------------------------------------------------------
   // List expression convenience function
   //----------------------------------------------------------------------
-  function lexpr(atom) {
-    // TODO: If this is an input, output needs to be re-stringified
 
+  // 'list expression'
+  // Takes an atom - if it is a list is is returned unchanged. If it is
+  // a word a list of the characters is returned. If the procedure
+  // returns a list, the output type should match the input type, so
+  // use sifw().
+  function lexpr(atom) {
     if (atom === undefined) { throw new Error(__("Expected list")); }
     switch (Type(atom)) {
     case 'word':
@@ -815,6 +819,13 @@ function LogoInterpreter(turtle, stream, savehook)
     }
 
     throw new Error(__("Expected list"));
+  }
+
+  // 'stringify if word'
+  // Takes an atom which is to be the subject of lexpr() and a result
+  // list. If the atom is a word, returns a word, otherwise a list.
+  function sifw(atom, list) {
+    return (Type(atom) === 'word') ? list.join('') : list;
   }
 
   //----------------------------------------------------------------------
@@ -1150,9 +1161,13 @@ function LogoInterpreter(turtle, stream, savehook)
     return list;
   });
 
-  def("fput", function(thing, list) { list = lexpr(list); list.unshift(thing); return list; });
+  def("fput", function(thing, list) {
+    var l = lexpr(list); l.unshift(thing); return sifw(list, l);
+  });
 
-  def("lput", function(thing, list) { list = lexpr(list); list.push(thing); return list; });
+  def("lput", function(thing, list) {
+    var l = lexpr(list); l.push(thing); return sifw(list, l);
+  });
 
   def("array", function(size) {
     size = aexpr(size);
@@ -1190,7 +1205,9 @@ function LogoInterpreter(turtle, stream, savehook)
     }
   });
 
-  def("reverse", function(list) { return lexpr(list).reverse(); });
+  def("reverse", function(list) {
+    return sifw(list, lexpr(list).reverse());
+  });
 
   var gensym_index = 0;
   def("gensym", function() {
@@ -1211,11 +1228,11 @@ function LogoInterpreter(turtle, stream, savehook)
   def("last", function(list) { list = lexpr(list); return list[list.length - 1]; });
 
   def(["butfirst", "bf"], function(list) {
-    return Type(list) === 'word' ? String(list).substring(1) : lexpr(list).slice(1);
+    return sifw(list, lexpr(list).slice(1));
   });
 
   def(["butfirsts", "bfs"], function(list) {
-    return lexpr(list).map(function(x) { return lexpr(x).slice(1); });
+    return lexpr(list).map(function(x) { return sifw(x, lexpr(x).slice(1)); });
   });
 
   def(["butlast", "bl"], function(list) {
@@ -1226,14 +1243,16 @@ function LogoInterpreter(turtle, stream, savehook)
     index = aexpr(index);
     switch (Type(thing)) {
     case 'list':
-      if (index < 1 || index > thing.length) {
+      if (index < 1 || index > thing.length)
         throw new Error(__("Index out of bounds"));
-      }
       return thing[index - 1];
     case 'array':
       return thing.item(index);
     default:
-      return sexpr(thing).charAt(index);
+      thing = sexpr(thing);
+      if (index < 1 || index > thing.length)
+        throw new Error(__("Index out of bounds"));
+      return thing.charAt(index - 1);
     }
   });
 
@@ -1246,17 +1265,18 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   def("remove", function(thing, list) {
-    return lexpr(list).filter(function(x) { return !equal(x, thing); });
+    return sifw(list, lexpr(list).filter(function(x) { return !equal(x, thing); }));
   });
 
   def("remdup", function(list) {
-    var dict = Object.create(null);
-    return lexpr(list).filter(function(x) {
-      if (!dict[x]) { dict[x] = true; return true; } else { return false; }
-    });
+    // TODO: This only works with JS equality. Use equalp.
+    var set = new Set();
+    return sifw(list, lexpr(list).filter(function(x) {
+      if (set.has(x)) { return false; } else { set.add(x); return true; }
+    }));
   });
 
-  // TODO: quoted
+  // Not Supported: quoted
 
   //
   // 2.3 Data Mutators
@@ -1264,41 +1284,87 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("setitem", function(index, array, value) {
     index = aexpr(index);
+    if (Type(array) !== 'array')
+      throw new Error(__("Expected array"));
+
+    function contains(atom, value) {
+      if (atom === value) return true;
+      switch (Type(atom)) {
+      case 'list':
+        return atom.some(function(a) { return contains(a, value); });
+      case 'array':
+        return atom.list().some(function(a) { return contains(a, value); });
+      default:
+        return false;
+      }
+    }
+
+    if (contains(value, array))
+      throw new Error(__("SETITEM can't create circular array"));
+
+    array.setItem(index, value);
+  });
+
+  // Not Supported: mdsetitem
+
+  def(".setfirst", function(list, value) {
+     if (Type(list) !== 'list')
+      throw new Error(__(".SETFIRST expected list"));
+    list[0] = value;
+  });
+
+  def(".setbf", function(list, value) {
+    if (Type(list) !== 'list')
+      throw new Error(__(".SETBF expected non-empty list"));
+    if (list.length < 1)
+      throw new Error(__(".SETBF expected non-empty list"));
+    value = lexpr(value);
+    list.length = 1;
+    list.push.apply(list, value);
+  });
+
+  def(".setitem", function(index, array, value) {
+    index = aexpr(index);
     if (Type(array) !== 'array') {
       throw new Error(__("Expected array"));
     }
     array.setItem(index, value);
   });
 
-  // Not Supported: mdsetitem
-  // Not Supported: .setfirst
-  // Not Supported: .setbf
-  // Not Supported: .setitem
-
   def("push", function(stackname, thing) {
-    var stack = lexpr(getvar(stackname));
+    var got = getvar(stackname);
+    var stack = lexpr(got);
     stack.unshift(thing);
-    setvar(stackname, stack);
+    setvar(stackname, sifw(got, stack));
   });
 
   def("pop", function(stackname) {
-    return getvar(stackname).shift();
+    var got = getvar(stackname);
+    var stack = lexpr(got);
+    var atom = stack.shift();
+    setvar(stackname, sifw(got, stack));
+    return atom;
   });
 
   def("queue", function(stackname, thing) {
-    var stack = lexpr(getvar(stackname));
-    stack.push(thing);
-    setvar(stackname, stack);
+    var got = getvar(stackname);
+    var queue = lexpr(got);
+    queue.push(thing);
+    setvar(stackname, sifw(got, queue));
   });
 
   def("dequeue", function(stackname) {
-    return getvar(stackname).pop();
+    var got = getvar(stackname);
+    var queue = lexpr(got);
+    var atom = queue.pop();
+    setvar(stackname, sifw(got, queue));
+    return atom;
   });
+
 
   //
   // 2.4 Predicates
   //
-
 
   def(["wordp", "word?"], function(thing) { return Type(thing) === 'word' ? 1 : 0; });
   def(["listp", "list?"], function(thing) { return Type(thing) === 'list' ? 1 : 0; });
@@ -1773,7 +1839,7 @@ function LogoInterpreter(turtle, stream, savehook)
     }
   });
 
-  // Not Supported: setpallete
+  // Not Supported: setpalette
 
   def(["setpensize", "setwidth", "setpw"], function(a) {
     if (Type(a) === 'list') {
@@ -2381,7 +2447,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("run", function(statements) {
     statements = reparse(lexpr(statements));
-    return self.execute(statements);
+    return self.execute(statements, {returnResult: true});
   });
 
   def("runresult", function(statements) {
@@ -2468,7 +2534,7 @@ function LogoInterpreter(turtle, stream, savehook)
     test = aexpr(test);
     statements = reparse(lexpr(statements));
 
-    if (test) { return self.execute(statements); }
+    if (test) { return self.execute(statements, {returnResult: true}); }
   });
 
   def("ifelse", function(test, statements1, statements2) {
@@ -2476,7 +2542,7 @@ function LogoInterpreter(turtle, stream, savehook)
     statements1 = reparse(lexpr(statements1));
     statements2 = reparse(lexpr(statements2));
 
-    return self.execute(test ? statements1 : statements2);
+    return self.execute(test ? statements1 : statements2, {returnResult: true});
   });
 
   def("test", function(tf) {
@@ -2488,13 +2554,13 @@ function LogoInterpreter(turtle, stream, savehook)
   def(["iftrue", "ift"], function(statements) {
     statements = reparse(lexpr(statements));
     var tf = self.scopes[self.scopes.length - 1]._test;
-    if (tf) { return self.execute(statements); }
+    if (tf) { return self.execute(statements, {returnResult: true}); }
   });
 
   def(["iffalse", "iff"], function(statements) {
     statements = reparse(lexpr(statements));
     var tf = self.scopes[self.scopes.length - 1]._test;
-    if (!tf) { return self.execute(statements); }
+    if (!tf) { return self.execute(statements, {returnResult: true}); }
   });
 
   def("stop", function() {
@@ -2505,9 +2571,9 @@ function LogoInterpreter(turtle, stream, savehook)
     return Promise.reject({special: "output", value: atom});
   });
 
-  // TODO: catch
-  // TODO: throw
-  // TODO: error
+  // Not Supported: catch
+  // Not Supported: throw
+  // Not Supported: error
   // Not Supported: pause
   // Not Supported: continue
   // Not Supported: wait
@@ -2695,7 +2761,7 @@ function LogoInterpreter(turtle, stream, savehook)
       if (isKeyword(first, 'ELSE')) {
         return evaluateExpression(clause);
       }
-      if (evaluateExpression(lexpr(first))) {
+      if (evaluateExpression(reparse(lexpr(first)))) {
         return evaluateExpression(clause);
       }
     }

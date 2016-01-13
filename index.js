@@ -416,7 +416,7 @@ function initInput() {
 //
 (function() {
   savehook = hook(savehook, function(name, def) {
-    var parent = $('#library');
+    var parent = $('#library .snippets');
     if (def)
       insertSnippet(def, parent, name);
     else
@@ -424,12 +424,12 @@ function initInput() {
   });
 
   historyhook = hook(historyhook, function(entry) {
-    var parent = $('#history');
+    var parent = $('#history .snippets');
     insertSnippet(entry, parent);
   });
 
   clearhistoryhook = hook(clearhistoryhook, function() {
-    var parent = $('#history');
+    var parent = $('#history .snippets');
     while (parent.firstChild)
       parent.removeChild(parent.firstChild);
   });
