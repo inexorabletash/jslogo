@@ -899,6 +899,10 @@ function LogoInterpreter(turtle, stream, savehook)
 
 
   self.run = function(string, options) {
+    if (self._pendingPromise) {
+      var runner = self.run.bind(self, string, options);
+      return self._queueCall(runner);
+    }
     options = Object(options);
     if (self.turtle) { self.turtle.begin(); }
 
@@ -907,18 +911,76 @@ function LogoInterpreter(turtle, stream, savehook)
       var atoms = parse(string);
 
       // And execute it!
-      return self.execute(atoms, options);
+      var promise = self.execute(atoms, options).then(null, function (err) {
+        if (err && err.special == "bye") {
+          return undefined;
+        }
+        if (self.turtle) {
+          self.turtle.end();
+        }
+        throw err;
+      });
+      this._setPendingPromise(promise);
+      self._pendingPromise = promise;
+      return promise;
     } catch (e) {
       // FIXME: doesn't work with promises
       if (e instanceof Bye) {
         // clean exit
-        return undefined;
+        return Promise.resolve(undefined);
       } else {
-        throw e;
+        return Promise.reject(e);
       }
     } finally {
       if (self.turtle) { self.turtle.end(); }
     }
+  };
+
+  //----------------------------------------------------------------------
+  // Helpers to ensure calls to run() are serialized:
+  //----------------------------------------------------------------------
+
+  // When there's an outstanding call to .run() (whose promise hasn't resolved
+  // or rejected), then this attribute contains that promise:
+  self._pendingPromise = null;
+
+  // This is a list of resolvers waiting in line to start their .run() work:
+  self._pendingPromiseQueue = [];
+
+  // Declares we have a promise that any other calls to .run() must wait on:
+  self._setPendingPromise = function(promise) {
+    if (self._pendingPromise) {
+      throw new Error("Cannot overwrite pendingPromise");
+    }
+    self._pendingPromise = promise;
+    var cleanup = self._unsetPendingPromise.bind(self, promise);
+    promise.then(cleanup, cleanup);
+  };
+
+  // Called by above; declares aforementioned promise has completed:
+  self._unsetPendingPromise = function(promise) {
+    if (! self._pendingPromise) {
+      console.warn("Error: tried to unset pendingPromise when there was none");
+    } else if (self._pendingPromise != promise) {
+      console.warn("Error: tried to unset pendingPromise when a different promise was active");
+    } else {
+      self._pendingPromise = null;
+      var resolver = self._pendingPromiseQueue.shift();
+      if (resolver) {
+        resolver();
+      }
+    }
+  };
+
+  // If .run() can't run, then this queues that call to run and returns a
+  // promise that will run and resolve when this call's turn comes up
+  self._queueCall = function(func) {
+    var resolver;
+    var ready = new Promise(function (resolve) {
+      resolver = resolve;
+    });
+    this._pendingPromiseQueue.push(resolver);
+    return ready.then(func);
   };
 
 
