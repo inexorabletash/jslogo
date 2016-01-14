@@ -24,8 +24,38 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
   function rad2deg(r) { return r * 180 / Math.PI; }
 
   var self = this;
+
+  self.speed = 3;
+  self.speed_interval = 25;
+
   function moveto(x, y) {
     function _go(x1, y1, x2, y2) {
+      var posx = x1;
+      var posy = y1;
+      var steps = Math.floor(Math.sqrt(Math.pow(x1-x2, 2)+Math.pow(y1-y2, 2))/self.speed);
+      var intx = (x2-x1)/steps;
+      var inty = (y2-y1)/steps;
+      return new Promise(function (resolve, reject) {
+        var count = steps;
+        var timeout = setInterval(function () {
+          try {
+            count--;
+            _goLine(posx, posy, posx+intx, posy+inty);
+            posx += intx;
+            posy += inty;
+            if (! count) {
+              clearTimeout(timeout);
+              resolve();
+            }
+          } catch (e) {
+            clearTimeout(timeout);
+            reject(e);
+          }
+        }, self.speed_interval);
+      });
+    }
+
+    function _goLine(x1, y1, x2, y2) {
       if (self.filling) {
         canvas_ctx.lineTo(x1, y1);
         canvas_ctx.lineTo(x2, y2);
@@ -44,10 +74,10 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
 
       switch (self.turtlemode) {
         case 'window':
-          _go(self.x, self.y, x, y);
-          self.x = x;
-          self.y = y;
-          return;
+          return _go(self.x, self.y, x, y).then(function () {
+            self.x = x;
+            self.y = y;
+          });
 
         default:
         case 'wrap':
@@ -93,23 +123,22 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
             wy = less ? height : 0;
           }
 
-          _go(self.x, self.y, ix, iy);
+          return _go(self.x, self.y, ix, iy).then(function () {
 
-          if (self.turtlemode === 'fence') {
-            // FENCE - stop on collision
-            self.x = ix;
-            self.y = iy;
-            return;
-          } else {
-            // WRAP - keep going
-            self.x = wx;
-            self.y = wy;
-            if (fx === 1 && fy === 1) {
+            if (self.turtlemode === 'fence') {
+              // FENCE - stop on collision
+              self.x = ix;
+              self.y = iy;
               return;
+            } else {
+              // WRAP - keep going
+              self.x = wx;
+              self.y = wy;
+              if (fx === 1 && fy === 1) {
+                return;
+              }
             }
-          }
-
-          break;
+          });
       }
     }
   }
@@ -127,12 +156,12 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
 
     x = this.x + distance * Math.cos(this.r);
     y = this.y - distance * Math.sin(this.r);
-    moveto(x, y);
-
-    if (point) {
-      this.x = saved_x;
-      this.y = saved_y;
-    }
+    return moveto(x, y).then(function () {
+      if (point) {
+        this.x = saved_x;
+        this.y = saved_y;
+      }
+    });
   };
 
   this.turn = function(angle) {
@@ -200,7 +229,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     x = (x === undefined) ? this.x : x + (width / 2);
     y = (y === undefined) ? this.y : -y + (height / 2);
 
-    moveto(x, y);
+    return moveto(x, y);
   };
 
   this.towards = function(x, y) {
@@ -231,8 +260,9 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
   };
 
   this.home = function() {
-    moveto(width / 2, height / 2);
-    this.r = deg2rad(90);
+    return moveto(width / 2, height / 2).then(function () {
+      this.r = deg2rad(90);
+    });
   };
 
   this.showturtle = function() {

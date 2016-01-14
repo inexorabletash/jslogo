@@ -209,13 +209,11 @@ function initInput() {
       input.setValue('');
     }
     setTimeout(function() {
-      try {
-        logo.run(v);
-      } catch (e) {
+      logo.run(v).catch(function (e) {
         error.innerHTML = '';
         error.appendChild(document.createTextNode(e.message));
         error.classList.add('shown');
-      }
+      });
     }, 100);
   }
 
@@ -666,11 +664,9 @@ window.addEventListener('DOMContentLoaded', function() {
     if (param.length > 0) {
       param = decodeURIComponent(param.substring(1).replace(/\_/g, ' '));
       input.setValue(param);
-      try {
-        logo.run(param);
-      } catch (e) {
+      logo.run(param).catch(function (e) {
         window.alert("Error: " + e.message);
-      }
+      });
     }
   }
 

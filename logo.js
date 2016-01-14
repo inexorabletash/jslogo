@@ -906,34 +906,27 @@ function LogoInterpreter(turtle, stream, savehook)
     options = Object(options);
     if (self.turtle) { self.turtle.begin(); }
 
-    try {
-      // Parse it
-      var atoms = parse(string);
+    // Parse it
+    var atoms = parse(string);
 
-      // And execute it!
-      var promise = self.execute(atoms, options).then(null, function (err) {
-        if (err && err.special == "bye") {
-          return undefined;
-        }
-        if (self.turtle) {
-          self.turtle.end();
-        }
-        throw err;
-      });
-      this._setPendingPromise(promise);
-      self._pendingPromise = promise;
-      return promise;
-    } catch (e) {
-      // FIXME: doesn't work with promises
-      if (e instanceof Bye) {
-        // clean exit
-        return Promise.resolve(undefined);
-      } else {
-        return Promise.reject(e);
+    // And execute it!
+    var promise = self.execute(atoms, options).then(function (result) {
+      if (self.turtle) {
+        self.turtle.end();
       }
-    } finally {
-      if (self.turtle) { self.turtle.end(); }
-    }
+      return result;
+    }, function (err) {
+      if (self.turtle) {
+        self.turtle.end();
+      }
+      if (err && err.special == "bye") {
+        return undefined;
+      }
+      throw err;
+    });
+    this._setPendingPromise(promise);
+    self._pendingPromise = promise;
+    return promise;
   };
 
   //----------------------------------------------------------------------
@@ -1764,34 +1757,34 @@ function LogoInterpreter(turtle, stream, savehook)
   //----------------------------------------------------------------------
   // 6.1 Turtle Motion
 
-  def(["forward", "fd"], function(a) { turtle.move(aexpr(a)); });
-  def(["back", "bk"], function(a) { turtle.move(-aexpr(a)); });
-  def(["left", "lt"], function(a) { turtle.turn(-aexpr(a)); });
-  def(["right", "rt"], function(a) { turtle.turn(aexpr(a)); });
+  def(["forward", "fd"], function(a) { return turtle.move(aexpr(a)); });
+  def(["back", "bk"], function(a) { return turtle.move(-aexpr(a)); });
+  def(["left", "lt"], function(a) { return turtle.turn(-aexpr(a)); });
+  def(["right", "rt"], function(a) { return turtle.turn(aexpr(a)); });
 
   // Left arrow:
-  def(["\u2190"], function() { turtle.turn(-15); });
+  def(["\u2190"], function() { return turtle.turn(-15); });
   // Right arrow:
-  def(["\u2192"], function() { turtle.turn(-15); });
+  def(["\u2192"], function() { return turtle.turn(-15); });
   // Up arrow:
-  def(["\u2191"], function() { turtle.move(10); });
+  def(["\u2191"], function() { return turtle.move(10); });
   // Down arrow:
-  def(["\u2193"], function() { turtle.turn(-10); });
+  def(["\u2193"], function() { return turtle.turn(-10); });
 
 
   def("setpos", function(l) {
     l = lexpr(l);
     if (l.length !== 2) { throw new Error(__("Expected list of length 2")); }
-    turtle.setposition(aexpr(l[0]), aexpr(l[1]));
+    return turtle.setposition(aexpr(l[0]), aexpr(l[1]));
   });
-  def("setxy", function(x, y) { turtle.setposition(aexpr(x), aexpr(y)); });
-  def("setx", function(x) { turtle.setposition(aexpr(x), undefined); }); // TODO: Replace with ...?
-  def("sety", function(y) { turtle.setposition(undefined, aexpr(y)); });
-  def(["setheading", "seth"], function(a) { turtle.setheading(aexpr(a)); });
+  def("setxy", function(x, y) { return turtle.setposition(aexpr(x), aexpr(y)); });
+  def("setx", function(x) { return turtle.setposition(aexpr(x), undefined); }); // TODO: Replace with ...?
+  def("sety", function(y) { return turtle.setposition(undefined, aexpr(y)); });
+  def(["setheading", "seth"], function(a) { return turtle.setheading(aexpr(a)); });
 
-  def("home", function() { turtle.home(); });
+  def("home", function() { return turtle.home(); });
 
-  def("arc", function(angle, radius) { turtle.arc(aexpr(angle), aexpr(radius)); });
+  def("arc", function(angle, radius) { return turtle.arc(aexpr(angle), aexpr(radius)); });
 
   //
   // 6.2 Turtle Motion Queries
@@ -1813,23 +1806,31 @@ function LogoInterpreter(turtle, stream, savehook)
   // 6.3 Turtle and Window Control
   //
 
-  def(["showturtle", "st"], function() { turtle.showturtle(); });
-  def(["hideturtle", "ht"], function() { turtle.hideturtle(); });
-  def("clean", function() { turtle.clear(); });
-  def(["clearscreen", "cs"], function() { turtle.clearscreen(); });
+  def(["showturtle", "st"], function() { return turtle.showturtle(); });
+  def(["hideturtle", "ht"], function() { return turtle.hideturtle(); });
+  def("clean", function() { return turtle.clear(); });
+  def(["clearscreen", "cs"], function() { return turtle.clearscreen(); });
 
-  def("wrap", function() { turtle.setturtlemode('wrap'); });
-  def("window", function() { turtle.setturtlemode('window'); });
-  def("fence", function() { turtle.setturtlemode('fence'); });
+  def("wrap", function() { return turtle.setturtlemode('wrap'); });
+  def("window", function() { return turtle.setturtlemode('window'); });
+  def("fence", function() { return turtle.setturtlemode('fence'); });
 
-  def("fill", function() { turtle.fill(); });
+  def("fill", function() { return turtle.fill(); });
 
   def("filled", function(fillcolor, statements) {
     fillcolor = sexpr(fillcolor);
     statements = reparse(lexpr(statements));
     turtle.beginpath();
     try {
-      self.execute(statements);
+      return self.execute(statements).then(
+        function (result) {
+          turtle.fillpath(fillcolor);
+          return result;
+        },
+        function (err) {
+          turtle.fillpath(fillcolor);
+          throw err;
+        });
     } finally {
       turtle.fillpath(fillcolor);
     }
@@ -1837,10 +1838,10 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("label", function(a) {
     var s = Array.from(arguments).map(stringify_nodecorate).join(" ");
-    turtle.drawtext(s);
+    return turtle.drawtext(s);
   });
 
-  def("setlabelheight", function(a) { turtle.setfontsize(aexpr(a)); });
+  def("setlabelheight", function(a) { return turtle.setfontsize(aexpr(a)); });
 
   // Not Supported: textscreen
   // Not Supported: fullscreen
@@ -1870,12 +1871,12 @@ function LogoInterpreter(turtle, stream, savehook)
   //
   // 6.5 Pen and Background Control
   //
-  def(["pendown", "pd"], function() { turtle.pendown(); });
-  def(["penup", "pu"], function() { turtle.penup(); });
+  def(["pendown", "pd"], function() { return turtle.pendown(); });
+  def(["penup", "pu"], function() { return turtle.penup(); });
 
-  def(["penpaint", "ppt"], function() { turtle.setpenmode('paint'); });
-  def(["penerase", "pe"], function() { turtle.setpenmode('erase'); });
-  def(["penreverse", "px"], function() { turtle.setpenmode('reverse'); });
+  def(["penpaint", "ppt"], function() { return turtle.setpenmode('paint'); });
+  def(["penerase", "pe"], function() { return turtle.setpenmode('erase'); });
+  def(["penreverse", "px"], function() { return turtle.setpenmode('reverse'); });
 
   def(["setpencolor", "setpc", "setcolor"], function(color) {
     function adjust(n) {
@@ -1891,9 +1892,9 @@ function LogoInterpreter(turtle, stream, savehook)
       var rr = (r < 16 ? "0" : "") + r.toString(16);
       var gg = (g < 16 ? "0" : "") + g.toString(16);
       var bb = (b < 16 ? "0" : "") + b.toString(16);
-      turtle.setcolor('#' + rr + gg + bb);
+      return turtle.setcolor('#' + rr + gg + bb);
     } else {
-      turtle.setcolor(sexpr(color));
+      return turtle.setcolor(sexpr(color));
     }
   });
 
@@ -1901,9 +1902,9 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def(["setpensize", "setwidth", "setpw"], function(a) {
     if (Type(a) === 'list') {
-      turtle.setwidth(aexpr(a[0]));
+      return turtle.setwidth(aexpr(a[0]));
     } else {
-      turtle.setwidth(aexpr(a));
+      return turtle.setwidth(aexpr(a));
     }
   });
 
