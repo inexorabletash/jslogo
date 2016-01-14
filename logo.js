@@ -80,6 +80,22 @@ function LogoInterpreter(turtle, stream, savehook)
     return value && value.then && value.catch;
   }
 
+  function promiseFinally(promise, finalBlock) {
+    return promise.then(
+      function (result) {
+        return Promise.resolve(finalBlock()).then(
+          function () {
+            return result;
+          });
+      },
+      function (err) {
+        return Promise.resolve(finalBlock()).then(
+          function () {
+            throw err;
+          });
+      });
+  }
+
   // Based on: http://www.jbouchard.net/chris/blog/2008/01/currying-in-javascript-fun-for-whole.html
   function to_arity(func, arity) {
     var parms = [];
@@ -2524,34 +2540,28 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   def("repeat", function(count, statements) {
-    return new Promise(function (resolve, reject) {
+    var old_repcount = self.repcount;
+    return promiseFinally(new Promise(function (resolve, reject) {
       count = aexpr(count);
       statements = reparse(lexpr(statements));
       var i = 1;
       function runLoop() {
-        while (i <= count) {
-          var old_repcount = self.repcount;
-          self.repcount = i;
-          i++;
-          var result;
-          try {
-            result = self.execute(statements);
-          } finally {
-            self.repcount = old_repcount;
-          }
-          if (isPromise(result)) {
-            result.then(runLoop).catch(function (err) {
-              i = count;
-              reject(err);
-            });
-            break;
-          }
-        }
-        if (i <= count) {
+        if (i > count) {
           resolve();
+          return;
         }
+        self.repcount = i;
+        i++;
+        result = self.execute(statements);
+        result.then(function () {
+          runLoop();
+        }, function (err) {
+          reject(err);
+        });
       }
       runLoop();
+    }), function () {
+      self.repcount = old_repcount;
     });
   });
 
