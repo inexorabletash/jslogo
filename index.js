@@ -209,12 +209,21 @@ function initInput() {
       input.setValue('');
     }
     setTimeout(function() {
-      logo.run(v).catch(function (e) {
+      setRun(false);
+      logo.run(v).then(function () {
+        setRun(true);
+      }).catch(function (e) {
         error.innerHTML = '';
         error.appendChild(document.createTextNode(e.message));
         error.classList.add('shown');
+        setRun(true);
       });
     }, 100);
+  }
+
+  function stop() {
+    logo.stop();
+    setRun(true);
   }
 
   input.run = run;
@@ -358,8 +367,18 @@ function initInput() {
   });
 
   $('#run').addEventListener('click', run);
+  $('#stop').addEventListener('click', stop);
   $('#clear').addEventListener('click', clear);
 
+  function setRun(canRun) {
+    if (canRun) {
+      $('#run').style.display = '';
+      $('#stop').style.display = 'none';
+    } else {
+      $('#run').style.display = 'none';
+      $('#stop').style.display = '';
+    }
+  }
 
   window.addEventListener('message', function(e) {
     if ('example' in e.data) {
