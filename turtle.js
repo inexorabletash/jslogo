@@ -28,8 +28,11 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
   self.speed = 3;
   self.speed_interval = 25;
 
-  function moveto(x, y) {
+  function moveto(x, y, fast) {
     function _go(x1, y1, x2, y2) {
+      if (fast) {
+        return Promise.resolve(_goLine(x1, y1, x2, y2));
+      }
       var posx = x1;
       var posy = y1;
       var steps = Math.floor(Math.sqrt(Math.pow(x1-x2, 2)+Math.pow(y1-y2, 2))/self.speed);
@@ -244,8 +247,9 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
   };
 
   this.clearscreen = function() {
-    this.home();
-    this.clear();
+    return this.home(true).then((function () {
+      return this.clear();
+    }).bind(this));
   };
 
   this.clear = function() {
@@ -259,8 +263,8 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     }
   };
 
-  this.home = function() {
-    return moveto(width / 2, height / 2).then(function () {
+  this.home = function(fast) {
+    return moveto(width / 2, height / 2, fast).then(function () {
       this.r = deg2rad(90);
     });
   };
