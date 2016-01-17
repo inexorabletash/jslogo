@@ -2681,27 +2681,34 @@ function LogoInterpreter(turtle, stream, savehook)
     function sign(x) { return x < 0 ? -1 : x > 0 ? 1 : 0; }
 
     var varname = sexpr(control.shift());
+    // FIXME: could be promises:
     var start = aexpr(evaluateExpression(control));
     var limit = aexpr(evaluateExpression(control));
 
     var step;
+    // FIXME: also could be promise:
+    step = (control.length) ?
+      aexpr(evaluateExpression(control.slice())) : sign(limit - start);
     var current = start;
     var stop = false;
     return new Promise(function (resolve, reject) {
       function runLoop() {
-        if (sign(current - limit) !== sign(step)) {
+        if (sign(limit - current) !== sign(step)) {
           resolve();
           return;
         }
         setvar(varname, current);
         var result = self.execute(statements);
-        step = (control.length) ?
-          aexpr(evaluateExpression(control.slice())) : sign(limit - start);
         current += step;
         result.catch(reject).then(runLoop);
       }
       runLoop();
     });
+  });
+
+  def("dotimes", function(control, statements) {
+    control = reparse(lexpr(control));
+    return self.routines.get("for")([control[0], 0, control[1]], statements);
   });
 
   function checkevalblock(block) {
