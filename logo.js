@@ -1739,15 +1739,37 @@ function LogoInterpreter(turtle, stream, savehook)
   def("true", function() { return 1; });
   def("false", function() { return 0; });
 
-// FIXME: needs to handle promises
   def("and", function(a, b) {
-    return Array.from(arguments).every(function(f) { return f(); }) ? 1 : 0;
+    var args = Array.from(arguments);
+    return checker(args, function (value) {return ! value;});
   }, {noeval: true});
 
-// FIXME: needs to handle promises
   def("or", function(a, b) {
-    return Array.from(arguments).some(function(f) { return f(); }) ? 1 : 0;
+    var args = Array.from(arguments);
+    return checker(args, function (value) {return value;});
   }, {noeval: true});
+
+  function _checker(args, shouldStop) {
+    if (! args.length) {
+      return Promise.resolve(true);
+    }
+    return new Promise(function (resolve, reject) {
+      function runLoop() {
+        if (args.length == 1) {
+          return resolve(args[0]());
+        }
+        var result = Promise.resolve(args.shift());
+        result.then(function (value) {
+          if (shouldStop(value)) {
+            resolve(value);
+          }
+          runLoop();
+        }, function (err) {
+          reject(err);
+        });
+      }
+    });
+  }
 
   def("xor", function(a, b) {
     return Array.from(arguments).map(aexpr)
