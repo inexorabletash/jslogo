@@ -2675,20 +2675,16 @@ function LogoInterpreter(turtle, stream, savehook)
     var stop = false;
     return new Promise(function (resolve, reject) {
       function runLoop() {
-        while ((! stop) && sign(current - limit) !== sign(step)) {
-          setvar(varname, current);
-          var result = self.execute(statements);
-          step = (control.length) ?
-            aexpr(evaluateExpression(control.slice())) : sign(limit - start);
-          current += step;
-          if (isPromise(result)) {
-            result.then(runLoop).catch(function (err) {
-              stop = true;
-              reject(err);
-            });
-            break;
-          }
+        if (sign(current - limit) !== sign(step)) {
+          resolve();
+          return;
         }
+        setvar(varname, current);
+        var result = self.execute(statements);
+        step = (control.length) ?
+          aexpr(evaluateExpression(control.slice())) : sign(limit - start);
+        current += step;
+        result.catch(reject).then(runLoop);
       }
       runLoop();
     });
