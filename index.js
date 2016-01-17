@@ -222,7 +222,7 @@ function initInput() {
   }
 
   function stop() {
-    logo.stop();
+    logo.bye();
     setRun(true);
   }
 

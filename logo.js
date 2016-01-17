@@ -221,7 +221,7 @@ function LogoInterpreter(turtle, stream, savehook)
   self.scopes = [new StringMap(true)];
   self.plists = new StringMap(true);
   self.prng = new PRNG(Math.random() * 0x7fffffff);
-  self.forceStop = false;
+  self.forceBye = false;
 
   //----------------------------------------------------------------------
   //
@@ -892,16 +892,15 @@ function LogoInterpreter(turtle, stream, savehook)
     return new Promise(function (resolve, reject) {
       var lastResult;
       function runLoop() {
-        if (self.forceStop) {
-          self.forceStop = false;
-          console.log("Stopping with statement:", statements[0]);
-          reject({special: "stop"});
+        if (self.forceBye) {
+          self.forceBye = false;
+          reject({special: "bye"});
           return;
         }
         while (statements.length) {
           var result = evaluateExpression(statements);
           if (isPromise(result)) {
-            result.then(function (value) {
+            lastResult = result.then(function (value) {
               lastResult = value;
               runLoop();
             }).catch(function (err) {
@@ -921,8 +920,8 @@ function LogoInterpreter(turtle, stream, savehook)
   };
 
   // FIXME: should this confirm that something is running?
-  self.stop = function() {
-    self.forceStop = true;
+  self.bye = function() {
+    self.forceBye = true;
   };
 
   self.run = function(string, options) {
@@ -2627,7 +2626,7 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   def("stop", function() {
-    return Promise.reject({special: "stop"});
+    return Promise.reject({special: "output", value: undefined});
   });
 
   def(["output", "op"], function(atom) {
