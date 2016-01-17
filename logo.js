@@ -2583,27 +2583,19 @@ function LogoInterpreter(turtle, stream, savehook)
   def("forever", function(statements) {
     statements = reparse(lexpr(statements));
     return new Promise(function (resolve, reject) {
-      var stop = false;
       var i = 1;
       function runLoop() {
-        while (! stop) {
-          var old_repcount = self.repcount;
-          self.repcount = i;
-          i++;
-          var result;
-          try {
-            result = self.execute(statements);
-          } finally {
-            self.repcount = old_repcount;
-          }
-          if (isPromise(result)) {
-            result.then(runLoop).catch(function (err) {
-              stop = true;
-              reject(err);
-            });
-            break;
-          }
-        }
+        var old_repcount = self.repcount;
+        self.repcount = i;
+        i++;
+        var result = self.execute(statements);
+        promiseFinally(result, function () {
+          self.repcount = old_repcount;
+        }).then(function () {
+          runLoop();
+        }, function (err) {
+          reject(err);
+        });
       }
       runLoop();
     });
