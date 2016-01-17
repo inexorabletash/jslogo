@@ -2796,13 +2796,13 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("do.until", function(block, tf) {
     block = checkevalblock(block);
-    var nottf = function () {return notpromise(tf)};
+    var nottf = function () { return notpromise(tf); };
     return self.routines["do.while"](block, nottf);
   }, {noeval: true});
 
   def("until", function(tf, block) {
     block = checkevalblock(block);
-    var nottf = function () {return notpromise(tf)};
+    var nottf = function () { return notpromise(tf); };
     return self.routines["while"](nottf, block);
   }, {noeval: true});
 
@@ -2901,18 +2901,13 @@ function LogoInterpreter(turtle, stream, savehook)
     var index = 0;
     return new Promise(function (resolve, reject) {
       function runLoop() {
-        while (index < list.length) {
-          var result = routine(list[index]);
-          index++;
-          if (isPromise(result)) {
-            result.then(runLoop).catch(function (err) {
-              index = list.length;
-              reject(err);
-            });
-            return;
-          }
+        if (index >= list.length) {
+          resolve();
+          return;
         }
-        resolve();
+        var result = Promise.resolve(routine(list[index]));
+        index++;
+        result.then(runLoop, reject);
       }
       runLoop();
     });
@@ -2936,23 +2931,16 @@ function LogoInterpreter(turtle, stream, savehook)
     var index = 0;
     return new Promise(function (resolve, reject) {
       function runLoop() {
-        while (index < list.length) {
-          var result = routine(list[index]);
-          index++;
-          if (isPromise(result)) {
-            result.then(function (value) {
-              mapped.push(value);
-              runLoop();
-            }).catch(function (err) {
-              index = list.length;
-              reject(err);
-            });
-            return;
-          } else {
-            mapped.push(result);
-          }
+        if (index >= list.length) {
+          resolve(mapped);
+          return;
         }
-        resolve(mapped);
+        var result = Promise.resolve(routine(list[index]));
+        index++;
+        result.then(function (value) {
+          mapped.push(value);
+          runLoop();
+        }, reject);
       }
       runLoop();
     });
@@ -2977,27 +2965,19 @@ function LogoInterpreter(turtle, stream, savehook)
     var index = 0;
     return new Promise(function (resolve, reject) {
       function runLoop() {
-        while (index < list.length) {
-          var item = list[index];
-          var result = routine(item);
-          index++;
-          if (isPromise(result)) {
-            result.then(function (value) {
-              if (value) {
-                // FIXME: item isn't well closed here
-                filtered.push(item);
-              }
-              runLoop();
-            }).catch(function (err) {
-              index = list.length;
-              reject(err);
-            });
-            return;
-          } else if (result) {
+        if (index >= list.length) {
+          resolve(filtered);
+          return;
+        }
+        var item = list[index];
+        var result = Promise.resolve(routine(item));
+        index++;
+        result.then(function (value) {
+          if (value) {
             filtered.push(item);
           }
-        }
-        resolve(filtered);
+          runLoop();
+        }, reject);
       }
       runLoop();
     });
@@ -3019,30 +2999,20 @@ function LogoInterpreter(turtle, stream, savehook)
     var index = 0;
     return new Promise(function (resolve, reject) {
       function runLoop() {
-        while (index < list.length) {
-          var item = list[index];
-          var result = routine(item);
-          index++;
-          if (isPromise(result)) {
-            result.then(function (value) {
-              if (value) {
-                // FIXME: not well closed
-                resolve(item);
-              } else {
-                runLoop();
-              }
-            }).catch(function (err) {
-              index = list.length;
-              reject(err);
-            });
-            return;
-          }
-          if (result) {
-            resolve(item);
-            break;
-          }
+        if (index >= list.length) {
+          resolve([]);
+          return;
         }
-        resolve([]);
+        var item = list[index];
+        var result = Promise.resolve(routine(item));
+        index++;
+        result.then(function (value) {
+          if (value) {
+            resolve(item);
+          } else {
+            runLoop();
+          }
+        }, reject);
       }
       runLoop();
     });
