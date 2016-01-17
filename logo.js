@@ -894,6 +894,7 @@ function LogoInterpreter(turtle, stream, savehook)
       function runLoop() {
         if (self.forceStop) {
           self.forceStop = false;
+          console.log("Stopping with statement:", statements[0]);
           reject({special: "stop"});
           return;
         }
@@ -1150,32 +1151,14 @@ function LogoInterpreter(turtle, stream, savehook)
         scope.set(inputs[i], {value: arguments[i]});
       }
       self.scopes.push(scope);
-
-      try {
-        // Execute the block
-        try {
-          var result = self.execute(block);
-          if (isPromise(result)) {
-            return result.then(null, function (err) {
-              if (err && err.special == "output") {
-                return err.value;
-              }
-              throw err;
-            });
-          }
-          return result;
-        } catch (e) {
-          // From OUTPUT
-          if (e instanceof Output) {
-            return e.output;
-          } else {
-            throw e;
-          }
+      return promiseFinally(self.execute(block).then(null, function (err) {
+        if (err && err.special == "output") {
+          return err.value;
         }
-      } finally {
-        // Close the scope
+        throw err;
+      }), function () {
         self.scopes.pop();
-      }
+      });
     };
 
     var proc = to_arity(func, inputs.length);
