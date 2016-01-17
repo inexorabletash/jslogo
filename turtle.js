@@ -345,6 +345,10 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     }
   };
 
+  this.setspeed = function(pixels) {
+    this.speed = pixels;
+  };
+
   this.getstate = function () {
     return {
       isturtlestate: true,
