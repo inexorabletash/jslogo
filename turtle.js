@@ -36,6 +36,10 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
       var posx = x1;
       var posy = y1;
       var steps = Math.floor(Math.sqrt(Math.pow(x1-x2, 2)+Math.pow(y1-y2, 2))/self.speed);
+      if (! steps) {
+        _goLine(x1, y1, x2, y2);
+        return Promise.resolve();
+      }
       var intx = (x2-x1)/steps;
       var inty = (y2-y1)/steps;
       return new Promise(function (resolve, reject) {
