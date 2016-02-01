@@ -2582,11 +2582,7 @@ function LogoInterpreter(turtle, stream, savehook)
         var result = self.execute(statements);
         promiseFinally(result, function () {
           self.repcount = old_repcount;
-        }).then(function () {
-          runLoop();
-        }, function (err) {
-          reject(err);
-        });
+        }).then(runLoop, reject);
       }
       runLoop();
     });
