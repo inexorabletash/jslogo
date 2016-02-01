@@ -1851,19 +1851,11 @@ function LogoInterpreter(turtle, stream, savehook)
     fillcolor = sexpr(fillcolor);
     statements = reparse(lexpr(statements));
     turtle.beginpath();
-    try {
-      return self.execute(statements).then(
-        function (result) {
-          turtle.fillpath(fillcolor);
-          return result;
-        },
-        function (err) {
-          turtle.fillpath(fillcolor);
-          throw err;
-        });
-    } finally {
-      turtle.fillpath(fillcolor);
-    }
+    return promiseFinally(
+      self.execute(statements),
+      function () {
+        turtle.fillpath(fillcolor);
+      });
   });
 
   def("label", function(a) {
