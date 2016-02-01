@@ -1740,17 +1740,17 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("and", function(a, b) {
     var args = Array.from(arguments);
-    return checker(args, function (value) {return ! value;});
+    return checker(args, function (value) {return ! value;}, 1);
   }, {noeval: true});
 
   def("or", function(a, b) {
     var args = Array.from(arguments);
-    return checker(args, function (value) {return value;});
+    return checker(args, function (value) {return value;}, 0);
   }, {noeval: true});
 
-  function _checker(args, shouldStop) {
+  function _checker(args, shouldStop, defaultValue) {
     if (! args.length) {
-      return Promise.resolve(true);
+      return Promise.resolve(defaultValue);
     }
     return new Promise(function (resolve, reject) {
       function runLoop() {
