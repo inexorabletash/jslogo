@@ -70,11 +70,9 @@ QUnit.module("Logo Unit Tests", {
         } else {
           t.strictEqual(result, expected, expression);
         }
-        done();
       }, function (failure) {
         t.strictEqual(failure, expected, expression);
-        done();
-      });
+      }).then(done);
     };
 
     this.assert_stream = function(expression, expected) {
@@ -86,13 +84,11 @@ QUnit.module("Logo Unit Tests", {
         var actual = this.stream.outputbuffer;
         this.stream.clear();
         t.equal(actual, expected, expression);
-        done();
       }).bind(this), (function (err) {
         var actual = this.stream.outputbuffer + "\nError: " + err;
         this.stream.clear();
         t.equal(actual, expected, expression);
-        done();
-      }).bind(this));
+      }).bind(this)).then(done);
     };
 
     this.assert_prompt = function(expression, expected) {
@@ -103,12 +99,10 @@ QUnit.module("Logo Unit Tests", {
         var actual = this.stream.last_prompt;
         this.stream.clear();
         t.equal(actual, expected, expression);
-        done();
       }, function (err) {
         t.equal("(no error)", err, expression);
         this.stream.clear();
-        done();
-      });
+      }).then(done);
     };
 
     this.assert_predicate = function(expression, predicate) {
@@ -116,11 +110,9 @@ QUnit.module("Logo Unit Tests", {
       var done = t.async();
       result.then(function (value) {
         t.ok(predicate(value), expression);
-        done();
       }, function (err) {
         t.equal("(no error)", err, expression);
-        done();
-      });
+      }).then(done);
     };
 
     this.assert_error = function(expression, expected) {
