@@ -930,11 +930,10 @@ function LogoInterpreter(turtle, stream, savehook)
       return self._queueCall(runner);
     }
     options = Object(options);
-    if (self.turtle) { self.turtle.begin(); }
-
     // Parse it
     var atoms = parse(string);
 
+    if (self.turtle) { self.turtle.begin(); }
     // And execute it!
     var promise = self.execute(atoms, options).then(function (result) {
       if (self.turtle) {
