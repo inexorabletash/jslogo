@@ -2559,11 +2559,7 @@ function LogoInterpreter(turtle, stream, savehook)
         self.repcount = i;
         i++;
         result = self.execute(statements);
-        result.then(function () {
-          runLoop();
-        }, function (err) {
-          reject(err);
-        });
+        result.then(runLoop, reject);
       }
       runLoop();
     }), function () {
