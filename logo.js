@@ -2624,11 +2624,11 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   def("stop", function() {
-    return Promise.reject(new Output());
+    throw new Output();
   });
 
   def(["output", "op"], function(atom) {
-    return Promise.reject(new Output(atom));
+    throw new Output(atom);
   });
 
   // Not Supported: catch
@@ -2639,11 +2639,11 @@ function LogoInterpreter(turtle, stream, savehook)
   // Not Supported: wait
 
   def("bye", function() {
-    return Promise.reject(new Bye);
+    throw new Bye;
   });
 
   def(".maybeoutput", function(value) {
-    return Promise.reject(new Output(value));
+    throw new Output(value);
   });
 
   // Not Supported: goto
