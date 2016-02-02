@@ -29,6 +29,9 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
   self.speed_interval = 25;
 
   function moveto(x, y, fast) {
+    if (! (self.down || self.filling)) {
+      fast = true;
+    }
     function _go(x1, y1, x2, y2) {
       if (fast) {
         return Promise.resolve(_goLine(x1, y1, x2, y2));
