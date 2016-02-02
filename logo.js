@@ -1741,33 +1741,32 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("and", function(a, b) {
     var args = Array.from(arguments);
-    return checker(args, function (value) {return ! value;}, 1);
+    return _checker(args, function (value) {return !value;}, 1);
   }, {noeval: true});
 
   def("or", function(a, b) {
     var args = Array.from(arguments);
-    return checker(args, function (value) {return value;}, 0);
+    return _checker(args, function (value) {return value;}, 0);
   }, {noeval: true});
 
   function _checker(args, shouldStop, defaultValue) {
-    if (! args.length) {
+    if (!args.length)
       return Promise.resolve(defaultValue);
-    }
-    return new Promise(function (resolve, reject) {
-      function runLoop() {
-        if (args.length == 1) {
-          return resolve(args[0]());
+    return new Promise(function(resolve, reject) {
+      (function runLoop() {
+        var r = args.shift()();
+        if (!args.length) {
+          resolve(r);
+          return;
         }
-        var result = Promise.resolve(args.shift());
-        result.then(function (value) {
+        Promise.resolve(r).then(function(value) {
           if (shouldStop(value)) {
             resolve(value);
+            return;
           }
           runLoop();
-        }, function (err) {
-          reject(err);
         });
-      }
+      }());
     });
   }
 
@@ -2559,7 +2558,7 @@ function LogoInterpreter(turtle, stream, savehook)
         }
         self.repcount = i;
         i++;
-        result = self.execute(statements);
+        var result = self.execute(statements);
         result.then(runLoop, reject);
       }
       runLoop();
