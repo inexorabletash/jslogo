@@ -894,7 +894,7 @@ function LogoInterpreter(turtle, stream, savehook)
       function runLoop() {
         if (self.forceBye) {
           self.forceBye = false;
-          reject({special: "bye"});
+          reject(new Bye);
           return;
         }
         while (statements.length) {
@@ -944,8 +944,10 @@ function LogoInterpreter(turtle, stream, savehook)
       if (self.turtle) {
         self.turtle.end();
       }
-      if (err && (err.special == "bye" || err.special == "stop")) {
-        return undefined;
+      if (err instanceof Bye)
+        return;
+      if (err && err.special == "stop") {
+        return;
       }
       throw err;
     });
@@ -2638,7 +2640,7 @@ function LogoInterpreter(turtle, stream, savehook)
   // Not Supported: wait
 
   def("bye", function() {
-    return Promise.reject({special: "bye"});
+    return Promise.reject(new Bye);
   });
 
   def(".maybeoutput", function(value) {
