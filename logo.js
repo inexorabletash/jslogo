@@ -1152,9 +1152,8 @@ function LogoInterpreter(turtle, stream, savehook)
       }
       self.scopes.push(scope);
       return promiseFinally(self.execute(block).then(null, function (err) {
-        if (err && err.special == "output") {
-          return err.value;
-        }
+        if (err instanceof Output)
+          return err.output;
         throw err;
       }), function () {
         self.scopes.pop();
@@ -2625,11 +2624,11 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   def("stop", function() {
-    return Promise.reject({special: "output", value: undefined});
+    return Promise.reject(new Output());
   });
 
   def(["output", "op"], function(atom) {
-    return Promise.reject({special: "output", value: atom});
+    return Promise.reject(new Output(atom));
   });
 
   // Not Supported: catch
@@ -2644,11 +2643,7 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   def(".maybeoutput", function(value) {
-    if (value !== undefined) {
-      return Promise.reject({special: "output", value: value});
-    } else {
-      return Promise.reject({special: "output"});
-    }
+    return Promise.reject(new Output(value));
   });
 
   // Not Supported: goto
