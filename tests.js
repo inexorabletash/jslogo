@@ -1054,12 +1054,11 @@ QUnit.test("Workspace Management", function(t) {
   // 7.7 Workspace Control
 });
 
-if (false) QUnit.test("Control Structures", function(t) {
-  t.expect(58);
+QUnit.test("Control Structures", function(t) {
+  //t.expect(58);
   //
   // 8.1 Control
   //
-
   this.assert_equals('make "c 0  run [ ]  :c', 0);
   this.assert_equals('make "c 0  run [ make "c 5 ]  :c', 5);
 
@@ -1114,6 +1113,7 @@ if (false) QUnit.test("Control Structures", function(t) {
 
   this.assert_equals('make "x 0  for [ r 1 5 ] [ make "x :x + :r ]  :x', 15);
   this.assert_equals('make "x 0  for [ r 0 10 2 ] [ make "x :x + :r ]  :x', 30);
+
   this.assert_equals('make "x 0  for [ r 10 0 -2 ] [ make "x :x + :r ]  :x', 30);
   this.assert_equals('make "x 0  for [ r 10 0 -2-2 ] [ make "x :x + :r ]  :x', 18);
 
@@ -1123,6 +1123,7 @@ if (false) QUnit.test("Control Structures", function(t) {
   this.assert_equals('make "x 0  do.until [ make "x :x + 1 ] :x > 10  :x', 11);
   this.assert_equals('make "x 0  until :x > 10 [ make "x :x + 1 ]     :x', 11);
 
+  return;
   this.assert_equals('to vowelp :letter ' +
                      '  output case :letter [ [[a e i o u] "true] [else "false] ] ' +
                      'end ' +

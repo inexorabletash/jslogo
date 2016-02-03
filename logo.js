@@ -2485,16 +2485,13 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("runresult", function(statements) {
     statements = reparse(lexpr(statements));
-    var result = self.execute(statements, {returnResult: true});
-    if (isPromise(result)) {
-      return result.then(function (r) {
-        return [r];
+    return self.execute(statements, {returnResult: true})
+      .then(function(result) {
+        if (result !== undefined)
+          return [result];
+        else
+          return [];
       });
-    } else if (result !== undefined) {
-      return [result];
-    } else {
-      return [];
-    }
   });
 
   def("repeat", function(count, statements) {
@@ -2612,29 +2609,39 @@ function LogoInterpreter(turtle, stream, savehook)
     function sign(x) { return x < 0 ? -1 : x > 0 ? 1 : 0; }
 
     var varname = sexpr(control.shift());
-    // FIXME: could be promises:
-    var start = aexpr(evaluateExpression(control));
-    var limit = aexpr(evaluateExpression(control));
+    var start, limit, step, current;
 
-    var step;
-    // FIXME: also could be promise:
-    step = (control.length) ?
-      aexpr(evaluateExpression(control.slice())) : sign(limit - start);
-    var current = start;
-    var stop = false;
-    return new Promise(function (resolve, reject) {
-      function runLoop() {
-        if (sign(limit - current) !== sign(step)) {
-          resolve();
-          return;
-        }
-        setvar(varname, current);
-        var result = self.execute(statements);
-        current += step;
-        result.catch(reject).then(runLoop);
-      }
-      runLoop();
-    });
+    return Promise.resolve(evaluateExpression(control))
+      .then(function(r) {
+        current = start = aexpr(r);
+        return evaluateExpression(control);
+      })
+      .then(function(r) {
+        limit = aexpr(r);
+      })
+      .then(function() {
+        return new Promise(function(resolve, reject) {
+          function runLoop() {
+            if (sign(current - limit) === sign(step)) {
+              resolve();
+              return;
+            }
+            setvar(varname, current);
+            self.execute(statements)
+              .then(function() {
+                return (control.length) ?
+                  evaluateExpression(control.slice()) : sign(limit - start);
+              })
+              .then(function(result) {
+                step = aexpr(result);
+                current += step;
+                runLoop();
+              })
+            .catch(reject);
+          }
+          runLoop();
+        });
+      });
   });
 
   def("dotimes", function(control, statements) {
@@ -2648,100 +2655,55 @@ function LogoInterpreter(turtle, stream, savehook)
     throw new Error(__("Expected block"));
   }
 
-  function whilechunk(runner) {
-    return new Promise(function (resolve, reject) {
-      function runLoop() {
-        var result = runner();
-        result.then(function (result) {
-          if (result) {
-            runLoop();
-          } else {
-            resolve();
-          }
-        }).catch(function (err) {
-          reject(err);
-        });
-      }
-      runLoop();
-    });
-  }
-
   def("do.while", function(block, tf) {
     block = checkevalblock(block);
-    return whilechunk(function () {
-      return new Promise(function (resolve, reject) {
-        var blockresult = Promise.resolve(self.execute(block));
-        blockresult.then(function () {
-          var cond = tf();
-          if (isPromise(cond)) {
-            cond.then(function (result) {
-              resolve(result);
-            }).catch(reject);
-          } else {
-            resolve(cond);
-          }
-        }).catch(reject);
-      });
+    return new Promise(function(resolve, reject) {
+      (function loop() {
+        self.execute(block)
+          .then(tf)
+          .then(function(cond) {
+            if (!cond) {
+              resolve();
+              return;
+            }
+            loop();
+          })
+          .catch(reject);
+      }());
     });
   }, {noeval: true});
 
   def("while", function(tf, block) {
     block = checkevalblock(block);
-    return whilechunk(function () {
-      return new Promise(function (resolve, reject) {
-        var cond = tf();
-        if (isPromise(cond)) {
-          cond.then(function (result) {
-            if (! result) {
-              resolve(result);
+    return new Promise(function(resolve, reject) {
+      (function loop() {
+        Promise.resolve(tf())
+          .then(function(cond) {
+            if (!cond) {
+              resolve();
               return;
             }
-            var blockresult = self.execute(block);
-            if (isPromise(blockresult)) {
-              blockresult.then(function () {
-                resolve(cond);
-              }).catch(reject);
-            } else {
-              resolve(result);
-            }
-          });
-        } else if (cond) {
-          var blockresult = self.execute(block);
-          if (isPromise(blockresult)) {
-            blockresult.then(function () {
-              resolve(cond);
-            }).catch(reject);
-          } else {
-            resolve(cond);
-          }
-        } else {
-          resolve(cond);
-        }
-      });
+            self.execute(block)
+              .then(loop);
+          })
+          .catch(reject);
+      }());
     });
   }, {noeval: true});
 
+
   function notpromise(tf) {
-    var cond = tf();
-    if (cond && cond.then) {
-      return cond.then(function (result) {
-        return ! result;
-      });
-    } else {
-      return ! cond;
-    }
+    return Promise.resolve(tf()).then(function(r) { return !r; });
   }
 
   def("do.until", function(block, tf) {
-    block = checkevalblock(block);
     var nottf = function () { return notpromise(tf); };
-    return self.routines["do.while"](block, nottf);
+    return self.routines.get("do.while")(block, nottf);
   }, {noeval: true});
 
   def("until", function(tf, block) {
-    block = checkevalblock(block);
     var nottf = function () { return notpromise(tf); };
-    return self.routines["while"](nottf, block);
+    return self.routines.get("while")(nottf, block);
   }, {noeval: true});
 
 // FIXME: not done
