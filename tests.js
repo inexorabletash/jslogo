@@ -116,9 +116,9 @@ QUnit.module("Logo Unit Tests", {
     };
 
     this.assert_error = function(expression, expected) {
+      var done = t.async();
       try {
         var result = this.interpreter.run(expression);
-        var done = t.async();
         result.then(function (result) {
           t.push(false, '(no error)', expected, 'Expected to error but did not: ' + expression);
           done();
@@ -1163,7 +1163,7 @@ if (false) QUnit.test("Control Structures", function(t) {
   // TODO: Structures, lists of lists
 });
 
-if (false) QUnit.test("Error Messages", function(t) {
+QUnit.test("Error Messages", function(t) {
   this.assert_error("to foo end show foo", "No output from procedure");
   this.assert_error("[ 1 2", "Expected ']'");
   this.assert_error("{ 1 2", "Expected '}'");

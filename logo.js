@@ -924,85 +924,37 @@ function LogoInterpreter(turtle, stream, savehook)
     self.forceBye = true;
   };
 
-  self.run = function(string, options) {
-    if (self._pendingPromise) {
-      var runner = self.run.bind(self, string, options);
-      return self._queueCall(runner);
-    }
-    options = Object(options);
-    // Parse it
-    var atoms = parse(string);
+  function noop() {}
+  var lastRun = Promise.resolve();
 
-    if (self.turtle) { self.turtle.begin(); }
-    // And execute it!
-    var promise = self.execute(atoms, options).then(function (result) {
-      if (self.turtle) {
-        self.turtle.end();
-      }
-      return result;
-    }, function (err) {
-      if (self.turtle) {
-        self.turtle.end();
-      }
-      if (err instanceof Bye)
-        return;
-      if (err && err.special == "stop") {
-        return;
-      }
-      throw err;
+  self.run = function(string, options) {
+    var promise = lastRun.then(function() {
+      options = Object(options);
+      // Parse it
+      var atoms = parse(string);
+
+      if (self.turtle)
+        self.turtle.begin();
+
+      // And execute it!
+      var p = self.execute(atoms, options);
+
+
+      // TODO: use promiseFinally() here
+      p.catch(noop).then(function() {
+        if (self.turtle)
+          self.turtle.end();
+      });
+
+      return p.catch(function(err) {
+        if (err instanceof Bye)
+          return;
+        throw err;
+      });
     });
-    this._setPendingPromise(promise);
-    self._pendingPromise = promise;
+    lastRun = promise.catch(noop);
     return promise;
   };
-
-  //----------------------------------------------------------------------
-  // Helpers to ensure calls to run() are serialized:
-  //----------------------------------------------------------------------
-
-  // When there's an outstanding call to .run() (whose promise hasn't resolved
-  // or rejected), then this attribute contains that promise:
-  self._pendingPromise = null;
-
-  // This is a list of resolvers waiting in line to start their .run() work:
-  self._pendingPromiseQueue = [];
-
-  // Declares we have a promise that any other calls to .run() must wait on:
-  self._setPendingPromise = function(promise) {
-    if (self._pendingPromise) {
-      throw new Error("Cannot overwrite pendingPromise");
-    }
-    self._pendingPromise = promise;
-    var cleanup = self._unsetPendingPromise.bind(self, promise);
-    promise.then(cleanup, cleanup);
-  };
-
-  // Called by above; declares aforementioned promise has completed:
-  self._unsetPendingPromise = function(promise) {
-    if (! self._pendingPromise) {
-      console.warn("Error: tried to unset pendingPromise when there was none");
-    } else if (self._pendingPromise != promise) {
-      console.warn("Error: tried to unset pendingPromise when a different promise was active");
-    } else {
-      self._pendingPromise = null;
-      var resolver = self._pendingPromiseQueue.shift();
-      if (resolver) {
-        resolver();
-      }
-    }
-  };
-
-  // If .run() can't run, then this queues that call to run and returns a
-  // promise that will run and resolve when this call's turn comes up
-  self._queueCall = function(func) {
-    var resolver;
-    var ready = new Promise(function (resolve) {
-      resolver = resolve;
-    });
-    this._pendingPromiseQueue.push(resolver);
-    return ready.then(func);
-  };
-
 
   self.definition = function(name, proc) {
 
