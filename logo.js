@@ -2706,7 +2706,6 @@ function LogoInterpreter(turtle, stream, savehook)
     return self.routines.get("while")(nottf, block);
   }, {noeval: true});
 
-// FIXME: not done
   def("case", function(value, clauses) {
     clauses = lexpr(clauses);
 
@@ -2723,21 +2722,32 @@ function LogoInterpreter(turtle, stream, savehook)
     return undefined;
   });
 
-// FIXME: not done
   def("cond", function(clauses) {
     clauses = lexpr(clauses);
 
-    for (var i = 0; i < clauses.length; ++i) {
-      var clause = lexpr(clauses[i]);
-      var first = clause.shift();
-      if (isKeyword(first, 'ELSE')) {
-        return evaluateExpression(clause);
-      }
-      if (evaluateExpression(reparse(lexpr(first)))) {
-        return evaluateExpression(clause);
-      }
-    }
-    return undefined;
+    return new Promise(function(resolve, reject) {
+      (function loop() {
+        if (!clauses.length) {
+          resolve();
+          return;
+        }
+        var clause = lexpr(clauses.shift());
+        var first = clause.shift();
+        if (isKeyword(first, 'ELSE')) {
+          resolve(evaluateExpression(clause));
+          return;
+        }
+        evaluateExpression(reparse(lexpr(first)))
+          .then(function(result) {
+            if (result) {
+              resolve(evaluateExpression(clause));
+              return;
+            }
+            loop();
+          })
+          .catch(reject);
+      }());
+    });
   });
 
   //

@@ -1123,7 +1123,6 @@ QUnit.test("Control Structures", function(t) {
   this.assert_equals('make "x 0  do.until [ make "x :x + 1 ] :x > 10  :x', 11);
   this.assert_equals('make "x 0  until :x > 10 [ make "x :x + 1 ]     :x', 11);
 
-  return;
   this.assert_equals('to vowelp :letter ' +
                      '  output case :letter [ [[a e i o u] "true] [else "false] ] ' +
                      'end ' +
@@ -1229,7 +1228,7 @@ QUnit.test("Error Messages", function(t) {
   this.assert_error('make "a { 1 2 3 }@1.5', "Don't know what to do with 0.5");
 });
 
-if (false) QUnit.test("Regression Tests", function(t) {
+QUnit.test("Regression Tests", function(t) {
   this.assert_equals('make "x 0  repeat 3 [ for [ i 1 4 ] [ make "x :x + 1 ] ]  :x', 12);
   this.assert_equals('make "x 0  for [i 0 100 :i + 1] [make "x :x + :i]  :x', 120);
   this.assert_error("fd 100 50 rt 90", "Don't know what to do with 50");
