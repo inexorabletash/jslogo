@@ -894,7 +894,7 @@ function LogoInterpreter(turtle, stream, savehook)
       function runLoop() {
         if (self.forceBye) {
           self.forceBye = false;
-          reject({special: "bye"});
+          reject(new Bye);
           return;
         }
         while (statements.length) {
@@ -924,83 +924,37 @@ function LogoInterpreter(turtle, stream, savehook)
     self.forceBye = true;
   };
 
-  self.run = function(string, options) {
-    if (self._pendingPromise) {
-      var runner = self.run.bind(self, string, options);
-      return self._queueCall(runner);
-    }
-    options = Object(options);
-    // Parse it
-    var atoms = parse(string);
+  function noop() {}
+  var lastRun = Promise.resolve();
 
-    if (self.turtle) { self.turtle.begin(); }
-    // And execute it!
-    var promise = self.execute(atoms, options).then(function (result) {
-      if (self.turtle) {
-        self.turtle.end();
-      }
-      return result;
-    }, function (err) {
-      if (self.turtle) {
-        self.turtle.end();
-      }
-      if (err && (err.special == "bye" || err.special == "stop")) {
-        return undefined;
-      }
-      throw err;
+  self.run = function(string, options) {
+    var promise = lastRun.then(function() {
+      options = Object(options);
+      // Parse it
+      var atoms = parse(string);
+
+      if (self.turtle)
+        self.turtle.begin();
+
+      // And execute it!
+      var p = self.execute(atoms, options);
+
+
+      // TODO: use promiseFinally() here
+      p.catch(noop).then(function() {
+        if (self.turtle)
+          self.turtle.end();
+      });
+
+      return p.catch(function(err) {
+        if (err instanceof Bye)
+          return;
+        throw err;
+      });
     });
-    this._setPendingPromise(promise);
-    self._pendingPromise = promise;
+    lastRun = promise.catch(noop);
     return promise;
   };
-
-  //----------------------------------------------------------------------
-  // Helpers to ensure calls to run() are serialized:
-  //----------------------------------------------------------------------
-
-  // When there's an outstanding call to .run() (whose promise hasn't resolved
-  // or rejected), then this attribute contains that promise:
-  self._pendingPromise = null;
-
-  // This is a list of resolvers waiting in line to start their .run() work:
-  self._pendingPromiseQueue = [];
-
-  // Declares we have a promise that any other calls to .run() must wait on:
-  self._setPendingPromise = function(promise) {
-    if (self._pendingPromise) {
-      throw new Error("Cannot overwrite pendingPromise");
-    }
-    self._pendingPromise = promise;
-    var cleanup = self._unsetPendingPromise.bind(self, promise);
-    promise.then(cleanup, cleanup);
-  };
-
-  // Called by above; declares aforementioned promise has completed:
-  self._unsetPendingPromise = function(promise) {
-    if (! self._pendingPromise) {
-      console.warn("Error: tried to unset pendingPromise when there was none");
-    } else if (self._pendingPromise != promise) {
-      console.warn("Error: tried to unset pendingPromise when a different promise was active");
-    } else {
-      self._pendingPromise = null;
-      var resolver = self._pendingPromiseQueue.shift();
-      if (resolver) {
-        resolver();
-      }
-    }
-  };
-
-  // If .run() can't run, then this queues that call to run and returns a
-  // promise that will run and resolve when this call's turn comes up
-  self._queueCall = function(func) {
-    var resolver;
-    var ready = new Promise(function (resolve) {
-      resolver = resolve;
-    });
-    this._pendingPromiseQueue.push(resolver);
-    return ready.then(func);
-  };
-
 
   self.definition = function(name, proc) {
 
@@ -1150,9 +1104,8 @@ function LogoInterpreter(turtle, stream, savehook)
       }
       self.scopes.push(scope);
       return promiseFinally(self.execute(block).then(null, function (err) {
-        if (err && err.special == "output") {
-          return err.value;
-        }
+        if (err instanceof Output)
+          return err.output;
         throw err;
       }), function () {
         self.scopes.pop();
@@ -1740,33 +1693,32 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("and", function(a, b) {
     var args = Array.from(arguments);
-    return checker(args, function (value) {return ! value;}, 1);
+    return _checker(args, function (value) {return !value;}, 1);
   }, {noeval: true});
 
   def("or", function(a, b) {
     var args = Array.from(arguments);
-    return checker(args, function (value) {return value;}, 0);
+    return _checker(args, function (value) {return value;}, 0);
   }, {noeval: true});
 
   function _checker(args, shouldStop, defaultValue) {
-    if (! args.length) {
+    if (!args.length)
       return Promise.resolve(defaultValue);
-    }
-    return new Promise(function (resolve, reject) {
-      function runLoop() {
-        if (args.length == 1) {
-          return resolve(args[0]());
+    return new Promise(function(resolve, reject) {
+      (function runLoop() {
+        var r = args.shift()();
+        if (!args.length) {
+          resolve(r);
+          return;
         }
-        var result = Promise.resolve(args.shift());
-        result.then(function (value) {
+        Promise.resolve(r).then(function(value) {
           if (shouldStop(value)) {
             resolve(value);
+            return;
           }
           runLoop();
-        }, function (err) {
-          reject(err);
         });
-      }
+      }());
     });
   }
 
@@ -2533,16 +2485,13 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("runresult", function(statements) {
     statements = reparse(lexpr(statements));
-    var result = self.execute(statements, {returnResult: true});
-    if (isPromise(result)) {
-      return result.then(function (r) {
-        return [r];
+    return self.execute(statements, {returnResult: true})
+      .then(function(result) {
+        if (result !== undefined)
+          return [result];
+        else
+          return [];
       });
-    } else if (result !== undefined) {
-      return [result];
-    } else {
-      return [];
-    }
   });
 
   def("repeat", function(count, statements) {
@@ -2558,7 +2507,7 @@ function LogoInterpreter(turtle, stream, savehook)
         }
         self.repcount = i;
         i++;
-        result = self.execute(statements);
+        var result = self.execute(statements);
         result.then(runLoop, reject);
       }
       runLoop();
@@ -2623,11 +2572,11 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   def("stop", function() {
-    return Promise.reject({special: "output", value: undefined});
+    throw new Output();
   });
 
   def(["output", "op"], function(atom) {
-    return Promise.reject({special: "output", value: atom});
+    throw new Output(atom);
   });
 
   // Not Supported: catch
@@ -2638,15 +2587,11 @@ function LogoInterpreter(turtle, stream, savehook)
   // Not Supported: wait
 
   def("bye", function() {
-    return Promise.reject({special: "bye"});
+    throw new Bye;
   });
 
   def(".maybeoutput", function(value) {
-    if (value !== undefined) {
-      return Promise.reject({special: "output", value: value});
-    } else {
-      return Promise.reject({special: "output"});
-    }
+    throw new Output(value);
   });
 
   // Not Supported: goto
@@ -2664,29 +2609,39 @@ function LogoInterpreter(turtle, stream, savehook)
     function sign(x) { return x < 0 ? -1 : x > 0 ? 1 : 0; }
 
     var varname = sexpr(control.shift());
-    // FIXME: could be promises:
-    var start = aexpr(evaluateExpression(control));
-    var limit = aexpr(evaluateExpression(control));
+    var start, limit, step, current;
 
-    var step;
-    // FIXME: also could be promise:
-    step = (control.length) ?
-      aexpr(evaluateExpression(control.slice())) : sign(limit - start);
-    var current = start;
-    var stop = false;
-    return new Promise(function (resolve, reject) {
-      function runLoop() {
-        if (sign(limit - current) !== sign(step)) {
-          resolve();
-          return;
-        }
-        setvar(varname, current);
-        var result = self.execute(statements);
-        current += step;
-        result.catch(reject).then(runLoop);
-      }
-      runLoop();
-    });
+    return Promise.resolve(evaluateExpression(control))
+      .then(function(r) {
+        current = start = aexpr(r);
+        return evaluateExpression(control);
+      })
+      .then(function(r) {
+        limit = aexpr(r);
+      })
+      .then(function() {
+        return new Promise(function(resolve, reject) {
+          function runLoop() {
+            if (sign(current - limit) === sign(step)) {
+              resolve();
+              return;
+            }
+            setvar(varname, current);
+            self.execute(statements)
+              .then(function() {
+                return (control.length) ?
+                  evaluateExpression(control.slice()) : sign(limit - start);
+              })
+              .then(function(result) {
+                step = aexpr(result);
+                current += step;
+                runLoop();
+              })
+            .catch(reject);
+          }
+          runLoop();
+        });
+      });
   });
 
   def("dotimes", function(control, statements) {
@@ -2700,103 +2655,57 @@ function LogoInterpreter(turtle, stream, savehook)
     throw new Error(__("Expected block"));
   }
 
-  function whilechunk(runner) {
-    return new Promise(function (resolve, reject) {
-      function runLoop() {
-        var result = runner();
-        result.then(function (result) {
-          if (result) {
-            runLoop();
-          } else {
-            resolve();
-          }
-        }).catch(function (err) {
-          reject(err);
-        });
-      }
-      runLoop();
-    });
-  }
-
   def("do.while", function(block, tf) {
     block = checkevalblock(block);
-    return whilechunk(function () {
-      return new Promise(function (resolve, reject) {
-        var blockresult = Promise.resolve(self.execute(block));
-        blockresult.then(function () {
-          var cond = tf();
-          if (isPromise(cond)) {
-            cond.then(function (result) {
-              resolve(result);
-            }).catch(reject);
-          } else {
-            resolve(cond);
-          }
-        }).catch(reject);
-      });
+    return new Promise(function(resolve, reject) {
+      (function loop() {
+        self.execute(block)
+          .then(tf)
+          .then(function(cond) {
+            if (!cond) {
+              resolve();
+              return;
+            }
+            loop();
+          })
+          .catch(reject);
+      }());
     });
   }, {noeval: true});
 
   def("while", function(tf, block) {
     block = checkevalblock(block);
-    return whilechunk(function () {
-      return new Promise(function (resolve, reject) {
-        var cond = tf();
-        if (isPromise(cond)) {
-          cond.then(function (result) {
-            if (! result) {
-              resolve(result);
+    return new Promise(function(resolve, reject) {
+      (function loop() {
+        Promise.resolve(tf())
+          .then(function(cond) {
+            if (!cond) {
+              resolve();
               return;
             }
-            var blockresult = self.execute(block);
-            if (isPromise(blockresult)) {
-              blockresult.then(function () {
-                resolve(cond);
-              }).catch(reject);
-            } else {
-              resolve(result);
-            }
-          });
-        } else if (cond) {
-          var blockresult = self.execute(block);
-          if (isPromise(blockresult)) {
-            blockresult.then(function () {
-              resolve(cond);
-            }).catch(reject);
-          } else {
-            resolve(cond);
-          }
-        } else {
-          resolve(cond);
-        }
-      });
+            self.execute(block)
+              .then(loop);
+          })
+          .catch(reject);
+      }());
     });
   }, {noeval: true});
 
+
   function notpromise(tf) {
-    var cond = tf();
-    if (cond && cond.then) {
-      return cond.then(function (result) {
-        return ! result;
-      });
-    } else {
-      return ! cond;
-    }
+    return Promise.resolve(tf()).then(function(r) { return !r; });
   }
 
   def("do.until", function(block, tf) {
-    block = checkevalblock(block);
     var nottf = function () { return notpromise(tf); };
-    return self.routines["do.while"](block, nottf);
+    return self.routines.get("do.while")(block, nottf);
   }, {noeval: true});
 
   def("until", function(tf, block) {
-    block = checkevalblock(block);
     var nottf = function () { return notpromise(tf); };
-    return self.routines["while"](nottf, block);
+    return self.routines.get("while")(nottf, block);
   }, {noeval: true});
 
-// FIXME: not done
   def("case", function(value, clauses) {
     clauses = lexpr(clauses);
 
@@ -2813,21 +2722,32 @@ function LogoInterpreter(turtle, stream, savehook)
     return undefined;
   });
 
-// FIXME: not done
   def("cond", function(clauses) {
     clauses = lexpr(clauses);
 
-    for (var i = 0; i < clauses.length; ++i) {
-      var clause = lexpr(clauses[i]);
-      var first = clause.shift();
-      if (isKeyword(first, 'ELSE')) {
-        return evaluateExpression(clause);
-      }
-      if (evaluateExpression(reparse(lexpr(first)))) {
-        return evaluateExpression(clause);
-      }
-    }
-    return undefined;
+    return new Promise(function(resolve, reject) {
+      (function loop() {
+        if (!clauses.length) {
+          resolve();
+          return;
+        }
+        var clause = lexpr(clauses.shift());
+        var first = clause.shift();
+        if (isKeyword(first, 'ELSE')) {
+          resolve(evaluateExpression(clause));
+          return;
+        }
+        evaluateExpression(reparse(lexpr(first)))
+          .then(function(result) {
+            if (result) {
+              resolve(evaluateExpression(clause));
+              return;
+            }
+            loop();
+          })
+          .catch(reject);
+      }());
+    });
   });
 
   //
