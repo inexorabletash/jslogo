@@ -20,6 +20,8 @@
 function LogoInterpreter(turtle, stream, savehook)
 //----------------------------------------------------------------------
 {
+  'use strict';
+
   var self = this;
 
   var UNARY_MINUS = '<UNARYMINUS>'; // Must not match regexIdentifier

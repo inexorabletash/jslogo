@@ -768,12 +768,13 @@ QUnit.test("Logical Operations", function(t) {
   this.assert_stream('or 0 (type "yup)', 'yup');
 });
 
-if (false) QUnit.test("Graphics", function(t) {
+QUnit.test("Graphics", function(t) {
   t.expect(69);
 
   // NOTE: test canvas is 300,300 (so -150...150 coordinates before hitting)
   // edge
 
+  this.interpreter.run('setspeed Infinity');
   this.interpreter.run('clearscreen');
   this.assert_equals('clean home (list heading xcor ycor)', [0, 0, 0]);
 
@@ -824,11 +825,9 @@ if (false) QUnit.test("Graphics", function(t) {
   this.assert_equals('setpos [ 12 34 ] clean pos', [12, 34]);
   this.assert_equals('setpos [ 12 34 ] clearscreen (list heading xcor ycor)', [0, 0, 0]);
   this.assert_equals('setpos [ 12 34 ] cs (list heading xcor ycor)', [0, 0, 0]);
-
   this.assert_equals('wrap turtlemode', 'WRAP');
 
   this.assert_equals('setxy 0 0 setxy 160 160 (list xcor ycor)', [-140, -140]);
-
   this.assert_equals('window turtlemode', 'WINDOW');
   this.assert_equals('setxy 0 0 setxy 160 160 (list xcor ycor)', [160, 160]);
 
@@ -1063,7 +1062,7 @@ QUnit.test("Workspace Management", function(t) {
 });
 
 QUnit.test("Control Structures", function(t) {
-  //t.expect(58);
+  t.expect(58);
   //
   // 8.1 Control
   //
