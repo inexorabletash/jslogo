@@ -131,6 +131,10 @@ QUnit.module("Logo Unit Tests", {
         done();
       }
     };
+
+    this.queue = function(task) {
+      this.interpreter.queueTask(task.bind(this));
+    };
   }
 });
 
@@ -524,14 +528,14 @@ QUnit.test("Communication", function(t) {
 
   // 3.2 Receivers
 
-  this.interpreter.queueTask((function() {
+  this.queue(function() {
     this.stream.inputbuffer = "test";
-  }).bind(this));
+  });
   this.assert_equals('readword', 'test');
 
-  this.interpreter.queueTask((function() {
+  this.queue(function() {
     this.stream.inputbuffer = "a b c 1 2 3";
-  }).bind(this));
+  });
   this.assert_equals('readword', 'a b c 1 2 3');
 
   this.assert_prompt('readword', undefined);
@@ -1266,44 +1270,57 @@ QUnit.test("Regression Tests", function(t) {
   this.assert_equals('make "a { 1 }  make "b :a  setitem 1 :a 2  item 1 :b', 2);
 });
 
-if (false) QUnit.test("API Tests", function(t) {
+QUnit.test("API Tests", function(t) {
   // LogoInterpeter#copydef(newname, oldname)
   this.assert_error('yup', "Don't know how to YUP");
   this.assert_error('nope', "Don't know how to NOPE");
-  this.interpreter.copydef('yup', 'true');
-  this.interpreter.copydef('nope', 'false');
+
+  this.queue(function() {
+    this.interpreter.copydef('yup', 'true');
+    this.interpreter.copydef('nope', 'false');
+  });
   this.assert_equals('yup', 1);
   this.assert_equals('nope', 0);
 
   // LogoInterpreter#localize
   this.assert_error("1 / 0", "Division by zero");
   this.assert_error("item 5 [ 1 2 ]", "Index out of bounds");
-  this.interpreter.localize = function(s) {
-    return {
-      'Division by zero': 'Divido per nulo',
-      'Index out of bounds': 'Indekso ekster limojn'
-    }[s];
-  };
+  this.queue(function() {
+    this.interpreter.localize = function(s) {
+      return {
+        'Division by zero': 'Divido per nulo',
+        'Index out of bounds': 'Indekso ekster limojn'
+      }[s];
+    };
+  });
   this.assert_error("1 / 0", "Divido per nulo");
   this.assert_error("item 5 [ 1 2 ]", "Indekso ekster limojn");
 
   // LogoInterpreter#keywordAlias
   this.assert_error('to foo output 2 fino  foo', "Expected END");
   this.assert_equals('case 2 [[[1] "a"] [alie "b]]', undefined);
-  this.interpreter.keywordAlias = function(s) {
-    return {
-      'FINO': 'END',
-      'ALIE': 'ELSE'
-    }[s];
-  };
+  this.queue(function() {
+    this.interpreter.keywordAlias = function(s) {
+      return {
+        'FINO': 'END',
+        'ALIE': 'ELSE'
+      }[s];
+    };
+  });
   this.assert_equals('case 2 [[[1] "a"] [alie "b]]', 'b');
   this.assert_equals('to foo output 2 fino  foo', 2);
 
   // CanvasTurtle#colorAlias
+  var done = t.async();
   var hookCalled = false;
-  this.turtle.colorAlias = function(s) {
-    hookCalled = hookCalled || (s === 'internationalorange');
-  };
+  this.queue(function() {
+    this.turtle.colorAlias = function(s) {
+      hookCalled = hookCalled || (s === 'internationalorange');
+    };
+  });
   this.interpreter.run('setpencolor "internationalorange');
-  t.ok(hookCalled);
+  this.queue(function() {
+    t.ok(hookCalled);
+    done();
+  });
 });
