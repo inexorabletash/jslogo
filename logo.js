@@ -1748,7 +1748,6 @@ function LogoInterpreter(turtle, stream, savehook)
   def(["back", "bk"], function(a) { return turtle.move(-aexpr(a)); });
   def(["left", "lt"], function(a) { return turtle.turn(-aexpr(a)); });
   def(["right", "rt"], function(a) { return turtle.turn(aexpr(a)); });
-  def(["setspeed"], function(a) { return turtle.setspeed(aexpr(a)); });
 
   // Left arrow:
   def(["\u2190"], function() { return turtle.turn(-15); });
@@ -2934,7 +2933,6 @@ function LogoInterpreter(turtle, stream, savehook)
     });
   });
 
-// FIXME: not done
   def("reduce", function(procname, list) {
     procname = sexpr(procname);
     list = lexpr(list);
@@ -2949,13 +2947,33 @@ function LogoInterpreter(turtle, stream, savehook)
                              { name: procname }));
     }
 
-    // NOTE: Can't use procedure directly as reduce calls
-    // targets w/ additional args and defaults initial value to undefined
-    return list.reduce(function(a, b) { return procedure(a, b); }, value);
+    if (!list.length)
+      return value;
+
+    return new Promise(function(resolve, reject) {
+      (function loop() {
+        var next = list.shift();
+        Promise.resolve(procedure(value, next))
+          .then(function(result) {
+            if (!list.length) {
+              resolve(result);
+              return;
+            }
+            value = result;
+            loop();
+          }, reject);
+      }());
+    });
+
   });
 
   // Not Supported: crossmap
   // Not Supported: cascade
   // Not Supported: cascade.2
   // Not Supported: transfer
+
+  // Helper for testing that wraps a result in a Promise
+  def(".promise", function(value) {
+    return Promise.resolve(value);
+  });
 }

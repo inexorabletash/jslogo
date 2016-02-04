@@ -1062,7 +1062,7 @@ QUnit.test("Workspace Management", function(t) {
 });
 
 QUnit.test("Control Structures", function(t) {
-  t.expect(58);
+  t.expect(67);
   //
   // 8.1 Control
   //
@@ -1154,17 +1154,35 @@ QUnit.test("Control Structures", function(t) {
   // 8.2 Template-based Iteration
   //
 
+  this.interpreter.run("to add_async :a :b output .promise :a + :b end");
+  this.interpreter.run("to numberp_async :a output .promise numberp :a end");
+
   this.assert_equals('apply "word ["a "b "c]', '"a"b"c');
+  this.assert_equals('apply "add_async [1 2]', 3);
+
   this.assert_equals('invoke "word "a', 'a');
   this.assert_equals('(invoke "word "a "b "c)', 'abc');
   this.assert_equals('(invoke "word)', '');
+  this.assert_equals('(invoke "add_async 1 2)', 3);
+
   this.assert_equals('make "x 0  to addx :a make "x :x+:a end  foreach "addx [ 1 2 3 4 5 ]  :x', 15);
+  this.assert_equals('make "x 0  to addx :a make "x .promise :x+:a end  foreach "addx [ 1 2 3 4 5 ]  :x', 15);
+
   this.assert_equals('to double :x output :x * 2 end  map "double [ 1 2 3 ]', [2, 4, 6]);
+  this.assert_equals('to double :x output .promise :x * 2 end  map "double [ 1 2 3 ]', [2, 4, 6]);
+
   this.assert_equals('to odd :x output :x % 2 end  filter "odd [ 1 2 3 ]', ["1", "3"]);
+  this.assert_equals('to odd :x output .promise :x % 2 end  filter "odd [ 1 2 3 ]', ["1", "3"]);
+
   this.assert_equals('find "numberp (list "a "b "c 4 "e "f )', 4);
   this.assert_equals('find "numberp (list "a "b "c "d "e "f )', []);
+  this.assert_equals('find "numberp_async (list "a "b "c 4 "e "f )', 4);
+  this.assert_equals('find "numberp_async (list "a "b "c "d "e "f )', []);
+
   this.assert_equals('reduce "sum [ 1 2 3 4 ]', 10);
   this.assert_equals('(reduce "sum [ 1 2 3 4 ] 10)', 20);
+  this.assert_equals('reduce "add_async [ 1 2 3 4 ]', 10);
+  this.assert_equals('(reduce "add_async [ 1 2 3 4 ] 10)', 20);
 
   // TODO: Order of operations
   // TODO: Structures, lists of lists
