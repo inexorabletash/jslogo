@@ -78,10 +78,6 @@ function LogoInterpreter(turtle, stream, savehook)
     return atom === match;
   }
 
-  function isPromise(value) {
-    return value && value.then && value.catch;
-  }
-
   function promiseFinally(promise, finalBlock) {
     return promise.then(
       function (result) {
@@ -250,7 +246,7 @@ function LogoInterpreter(turtle, stream, savehook)
       return 'list';
     } else if (atom instanceof LogoArray) {
       return 'array';
-    } else if (isPromise(atom)) {
+    } else if ('then' in Object(atom)) {
       throw new Error(__("Unexpected value: a promise"));
     } else if (!atom) {
       throw new Error(__("Unexpected value: null"));
@@ -576,23 +572,18 @@ function LogoInterpreter(turtle, stream, savehook)
     return function () {
       var args = [];
       var index = 0;
-      return new Promise(function (resolve, reject) {
-        function resolveLoop() {
-          while (index < input.length) {
-            var item = input[index]();
-            index++;
-            if (isPromise(item)) {
-              item.then(function (result) {
-                args.push(result);
-                resolveLoop();
-              }).catch(reject);
-              return;
-            }
-            args.push(item);
+      return new Promise(function(resolve, reject) {
+        (function loop() {
+          if (index === input.length) {
+            resolve(func.apply(null, args));
+            return;
           }
-          resolve(func.apply(null, args));
-        }
-        resolveLoop();
+          Promise.resolve(input[index++]())
+            .then(function(result) {
+              args.push(result);
+              loop();
+            }).catch(reject);
+        }());
       });
     };
   }
@@ -763,26 +754,18 @@ function LogoInterpreter(turtle, stream, savehook)
       return function() {
         var evaluatedArgs = [];
         var index = 0;
-        return new Promise(function (resolve, reject) {
-          function doEvalLoop() {
-            while (index < args.length) {
-              var result = args[index]();
-              index++;
-              if (isPromise(result)) {
-                result.then(function (value) {
-                  evaluatedArgs.push(value);
-                  doEvalLoop();
-                }).catch(function (err) {
-                  index = args.length;
-                  reject(err);
-                });
-                return;
-              }
-              evaluatedArgs.push(result);
+        return new Promise(function(resolve, reject) {
+          (function loop() {
+            if (index === args.length) {
+              resolve(procedure.apply(null, evaluatedArgs));
+              return;
             }
-            resolve(procedure.apply(null, evaluatedArgs));
-          }
-          doEvalLoop();
+            Promise.resolve(args[index++]())
+              .then(function(result) {
+                evaluatedArgs.push(result);
+                loop();
+              }).catch(reject);
+          }());
         });
       };
     }
