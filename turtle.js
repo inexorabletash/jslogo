@@ -25,7 +25,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
 
   var self = this;
 
-  self.speed = 3;
+  self.speed = 50;
   self.speed_interval = 25;
 
   function moveto(x, y, fast) {

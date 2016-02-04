@@ -889,33 +889,29 @@ function LogoInterpreter(turtle, stream, savehook)
     // Operate on a copy so the original is not destroyed
     statements = statements.slice();
 
-    return new Promise(function (resolve, reject) {
-      var lastResult;
-      function runLoop() {
+    if (!statements.length)
+      return Promise.resolve();
+
+    return new Promise(function(resolve, reject) {
+      (function loop() {
         if (self.forceBye) {
           self.forceBye = false;
           reject(new Bye);
           return;
         }
-        while (statements.length) {
-          var result = evaluateExpression(statements);
-          if (isPromise(result)) {
-            lastResult = result.then(function (value) {
-              lastResult = value;
-              runLoop();
-            }).catch(function (err) {
-              reject(err);
-            });
-            return;
-          }
-          lastResult = result;
-        }
-        if (lastResult !== undefined && !options.returnResult) {
-          reject(new Error(format(__("Don't know what to do with {result}"), {result: lastResult})));
-        }
-        resolve(lastResult);
-      }
-      runLoop();
+        Promise.resolve(evaluateExpression(statements))
+          .then(function(result) {
+            if (result !== undefined && !options.returnResult) {
+              reject(new Error(format(__("Don't know what to do with {result}"), {result: result})));
+              return;
+            }
+            if (!statements.length) {
+              resolve(result);
+              return;
+            }
+            loop();
+          }, reject);
+      }());
     });
   };
 
