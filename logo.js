@@ -923,9 +923,20 @@ function LogoInterpreter(turtle, stream, savehook)
   function noop() {}
   var lastRun = Promise.resolve();
 
-  self.run = function(string, options) {
+  // Call to insert an arbitrary task (callback) to be run
+  // in sequence with pending calls to run. Useful in tests
+  // to do work just before a subsequent assertion.
+  self.queueTask = function(task) {
     var promise = lastRun.then(function() {
-      options = Object(options);
+      return Promise.resolve(task());
+    });
+    lastRun = promise.catch(noop);
+    return promise;
+  };
+
+  self.run = function(string, options) {
+    options = Object(options);
+    return self.queueTask(function() {
       // Parse it
       var atoms = parse(string);
 
@@ -934,7 +945,6 @@ function LogoInterpreter(turtle, stream, savehook)
 
       // And execute it!
       var p = self.execute(atoms, options);
-
 
       // TODO: use promiseFinally() here
       p.catch(noop).then(function() {
@@ -948,8 +958,6 @@ function LogoInterpreter(turtle, stream, savehook)
         throw err;
       });
     });
-    lastRun = promise.catch(noop);
-    return promise;
   };
 
   self.definition = function(name, proc) {

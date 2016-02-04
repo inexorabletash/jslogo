@@ -95,14 +95,14 @@ QUnit.module("Logo Unit Tests", {
       this.stream.clear();
       var result = this.interpreter.run(expression, {returnResult: true});
       var done = t.async();
-      result.then(function () {
+      result.then((function () {
         var actual = this.stream.last_prompt;
         this.stream.clear();
         t.equal(actual, expected, expression);
-      }, function (err) {
+      }).bind(this), (function (err) {
         t.equal("(no error)", err, expression);
         this.stream.clear();
-      }).then(done);
+      }).bind(this)).then(done);
     };
 
     this.assert_predicate = function(expression, predicate) {
@@ -499,7 +499,7 @@ QUnit.test("Data Structure Primitives", function(t) {
   this.assert_equals('standout "whatever', 'whatever');
 });
 
-if (false) QUnit.test("Communication", function(t) {
+QUnit.test("Communication", function(t) {
   t.expect(22);
 
   // 3.1 Transmitters
@@ -524,10 +524,14 @@ if (false) QUnit.test("Communication", function(t) {
 
   // 3.2 Receivers
 
-  this.stream.inputbuffer = "test";
+  this.interpreter.queueTask((function() {
+    this.stream.inputbuffer = "test";
+  }).bind(this));
   this.assert_equals('readword', 'test');
 
-  this.stream.inputbuffer = "a b c 1 2 3";
+  this.interpreter.queueTask((function() {
+    this.stream.inputbuffer = "a b c 1 2 3";
+  }).bind(this));
   this.assert_equals('readword', 'a b c 1 2 3');
 
   this.assert_prompt('readword', undefined);
