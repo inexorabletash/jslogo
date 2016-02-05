@@ -2916,24 +2916,20 @@ function LogoInterpreter(turtle, stream, savehook)
                              { name: procname }));
     }
 
-    if (!list.length)
-      return value;
-
     return new Promise(function(resolve, reject) {
       (function loop() {
+        if (!list.length) {
+          resolve(value);
+          return;
+        }
         var next = list.shift();
         Promise.resolve(procedure(value, next))
           .then(function(result) {
-            if (!list.length) {
-              resolve(result);
-              return;
-            }
             value = result;
             loop();
           }, reject);
       }());
     });
-
   });
 
   // Not Supported: crossmap
