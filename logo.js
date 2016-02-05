@@ -16,9 +16,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//----------------------------------------------------------------------
 function LogoInterpreter(turtle, stream, savehook)
-//----------------------------------------------------------------------
 {
   'use strict';
 
@@ -57,10 +55,10 @@ function LogoInterpreter(turtle, stream, savehook)
     return string;
   }
 
-  // To handle additional keyword aliases (localizations, etc),
-  // assign a function to keywordAlias. Input will be the uppercased
-  // word, output must be one of the keywords (ELSE or END), or
-  // undefined. For example:
+  // To handle additional keyword aliases (localizations, etc), assign
+  // a function to keywordAlias. Input will be the uppercased word,
+  // output must be one of the keywords (ELSE or END), or undefined.
+  // For example:
   // logo.keywordAlias = function(name) {
   //   return {
   //     'ALIE': 'ELSE',
@@ -116,16 +114,15 @@ function LogoInterpreter(turtle, stream, savehook)
   // that executes finalBlock before it resolves, regardless of
   // whether it fulfills or rejects.
   function promiseFinally(promise, finalBlock) {
-    return promise.then(
-      function(result) {
-        return Promise.resolve(finalBlock()).then(
-          function() {
+    return promise
+      .then(function(result) {
+        return Promise.resolve(finalBlock())
+          .then(function() {
             return result;
           });
-      },
-      function(err) {
-        return Promise.resolve(finalBlock()).then(
-          function() {
+      }, function(err) {
+        return Promise.resolve(finalBlock())
+          .then(function() {
             throw err;
           });
       });
@@ -363,8 +360,8 @@ function LogoInterpreter(turtle, stream, savehook)
         // preceded by a space and followed by a nonspace.
 
         // Minus sign means unary minus if the previous token is an
-        // infix operator or open parenthesis, or it is preceded by
-        // a space and followed by a nonspace.
+        // infix operator or open parenthesis, or it is preceded by a
+        // space and followed by a nonspace.
 
         if (atom === '-') {
 
@@ -563,13 +560,9 @@ function LogoInterpreter(turtle, stream, savehook)
   //                           | procedure-call
   //                           | '(' Expression ')'
 
-  //----------------------------------------------------------------------
   // Peek at the list to see if there are additional atoms from a set
   // of options.
-  //----------------------------------------------------------------------
-  function peek(list, options)
-  //----------------------------------------------------------------------
-  {
+  function peek(list, options) {
     if (list.length < 1) { return false; }
     var next = list[0];
     return options.some(function(x) { return next === x; });
@@ -826,8 +819,8 @@ function LogoInterpreter(turtle, stream, savehook)
   //----------------------------------------------------------------------
 
   // 'list expression'
-  // Takes an atom - if it is a list is is returned unchanged. If it is
-  // a word a list of the characters is returned. If the procedure
+  // Takes an atom - if it is a list is is returned unchanged. If it
+  // is a word a list of the characters is returned. If the procedure
   // returns a list, the output type should match the input type, so
   // use sifw().
   function lexpr(atom) {
@@ -927,9 +920,9 @@ function LogoInterpreter(turtle, stream, savehook)
 
   var lastRun = Promise.resolve();
 
-  // Call to insert an arbitrary task (callback) to be run
-  // in sequence with pending calls to run. Useful in tests
-  // to do work just before a subsequent assertion.
+  // Call to insert an arbitrary task (callback) to be run in sequence
+  // with pending calls to run. Useful in tests to do work just before
+  // a subsequent assertion.
   self.queueTask = function(task) {
     var promise = lastRun.then(function() {
       return Promise.resolve(task());
@@ -1697,30 +1690,29 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("and", function(a, b) {
     var args = Array.from(arguments);
-    return _checker(args, function(value) {return !value;}, 1);
+    return booleanReduce(args, function(value) {return value;}, 1);
   }, {noeval: true});
 
   def("or", function(a, b) {
     var args = Array.from(arguments);
-    return _checker(args, function(value) {return value;}, 0);
+    return booleanReduce(args, function(value) {return !value;}, 0);
   }, {noeval: true});
 
-  function _checker(args, shouldStop, defaultValue) {
-    if (!args.length)
-      return Promise.resolve(defaultValue);
+  function booleanReduce(args, test, value) {
     return promiseLoop(function(loop, resolve, reject) {
-      var r = args.shift()();
       if (!args.length) {
-        resolve(r);
+        resolve(value);
         return;
       }
-      Promise.resolve(r).then(function(value) {
-        if (shouldStop(value)) {
-          resolve(value);
-          return;
-        }
-        loop();
-      });
+      Promise.resolve(args.shift()())
+        .then(function(result) {
+          if (!test(result)) {
+            resolve(result);
+            return;
+          }
+          value = result;
+          loop();
+        });
     });
   }
 
@@ -2478,7 +2470,6 @@ function LogoInterpreter(turtle, stream, savehook)
   // 8.1 Control
   //
 
-
   def("run", function(statements) {
     statements = reparse(lexpr(statements));
     return self.execute(statements, {returnResult: true});
@@ -2681,18 +2672,18 @@ function LogoInterpreter(turtle, stream, savehook)
     });
   }, {noeval: true});
 
-  function notpromise(tf) {
-    return Promise.resolve(tf()).then(function(r) { return !r; });
+  function negatePromiseFunction(tf) {
+    return function() {
+      return Promise.resolve(tf()).then(function(r) { return !r; });
+    };
   }
 
   def("do.until", function(block, tf) {
-    var nottf = function() { return notpromise(tf); };
-    return self.routines.get("do.while")(block, nottf);
+    return self.routines.get("do.while")(block, negatePromiseFunction(tf));
   }, {noeval: true});
 
   def("until", function(tf, block) {
-    var nottf = function() { return notpromise(tf); };
-    return self.routines.get("while")(nottf, block);
+    return self.routines.get("while")(negatePromiseFunction(tf), block);
   }, {noeval: true});
 
   def("case", function(value, clauses) {
