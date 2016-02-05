@@ -78,24 +78,37 @@ function LogoInterpreter(turtle, stream, savehook)
     return atom === match;
   }
 
+  // Returns a promise; calls the passed function with (loop, resolve,
+  // reject). Calling resolve or reject (or throwing) settles the
+  // promise, calling loop repeats.
+  function promiseLoop(func) {
+    return new Promise(function(resolve, reject) {
+      (function loop() {
+        try {
+          func(loop, resolve, reject);
+        } catch (e) {
+          reject(e);
+        }
+      }());
+    });
+  }
+
   // Takes a list of (possibly async) closures. Each is called in
   // turn, waiting for its result to resolve before the next is
   // executed. Resolves to an array of results, or rejects if any
   // closure rejects.
   function serialExecute(funcs) {
     var results = [];
-    return new Promise(function(resolve, reject) {
-      (function loop() {
-        if (!funcs.length) {
-          resolve(results);
-          return;
-        }
-        Promise.resolve(funcs.shift()())
-          .then(function(result) {
-            results.push(result);
-            loop();
-          }, reject);
-      }());
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!funcs.length) {
+        resolve(results);
+        return;
+      }
+      Promise.resolve(funcs.shift()())
+        .then(function(result) {
+          results.push(result);
+          loop();
+        }, reject);
     });
   }
 
@@ -885,27 +898,25 @@ function LogoInterpreter(turtle, stream, savehook)
     statements = statements.slice();
 
     var lastResult;
-    return new Promise(function(resolve, reject) {
-      (function loop() {
-        if (self.forceBye) {
-          self.forceBye = false;
-          reject(new Bye);
-          return;
-        }
-        if (!statements.length) {
-          resolve(lastResult);
-          return;
-        }
-        Promise.resolve(evaluateExpression(statements))
-          .then(function(result) {
-            if (result !== undefined && !options.returnResult) {
-              reject(new Error(format(__("Don't know what to do with {result}"), {result: result})));
-              return;
-            }
-            lastResult = result;
-            loop();
-          }, reject);
-      }());
+    return promiseLoop(function(loop, resolve, reject) {
+      if (self.forceBye) {
+        self.forceBye = false;
+        reject(new Bye);
+        return;
+      }
+      if (!statements.length) {
+        resolve(lastResult);
+        return;
+      }
+      Promise.resolve(evaluateExpression(statements))
+        .then(function(result) {
+          if (result !== undefined && !options.returnResult) {
+            reject(new Error(format(__("Don't know what to do with {result}"), {result: result})));
+            return;
+          }
+          lastResult = result;
+          loop();
+        }, reject);
     });
   };
 
@@ -1697,21 +1708,19 @@ function LogoInterpreter(turtle, stream, savehook)
   function _checker(args, shouldStop, defaultValue) {
     if (!args.length)
       return Promise.resolve(defaultValue);
-    return new Promise(function(resolve, reject) {
-      (function loop() {
-        var r = args.shift()();
-        if (!args.length) {
-          resolve(r);
+    return promiseLoop(function(loop, resolve, reject) {
+      var r = args.shift()();
+      if (!args.length) {
+        resolve(r);
+        return;
+      }
+      Promise.resolve(r).then(function(value) {
+        if (shouldStop(value)) {
+          resolve(value);
           return;
         }
-        Promise.resolve(r).then(function(value) {
-          if (shouldStop(value)) {
-            resolve(value);
-            return;
-          }
-          loop();
-        });
-      }());
+        loop();
+      });
     });
   }
 
@@ -2490,9 +2499,9 @@ function LogoInterpreter(turtle, stream, savehook)
     count = aexpr(count);
     statements = reparse(lexpr(statements));
     var old_repcount = self.repcount;
-    return promiseFinally(new Promise(function(resolve, reject) {
-      var i = 1;
-      (function loop() {
+    var i = 1;
+    return promiseFinally(
+      promiseLoop(function(loop, resolve, reject) {
         if (i > count) {
           resolve();
           return;
@@ -2500,25 +2509,23 @@ function LogoInterpreter(turtle, stream, savehook)
         self.repcount = i++;
         self.execute(statements)
           .then(loop, reject);
-      }());
-    }), function() {
-      self.repcount = old_repcount;
-    });
+      }), function() {
+        self.repcount = old_repcount;
+      });
   });
 
   def("forever", function(statements) {
     statements = reparse(lexpr(statements));
     var old_repcount = self.repcount;
-    return promiseFinally(new Promise(function(resolve, reject) {
-      var i = 1;
-      (function loop() {
+    var i = 1;
+    return promiseFinally(
+      promiseLoop(function(loop, resolve, reject) {
         self.repcount = i++;
         self.execute(statements)
           .then(loop, reject);
-      }());
-    }), function() {
-      self.repcount = old_repcount;
-    });
+      }), function() {
+        self.repcount = old_repcount;
+      });
   });
 
   def("repcount", function() {
@@ -2613,24 +2620,22 @@ function LogoInterpreter(turtle, stream, savehook)
         limit = aexpr(r);
       })
       .then(function() {
-        return new Promise(function(resolve, reject) {
-          (function loop() {
-            if (sign(current - limit) === sign(step)) {
-              resolve();
-              return;
-            }
-            setvar(varname, current);
-            self.execute(statements)
-              .then(function() {
-                return (control.length) ?
-                  evaluateExpression(control.slice()) : sign(limit - start);
-              })
-              .then(function(result) {
-                step = aexpr(result);
+        return promiseLoop(function(loop, resolve, reject) {
+          if (sign(current - limit) === sign(step)) {
+            resolve();
+            return;
+          }
+          setvar(varname, current);
+          self.execute(statements)
+            .then(function() {
+              return (control.length) ?
+                evaluateExpression(control.slice()) : sign(limit - start);
+            })
+            .then(function(result) {
+              step = aexpr(result);
                 current += step;
-                loop();
-              }, reject);
-          }());
+              loop();
+            }, reject);
         });
       });
   });
@@ -2648,35 +2653,31 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("do.while", function(block, tf) {
     block = checkevalblock(block);
-    return new Promise(function(resolve, reject) {
-      (function loop() {
-        self.execute(block)
-          .then(tf)
-          .then(function(cond) {
-            if (!cond) {
-              resolve();
-              return;
-            }
-            loop();
-          }, reject);
-      }());
+    return promiseLoop(function(loop, resolve, reject) {
+      self.execute(block)
+        .then(tf)
+        .then(function(cond) {
+          if (!cond) {
+            resolve();
+            return;
+          }
+          loop();
+        }, reject);
     });
   }, {noeval: true});
 
   def("while", function(tf, block) {
     block = checkevalblock(block);
-    return new Promise(function(resolve, reject) {
-      (function loop() {
-        Promise.resolve(tf())
-          .then(function(cond) {
-            if (!cond) {
-              resolve();
-              return;
-            }
-            self.execute(block)
-              .then(loop);
-          }, reject);
-      }());
+    return promiseLoop(function(loop, resolve, reject) {
+      Promise.resolve(tf())
+        .then(function(cond) {
+          if (!cond) {
+            resolve();
+            return;
+          }
+          self.execute(block)
+            .then(loop);
+        }, reject);
     });
   }, {noeval: true});
 
@@ -2712,28 +2713,25 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("cond", function(clauses) {
     clauses = lexpr(clauses);
-
-    return new Promise(function(resolve, reject) {
-      (function loop() {
-        if (!clauses.length) {
-          resolve();
-          return;
-        }
-        var clause = lexpr(clauses.shift());
-        var first = clause.shift();
-        if (isKeyword(first, 'ELSE')) {
-          resolve(evaluateExpression(clause));
-          return;
-        }
-        evaluateExpression(reparse(lexpr(first)))
-          .then(function(result) {
-            if (result) {
-              resolve(evaluateExpression(clause));
-              return;
-            }
-            loop();
-          }, reject);
-      }());
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!clauses.length) {
+        resolve();
+        return;
+      }
+      var clause = lexpr(clauses.shift());
+      var first = clause.shift();
+      if (isKeyword(first, 'ELSE')) {
+        resolve(evaluateExpression(clause));
+        return;
+      }
+      evaluateExpression(reparse(lexpr(first)))
+        .then(function(result) {
+          if (result) {
+            resolve(evaluateExpression(clause));
+            return;
+          }
+          loop();
+        }, reject);
     });
   });
 
@@ -2795,15 +2793,13 @@ function LogoInterpreter(turtle, stream, savehook)
                              { name: procname }));
     }
     list = lexpr(list);
-    return new Promise(function(resolve, reject) {
-      (function loop() {
-        if (!list.length) {
-          resolve();
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!list.length) {
+        resolve();
           return;
-        }
-        Promise.resolve(routine(list.shift()))
-          .then(loop, reject);
-      }());
+      }
+      Promise.resolve(routine(list.shift()))
+        .then(loop, reject);
     });
   });
 
@@ -2822,18 +2818,16 @@ function LogoInterpreter(turtle, stream, savehook)
 
     list = lexpr(list);
     var mapped = [];
-    return new Promise(function(resolve, reject) {
-      (function loop() {
-        if (!list.length) {
-          resolve(mapped);
-          return;
-        }
-        Promise.resolve(routine(list.shift()))
-          .then(function(value) {
-            mapped.push(value);
-            loop();
-          }, reject);
-      }());
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!list.length) {
+        resolve(mapped);
+        return;
+      }
+      Promise.resolve(routine(list.shift()))
+        .then(function(value) {
+          mapped.push(value);
+          loop();
+        }, reject);
     });
   });
 
@@ -2853,20 +2847,18 @@ function LogoInterpreter(turtle, stream, savehook)
 
     list = lexpr(list);
     var filtered = [];
-    return new Promise(function(resolve, reject) {
-      (function loop() {
-        if (!list.length) {
-          resolve(filtered);
-          return;
-        }
-        var item = list.shift();
-        Promise.resolve(routine(item))
-          .then(function(value) {
-            if (value)
-              filtered.push(item);
-            loop();
-          }, reject);
-      }());
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!list.length) {
+        resolve(filtered);
+        return;
+      }
+      var item = list.shift();
+      Promise.resolve(routine(item))
+        .then(function(value) {
+          if (value)
+            filtered.push(item);
+          loop();
+        }, reject);
     });
   });
 
@@ -2883,22 +2875,20 @@ function LogoInterpreter(turtle, stream, savehook)
     }
 
     list = lexpr(list);
-    return new Promise(function(resolve, reject) {
-      (function loop() {
-        if (!list.length) {
-          resolve([]);
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!list.length) {
+        resolve([]);
+        return;
+      }
+      var item = list.shift();
+      var result = Promise.resolve(routine(item));
+      result.then(function(value) {
+        if (value) {
+          resolve(item);
           return;
         }
-        var item = list.shift();
-        var result = Promise.resolve(routine(item));
-        result.then(function(value) {
-          if (value) {
-            resolve(item);
-            return;
-          }
-          loop();
-        }, reject);
-      }());
+        loop();
+      }, reject);
     });
   });
 
@@ -2916,19 +2906,17 @@ function LogoInterpreter(turtle, stream, savehook)
                              { name: procname }));
     }
 
-    return new Promise(function(resolve, reject) {
-      (function loop() {
-        if (!list.length) {
-          resolve(value);
-          return;
-        }
-        var next = list.shift();
-        Promise.resolve(procedure(value, next))
-          .then(function(result) {
-            value = result;
-            loop();
-          }, reject);
-      }());
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!list.length) {
+        resolve(value);
+        return;
+      }
+      var next = list.shift();
+      Promise.resolve(procedure(value, next))
+        .then(function(result) {
+          value = result;
+          loop();
+        }, reject);
     });
   });
 
