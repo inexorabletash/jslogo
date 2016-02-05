@@ -2796,7 +2796,7 @@ function LogoInterpreter(turtle, stream, savehook)
     return promiseLoop(function(loop, resolve, reject) {
       if (!list.length) {
         resolve();
-          return;
+        return;
       }
       Promise.resolve(routine(list.shift()))
         .then(loop, reject);
@@ -2881,13 +2881,13 @@ function LogoInterpreter(turtle, stream, savehook)
         return;
       }
       var item = list.shift();
-      var result = Promise.resolve(routine(item));
-      result.then(function(value) {
-        if (value) {
-          resolve(item);
-          return;
-        }
-        loop();
+      Promise.resolve(routine(item))
+        .then(function(value) {
+          if (value) {
+            resolve(item);
+            return;
+          }
+          loop();
       }, reject);
     });
   });
@@ -2911,8 +2911,7 @@ function LogoInterpreter(turtle, stream, savehook)
         resolve(value);
         return;
       }
-      var next = list.shift();
-      Promise.resolve(procedure(value, next))
+      Promise.resolve(procedure(value, list.shift()))
         .then(function(result) {
           value = result;
           loop();
