@@ -892,8 +892,10 @@ function LogoInterpreter(turtle, stream, savehook)
           reject(new Bye);
           return;
         }
-        if (!statements.length)
+        if (!statements.length) {
           resolve(lastResult);
+          return;
+        }
         Promise.resolve(evaluateExpression(statements))
           .then(function(result) {
             if (result !== undefined && !options.returnResult) {
