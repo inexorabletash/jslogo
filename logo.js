@@ -884,9 +884,7 @@ function LogoInterpreter(turtle, stream, savehook)
     // Operate on a copy so the original is not destroyed
     statements = statements.slice();
 
-    if (!statements.length)
-      return Promise.resolve();
-
+    var lastResult;
     return new Promise(function(resolve, reject) {
       (function loop() {
         if (self.forceBye) {
@@ -894,16 +892,15 @@ function LogoInterpreter(turtle, stream, savehook)
           reject(new Bye);
           return;
         }
+        if (!statements.length)
+          resolve(lastResult);
         Promise.resolve(evaluateExpression(statements))
           .then(function(result) {
             if (result !== undefined && !options.returnResult) {
               reject(new Error(format(__("Don't know what to do with {result}"), {result: result})));
               return;
             }
-            if (!statements.length) {
-              resolve(result);
-              return;
-            }
+            lastResult = result;
             loop();
           }, reject);
       }());
