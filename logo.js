@@ -78,15 +78,39 @@ function LogoInterpreter(turtle, stream, savehook)
     return atom === match;
   }
 
+  // Takes a list of (possibly async) closures. Each is called in
+  // turn, waiting for its result to resolve before the next is
+  // executed. Resolves to an array of results, or rejects if any
+  // closure rejects.
+  function serialExecute(funcs) {
+    var results = [];
+    return new Promise(function(resolve, reject) {
+      (function loop() {
+        if (!funcs.length) {
+          resolve(results);
+          return;
+        }
+        Promise.resolve(funcs.shift()())
+          .then(function(result) {
+            results.push(result);
+            loop();
+          }).catch(reject);
+      }());
+    });
+  }
+
+  // Returns a promise with the same result as the passed promise, but
+  // that executes finalBlock before it resolves, regardless of
+  // whether it fulfills or rejects.
   function promiseFinally(promise, finalBlock) {
     return promise.then(
-      function (result) {
+      function(result) {
         return Promise.resolve(finalBlock()).then(
           function () {
             return result;
           });
       },
-      function (err) {
+      function(err) {
         return Promise.resolve(finalBlock()).then(
           function () {
             throw err;
@@ -111,6 +135,12 @@ function LogoInterpreter(turtle, stream, savehook)
     return f;
   }
 
+
+  //----------------------------------------------------------------------
+  //
+  // Classes
+  //
+  //----------------------------------------------------------------------
 
   // Adapted from:
   // http://stackoverflow.com/questions/424292/how-to-create-my-own-javascript-random-number-generator-that-i-can-also-set-the-s
@@ -234,7 +264,6 @@ function LogoInterpreter(turtle, stream, savehook)
 
   // Used to stop processing cleanly
   function Bye() { }
-
 
   function Type(atom) {
     if (atom === undefined) {
@@ -567,23 +596,10 @@ function LogoInterpreter(turtle, stream, savehook)
     return lhs;
   }
 
-  function serialExecute(funcs) {
-    var results = [];
-    return new Promise(function(resolve, reject) {
-      (function loop() {
-        if (!funcs.length) {
-          resolve(results);
-          return;
-        }
-        Promise.resolve(funcs.shift()())
-          .then(function(result) {
-            results.push(result);
-            loop();
-          }).catch(reject);
-      }());
-    });
-  }
 
+  // Takes a function and list of (possibly async) closures. Returns a
+  // closure that, when executed, evaluates the closures serially then
+  // applies the function to the results.
   function defer(func /*, input...*/) {
     var input = Array.prototype.slice.call(arguments, 1);
     return function () {
