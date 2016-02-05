@@ -106,13 +106,13 @@ function LogoInterpreter(turtle, stream, savehook)
     return promise.then(
       function(result) {
         return Promise.resolve(finalBlock()).then(
-          function () {
+          function() {
             return result;
           });
       },
       function(err) {
         return Promise.resolve(finalBlock()).then(
-          function () {
+          function() {
             throw err;
           });
       });
@@ -602,7 +602,7 @@ function LogoInterpreter(turtle, stream, savehook)
   // applies the function to the results.
   function defer(func /*, input...*/) {
     var input = Array.prototype.slice.call(arguments, 1);
-    return function () {
+    return function() {
       return serialExecute(input.slice())
         .then(function(args) {
           return func.apply(null, args);
@@ -1094,11 +1094,11 @@ function LogoInterpreter(turtle, stream, savehook)
         scope.set(inputs[i], {value: arguments[i]});
       }
       self.scopes.push(scope);
-      return promiseFinally(self.execute(block).then(null, function (err) {
+      return promiseFinally(self.execute(block).then(null, function(err) {
         if (err instanceof Output)
           return err.output;
         throw err;
-      }), function () {
+      }), function() {
         self.scopes.pop();
       });
     };
@@ -1684,12 +1684,12 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("and", function(a, b) {
     var args = Array.from(arguments);
-    return _checker(args, function (value) {return !value;}, 1);
+    return _checker(args, function(value) {return !value;}, 1);
   }, {noeval: true});
 
   def("or", function(a, b) {
     var args = Array.from(arguments);
-    return _checker(args, function (value) {return value;}, 0);
+    return _checker(args, function(value) {return value;}, 0);
   }, {noeval: true});
 
   function _checker(args, shouldStop, defaultValue) {
@@ -1795,7 +1795,7 @@ function LogoInterpreter(turtle, stream, savehook)
     turtle.beginpath();
     return promiseFinally(
       self.execute(statements),
-      function () {
+      function() {
         turtle.fillpath(fillcolor);
       });
   });
@@ -2023,7 +2023,7 @@ function LogoInterpreter(turtle, stream, savehook)
     }
 
     var result = [];
-    plist.forEach(function (key, value) {
+    plist.forEach(function(key, value) {
       result.push(key);
       result.push(copy(value));
     });
@@ -2130,7 +2130,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("globals", function() {
     var globalscope = self.scopes[0];
-    return globalscope.keys().filter(function (x) {
+    return globalscope.keys().filter(function(x) {
       return !globalscope.get(x).buried;
     });
   });
@@ -2244,7 +2244,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
     self.plists.keys().filter(function(x) {
       return !self.plists.get(x).buried;
-    }).forEach(function (name) {
+    }).forEach(function(name) {
       self.plists['delete'](name);
     });
   });
@@ -2271,7 +2271,7 @@ function LogoInterpreter(turtle, stream, savehook)
   def("erpls", function() {
     self.plists.keys().filter(function(x) {
       return !self.plists.get(x).buried;
-    }).forEach(function (key) {
+    }).forEach(function(key) {
       self.plists['delete'](key);
     });
   });
@@ -2499,7 +2499,7 @@ function LogoInterpreter(turtle, stream, savehook)
         self.execute(statements)
           .then(loop, reject);
       }());
-    }), function () {
+    }), function() {
       self.repcount = old_repcount;
     });
   });
@@ -2683,12 +2683,12 @@ function LogoInterpreter(turtle, stream, savehook)
   }
 
   def("do.until", function(block, tf) {
-    var nottf = function () { return notpromise(tf); };
+    var nottf = function() { return notpromise(tf); };
     return self.routines.get("do.while")(block, nottf);
   }, {noeval: true});
 
   def("until", function(tf, block) {
-    var nottf = function () { return notpromise(tf); };
+    var nottf = function() { return notpromise(tf); };
     return self.routines.get("while")(nottf, block);
   }, {noeval: true});
 
@@ -2793,7 +2793,7 @@ function LogoInterpreter(turtle, stream, savehook)
                              { name: procname }));
     }
     list = lexpr(list);
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
       (function loop() {
         if (!list.length) {
           resolve();
@@ -2820,14 +2820,14 @@ function LogoInterpreter(turtle, stream, savehook)
 
     list = lexpr(list);
     var mapped = [];
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
       (function loop() {
         if (!list.length) {
           resolve(mapped);
           return;
         }
         Promise.resolve(routine(list.shift()))
-          .then(function (value) {
+          .then(function(value) {
             mapped.push(value);
             loop();
           }, reject);
@@ -2881,7 +2881,7 @@ function LogoInterpreter(turtle, stream, savehook)
     }
 
     list = lexpr(list);
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
       (function loop() {
         if (!list.length) {
           resolve([]);
@@ -2889,7 +2889,7 @@ function LogoInterpreter(turtle, stream, savehook)
         }
         var item = list.shift();
         var result = Promise.resolve(routine(item));
-        result.then(function (value) {
+        result.then(function(value) {
           if (value) {
             resolve(item);
             return;

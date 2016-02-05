@@ -313,7 +313,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     }
   };
 
-  this.getstate = function () {
+  this.getstate = function() {
     return {
       isturtlestate: true,
       color: this.getcolor(),
@@ -328,7 +328,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     };
   };
 
-  this.setstate = function (state) {
+  this.setstate = function(state) {
     if ((! state) || ! state.isturtlestate) {
       throw new Error("Tried to restore a state that is not a turtle state");
     }
