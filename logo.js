@@ -567,24 +567,30 @@ function LogoInterpreter(turtle, stream, savehook)
     return lhs;
   }
 
-  function defer(func) {
+  function serialExecute(funcs) {
+    var results = [];
+    return new Promise(function(resolve, reject) {
+      (function loop() {
+        if (!funcs.length) {
+          resolve(results);
+          return;
+        }
+        Promise.resolve(funcs.shift()())
+          .then(function(result) {
+            results.push(result);
+            loop();
+          }).catch(reject);
+      }());
+    });
+  }
+
+  function defer(func /*, input...*/) {
     var input = Array.prototype.slice.call(arguments, 1);
     return function () {
-      var args = [];
-      var index = 0;
-      return new Promise(function(resolve, reject) {
-        (function loop() {
-          if (index === input.length) {
-            resolve(func.apply(null, args));
-            return;
-          }
-          Promise.resolve(input[index++]())
-            .then(function(result) {
-              args.push(result);
-              loop();
-            }).catch(reject);
-        }());
-      });
+      return serialExecute(input.slice())
+        .then(function(args) {
+          return func.apply(null, args);
+        });
     };
   }
 
@@ -750,25 +756,13 @@ function LogoInterpreter(turtle, stream, savehook)
       return function() {
         return procedure.apply(null, args);
       };
-    } else {
-      return function() {
-        var evaluatedArgs = [];
-        var index = 0;
-        return new Promise(function(resolve, reject) {
-          (function loop() {
-            if (index === args.length) {
-              resolve(procedure.apply(null, evaluatedArgs));
-              return;
-            }
-            Promise.resolve(args[index++]())
-              .then(function(result) {
-                evaluatedArgs.push(result);
-                loop();
-              }).catch(reject);
-          }());
-        });
-      };
     }
+
+    return function() {
+      return serialExecute(args).then(function(args) {
+        return procedure.apply(null, args);
+      });
+    };
   };
 
   //----------------------------------------------------------------------
