@@ -94,7 +94,7 @@ function LogoInterpreter(turtle, stream, savehook)
           .then(function(result) {
             results.push(result);
             loop();
-          }).catch(reject);
+          }, reject);
       }());
     });
   }
@@ -2635,8 +2635,7 @@ function LogoInterpreter(turtle, stream, savehook)
                 step = aexpr(result);
                 current += step;
                 loop();
-              })
-              .catch(reject);
+              }, reject);
           }());
         });
       });
@@ -2665,8 +2664,7 @@ function LogoInterpreter(turtle, stream, savehook)
               return;
             }
             loop();
-          })
-          .catch(reject);
+          }, reject);
       }());
     });
   }, {noeval: true});
@@ -2683,12 +2681,10 @@ function LogoInterpreter(turtle, stream, savehook)
             }
             self.execute(block)
               .then(loop);
-          })
-          .catch(reject);
+          }, reject);
       }());
     });
   }, {noeval: true});
-
 
   function notpromise(tf) {
     return Promise.resolve(tf()).then(function(r) { return !r; });
@@ -2742,8 +2738,7 @@ function LogoInterpreter(turtle, stream, savehook)
               return;
             }
             loop();
-          })
-          .catch(reject);
+          }, reject);
       }());
     });
   });
@@ -2806,16 +2801,14 @@ function LogoInterpreter(turtle, stream, savehook)
                              { name: procname }));
     }
     list = lexpr(list);
-    var index = 0;
     return new Promise(function (resolve, reject) {
       (function loop() {
-        if (index >= list.length) {
+        if (!list.length) {
           resolve();
           return;
         }
-        var result = Promise.resolve(routine(list[index]));
-        index++;
-        result.then(loop, reject);
+        Promise.resolve(routine(list.shift()))
+          .then(loop, reject);
       }());
     });
   });
@@ -2835,19 +2828,17 @@ function LogoInterpreter(turtle, stream, savehook)
 
     list = lexpr(list);
     var mapped = [];
-    var index = 0;
     return new Promise(function (resolve, reject) {
       (function loop() {
-        if (index >= list.length) {
+        if (!list.length) {
           resolve(mapped);
           return;
         }
-        var result = Promise.resolve(routine(list[index]));
-        index++;
-        result.then(function (value) {
-          mapped.push(value);
-          loop();
-        }, reject);
+        Promise.resolve(routine(list.shift()))
+          .then(function (value) {
+            mapped.push(value);
+            loop();
+          }, reject);
       }());
     });
   });
@@ -2880,8 +2871,7 @@ function LogoInterpreter(turtle, stream, savehook)
             if (value)
               filtered.push(item);
             loop();
-          })
-          .catch(reject);
+          }, reject);
       }());
     });
   });
@@ -2899,16 +2889,14 @@ function LogoInterpreter(turtle, stream, savehook)
     }
 
     list = lexpr(list);
-    var index = 0;
     return new Promise(function (resolve, reject) {
       (function loop() {
-        if (index >= list.length) {
+        if (!list.length) {
           resolve([]);
           return;
         }
-        var item = list[index];
+        var item = list.shift();
         var result = Promise.resolve(routine(item));
-        index++;
         result.then(function (value) {
           if (value) {
             resolve(item);
