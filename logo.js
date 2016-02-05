@@ -912,7 +912,6 @@ function LogoInterpreter(turtle, stream, savehook)
     self.forceBye = true;
   };
 
-  function noop() {}
   var lastRun = Promise.resolve();
 
   // Call to insert an arbitrary task (callback) to be run
@@ -922,7 +921,7 @@ function LogoInterpreter(turtle, stream, savehook)
     var promise = lastRun.then(function() {
       return Promise.resolve(task());
     });
-    lastRun = promise.catch(noop);
+    lastRun = promise.catch(function(){});
     return promise;
   };
 
@@ -932,23 +931,19 @@ function LogoInterpreter(turtle, stream, savehook)
       // Parse it
       var atoms = parse(string);
 
+      // And execute it!
       if (self.turtle)
         self.turtle.begin();
-
-      // And execute it!
-      var p = self.execute(atoms, options);
-
-      // TODO: use promiseFinally() here
-      p.catch(noop).then(function() {
-        if (self.turtle)
-          self.turtle.end();
-      });
-
-      return p.catch(function(err) {
-        if (err instanceof Bye)
-          return;
-        throw err;
-      });
+      return promiseFinally(
+        self.execute(atoms, options),
+        function() {
+          if (self.turtle)
+            self.turtle.end();
+        })
+        .catch(function(err) {
+          if (!(err instanceof Bye))
+            throw err;
+        });
     });
   };
 
