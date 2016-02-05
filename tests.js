@@ -1062,7 +1062,7 @@ QUnit.test("Workspace Management", function(t) {
 });
 
 QUnit.test("Control Structures", function(t) {
-  t.expect(67);
+  t.expect(69);
   //
   // 8.1 Control
   //
@@ -1105,6 +1105,11 @@ QUnit.test("Control Structures", function(t) {
   this.assert_error('test 2 > 1  show iffalse [ "a ]', 'No output from procedure');
 
   this.assert_equals('to foo forever [ if repcount = 5 [ make "c 234 stop ] ] end  foo  :c', 234);
+
+  var now;
+  this.queue(function() { now = Date.now(); });
+  this.assert_equals('wait 60/6', undefined);
+  this.queue(function() { t.ok((Date.now() - now) > (1000/6)); });
 
   this.assert_equals('forever [ if repcount = 5 [ bye ] ]', undefined);
 

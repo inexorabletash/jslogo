@@ -289,6 +289,15 @@ body {
   top: 5px; bottom: 35px; width: 70px;
 }
 
+#run, #stop {
+  top: 5px; bottom: 35px; width: 70px;
+}
+
+#run { display: block; }
+#stop { display: none; }
+.running #run { display: none; }
+.running #stop { display: block; }
+
 #clear {
   height: 19px; bottom: 10px; width: 70px;
 }

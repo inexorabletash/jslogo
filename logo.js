@@ -2584,6 +2584,12 @@ function LogoInterpreter(turtle, stream, savehook)
   // Not Supported: continue
   // Not Supported: wait
 
+  def("wait", function(time) {
+    return new Promise(function(resolve) {
+      setTimeout(resolve, aexpr(time) / 60 * 1000);
+    });
+  });
+
   def("bye", function() {
     throw new Bye;
   });
