@@ -2493,20 +2493,19 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   def("repeat", function(count, statements) {
+    count = aexpr(count);
+    statements = reparse(lexpr(statements));
     var old_repcount = self.repcount;
-    return promiseFinally(new Promise(function (resolve, reject) {
-      count = aexpr(count);
-      statements = reparse(lexpr(statements));
+    return promiseFinally(new Promise(function(resolve, reject) {
       var i = 1;
       (function loop() {
         if (i > count) {
           resolve();
           return;
         }
-        self.repcount = i;
-        i++;
-        var result = self.execute(statements);
-        result.then(loop, reject);
+        self.repcount = i++;
+        self.execute(statements)
+          .then(loop, reject);
       }());
     }), function () {
       self.repcount = old_repcount;
@@ -2515,21 +2514,19 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("forever", function(statements) {
     statements = reparse(lexpr(statements));
-    return new Promise(function (resolve, reject) {
+    var old_repcount = self.repcount;
+    return promiseFinally(new Promise(function(resolve, reject) {
       var i = 1;
       (function loop() {
-        var old_repcount = self.repcount;
-        self.repcount = i;
-        i++;
-        var result = self.execute(statements);
-        promiseFinally(result, function () {
-          self.repcount = old_repcount;
-        }).then(loop, reject);
+        self.repcount = i++;
+        self.execute(statements)
+          .then(loop, reject);
       }());
+    }), function() {
+      self.repcount = old_repcount;
     });
   });
 
-// FIXME: this probably doesn't work
   def("repcount", function() {
     return self.repcount;
   });
@@ -2871,22 +2868,20 @@ function LogoInterpreter(turtle, stream, savehook)
 
     list = lexpr(list);
     var filtered = [];
-    var index = 0;
-    return new Promise(function (resolve, reject) {
+    return new Promise(function(resolve, reject) {
       (function loop() {
-        if (index >= list.length) {
+        if (!list.length) {
           resolve(filtered);
           return;
         }
-        var item = list[index];
-        var result = Promise.resolve(routine(item));
-        index++;
-        result.then(function (value) {
-          if (value) {
-            filtered.push(item);
-          }
-          loop();
-        }, reject);
+        var item = list.shift();
+        Promise.resolve(routine(item))
+          .then(function(value) {
+            if (value)
+              filtered.push(item);
+            loop();
+          })
+          .catch(reject);
       }());
     });
   });
