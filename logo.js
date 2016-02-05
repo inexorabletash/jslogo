@@ -1704,7 +1704,7 @@ function LogoInterpreter(turtle, stream, savehook)
     if (!args.length)
       return Promise.resolve(defaultValue);
     return new Promise(function(resolve, reject) {
-      (function runLoop() {
+      (function loop() {
         var r = args.shift()();
         if (!args.length) {
           resolve(r);
@@ -1715,7 +1715,7 @@ function LogoInterpreter(turtle, stream, savehook)
             resolve(value);
             return;
           }
-          runLoop();
+          loop();
         });
       }());
     });
@@ -2498,7 +2498,7 @@ function LogoInterpreter(turtle, stream, savehook)
       count = aexpr(count);
       statements = reparse(lexpr(statements));
       var i = 1;
-      function runLoop() {
+      (function loop() {
         if (i > count) {
           resolve();
           return;
@@ -2506,9 +2506,8 @@ function LogoInterpreter(turtle, stream, savehook)
         self.repcount = i;
         i++;
         var result = self.execute(statements);
-        result.then(runLoop, reject);
-      }
-      runLoop();
+        result.then(loop, reject);
+      }());
     }), function () {
       self.repcount = old_repcount;
     });
@@ -2518,16 +2517,15 @@ function LogoInterpreter(turtle, stream, savehook)
     statements = reparse(lexpr(statements));
     return new Promise(function (resolve, reject) {
       var i = 1;
-      function runLoop() {
+      (function loop() {
         var old_repcount = self.repcount;
         self.repcount = i;
         i++;
         var result = self.execute(statements);
         promiseFinally(result, function () {
           self.repcount = old_repcount;
-        }).then(runLoop, reject);
-      }
-      runLoop();
+        }).then(loop, reject);
+      }());
     });
   });
 
@@ -2625,7 +2623,7 @@ function LogoInterpreter(turtle, stream, savehook)
       })
       .then(function() {
         return new Promise(function(resolve, reject) {
-          function runLoop() {
+          (function loop() {
             if (sign(current - limit) === sign(step)) {
               resolve();
               return;
@@ -2639,11 +2637,10 @@ function LogoInterpreter(turtle, stream, savehook)
               .then(function(result) {
                 step = aexpr(result);
                 current += step;
-                runLoop();
+                loop();
               })
-            .catch(reject);
-          }
-          runLoop();
+              .catch(reject);
+          }());
         });
       });
   });
@@ -2814,16 +2811,15 @@ function LogoInterpreter(turtle, stream, savehook)
     list = lexpr(list);
     var index = 0;
     return new Promise(function (resolve, reject) {
-      function runLoop() {
+      (function loop() {
         if (index >= list.length) {
           resolve();
           return;
         }
         var result = Promise.resolve(routine(list[index]));
         index++;
-        result.then(runLoop, reject);
-      }
-      runLoop();
+        result.then(loop, reject);
+      }());
     });
   });
 
@@ -2844,7 +2840,7 @@ function LogoInterpreter(turtle, stream, savehook)
     var mapped = [];
     var index = 0;
     return new Promise(function (resolve, reject) {
-      function runLoop() {
+      (function loop() {
         if (index >= list.length) {
           resolve(mapped);
           return;
@@ -2853,10 +2849,9 @@ function LogoInterpreter(turtle, stream, savehook)
         index++;
         result.then(function (value) {
           mapped.push(value);
-          runLoop();
+          loop();
         }, reject);
-      }
-      runLoop();
+      }());
     });
   });
 
@@ -2878,7 +2873,7 @@ function LogoInterpreter(turtle, stream, savehook)
     var filtered = [];
     var index = 0;
     return new Promise(function (resolve, reject) {
-      function runLoop() {
+      (function loop() {
         if (index >= list.length) {
           resolve(filtered);
           return;
@@ -2890,10 +2885,9 @@ function LogoInterpreter(turtle, stream, savehook)
           if (value) {
             filtered.push(item);
           }
-          runLoop();
+          loop();
         }, reject);
-      }
-      runLoop();
+      }());
     });
   });
 
@@ -2912,7 +2906,7 @@ function LogoInterpreter(turtle, stream, savehook)
     list = lexpr(list);
     var index = 0;
     return new Promise(function (resolve, reject) {
-      function runLoop() {
+      (function loop() {
         if (index >= list.length) {
           resolve([]);
           return;
@@ -2923,12 +2917,11 @@ function LogoInterpreter(turtle, stream, savehook)
         result.then(function (value) {
           if (value) {
             resolve(item);
-          } else {
-            runLoop();
+            return;
           }
+          loop();
         }, reject);
-      }
-      runLoop();
+      }());
     });
   });
 
