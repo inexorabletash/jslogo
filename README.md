@@ -7,8 +7,6 @@ This is hosted at http://inexorabletash.github.io/jslogo/ for playing with live.
 this attempts to implement a subset of [UCBLogo](http://www.cs.berkeley.edu/~bh/v2ch14/manual.html)
 defined in in *Brian Harvey's Computer Science Logo Style*
 
-Use `git clone --recursive` to get [polyfill](https://github.com/inexorabletash/polyfill) for older browsers.
-
 Logo Examples
 -------------
     to star repeat 5 [ fd 100 rt 144 ] end

@@ -1,3 +1,0 @@
-[submodule "polyfill"]
-	path = polyfill
-	url = https://github.com/inexorabletash/polyfill.git
