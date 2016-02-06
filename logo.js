@@ -16,10 +16,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//----------------------------------------------------------------------
 function LogoInterpreter(turtle, stream, savehook)
-//----------------------------------------------------------------------
 {
+  'use strict';
+
   var self = this;
 
   var UNARY_MINUS = '<UNARYMINUS>'; // Must not match regexIdentifier
@@ -55,10 +55,10 @@ function LogoInterpreter(turtle, stream, savehook)
     return string;
   }
 
-  // To handle additional keyword aliases (localizations, etc),
-  // assign a function to keywordAlias. Input will be the uppercased
-  // word, output must be one of the keywords (ELSE or END), or
-  // undefined. For example:
+  // To handle additional keyword aliases (localizations, etc), assign
+  // a function to keywordAlias. Input will be the uppercased word,
+  // output must be one of the keywords (ELSE or END), or undefined.
+  // For example:
   // logo.keywordAlias = function(name) {
   //   return {
   //     'ALIE': 'ELSE',
@@ -74,6 +74,58 @@ function LogoInterpreter(turtle, stream, savehook)
     if (self.keywordAlias)
       atom = self.keywordAlias(atom) || atom;
     return atom === match;
+  }
+
+  // Returns a promise; calls the passed function with (loop, resolve,
+  // reject). Calling resolve or reject (or throwing) settles the
+  // promise, calling loop repeats.
+  function promiseLoop(func) {
+    return new Promise(function(resolve, reject) {
+      (function loop() {
+        try {
+          func(loop, resolve, reject);
+        } catch (e) {
+          reject(e);
+        }
+      }());
+    });
+  }
+
+  // Takes a list of (possibly async) closures. Each is called in
+  // turn, waiting for its result to resolve before the next is
+  // executed. Resolves to an array of results, or rejects if any
+  // closure rejects.
+  function serialExecute(funcs) {
+    var results = [];
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!funcs.length) {
+        resolve(results);
+        return;
+      }
+      Promise.resolve(funcs.shift()())
+        .then(function(result) {
+          results.push(result);
+          loop();
+        }, reject);
+    });
+  }
+
+  // Returns a promise with the same result as the passed promise, but
+  // that executes finalBlock before it resolves, regardless of
+  // whether it fulfills or rejects.
+  function promiseFinally(promise, finalBlock) {
+    return promise
+      .then(function(result) {
+        return Promise.resolve(finalBlock())
+          .then(function() {
+            return result;
+          });
+      }, function(err) {
+        return Promise.resolve(finalBlock())
+          .then(function() {
+            throw err;
+          });
+      });
   }
 
   // Based on: http://www.jbouchard.net/chris/blog/2008/01/currying-in-javascript-fun-for-whole.html
@@ -93,6 +145,12 @@ function LogoInterpreter(turtle, stream, savehook)
     return f;
   }
 
+
+  //----------------------------------------------------------------------
+  //
+  // Classes
+  //
+  //----------------------------------------------------------------------
 
   // Adapted from:
   // http://stackoverflow.com/questions/424292/how-to-create-my-own-javascript-random-number-generator-that-i-can-also-set-the-s
@@ -201,6 +259,7 @@ function LogoInterpreter(turtle, stream, savehook)
   self.scopes = [new StringMap(true)];
   self.plists = new StringMap(true);
   self.prng = new PRNG(Math.random() * 0x7fffffff);
+  self.forceBye = false;
 
   //----------------------------------------------------------------------
   //
@@ -216,7 +275,6 @@ function LogoInterpreter(turtle, stream, savehook)
   // Used to stop processing cleanly
   function Bye() { }
 
-
   function Type(atom) {
     if (atom === undefined) {
       // TODO: Should be caught higher upstream than this
@@ -227,6 +285,8 @@ function LogoInterpreter(turtle, stream, savehook)
       return 'list';
     } else if (atom instanceof LogoArray) {
       return 'array';
+    } else if ('then' in Object(atom)) {
+      throw new Error(__("Unexpected value: a promise"));
     } else if (!atom) {
       throw new Error(__("Unexpected value: null"));
     } else {
@@ -300,8 +360,8 @@ function LogoInterpreter(turtle, stream, savehook)
         // preceded by a space and followed by a nonspace.
 
         // Minus sign means unary minus if the previous token is an
-        // infix operator or open parenthesis, or it is preceded by
-        // a space and followed by a nonspace.
+        // infix operator or open parenthesis, or it is preceded by a
+        // space and followed by a nonspace.
 
         if (atom === '-') {
 
@@ -500,13 +560,9 @@ function LogoInterpreter(turtle, stream, savehook)
   //                           | procedure-call
   //                           | '(' Expression ')'
 
-  //----------------------------------------------------------------------
   // Peek at the list to see if there are additional atoms from a set
   // of options.
-  //----------------------------------------------------------------------
-  function peek(list, options)
-  //----------------------------------------------------------------------
-  {
+  function peek(list, options) {
     if (list.length < 1) { return false; }
     var next = list[0];
     return options.some(function(x) { return next === x; });
@@ -531,19 +587,33 @@ function LogoInterpreter(turtle, stream, savehook)
         var rhs = additiveExpression(list);
 
         switch (op) {
-          case "<": return function() { return (aexpr(lhs()) < aexpr(rhs())) ? 1 : 0; };
-          case ">": return function() { return (aexpr(lhs()) > aexpr(rhs())) ? 1 : 0; };
-          case "=": return function() { return equal(lhs(), rhs()) ? 1 : 0; };
+          case "<": return defer(function(lhs, rhs) { return (aexpr(lhs) < aexpr(rhs)) ? 1 : 0; }, lhs, rhs);
+          case ">": return defer(function(lhs, rhs) { return (aexpr(lhs) > aexpr(rhs)) ? 1 : 0; }, lhs, rhs);
+          case "=": return defer(function(lhs, rhs) { return equal(lhs, rhs) ? 1 : 0; }, lhs, rhs);
 
-          case "<=": return function() { return (aexpr(lhs()) <= aexpr(rhs())) ? 1 : 0; };
-          case ">=": return function() { return (aexpr(lhs()) >= aexpr(rhs())) ? 1 : 0; };
-          case "<>": return function() { return !equal(lhs(), rhs()) ? 1 : 0; };
+          case "<=": return defer(function(lhs, rhs) { return (aexpr(lhs) <= aexpr(rhs)) ? 1 : 0; }, lhs, rhs);
+          case ">=": return defer(function(lhs, rhs) { return (aexpr(lhs) >= aexpr(rhs)) ? 1 : 0; }, lhs, rhs);
+          case "<>": return defer(function(lhs, rhs) { return !equal(lhs, rhs) ? 1 : 0; }, lhs, rhs);
           default: throw new Error(__("Internal error in expression parser"));
         }
       } (lhs);
     }
 
     return lhs;
+  }
+
+
+  // Takes a function and list of (possibly async) closures. Returns a
+  // closure that, when executed, evaluates the closures serially then
+  // applies the function to the results.
+  function defer(func /*, input...*/) {
+    var input = Array.prototype.slice.call(arguments, 1);
+    return function() {
+      return serialExecute(input.slice())
+        .then(function(args) {
+          return func.apply(null, args);
+        });
+    };
   }
 
   function additiveExpression(list) {
@@ -555,8 +625,8 @@ function LogoInterpreter(turtle, stream, savehook)
       lhs = function(lhs) {
         var rhs = multiplicativeExpression(list);
         switch (op) {
-          case "+": return function() { return aexpr(lhs()) + aexpr(rhs()); };
-          case "-": return function() { return aexpr(lhs()) - aexpr(rhs()); };
+          case "+": return defer(function(lhs, rhs) { return aexpr(lhs) + aexpr(rhs); }, lhs, rhs);
+          case "-": return defer(function(lhs, rhs) { return aexpr(lhs) - aexpr(rhs); }, lhs, rhs);
           default: throw new Error(__("Internal error in expression parser"));
         }
       } (lhs);
@@ -574,17 +644,17 @@ function LogoInterpreter(turtle, stream, savehook)
       lhs = function(lhs) {
         var rhs = powerExpression(list);
         switch (op) {
-          case "*": return function() { return aexpr(lhs()) * aexpr(rhs()); };
-          case "/": return function() {
-            var n = aexpr(lhs()), d = aexpr(rhs());
+          case "*": return defer(function(lhs, rhs) { return aexpr(lhs) * aexpr(rhs); }, lhs, rhs);
+          case "/": return defer(function(lhs, rhs) {
+            var n = aexpr(lhs), d = aexpr(rhs);
             if (d === 0) { throw new Error(__("Division by zero")); }
             return n / d;
-          };
-          case "%": return function() {
-            var n = aexpr(lhs()), d = aexpr(rhs());
+          }, lhs, rhs);
+          case "%": return defer(function(lhs, rhs) {
+            var n = aexpr(lhs), d = aexpr(rhs);
             if (d === 0) { throw new Error(__("Division by zero")); }
             return n % d;
-          };
+          }, lhs, rhs);
           default: throw new Error(__("Internal error in expression parser"));
         }
       } (lhs);
@@ -600,7 +670,7 @@ function LogoInterpreter(turtle, stream, savehook)
       op = list.shift();
       lhs = function(lhs) {
         var rhs = unaryExpression(list);
-        return function() { return Math.pow(aexpr(lhs()), aexpr(rhs())); };
+        return defer(function(lhs, rhs) { return Math.pow(aexpr(lhs), aexpr(rhs)); }, lhs, rhs);
       } (lhs);
     }
 
@@ -613,7 +683,7 @@ function LogoInterpreter(turtle, stream, savehook)
     if (peek(list, [UNARY_MINUS])) {
       op = list.shift();
       rhs = unaryExpression(list);
-      return function() { return -aexpr(rhs()); };
+      return defer(function(rhs) { return -aexpr(rhs); }, rhs);
     } else {
       return finalExpression(list);
     }
@@ -708,11 +778,13 @@ function LogoInterpreter(turtle, stream, savehook)
       return function() {
         return procedure.apply(null, args);
       };
-    } else {
-      return function() {
-        return procedure.apply(null, args.map(function(a) { return a(); }));
-      };
     }
+
+    return function() {
+      return serialExecute(args).then(function(args) {
+        return procedure.apply(null, args);
+      });
+    };
   };
 
   //----------------------------------------------------------------------
@@ -747,8 +819,8 @@ function LogoInterpreter(turtle, stream, savehook)
   //----------------------------------------------------------------------
 
   // 'list expression'
-  // Takes an atom - if it is a list is is returned unchanged. If it is
-  // a word a list of the characters is returned. If the procedure
+  // Takes an atom - if it is a list is is returned unchanged. If it
+  // is a word a list of the characters is returned. If the procedure
   // returns a list, the output type should match the input type, so
   // use sifw().
   function lexpr(atom) {
@@ -818,42 +890,68 @@ function LogoInterpreter(turtle, stream, savehook)
     // Operate on a copy so the original is not destroyed
     statements = statements.slice();
 
-    var result;
-    while (statements.length) {
-      result = evaluateExpression(statements);
-
-      if (result !== undefined && !options.returnResult) {
-        throw new Error(format(__("Don't know what to do with {result}"), {result: result}));
+    var lastResult;
+    return promiseLoop(function(loop, resolve, reject) {
+      if (self.forceBye) {
+        self.forceBye = false;
+        reject(new Bye);
+        return;
       }
-    }
-
-    // Return last result
-    return result;
+      if (!statements.length) {
+        resolve(lastResult);
+        return;
+      }
+      Promise.resolve(evaluateExpression(statements))
+        .then(function(result) {
+          if (result !== undefined && !options.returnResult) {
+            reject(new Error(format(__("Don't know what to do with {result}"), {result: result})));
+            return;
+          }
+          lastResult = result;
+          loop();
+        }, reject);
+    });
   };
 
+  // FIXME: should this confirm that something is running?
+  self.bye = function() {
+    self.forceBye = true;
+  };
+
+  var lastRun = Promise.resolve();
+
+  // Call to insert an arbitrary task (callback) to be run in sequence
+  // with pending calls to run. Useful in tests to do work just before
+  // a subsequent assertion.
+  self.queueTask = function(task) {
+    var promise = lastRun.then(function() {
+      return Promise.resolve(task());
+    });
+    lastRun = promise.catch(function(){});
+    return promise;
+  };
 
   self.run = function(string, options) {
     options = Object(options);
-    if (self.turtle) { self.turtle.begin(); }
-
-    try {
+    return self.queueTask(function() {
       // Parse it
       var atoms = parse(string);
 
       // And execute it!
-      return self.execute(atoms, options);
-    } catch (e) {
-      if (e instanceof Bye) {
-        // clean exit
-        return undefined;
-      } else {
-        throw e;
-      }
-    } finally {
-      if (self.turtle) { self.turtle.end(); }
-    }
+      if (self.turtle)
+        self.turtle.begin();
+      return promiseFinally(
+        self.execute(atoms, options),
+        function() {
+          if (self.turtle)
+            self.turtle.end();
+        })
+        .catch(function(err) {
+          if (!(err instanceof Bye))
+            throw err;
+        });
+    });
   };
-
 
   self.definition = function(name, proc) {
 
@@ -1002,23 +1100,13 @@ function LogoInterpreter(turtle, stream, savehook)
         scope.set(inputs[i], {value: arguments[i]});
       }
       self.scopes.push(scope);
-
-      try {
-        // Execute the block
-        try {
-          return self.execute(block);
-        } catch (e) {
-          // From OUTPUT
-          if (e instanceof Output) {
-            return e.output;
-          } else {
-            throw e;
-          }
-        }
-      } finally {
-        // Close the scope
+      return promiseFinally(self.execute(block).then(null, function(err) {
+        if (err instanceof Output)
+          return err.output;
+        throw err;
+      }), function() {
         self.scopes.pop();
-      }
+      });
     };
 
     var proc = to_arity(func, inputs.length);
@@ -1601,12 +1689,32 @@ function LogoInterpreter(turtle, stream, savehook)
   def("false", function() { return 0; });
 
   def("and", function(a, b) {
-    return Array.from(arguments).every(function(f) { return f(); }) ? 1 : 0;
+    var args = Array.from(arguments);
+    return booleanReduce(args, function(value) {return value;}, 1);
   }, {noeval: true});
 
   def("or", function(a, b) {
-    return Array.from(arguments).some(function(f) { return f(); }) ? 1 : 0;
+    var args = Array.from(arguments);
+    return booleanReduce(args, function(value) {return !value;}, 0);
   }, {noeval: true});
+
+  function booleanReduce(args, test, value) {
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!args.length) {
+        resolve(value);
+        return;
+      }
+      Promise.resolve(args.shift()())
+        .then(function(result) {
+          if (!test(result)) {
+            resolve(result);
+            return;
+          }
+          value = result;
+          loop();
+        });
+    });
+  }
 
   def("xor", function(a, b) {
     return Array.from(arguments).map(aexpr)
@@ -1624,34 +1732,34 @@ function LogoInterpreter(turtle, stream, savehook)
   //----------------------------------------------------------------------
   // 6.1 Turtle Motion
 
-  def(["forward", "fd"], function(a) { turtle.move(aexpr(a)); });
-  def(["back", "bk"], function(a) { turtle.move(-aexpr(a)); });
-  def(["left", "lt"], function(a) { turtle.turn(-aexpr(a)); });
-  def(["right", "rt"], function(a) { turtle.turn(aexpr(a)); });
+  def(["forward", "fd"], function(a) { return turtle.move(aexpr(a)); });
+  def(["back", "bk"], function(a) { return turtle.move(-aexpr(a)); });
+  def(["left", "lt"], function(a) { return turtle.turn(-aexpr(a)); });
+  def(["right", "rt"], function(a) { return turtle.turn(aexpr(a)); });
 
   // Left arrow:
-  def(["\u2190"], function() { turtle.turn(-15); });
+  def(["\u2190"], function() { return turtle.turn(-15); });
   // Right arrow:
-  def(["\u2192"], function() { turtle.turn(-15); });
+  def(["\u2192"], function() { return turtle.turn(-15); });
   // Up arrow:
-  def(["\u2191"], function() { turtle.move(10); });
+  def(["\u2191"], function() { return turtle.move(10); });
   // Down arrow:
-  def(["\u2193"], function() { turtle.turn(-10); });
+  def(["\u2193"], function() { return turtle.turn(-10); });
 
 
   def("setpos", function(l) {
     l = lexpr(l);
     if (l.length !== 2) { throw new Error(__("Expected list of length 2")); }
-    turtle.setposition(aexpr(l[0]), aexpr(l[1]));
+    return turtle.setposition(aexpr(l[0]), aexpr(l[1]));
   });
-  def("setxy", function(x, y) { turtle.setposition(aexpr(x), aexpr(y)); });
-  def("setx", function(x) { turtle.setposition(aexpr(x), undefined); }); // TODO: Replace with ...?
-  def("sety", function(y) { turtle.setposition(undefined, aexpr(y)); });
-  def(["setheading", "seth"], function(a) { turtle.setheading(aexpr(a)); });
+  def("setxy", function(x, y) { return turtle.setposition(aexpr(x), aexpr(y)); });
+  def("setx", function(x) { return turtle.setposition(aexpr(x), undefined); }); // TODO: Replace with ...?
+  def("sety", function(y) { return turtle.setposition(undefined, aexpr(y)); });
+  def(["setheading", "seth"], function(a) { return turtle.setheading(aexpr(a)); });
 
-  def("home", function() { turtle.home(); });
+  def("home", function() { return turtle.home(); });
 
-  def("arc", function(angle, radius) { turtle.arc(aexpr(angle), aexpr(radius)); });
+  def("arc", function(angle, radius) { return turtle.arc(aexpr(angle), aexpr(radius)); });
 
   //
   // 6.2 Turtle Motion Queries
@@ -1673,34 +1781,34 @@ function LogoInterpreter(turtle, stream, savehook)
   // 6.3 Turtle and Window Control
   //
 
-  def(["showturtle", "st"], function() { turtle.showturtle(); });
-  def(["hideturtle", "ht"], function() { turtle.hideturtle(); });
-  def("clean", function() { turtle.clear(); });
-  def(["clearscreen", "cs"], function() { turtle.clearscreen(); });
+  def(["showturtle", "st"], function() { return turtle.showturtle(); });
+  def(["hideturtle", "ht"], function() { return turtle.hideturtle(); });
+  def("clean", function() { return turtle.clear(); });
+  def(["clearscreen", "cs"], function() { return turtle.clearscreen(); });
 
-  def("wrap", function() { turtle.setturtlemode('wrap'); });
-  def("window", function() { turtle.setturtlemode('window'); });
-  def("fence", function() { turtle.setturtlemode('fence'); });
+  def("wrap", function() { return turtle.setturtlemode('wrap'); });
+  def("window", function() { return turtle.setturtlemode('window'); });
+  def("fence", function() { return turtle.setturtlemode('fence'); });
 
-  def("fill", function() { turtle.fill(); });
+  def("fill", function() { return turtle.fill(); });
 
   def("filled", function(fillcolor, statements) {
     fillcolor = sexpr(fillcolor);
     statements = reparse(lexpr(statements));
     turtle.beginpath();
-    try {
-      self.execute(statements);
-    } finally {
-      turtle.fillpath(fillcolor);
-    }
+    return promiseFinally(
+      self.execute(statements),
+      function() {
+        turtle.fillpath(fillcolor);
+      });
   });
 
   def("label", function(a) {
     var s = Array.from(arguments).map(stringify_nodecorate).join(" ");
-    turtle.drawtext(s);
+    return turtle.drawtext(s);
   });
 
-  def("setlabelheight", function(a) { turtle.setfontsize(aexpr(a)); });
+  def("setlabelheight", function(a) { return turtle.setfontsize(aexpr(a)); });
 
   // Not Supported: textscreen
   // Not Supported: fullscreen
@@ -1730,12 +1838,12 @@ function LogoInterpreter(turtle, stream, savehook)
   //
   // 6.5 Pen and Background Control
   //
-  def(["pendown", "pd"], function() { turtle.pendown(); });
-  def(["penup", "pu"], function() { turtle.penup(); });
+  def(["pendown", "pd"], function() { return turtle.pendown(); });
+  def(["penup", "pu"], function() { return turtle.penup(); });
 
-  def(["penpaint", "ppt"], function() { turtle.setpenmode('paint'); });
-  def(["penerase", "pe"], function() { turtle.setpenmode('erase'); });
-  def(["penreverse", "px"], function() { turtle.setpenmode('reverse'); });
+  def(["penpaint", "ppt"], function() { return turtle.setpenmode('paint'); });
+  def(["penerase", "pe"], function() { return turtle.setpenmode('erase'); });
+  def(["penreverse", "px"], function() { return turtle.setpenmode('reverse'); });
 
   def(["setpencolor", "setpc", "setcolor"], function(color) {
     function adjust(n) {
@@ -1751,9 +1859,9 @@ function LogoInterpreter(turtle, stream, savehook)
       var rr = (r < 16 ? "0" : "") + r.toString(16);
       var gg = (g < 16 ? "0" : "") + g.toString(16);
       var bb = (b < 16 ? "0" : "") + b.toString(16);
-      turtle.setcolor('#' + rr + gg + bb);
+      return turtle.setcolor('#' + rr + gg + bb);
     } else {
-      turtle.setcolor(sexpr(color));
+      return turtle.setcolor(sexpr(color));
     }
   });
 
@@ -1761,9 +1869,9 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def(["setpensize", "setwidth", "setpw"], function(a) {
     if (Type(a) === 'list') {
-      turtle.setwidth(aexpr(a[0]));
+      return turtle.setwidth(aexpr(a[0]));
     } else {
-      turtle.setwidth(aexpr(a));
+      return turtle.setwidth(aexpr(a));
     }
   });
 
@@ -1918,7 +2026,7 @@ function LogoInterpreter(turtle, stream, savehook)
     }
 
     var result = [];
-    plist.forEach(function (key, value) {
+    plist.forEach(function(key, value) {
       result.push(key);
       result.push(copy(value));
     });
@@ -2025,7 +2133,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("globals", function() {
     var globalscope = self.scopes[0];
-    return globalscope.keys().filter(function (x) {
+    return globalscope.keys().filter(function(x) {
       return !globalscope.get(x).buried;
     });
   });
@@ -2139,7 +2247,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
     self.plists.keys().filter(function(x) {
       return !self.plists.get(x).buried;
-    }).forEach(function (name) {
+    }).forEach(function(name) {
       self.plists['delete'](name);
     });
   });
@@ -2166,7 +2274,7 @@ function LogoInterpreter(turtle, stream, savehook)
   def("erpls", function() {
     self.plists.keys().filter(function(x) {
       return !self.plists.get(x).buried;
-    }).forEach(function (key) {
+    }).forEach(function(key) {
       self.plists['delete'](key);
     });
   });
@@ -2362,7 +2470,6 @@ function LogoInterpreter(turtle, stream, savehook)
   // 8.1 Control
   //
 
-
   def("run", function(statements) {
     statements = reparse(lexpr(statements));
     return self.execute(statements, {returnResult: true});
@@ -2370,39 +2477,46 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("runresult", function(statements) {
     statements = reparse(lexpr(statements));
-    var result = self.execute(statements, {returnResult: true});
-    if (result !== undefined) {
-      return [result];
-    } else {
-      return [];
-    }
+    return self.execute(statements, {returnResult: true})
+      .then(function(result) {
+        if (result !== undefined)
+          return [result];
+        else
+          return [];
+      });
   });
 
   def("repeat", function(count, statements) {
     count = aexpr(count);
     statements = reparse(lexpr(statements));
-    for (var i = 1; i <= count; ++i) {
-      var old_repcount = self.repcount;
-      self.repcount = i;
-      try {
-        self.execute(statements);
-      } finally {
+    var old_repcount = self.repcount;
+    var i = 1;
+    return promiseFinally(
+      promiseLoop(function(loop, resolve, reject) {
+        if (i > count) {
+          resolve();
+          return;
+        }
+        self.repcount = i++;
+        self.execute(statements)
+          .then(loop, reject);
+      }), function() {
         self.repcount = old_repcount;
-      }
-    }
+      });
   });
 
   def("forever", function(statements) {
     statements = reparse(lexpr(statements));
-    for (var i = 1; true; ++i) {
-      var old_repcount = self.repcount;
-      self.repcount = i;
-      try {
-        self.execute(statements);
-      } finally {
+    var old_repcount = self.repcount;
+    var i = 1;
+    return promiseFinally(
+      promiseLoop(function(loop, resolve, reject) {
+        self.repcount = i++;
+        self.execute(statements)
+          .then(loop, reject);
+      }), function() {
         self.repcount = old_repcount;
-      }
-    }
+      });
   });
 
   def("repcount", function() {
@@ -2457,16 +2571,18 @@ function LogoInterpreter(turtle, stream, savehook)
   // Not Supported: continue
   // Not Supported: wait
 
+  def("wait", function(time) {
+    return new Promise(function(resolve) {
+      setTimeout(resolve, aexpr(time) / 60 * 1000);
+    });
+  });
+
   def("bye", function() {
-    throw new Bye();
+    throw new Bye;
   });
 
   def(".maybeoutput", function(value) {
-    if (value !== undefined) {
-      throw new Output(value);
-    } else {
-      throw new Output();
-    }
+    throw new Output(value);
   });
 
   // Not Supported: goto
@@ -2484,19 +2600,40 @@ function LogoInterpreter(turtle, stream, savehook)
     function sign(x) { return x < 0 ? -1 : x > 0 ? 1 : 0; }
 
     var varname = sexpr(control.shift());
-    var start = aexpr(evaluateExpression(control));
-    var limit = aexpr(evaluateExpression(control));
+    var start, limit, step, current;
 
-    var step;
-    var current = start;
-    while (sign(current - limit) !== sign(step)) {
-      setvar(varname, current);
-      self.execute(statements);
+    return Promise.resolve(evaluateExpression(control))
+      .then(function(r) {
+        current = start = aexpr(r);
+        return evaluateExpression(control);
+      })
+      .then(function(r) {
+        limit = aexpr(r);
+      })
+      .then(function() {
+        return promiseLoop(function(loop, resolve, reject) {
+          if (sign(current - limit) === sign(step)) {
+            resolve();
+            return;
+          }
+          setvar(varname, current);
+          self.execute(statements)
+            .then(function() {
+              return (control.length) ?
+                evaluateExpression(control.slice()) : sign(limit - start);
+            })
+            .then(function(result) {
+              step = aexpr(result);
+                current += step;
+              loop();
+            }, reject);
+        });
+      });
+  });
 
-      step = (control.length) ?
-        aexpr(evaluateExpression(control.slice())) : sign(limit - start);
-      current += step;
-    }
+  def("dotimes", function(control, statements) {
+    control = reparse(lexpr(control));
+    return self.routines.get("for")([control[0], 0, control[1]], statements);
   });
 
   function checkevalblock(block) {
@@ -2507,34 +2644,46 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("do.while", function(block, tf) {
     block = checkevalblock(block);
-
-    do {
-      self.execute(block);
-    } while (tf());
+    return promiseLoop(function(loop, resolve, reject) {
+      self.execute(block)
+        .then(tf)
+        .then(function(cond) {
+          if (!cond) {
+            resolve();
+            return;
+          }
+          loop();
+        }, reject);
+    });
   }, {noeval: true});
 
   def("while", function(tf, block) {
     block = checkevalblock(block);
-
-    while (tf()) {
-      self.execute(block);
-    }
+    return promiseLoop(function(loop, resolve, reject) {
+      Promise.resolve(tf())
+        .then(function(cond) {
+          if (!cond) {
+            resolve();
+            return;
+          }
+          self.execute(block)
+            .then(loop);
+        }, reject);
+    });
   }, {noeval: true});
 
-  def("do.until", function(block, tf) {
-    block = checkevalblock(block);
+  function negatePromiseFunction(tf) {
+    return function() {
+      return Promise.resolve(tf()).then(function(r) { return !r; });
+    };
+  }
 
-    do {
-      self.execute(block);
-    } while (!tf());
+  def("do.until", function(block, tf) {
+    return self.routines.get("do.while")(block, negatePromiseFunction(tf));
   }, {noeval: true});
 
   def("until", function(tf, block) {
-    block = checkevalblock(block);
-
-    while (!tf()) {
-      self.execute(block);
-    }
+    return self.routines.get("while")(negatePromiseFunction(tf), block);
   }, {noeval: true});
 
   def("case", function(value, clauses) {
@@ -2555,18 +2704,26 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("cond", function(clauses) {
     clauses = lexpr(clauses);
-
-    for (var i = 0; i < clauses.length; ++i) {
-      var clause = lexpr(clauses[i]);
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!clauses.length) {
+        resolve();
+        return;
+      }
+      var clause = lexpr(clauses.shift());
       var first = clause.shift();
       if (isKeyword(first, 'ELSE')) {
-        return evaluateExpression(clause);
+        resolve(evaluateExpression(clause));
+        return;
       }
-      if (evaluateExpression(reparse(lexpr(first)))) {
-        return evaluateExpression(clause);
-      }
-    }
-    return undefined;
+      evaluateExpression(reparse(lexpr(first)))
+        .then(function(result) {
+          if (result) {
+            resolve(evaluateExpression(clause));
+            return;
+          }
+          loop();
+        }, reject);
+    });
   });
 
   //
@@ -2626,8 +2783,15 @@ function LogoInterpreter(turtle, stream, savehook)
       throw new Error(format(__("Can't apply FOREACH to special {name:U}"),
                              { name: procname }));
     }
-
-    lexpr(list).forEach(function(n) { return routine(n); });
+    list = lexpr(list);
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!list.length) {
+        resolve();
+        return;
+      }
+      Promise.resolve(routine(list.shift()))
+        .then(loop, reject);
+    });
   });
 
 
@@ -2643,7 +2807,19 @@ function LogoInterpreter(turtle, stream, savehook)
                              { name: procname }));
     }
 
-    return lexpr(list).map(routine);
+    list = lexpr(list);
+    var mapped = [];
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!list.length) {
+        resolve(mapped);
+        return;
+      }
+      Promise.resolve(routine(list.shift()))
+        .then(function(value) {
+          mapped.push(value);
+          loop();
+        }, reject);
+    });
   });
 
   // Not Supported: map.se
@@ -2660,7 +2836,21 @@ function LogoInterpreter(turtle, stream, savehook)
                              { name: procname }));
     }
 
-    return lexpr(list).filter(function(x) { return routine(x); });
+    list = lexpr(list);
+    var filtered = [];
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!list.length) {
+        resolve(filtered);
+        return;
+      }
+      var item = list.shift();
+      Promise.resolve(routine(item))
+        .then(function(value) {
+          if (value)
+            filtered.push(item);
+          loop();
+        }, reject);
+    });
   });
 
   def("find", function(procname, list) {
@@ -2676,13 +2866,21 @@ function LogoInterpreter(turtle, stream, savehook)
     }
 
     list = lexpr(list);
-    for (var i = 0; i < list.length; i += 1) {
-      var item = list[i];
-      if (routine(item)) {
-        return item;
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!list.length) {
+        resolve([]);
+        return;
       }
-    }
-    return [];
+      var item = list.shift();
+      Promise.resolve(routine(item))
+        .then(function(value) {
+          if (value) {
+            resolve(item);
+            return;
+          }
+          loop();
+      }, reject);
+    });
   });
 
   def("reduce", function(procname, list) {
@@ -2699,13 +2897,26 @@ function LogoInterpreter(turtle, stream, savehook)
                              { name: procname }));
     }
 
-    // NOTE: Can't use procedure directly as reduce calls
-    // targets w/ additional args and defaults initial value to undefined
-    return list.reduce(function(a, b) { return procedure(a, b); }, value);
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!list.length) {
+        resolve(value);
+        return;
+      }
+      Promise.resolve(procedure(value, list.shift()))
+        .then(function(result) {
+          value = result;
+          loop();
+        }, reject);
+    });
   });
 
   // Not Supported: crossmap
   // Not Supported: cascade
   // Not Supported: cascade.2
   // Not Supported: transfer
+
+  // Helper for testing that wraps a result in a Promise
+  def(".promise", function(value) {
+    return Promise.resolve(value);
+  });
 }

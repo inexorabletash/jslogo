@@ -17,6 +17,7 @@
 // limitations under the License.
 
 function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
+  'use strict';
   width = Number(width);
   height = Number(height);
 
@@ -292,26 +293,27 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
 
   this.arc = function(angle, radius) {
     var self = this;
-    if (this.turtlemode == 'wrap') {
-      [self.x, self.x + width, this.x - width].forEach(function(x) {
-        [self.y, self.y + height, this.y - height].forEach(function(y) {
-          if (!this.filling)
+
+    if (self.turtlemode == 'wrap') {
+      [self.x, self.x + width, self.x - width].forEach(function(x) {
+        [self.y, self.y + height, self.y - height].forEach(function(y) {
+          if (!self.filling)
             canvas_ctx.beginPath();
           canvas_ctx.arc(x, y, radius, -self.r, -self.r + deg2rad(angle), false);
-          if (!this.filling)
+          if (!self.filling)
             canvas_ctx.stroke();
         });
       });
     } else {
-      if (!this.filling)
+      if (!self.filling)
         canvas_ctx.beginPath();
-      canvas_ctx.arc(this.x, this.y, radius, -this.r, -this.r + deg2rad(angle), false);
-      if (!this.filling)
+      canvas_ctx.arc(self.x, self.y, radius, -self.r, -self.r + deg2rad(angle), false);
+      if (!self.filling)
         canvas_ctx.stroke();
     }
   };
 
-  this.getstate = function () {
+  this.getstate = function() {
     return {
       isturtlestate: true,
       color: this.getcolor(),
@@ -326,7 +328,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     };
   };
 
-  this.setstate = function (state) {
+  this.setstate = function(state) {
     if ((! state) || ! state.isturtlestate) {
       throw new Error("Tried to restore a state that is not a turtle state");
     }

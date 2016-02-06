@@ -272,7 +272,7 @@ body {
 .single #toggle #collapse-label { display: none; }
 .multi  #toggle #expand-label { display: none; }
 
-#run, #clear {
+#run, #stop, #clear {
   cursor: pointer;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -285,26 +285,35 @@ body {
   background-color: white;
 }
 
-#run {
+#run, #stop {
   top: 5px; bottom: 35px; width: 70px;
 }
+
+#run, #stop {
+  top: 5px; bottom: 35px; width: 70px;
+}
+
+#run { display: block; }
+#stop { display: none; }
+.running #run { display: none; }
+.running #stop { display: block; }
 
 #clear {
   height: 19px; bottom: 10px; width: 70px;
 }
 
-#run, #clear {
+#run, #stop, #clear {
   right: 5px; left: auto;
 }
-[dir=rtl] #run, [dir=rtl] #clear {
+[dir=rtl] #run, [dir=rtl] #clear, [dir=rtl] #stop {
   left: 5px; right: auto;
 }
 
-#run:hover, #clear:hover {
+#run:hover, #clear:hover, #stop:hover {
   background-color: #eeeeee;
 }
 
-#run .label, #clear .label {
+#run .label, #clear .label, #stop .label {
   position: absolute;
   top: 0; bottom: 0; left: 0; right: 0;
   margin: auto;
@@ -377,6 +386,6 @@ a:hover.forkme {
 }
 
 @media only screen and (max-width: 420px) {
-  #run { height: auto; bottom: 10px; }
+  #run, #stop { height: auto; bottom: 10px; }
   #clear { display: none; }
 }

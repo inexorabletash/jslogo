@@ -209,14 +209,20 @@ function initInput() {
       input.setValue('');
     }
     setTimeout(function() {
-      try {
-        logo.run(v);
-      } catch (e) {
+      document.body.classList.add('running');
+      logo.run(v).catch(function (e) {
         error.innerHTML = '';
         error.appendChild(document.createTextNode(e.message));
         error.classList.add('shown');
-      }
+      }).then(function() {
+        document.body.classList.remove('running');
+      });
     }, 100);
+  }
+
+  function stop() {
+    logo.bye();
+    document.body.classList.remove('running');
   }
 
   input.run = run;
@@ -360,8 +366,8 @@ function initInput() {
   });
 
   $('#run').addEventListener('click', run);
+  $('#stop').addEventListener('click', stop);
   $('#clear').addEventListener('click', clear);
-
 
   window.addEventListener('message', function(e) {
     if ('example' in e.data) {
@@ -666,11 +672,9 @@ window.addEventListener('DOMContentLoaded', function() {
     if (param.length > 0) {
       param = decodeURIComponent(param.substring(1).replace(/\_/g, ' '));
       input.setValue(param);
-      try {
-        logo.run(param);
-      } catch (e) {
+      logo.run(param).catch(function (e) {
         window.alert("Error: " + e.message);
-      }
+      });
     }
   }
 
