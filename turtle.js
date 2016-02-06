@@ -27,6 +27,11 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
 
   function deg2rad(d) { return d / 180 * Math.PI; }
   function rad2deg(r) { return r * 180 / Math.PI; }
+  function font(px, name) {
+    px = Number(px);
+    name = String(name);
+    return String(px) + 'px ' + (/\s/.test(name) ? JSON.stringify(name) : name);
+  }
 
   var self = this;
   function moveto(x, y) {
@@ -197,9 +202,15 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
 
   this.setfontsize = function(size) {
     this.fontsize = size;
-    canvas_ctx.font = this.fontsize + 'px sans-serif';
+    canvas_ctx.font = font(this.fontsize, this.fontname);
   };
   this.getfontsize = function() { return this.fontsize; };
+
+  this.setfontname = function(name) {
+    this.fontname = name;
+    canvas_ctx.font = font(this.fontsize, this.fontname);
+  };
+  this.getfontname = function() { return this.fontname; };
 
   this.setposition = function(x, y) {
     x = (x === undefined) ? this.x : x + (width / 2);
@@ -327,6 +338,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
       turtlemode: this.getturtlemode(),
       width: this.getwidth(),
       fontsize: this.getfontsize(),
+      fontname: this.getfontname(),
       visible: this.isturtlevisible(),
       pendown: this.down
     };
@@ -341,7 +353,8 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     this.setturtlemode(state.turtlemode);
     this.setcolor(state.color);
     this.setwidth(state.width);
-    this.setfontsize(state.size);
+    this.setfontsize(state.fontsize);
+    this.setfontname(state.fontname);
     this.setposition(state.xy[0], state.xy[1]);
     this.setheading(state.heading);
     this.setpenmode(state.penmode);
@@ -423,6 +436,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
   this.width = 1;
   this.penmode = 'paint';
   this.fontsize = 14;
+  this.fontname = 'sans-serif';
   this.turtlemode = 'wrap';
   this.visible = true;
   this.down = true;
@@ -437,7 +451,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     canvas_ctx.strokeStyle = parseColor(self.color);
     canvas_ctx.fillStyle = parseColor(self.color);
     canvas_ctx.lineWidth = self.width;
-    canvas_ctx.font = self.fontsize + 'px sans-serif';
+    canvas_ctx.font = font(self.fontsize, self.fontname);
     canvas_ctx.globalCompositeOperation =
       (self.penmode === 'erase') ? 'destination-out' :
       (self.penmode === 'reverse') ? 'xor' : 'source-over';

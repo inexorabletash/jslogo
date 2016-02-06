@@ -1801,6 +1801,8 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("setlabelheight", function(a) { return turtle.setfontsize(aexpr(a)); });
 
+  def("setlabelfont", function(a) { return turtle.setfontname(sexpr(a)); });
+
   // Not Supported: textscreen
   // Not Supported: fullscreen
   // Not Supported: splitscreen
@@ -1824,6 +1826,10 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("labelsize", function() {
     return [turtle.getfontsize(), turtle.getfontsize()];
+  });
+
+  def("labelfont", function() {
+    return turtle.getfontname();
   });
 
   //
