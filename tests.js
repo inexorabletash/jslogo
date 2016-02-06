@@ -1281,7 +1281,8 @@ QUnit.test("Regression Tests", function(t) {
   this.assert_equals('"abc;def', "abc");
   this.assert_equals('"abc\\;def', "abc;def");
   this.assert_equals('"abc\\\\def', "abc\\def");
-  this.assert_equals('repeat 1 [ make "v "abc\\;def ]  :v', "abc;def");
+  this.assert_equals('"a\\ b', 'a b');
+  this.assert_equals('repeat 1 [ make "v "abc\\;def ]  :v', "abc\\;def");
   this.assert_error('repeat 1 [ make "v "abc;def ]  :v', "Expected ']'");
   this.assert_equals('make "a [ a b c ]  make "b :a  pop "a  :b', ["a", "b", "c"]);
   this.assert_equals('to foo :BAR output :BAR end  foo 1', 1);

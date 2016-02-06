@@ -296,7 +296,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   // Note: U+2190 ... U+2193 are arrows
   var regexIdentifier = /^(\.?[A-Za-z\u00A1-\u1FFF][A-Za-z0-9_.\?\u00A1-\u1FFF]*|[\u2190-\u2193])/;
-  var regexStringLiteral = /^(["'][^ \[\]\(\)\{\}]*)/;
+  var regexStringLiteral = /^(["'](?:[^ \[\]\(\)\{\}\\]|\\.)*)/m;
   var regexVariable = /^(:[A-Za-z\u00A1-\u1FFF][A-Za-z0-9_\u00A1-\u1FFF]*)/;
   var regexNumberLiteral = /^([0-9]*\.?[0-9]+(?:[eE]\s*[\-+]?\s*[0-9]+)?)/;
   var regexOperator = /^(\+|\-|\*|\/|%|\^|>=|<=|<>|=|<|>|\[|\]|\{|\}|\(|\))/;
@@ -318,11 +318,7 @@ function LogoInterpreter(turtle, stream, savehook)
         prev, r;
 
     // Handle escaping and filter out comments
-    string = string.replace(/^(([^;\\\n]|\\.)*);.*$/mg, '$1').replace(/\\(.)/g, '$1');
-
-    // Treat newlines as whitespace (so \s will match)
-    string = string.replace(/\r/g, '').replace(/\n/g, ' ');
-    string = string.replace(/^\s+/, '').replace(/\s+$/, '');
+    string = string.replace(/^((?:[^;\\\n]|\\.)*);.*$/mg, '$1');
 
     while (string !== undefined && string !== '') {
       var atom;
@@ -330,6 +326,7 @@ function LogoInterpreter(turtle, stream, savehook)
       // Ignore (but track) leading space - needed for unary minus disambiguation
       var leading_space = /^\s+/.test(string);
       string = string.replace(/^\s+/, '');
+      if (!string.length) break;
 
       if (string.match(regexIdentifier) ||
           string.match(regexStringLiteral) ||
@@ -338,6 +335,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
         atom = RegExp.$1;
         string = string.substring(atom.length);
+        atom = atom.replace(/\\(.)/mg, '$1');
 
       } else if (string.charAt(0) === '[') {
         r = parseList(string.substring(1));
