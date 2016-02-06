@@ -29,8 +29,10 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
   function rad2deg(r) { return r * 180 / Math.PI; }
   function font(px, name) {
     px = Number(px);
-    name = String(name);
-    return String(px) + 'px ' + (/\s/.test(name) ? JSON.stringify(name) : name);
+    name = String(name).toLowerCase();
+    if (['serif', 'sans-serif', 'cursive', 'fantasy', 'monospace'].indexOf(name) === -1)
+      name = JSON.stringify(name);
+    return String(px) + 'px ' + name;
   }
 
   var self = this;
