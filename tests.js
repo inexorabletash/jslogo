@@ -135,6 +135,13 @@ QUnit.module("Logo Unit Tests", {
     this.queue = function(task) {
       this.interpreter.queueTask(task.bind(this));
     };
+
+    this.run = function(code) {
+      this.interpreter.run(code).catch(function(error) {
+        console.warn(error);
+        ok(false, 'Failed: ' + code + ' - ' + error);
+      });
+    };
   }
 });
 
@@ -774,8 +781,7 @@ QUnit.test("Graphics", function(t) {
   // NOTE: test canvas is 300,300 (so -150...150 coordinates before hitting)
   // edge
 
-  this.interpreter.run('setspeed Infinity');
-  this.interpreter.run('clearscreen');
+  this.run('clearscreen');
   this.assert_equals('clean home (list heading xcor ycor)', [0, 0, 0]);
 
   //
@@ -1159,8 +1165,8 @@ QUnit.test("Control Structures", function(t) {
   // 8.2 Template-based Iteration
   //
 
-  this.interpreter.run("to add_async :a :b output .promise :a + :b end");
-  this.interpreter.run("to numberp_async :a output .promise numberp :a end");
+  this.run("to add_async :a :b output .promise :a + :b end");
+  this.run("to numberp_async :a output .promise numberp :a end");
 
   this.assert_equals('apply "word ["a "b "c]', '"a"b"c');
   this.assert_equals('apply "add_async [1 2]', 3);
@@ -1340,7 +1346,7 @@ QUnit.test("API Tests", function(t) {
       hookCalled = hookCalled || (s === 'internationalorange');
     };
   });
-  this.interpreter.run('setpencolor "internationalorange');
+  this.run('setpencolor "internationalorange');
   this.queue(function() {
     t.ok(hookCalled);
     done();
