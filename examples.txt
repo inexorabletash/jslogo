@@ -22,6 +22,7 @@ repeat 144 [
   bk repcount * repcount / 30
   pendown
   rt 10
+  wait 5
 ]
 
 to tree :size
