@@ -95,14 +95,14 @@ QUnit.module("Logo Unit Tests", {
       this.stream.clear();
       var result = this.interpreter.run(expression, {returnResult: true});
       var done = t.async();
-      result.then(function () {
+      result.then((function () {
         var actual = this.stream.last_prompt;
         this.stream.clear();
         t.equal(actual, expected, expression);
-      }, function (err) {
+      }).bind(this), (function (err) {
         t.equal("(no error)", err, expression);
         this.stream.clear();
-      }).then(done);
+      }).bind(this)).then(done);
     };
 
     this.assert_predicate = function(expression, predicate) {
@@ -130,6 +130,10 @@ QUnit.module("Logo Unit Tests", {
         t.push(ex.message === expected, ex.message, expected, 'Expected error from: ' + expression);
         done();
       }
+    };
+
+    this.queue = function(task) {
+      this.interpreter.queueTask(task.bind(this));
     };
   }
 });
@@ -499,7 +503,7 @@ QUnit.test("Data Structure Primitives", function(t) {
   this.assert_equals('standout "whatever', 'whatever');
 });
 
-if (false) QUnit.test("Communication", function(t) {
+QUnit.test("Communication", function(t) {
   t.expect(22);
 
   // 3.1 Transmitters
@@ -524,10 +528,14 @@ if (false) QUnit.test("Communication", function(t) {
 
   // 3.2 Receivers
 
-  this.stream.inputbuffer = "test";
+  this.queue(function() {
+    this.stream.inputbuffer = "test";
+  });
   this.assert_equals('readword', 'test');
 
-  this.stream.inputbuffer = "a b c 1 2 3";
+  this.queue(function() {
+    this.stream.inputbuffer = "a b c 1 2 3";
+  });
   this.assert_equals('readword', 'a b c 1 2 3');
 
   this.assert_prompt('readword', undefined);
@@ -760,12 +768,13 @@ QUnit.test("Logical Operations", function(t) {
   this.assert_stream('or 0 (type "yup)', 'yup');
 });
 
-if (false) QUnit.test("Graphics", function(t) {
+QUnit.test("Graphics", function(t) {
   t.expect(69);
 
   // NOTE: test canvas is 300,300 (so -150...150 coordinates before hitting)
   // edge
 
+  this.interpreter.run('setspeed Infinity');
   this.interpreter.run('clearscreen');
   this.assert_equals('clean home (list heading xcor ycor)', [0, 0, 0]);
 
@@ -816,11 +825,9 @@ if (false) QUnit.test("Graphics", function(t) {
   this.assert_equals('setpos [ 12 34 ] clean pos', [12, 34]);
   this.assert_equals('setpos [ 12 34 ] clearscreen (list heading xcor ycor)', [0, 0, 0]);
   this.assert_equals('setpos [ 12 34 ] cs (list heading xcor ycor)', [0, 0, 0]);
-
   this.assert_equals('wrap turtlemode', 'WRAP');
 
   this.assert_equals('setxy 0 0 setxy 160 160 (list xcor ycor)', [-140, -140]);
-
   this.assert_equals('window turtlemode', 'WINDOW');
   this.assert_equals('setxy 0 0 setxy 160 160 (list xcor ycor)', [160, 160]);
 
@@ -1055,7 +1062,7 @@ QUnit.test("Workspace Management", function(t) {
 });
 
 QUnit.test("Control Structures", function(t) {
-  //t.expect(58);
+  t.expect(69);
   //
   // 8.1 Control
   //
@@ -1098,6 +1105,11 @@ QUnit.test("Control Structures", function(t) {
   this.assert_error('test 2 > 1  show iffalse [ "a ]', 'No output from procedure');
 
   this.assert_equals('to foo forever [ if repcount = 5 [ make "c 234 stop ] ] end  foo  :c', 234);
+
+  var now;
+  this.queue(function() { now = Date.now(); });
+  this.assert_equals('wait 60/6', undefined);
+  this.queue(function() { t.ok((Date.now() - now) > (1000/6)); });
 
   this.assert_equals('forever [ if repcount = 5 [ bye ] ]', undefined);
 
@@ -1147,17 +1159,35 @@ QUnit.test("Control Structures", function(t) {
   // 8.2 Template-based Iteration
   //
 
+  this.interpreter.run("to add_async :a :b output .promise :a + :b end");
+  this.interpreter.run("to numberp_async :a output .promise numberp :a end");
+
   this.assert_equals('apply "word ["a "b "c]', '"a"b"c');
+  this.assert_equals('apply "add_async [1 2]', 3);
+
   this.assert_equals('invoke "word "a', 'a');
   this.assert_equals('(invoke "word "a "b "c)', 'abc');
   this.assert_equals('(invoke "word)', '');
+  this.assert_equals('(invoke "add_async 1 2)', 3);
+
   this.assert_equals('make "x 0  to addx :a make "x :x+:a end  foreach "addx [ 1 2 3 4 5 ]  :x', 15);
+  this.assert_equals('make "x 0  to addx :a make "x .promise :x+:a end  foreach "addx [ 1 2 3 4 5 ]  :x', 15);
+
   this.assert_equals('to double :x output :x * 2 end  map "double [ 1 2 3 ]', [2, 4, 6]);
+  this.assert_equals('to double :x output .promise :x * 2 end  map "double [ 1 2 3 ]', [2, 4, 6]);
+
   this.assert_equals('to odd :x output :x % 2 end  filter "odd [ 1 2 3 ]', ["1", "3"]);
+  this.assert_equals('to odd :x output .promise :x % 2 end  filter "odd [ 1 2 3 ]', ["1", "3"]);
+
   this.assert_equals('find "numberp (list "a "b "c 4 "e "f )', 4);
   this.assert_equals('find "numberp (list "a "b "c "d "e "f )', []);
+  this.assert_equals('find "numberp_async (list "a "b "c 4 "e "f )', 4);
+  this.assert_equals('find "numberp_async (list "a "b "c "d "e "f )', []);
+
   this.assert_equals('reduce "sum [ 1 2 3 4 ]', 10);
   this.assert_equals('(reduce "sum [ 1 2 3 4 ] 10)', 20);
+  this.assert_equals('reduce "add_async [ 1 2 3 4 ]', 10);
+  this.assert_equals('(reduce "add_async [ 1 2 3 4 ] 10)', 20);
 
   // TODO: Order of operations
   // TODO: Structures, lists of lists
@@ -1262,44 +1292,57 @@ QUnit.test("Regression Tests", function(t) {
   this.assert_equals('make "a { 1 }  make "b :a  setitem 1 :a 2  item 1 :b', 2);
 });
 
-if (false) QUnit.test("API Tests", function(t) {
+QUnit.test("API Tests", function(t) {
   // LogoInterpeter#copydef(newname, oldname)
   this.assert_error('yup', "Don't know how to YUP");
   this.assert_error('nope', "Don't know how to NOPE");
-  this.interpreter.copydef('yup', 'true');
-  this.interpreter.copydef('nope', 'false');
+
+  this.queue(function() {
+    this.interpreter.copydef('yup', 'true');
+    this.interpreter.copydef('nope', 'false');
+  });
   this.assert_equals('yup', 1);
   this.assert_equals('nope', 0);
 
   // LogoInterpreter#localize
   this.assert_error("1 / 0", "Division by zero");
   this.assert_error("item 5 [ 1 2 ]", "Index out of bounds");
-  this.interpreter.localize = function(s) {
-    return {
-      'Division by zero': 'Divido per nulo',
-      'Index out of bounds': 'Indekso ekster limojn'
-    }[s];
-  };
+  this.queue(function() {
+    this.interpreter.localize = function(s) {
+      return {
+        'Division by zero': 'Divido per nulo',
+        'Index out of bounds': 'Indekso ekster limojn'
+      }[s];
+    };
+  });
   this.assert_error("1 / 0", "Divido per nulo");
   this.assert_error("item 5 [ 1 2 ]", "Indekso ekster limojn");
 
   // LogoInterpreter#keywordAlias
   this.assert_error('to foo output 2 fino  foo', "Expected END");
   this.assert_equals('case 2 [[[1] "a"] [alie "b]]', undefined);
-  this.interpreter.keywordAlias = function(s) {
-    return {
-      'FINO': 'END',
-      'ALIE': 'ELSE'
-    }[s];
-  };
+  this.queue(function() {
+    this.interpreter.keywordAlias = function(s) {
+      return {
+        'FINO': 'END',
+        'ALIE': 'ELSE'
+      }[s];
+    };
+  });
   this.assert_equals('case 2 [[[1] "a"] [alie "b]]', 'b');
   this.assert_equals('to foo output 2 fino  foo', 2);
 
   // CanvasTurtle#colorAlias
+  var done = t.async();
   var hookCalled = false;
-  this.turtle.colorAlias = function(s) {
-    hookCalled = hookCalled || (s === 'internationalorange');
-  };
+  this.queue(function() {
+    this.turtle.colorAlias = function(s) {
+      hookCalled = hookCalled || (s === 'internationalorange');
+    };
+  });
   this.interpreter.run('setpencolor "internationalorange');
-  t.ok(hookCalled);
+  this.queue(function() {
+    t.ok(hookCalled);
+    done();
+  });
 });

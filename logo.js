@@ -16,10 +16,10 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//----------------------------------------------------------------------
 function LogoInterpreter(turtle, stream, savehook)
-//----------------------------------------------------------------------
 {
+  'use strict';
+
   var self = this;
 
   var UNARY_MINUS = '<UNARYMINUS>'; // Must not match regexIdentifier
@@ -55,10 +55,10 @@ function LogoInterpreter(turtle, stream, savehook)
     return string;
   }
 
-  // To handle additional keyword aliases (localizations, etc),
-  // assign a function to keywordAlias. Input will be the uppercased
-  // word, output must be one of the keywords (ELSE or END), or
-  // undefined. For example:
+  // To handle additional keyword aliases (localizations, etc), assign
+  // a function to keywordAlias. Input will be the uppercased word,
+  // output must be one of the keywords (ELSE or END), or undefined.
+  // For example:
   // logo.keywordAlias = function(name) {
   //   return {
   //     'ALIE': 'ELSE',
@@ -76,21 +76,53 @@ function LogoInterpreter(turtle, stream, savehook)
     return atom === match;
   }
 
-  function isPromise(value) {
-    return value && value.then && value.catch;
+  // Returns a promise; calls the passed function with (loop, resolve,
+  // reject). Calling resolve or reject (or throwing) settles the
+  // promise, calling loop repeats.
+  function promiseLoop(func) {
+    return new Promise(function(resolve, reject) {
+      (function loop() {
+        try {
+          func(loop, resolve, reject);
+        } catch (e) {
+          reject(e);
+        }
+      }());
+    });
   }
 
+  // Takes a list of (possibly async) closures. Each is called in
+  // turn, waiting for its result to resolve before the next is
+  // executed. Resolves to an array of results, or rejects if any
+  // closure rejects.
+  function serialExecute(funcs) {
+    var results = [];
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!funcs.length) {
+        resolve(results);
+        return;
+      }
+      Promise.resolve(funcs.shift()())
+        .then(function(result) {
+          results.push(result);
+          loop();
+        }, reject);
+    });
+  }
+
+  // Returns a promise with the same result as the passed promise, but
+  // that executes finalBlock before it resolves, regardless of
+  // whether it fulfills or rejects.
   function promiseFinally(promise, finalBlock) {
-    return promise.then(
-      function (result) {
-        return Promise.resolve(finalBlock()).then(
-          function () {
+    return promise
+      .then(function(result) {
+        return Promise.resolve(finalBlock())
+          .then(function() {
             return result;
           });
-      },
-      function (err) {
-        return Promise.resolve(finalBlock()).then(
-          function () {
+      }, function(err) {
+        return Promise.resolve(finalBlock())
+          .then(function() {
             throw err;
           });
       });
@@ -113,6 +145,12 @@ function LogoInterpreter(turtle, stream, savehook)
     return f;
   }
 
+
+  //----------------------------------------------------------------------
+  //
+  // Classes
+  //
+  //----------------------------------------------------------------------
 
   // Adapted from:
   // http://stackoverflow.com/questions/424292/how-to-create-my-own-javascript-random-number-generator-that-i-can-also-set-the-s
@@ -237,7 +275,6 @@ function LogoInterpreter(turtle, stream, savehook)
   // Used to stop processing cleanly
   function Bye() { }
 
-
   function Type(atom) {
     if (atom === undefined) {
       // TODO: Should be caught higher upstream than this
@@ -248,7 +285,7 @@ function LogoInterpreter(turtle, stream, savehook)
       return 'list';
     } else if (atom instanceof LogoArray) {
       return 'array';
-    } else if (isPromise(atom)) {
+    } else if ('then' in Object(atom)) {
       throw new Error(__("Unexpected value: a promise"));
     } else if (!atom) {
       throw new Error(__("Unexpected value: null"));
@@ -323,8 +360,8 @@ function LogoInterpreter(turtle, stream, savehook)
         // preceded by a space and followed by a nonspace.
 
         // Minus sign means unary minus if the previous token is an
-        // infix operator or open parenthesis, or it is preceded by
-        // a space and followed by a nonspace.
+        // infix operator or open parenthesis, or it is preceded by a
+        // space and followed by a nonspace.
 
         if (atom === '-') {
 
@@ -523,13 +560,9 @@ function LogoInterpreter(turtle, stream, savehook)
   //                           | procedure-call
   //                           | '(' Expression ')'
 
-  //----------------------------------------------------------------------
   // Peek at the list to see if there are additional atoms from a set
   // of options.
-  //----------------------------------------------------------------------
-  function peek(list, options)
-  //----------------------------------------------------------------------
-  {
+  function peek(list, options) {
     if (list.length < 1) { return false; }
     var next = list[0];
     return options.some(function(x) { return next === x; });
@@ -569,29 +602,17 @@ function LogoInterpreter(turtle, stream, savehook)
     return lhs;
   }
 
-  function defer(func) {
+
+  // Takes a function and list of (possibly async) closures. Returns a
+  // closure that, when executed, evaluates the closures serially then
+  // applies the function to the results.
+  function defer(func /*, input...*/) {
     var input = Array.prototype.slice.call(arguments, 1);
-    return function () {
-      var args = [];
-      var index = 0;
-      return new Promise(function (resolve, reject) {
-        function resolveLoop() {
-          while (index < input.length) {
-            var item = input[index]();
-            index++;
-            if (isPromise(item)) {
-              item.then(function (result) {
-                args.push(result);
-                resolveLoop();
-              }).catch(reject);
-              return;
-            }
-            args.push(item);
-          }
-          resolve(func.apply(null, args));
-        }
-        resolveLoop();
-      });
+    return function() {
+      return serialExecute(input.slice())
+        .then(function(args) {
+          return func.apply(null, args);
+        });
     };
   }
 
@@ -757,33 +778,13 @@ function LogoInterpreter(turtle, stream, savehook)
       return function() {
         return procedure.apply(null, args);
       };
-    } else {
-      return function() {
-        var evaluatedArgs = [];
-        var index = 0;
-        return new Promise(function (resolve, reject) {
-          function doEvalLoop() {
-            while (index < args.length) {
-              var result = args[index]();
-              index++;
-              if (isPromise(result)) {
-                result.then(function (value) {
-                  evaluatedArgs.push(value);
-                  doEvalLoop();
-                }).catch(function (err) {
-                  index = args.length;
-                  reject(err);
-                });
-                return;
-              }
-              evaluatedArgs.push(result);
-            }
-            resolve(procedure.apply(null, evaluatedArgs));
-          }
-          doEvalLoop();
-        });
-      };
     }
+
+    return function() {
+      return serialExecute(args).then(function(args) {
+        return procedure.apply(null, args);
+      });
+    };
   };
 
   //----------------------------------------------------------------------
@@ -818,8 +819,8 @@ function LogoInterpreter(turtle, stream, savehook)
   //----------------------------------------------------------------------
 
   // 'list expression'
-  // Takes an atom - if it is a list is is returned unchanged. If it is
-  // a word a list of the characters is returned. If the procedure
+  // Takes an atom - if it is a list is is returned unchanged. If it
+  // is a word a list of the characters is returned. If the procedure
   // returns a list, the output type should match the input type, so
   // use sifw().
   function lexpr(atom) {
@@ -889,33 +890,26 @@ function LogoInterpreter(turtle, stream, savehook)
     // Operate on a copy so the original is not destroyed
     statements = statements.slice();
 
-    return new Promise(function (resolve, reject) {
-      var lastResult;
-      function runLoop() {
-        if (self.forceBye) {
-          self.forceBye = false;
-          reject(new Bye);
-          return;
-        }
-        while (statements.length) {
-          var result = evaluateExpression(statements);
-          if (isPromise(result)) {
-            lastResult = result.then(function (value) {
-              lastResult = value;
-              runLoop();
-            }).catch(function (err) {
-              reject(err);
-            });
+    var lastResult;
+    return promiseLoop(function(loop, resolve, reject) {
+      if (self.forceBye) {
+        self.forceBye = false;
+        reject(new Bye);
+        return;
+      }
+      if (!statements.length) {
+        resolve(lastResult);
+        return;
+      }
+      Promise.resolve(evaluateExpression(statements))
+        .then(function(result) {
+          if (result !== undefined && !options.returnResult) {
+            reject(new Error(format(__("Don't know what to do with {result}"), {result: result})));
             return;
           }
           lastResult = result;
-        }
-        if (lastResult !== undefined && !options.returnResult) {
-          reject(new Error(format(__("Don't know what to do with {result}"), {result: lastResult})));
-        }
-        resolve(lastResult);
-      }
-      runLoop();
+          loop();
+        }, reject);
     });
   };
 
@@ -924,36 +918,39 @@ function LogoInterpreter(turtle, stream, savehook)
     self.forceBye = true;
   };
 
-  function noop() {}
   var lastRun = Promise.resolve();
 
-  self.run = function(string, options) {
+  // Call to insert an arbitrary task (callback) to be run in sequence
+  // with pending calls to run. Useful in tests to do work just before
+  // a subsequent assertion.
+  self.queueTask = function(task) {
     var promise = lastRun.then(function() {
-      options = Object(options);
+      return Promise.resolve(task());
+    });
+    lastRun = promise.catch(function(){});
+    return promise;
+  };
+
+  self.run = function(string, options) {
+    options = Object(options);
+    return self.queueTask(function() {
       // Parse it
       var atoms = parse(string);
 
+      // And execute it!
       if (self.turtle)
         self.turtle.begin();
-
-      // And execute it!
-      var p = self.execute(atoms, options);
-
-
-      // TODO: use promiseFinally() here
-      p.catch(noop).then(function() {
-        if (self.turtle)
-          self.turtle.end();
-      });
-
-      return p.catch(function(err) {
-        if (err instanceof Bye)
-          return;
-        throw err;
-      });
+      return promiseFinally(
+        self.execute(atoms, options),
+        function() {
+          if (self.turtle)
+            self.turtle.end();
+        })
+        .catch(function(err) {
+          if (!(err instanceof Bye))
+            throw err;
+        });
     });
-    lastRun = promise.catch(noop);
-    return promise;
   };
 
   self.definition = function(name, proc) {
@@ -1103,11 +1100,11 @@ function LogoInterpreter(turtle, stream, savehook)
         scope.set(inputs[i], {value: arguments[i]});
       }
       self.scopes.push(scope);
-      return promiseFinally(self.execute(block).then(null, function (err) {
+      return promiseFinally(self.execute(block).then(null, function(err) {
         if (err instanceof Output)
           return err.output;
         throw err;
-      }), function () {
+      }), function() {
         self.scopes.pop();
       });
     };
@@ -1693,32 +1690,29 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("and", function(a, b) {
     var args = Array.from(arguments);
-    return _checker(args, function (value) {return !value;}, 1);
+    return booleanReduce(args, function(value) {return value;}, 1);
   }, {noeval: true});
 
   def("or", function(a, b) {
     var args = Array.from(arguments);
-    return _checker(args, function (value) {return value;}, 0);
+    return booleanReduce(args, function(value) {return !value;}, 0);
   }, {noeval: true});
 
-  function _checker(args, shouldStop, defaultValue) {
-    if (!args.length)
-      return Promise.resolve(defaultValue);
-    return new Promise(function(resolve, reject) {
-      (function runLoop() {
-        var r = args.shift()();
-        if (!args.length) {
-          resolve(r);
-          return;
-        }
-        Promise.resolve(r).then(function(value) {
-          if (shouldStop(value)) {
-            resolve(value);
+  function booleanReduce(args, test, value) {
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!args.length) {
+        resolve(value);
+        return;
+      }
+      Promise.resolve(args.shift()())
+        .then(function(result) {
+          if (!test(result)) {
+            resolve(result);
             return;
           }
-          runLoop();
+          value = result;
+          loop();
         });
-      }());
     });
   }
 
@@ -1742,7 +1736,6 @@ function LogoInterpreter(turtle, stream, savehook)
   def(["back", "bk"], function(a) { return turtle.move(-aexpr(a)); });
   def(["left", "lt"], function(a) { return turtle.turn(-aexpr(a)); });
   def(["right", "rt"], function(a) { return turtle.turn(aexpr(a)); });
-  def(["setspeed"], function(a) { return turtle.setspeed(aexpr(a)); });
 
   // Left arrow:
   def(["\u2190"], function() { return turtle.turn(-15); });
@@ -1805,7 +1798,7 @@ function LogoInterpreter(turtle, stream, savehook)
     turtle.beginpath();
     return promiseFinally(
       self.execute(statements),
-      function () {
+      function() {
         turtle.fillpath(fillcolor);
       });
   });
@@ -2033,7 +2026,7 @@ function LogoInterpreter(turtle, stream, savehook)
     }
 
     var result = [];
-    plist.forEach(function (key, value) {
+    plist.forEach(function(key, value) {
       result.push(key);
       result.push(copy(value));
     });
@@ -2140,7 +2133,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("globals", function() {
     var globalscope = self.scopes[0];
-    return globalscope.keys().filter(function (x) {
+    return globalscope.keys().filter(function(x) {
       return !globalscope.get(x).buried;
     });
   });
@@ -2254,7 +2247,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
     self.plists.keys().filter(function(x) {
       return !self.plists.get(x).buried;
-    }).forEach(function (name) {
+    }).forEach(function(name) {
       self.plists['delete'](name);
     });
   });
@@ -2281,7 +2274,7 @@ function LogoInterpreter(turtle, stream, savehook)
   def("erpls", function() {
     self.plists.keys().filter(function(x) {
       return !self.plists.get(x).buried;
-    }).forEach(function (key) {
+    }).forEach(function(key) {
       self.plists['delete'](key);
     });
   });
@@ -2477,7 +2470,6 @@ function LogoInterpreter(turtle, stream, savehook)
   // 8.1 Control
   //
 
-
   def("run", function(statements) {
     statements = reparse(lexpr(statements));
     return self.execute(statements, {returnResult: true});
@@ -2495,45 +2487,38 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   def("repeat", function(count, statements) {
+    count = aexpr(count);
+    statements = reparse(lexpr(statements));
     var old_repcount = self.repcount;
-    return promiseFinally(new Promise(function (resolve, reject) {
-      count = aexpr(count);
-      statements = reparse(lexpr(statements));
-      var i = 1;
-      function runLoop() {
+    var i = 1;
+    return promiseFinally(
+      promiseLoop(function(loop, resolve, reject) {
         if (i > count) {
           resolve();
           return;
         }
-        self.repcount = i;
-        i++;
-        var result = self.execute(statements);
-        result.then(runLoop, reject);
-      }
-      runLoop();
-    }), function () {
-      self.repcount = old_repcount;
-    });
+        self.repcount = i++;
+        self.execute(statements)
+          .then(loop, reject);
+      }), function() {
+        self.repcount = old_repcount;
+      });
   });
 
   def("forever", function(statements) {
     statements = reparse(lexpr(statements));
-    return new Promise(function (resolve, reject) {
-      var i = 1;
-      function runLoop() {
-        var old_repcount = self.repcount;
-        self.repcount = i;
-        i++;
-        var result = self.execute(statements);
-        promiseFinally(result, function () {
-          self.repcount = old_repcount;
-        }).then(runLoop, reject);
-      }
-      runLoop();
-    });
+    var old_repcount = self.repcount;
+    var i = 1;
+    return promiseFinally(
+      promiseLoop(function(loop, resolve, reject) {
+        self.repcount = i++;
+        self.execute(statements)
+          .then(loop, reject);
+      }), function() {
+        self.repcount = old_repcount;
+      });
   });
 
-// FIXME: this probably doesn't work
   def("repcount", function() {
     return self.repcount;
   });
@@ -2586,6 +2571,12 @@ function LogoInterpreter(turtle, stream, savehook)
   // Not Supported: continue
   // Not Supported: wait
 
+  def("wait", function(time) {
+    return new Promise(function(resolve) {
+      setTimeout(resolve, aexpr(time) / 60 * 1000);
+    });
+  });
+
   def("bye", function() {
     throw new Bye;
   });
@@ -2620,26 +2611,22 @@ function LogoInterpreter(turtle, stream, savehook)
         limit = aexpr(r);
       })
       .then(function() {
-        return new Promise(function(resolve, reject) {
-          function runLoop() {
-            if (sign(current - limit) === sign(step)) {
-              resolve();
-              return;
-            }
-            setvar(varname, current);
-            self.execute(statements)
-              .then(function() {
-                return (control.length) ?
-                  evaluateExpression(control.slice()) : sign(limit - start);
-              })
-              .then(function(result) {
-                step = aexpr(result);
-                current += step;
-                runLoop();
-              })
-            .catch(reject);
+        return promiseLoop(function(loop, resolve, reject) {
+          if (sign(current - limit) === sign(step)) {
+            resolve();
+            return;
           }
-          runLoop();
+          setvar(varname, current);
+          self.execute(statements)
+            .then(function() {
+              return (control.length) ?
+                evaluateExpression(control.slice()) : sign(limit - start);
+            })
+            .then(function(result) {
+              step = aexpr(result);
+                current += step;
+              loop();
+            }, reject);
         });
       });
   });
@@ -2657,53 +2644,46 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("do.while", function(block, tf) {
     block = checkevalblock(block);
-    return new Promise(function(resolve, reject) {
-      (function loop() {
-        self.execute(block)
-          .then(tf)
-          .then(function(cond) {
-            if (!cond) {
-              resolve();
-              return;
-            }
-            loop();
-          })
-          .catch(reject);
-      }());
+    return promiseLoop(function(loop, resolve, reject) {
+      self.execute(block)
+        .then(tf)
+        .then(function(cond) {
+          if (!cond) {
+            resolve();
+            return;
+          }
+          loop();
+        }, reject);
     });
   }, {noeval: true});
 
   def("while", function(tf, block) {
     block = checkevalblock(block);
-    return new Promise(function(resolve, reject) {
-      (function loop() {
-        Promise.resolve(tf())
-          .then(function(cond) {
-            if (!cond) {
-              resolve();
-              return;
-            }
-            self.execute(block)
-              .then(loop);
-          })
-          .catch(reject);
-      }());
+    return promiseLoop(function(loop, resolve, reject) {
+      Promise.resolve(tf())
+        .then(function(cond) {
+          if (!cond) {
+            resolve();
+            return;
+          }
+          self.execute(block)
+            .then(loop);
+        }, reject);
     });
   }, {noeval: true});
 
-
-  function notpromise(tf) {
-    return Promise.resolve(tf()).then(function(r) { return !r; });
+  function negatePromiseFunction(tf) {
+    return function() {
+      return Promise.resolve(tf()).then(function(r) { return !r; });
+    };
   }
 
   def("do.until", function(block, tf) {
-    var nottf = function () { return notpromise(tf); };
-    return self.routines.get("do.while")(block, nottf);
+    return self.routines.get("do.while")(block, negatePromiseFunction(tf));
   }, {noeval: true});
 
   def("until", function(tf, block) {
-    var nottf = function () { return notpromise(tf); };
-    return self.routines.get("while")(nottf, block);
+    return self.routines.get("while")(negatePromiseFunction(tf), block);
   }, {noeval: true});
 
   def("case", function(value, clauses) {
@@ -2724,29 +2704,25 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("cond", function(clauses) {
     clauses = lexpr(clauses);
-
-    return new Promise(function(resolve, reject) {
-      (function loop() {
-        if (!clauses.length) {
-          resolve();
-          return;
-        }
-        var clause = lexpr(clauses.shift());
-        var first = clause.shift();
-        if (isKeyword(first, 'ELSE')) {
-          resolve(evaluateExpression(clause));
-          return;
-        }
-        evaluateExpression(reparse(lexpr(first)))
-          .then(function(result) {
-            if (result) {
-              resolve(evaluateExpression(clause));
-              return;
-            }
-            loop();
-          })
-          .catch(reject);
-      }());
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!clauses.length) {
+        resolve();
+        return;
+      }
+      var clause = lexpr(clauses.shift());
+      var first = clause.shift();
+      if (isKeyword(first, 'ELSE')) {
+        resolve(evaluateExpression(clause));
+        return;
+      }
+      evaluateExpression(reparse(lexpr(first)))
+        .then(function(result) {
+          if (result) {
+            resolve(evaluateExpression(clause));
+            return;
+          }
+          loop();
+        }, reject);
     });
   });
 
@@ -2808,18 +2784,13 @@ function LogoInterpreter(turtle, stream, savehook)
                              { name: procname }));
     }
     list = lexpr(list);
-    var index = 0;
-    return new Promise(function (resolve, reject) {
-      function runLoop() {
-        if (index >= list.length) {
-          resolve();
-          return;
-        }
-        var result = Promise.resolve(routine(list[index]));
-        index++;
-        result.then(runLoop, reject);
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!list.length) {
+        resolve();
+        return;
       }
-      runLoop();
+      Promise.resolve(routine(list.shift()))
+        .then(loop, reject);
     });
   });
 
@@ -2838,21 +2809,16 @@ function LogoInterpreter(turtle, stream, savehook)
 
     list = lexpr(list);
     var mapped = [];
-    var index = 0;
-    return new Promise(function (resolve, reject) {
-      function runLoop() {
-        if (index >= list.length) {
-          resolve(mapped);
-          return;
-        }
-        var result = Promise.resolve(routine(list[index]));
-        index++;
-        result.then(function (value) {
-          mapped.push(value);
-          runLoop();
-        }, reject);
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!list.length) {
+        resolve(mapped);
+        return;
       }
-      runLoop();
+      Promise.resolve(routine(list.shift()))
+        .then(function(value) {
+          mapped.push(value);
+          loop();
+        }, reject);
     });
   });
 
@@ -2872,24 +2838,18 @@ function LogoInterpreter(turtle, stream, savehook)
 
     list = lexpr(list);
     var filtered = [];
-    var index = 0;
-    return new Promise(function (resolve, reject) {
-      function runLoop() {
-        if (index >= list.length) {
-          resolve(filtered);
-          return;
-        }
-        var item = list[index];
-        var result = Promise.resolve(routine(item));
-        index++;
-        result.then(function (value) {
-          if (value) {
-            filtered.push(item);
-          }
-          runLoop();
-        }, reject);
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!list.length) {
+        resolve(filtered);
+        return;
       }
-      runLoop();
+      var item = list.shift();
+      Promise.resolve(routine(item))
+        .then(function(value) {
+          if (value)
+            filtered.push(item);
+          loop();
+        }, reject);
     });
   });
 
@@ -2906,29 +2866,23 @@ function LogoInterpreter(turtle, stream, savehook)
     }
 
     list = lexpr(list);
-    var index = 0;
-    return new Promise(function (resolve, reject) {
-      function runLoop() {
-        if (index >= list.length) {
-          resolve([]);
-          return;
-        }
-        var item = list[index];
-        var result = Promise.resolve(routine(item));
-        index++;
-        result.then(function (value) {
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!list.length) {
+        resolve([]);
+        return;
+      }
+      var item = list.shift();
+      Promise.resolve(routine(item))
+        .then(function(value) {
           if (value) {
             resolve(item);
-          } else {
-            runLoop();
+            return;
           }
-        }, reject);
-      }
-      runLoop();
+          loop();
+      }, reject);
     });
   });
 
-// FIXME: not done
   def("reduce", function(procname, list) {
     procname = sexpr(procname);
     list = lexpr(list);
@@ -2943,13 +2897,26 @@ function LogoInterpreter(turtle, stream, savehook)
                              { name: procname }));
     }
 
-    // NOTE: Can't use procedure directly as reduce calls
-    // targets w/ additional args and defaults initial value to undefined
-    return list.reduce(function(a, b) { return procedure(a, b); }, value);
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!list.length) {
+        resolve(value);
+        return;
+      }
+      Promise.resolve(procedure(value, list.shift()))
+        .then(function(result) {
+          value = result;
+          loop();
+        }, reject);
+    });
   });
 
   // Not Supported: crossmap
   // Not Supported: cascade
   // Not Supported: cascade.2
   // Not Supported: transfer
+
+  // Helper for testing that wraps a result in a Promise
+  def(".promise", function(value) {
+    return Promise.resolve(value);
+  });
 }

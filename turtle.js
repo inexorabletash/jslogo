@@ -17,6 +17,7 @@
 // limitations under the License.
 
 function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
+  'use strict';
   width = Number(width);
   height = Number(height);
 
@@ -24,48 +25,8 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
   function rad2deg(r) { return r * 180 / Math.PI; }
 
   var self = this;
-
-  self.speed = 3;
-  self.speed_interval = 25;
-
-  function moveto(x, y, fast) {
-    if (! (self.down || self.filling)) {
-      fast = true;
-    }
+  function moveto(x, y) {
     function _go(x1, y1, x2, y2) {
-      if (fast) {
-        return Promise.resolve(_goLine(x1, y1, x2, y2));
-      }
-      var posx = x1;
-      var posy = y1;
-      var steps = Math.floor(Math.sqrt(Math.pow(x1-x2, 2)+Math.pow(y1-y2, 2))/self.speed);
-      if (! steps) {
-        _goLine(x1, y1, x2, y2);
-        return Promise.resolve();
-      }
-      var intx = (x2-x1)/steps;
-      var inty = (y2-y1)/steps;
-      return new Promise(function (resolve, reject) {
-        var count = steps;
-        var timeout = setInterval(function () {
-          try {
-            count--;
-            _goLine(posx, posy, posx+intx, posy+inty);
-            posx += intx;
-            posy += inty;
-            if (! count) {
-              clearTimeout(timeout);
-              resolve();
-            }
-          } catch (e) {
-            clearTimeout(timeout);
-            reject(e);
-          }
-        }, self.speed_interval);
-      });
-    }
-
-    function _goLine(x1, y1, x2, y2) {
       if (self.filling) {
         canvas_ctx.lineTo(x1, y1);
         canvas_ctx.lineTo(x2, y2);
@@ -84,10 +45,10 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
 
       switch (self.turtlemode) {
         case 'window':
-          return _go(self.x, self.y, x, y).then(function () {
-            self.x = x;
-            self.y = y;
-          });
+          _go(self.x, self.y, x, y);
+          self.x = x;
+          self.y = y;
+          return;
 
         default:
         case 'wrap':
@@ -133,22 +94,23 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
             wy = less ? height : 0;
           }
 
-          return _go(self.x, self.y, ix, iy).then(function () {
+          _go(self.x, self.y, ix, iy);
 
-            if (self.turtlemode === 'fence') {
-              // FENCE - stop on collision
-              self.x = ix;
-              self.y = iy;
+          if (self.turtlemode === 'fence') {
+            // FENCE - stop on collision
+            self.x = ix;
+            self.y = iy;
+            return;
+          } else {
+            // WRAP - keep going
+            self.x = wx;
+            self.y = wy;
+            if (fx === 1 && fy === 1) {
               return;
-            } else {
-              // WRAP - keep going
-              self.x = wx;
-              self.y = wy;
-              if (fx === 1 && fy === 1) {
-                return;
-              }
             }
-          });
+          }
+
+          break;
       }
     }
   }
@@ -166,12 +128,12 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
 
     x = this.x + distance * Math.cos(this.r);
     y = this.y - distance * Math.sin(this.r);
-    return moveto(x, y).then(function () {
-      if (point) {
-        this.x = saved_x;
-        this.y = saved_y;
-      }
-    });
+    moveto(x, y);
+
+    if (point) {
+      this.x = saved_x;
+      this.y = saved_y;
+    }
   };
 
   this.turn = function(angle) {
@@ -239,7 +201,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     x = (x === undefined) ? this.x : x + (width / 2);
     y = (y === undefined) ? this.y : -y + (height / 2);
 
-    return moveto(x, y);
+    moveto(x, y);
   };
 
   this.towards = function(x, y) {
@@ -254,9 +216,8 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
   };
 
   this.clearscreen = function() {
-    return this.home(true).then((function () {
-      return this.clear();
-    }).bind(this));
+    this.home();
+    this.clear();
   };
 
   this.clear = function() {
@@ -270,10 +231,9 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     }
   };
 
-  this.home = function(fast) {
-    return moveto(width / 2, height / 2, fast).then(function () {
-      this.r = deg2rad(90);
-    });
+  this.home = function() {
+    moveto(width / 2, height / 2);
+    this.r = deg2rad(90);
   };
 
   this.showturtle = function() {
@@ -333,30 +293,27 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
 
   this.arc = function(angle, radius) {
     var self = this;
-    if (this.turtlemode == 'wrap') {
-      [self.x, self.x + width, this.x - width].forEach(function(x) {
-        [self.y, self.y + height, this.y - height].forEach(function(y) {
-          if (!this.filling)
+
+    if (self.turtlemode == 'wrap') {
+      [self.x, self.x + width, self.x - width].forEach(function(x) {
+        [self.y, self.y + height, self.y - height].forEach(function(y) {
+          if (!self.filling)
             canvas_ctx.beginPath();
           canvas_ctx.arc(x, y, radius, -self.r, -self.r + deg2rad(angle), false);
-          if (!this.filling)
+          if (!self.filling)
             canvas_ctx.stroke();
         });
       });
     } else {
-      if (!this.filling)
+      if (!self.filling)
         canvas_ctx.beginPath();
-      canvas_ctx.arc(this.x, this.y, radius, -this.r, -this.r + deg2rad(angle), false);
-      if (!this.filling)
+      canvas_ctx.arc(self.x, self.y, radius, -self.r, -self.r + deg2rad(angle), false);
+      if (!self.filling)
         canvas_ctx.stroke();
     }
   };
 
-  this.setspeed = function(pixels) {
-    this.speed = pixels;
-  };
-
-  this.getstate = function () {
+  this.getstate = function() {
     return {
       isturtlestate: true,
       color: this.getcolor(),
@@ -371,7 +328,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     };
   };
 
-  this.setstate = function (state) {
+  this.setstate = function(state) {
     if ((! state) || ! state.isturtlestate) {
       throw new Error("Tried to restore a state that is not a turtle state");
     }
