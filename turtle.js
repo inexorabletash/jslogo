@@ -18,6 +18,10 @@
 
 function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
   'use strict';
+
+  // Stub for old browsers w/ canvas but no text functions
+  canvas_ctx.fillText = canvas_ctx.fillText || function fillText(string, x, y) { };
+
   width = Number(width);
   height = Number(height);
 
@@ -349,15 +353,22 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     }
   };
 
-  this.begin = function() {
-    // Erase turtle
+  var last_x, last_y, last_r, last_visible;
+
+  this.tick = function() {
+    requestAnimationFrame(this.tick.bind(this));
+    if (this.x === last_x &&
+        this.y === last_y &&
+        this.r === last_r &&
+        this.visible === last_visible)
+      return;
+
+    last_x = this.x;
+    last_y = this.y;
+    last_r = this.r;
+    last_visible = this.visible;
+
     turtle_ctx.clearRect(0, 0, width, height);
-
-    // Stub for old browsers w/ canvas but no text functions
-    canvas_ctx.fillText = canvas_ctx.fillText || function fillText(string, x, y) { };
-  };
-
-  this.end = function() {
     if (this.visible) {
       var ctx = turtle_ctx;
       ctx.save();
@@ -439,6 +450,5 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
   };
 
   init();
-  this.begin();
-  this.end();
+  this.tick();
 }

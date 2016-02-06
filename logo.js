@@ -938,14 +938,7 @@ function LogoInterpreter(turtle, stream, savehook)
       var atoms = parse(string);
 
       // And execute it!
-      if (self.turtle)
-        self.turtle.begin();
-      return promiseFinally(
-        self.execute(atoms, options),
-        function() {
-          if (self.turtle)
-            self.turtle.end();
-        })
+      return self.execute(atoms, options)
         .catch(function(err) {
           if (!(err instanceof Bye))
             throw err;

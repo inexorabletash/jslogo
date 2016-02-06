@@ -13,7 +13,7 @@ end
 clearscreen
 repeat 36 [ randomcolor square random 200 rt 10 ]
 
-clearscreen window
+clearscreen window hideturtle
 repeat 144 [
   setlabelheight repcount
   penup
@@ -24,6 +24,7 @@ repeat 144 [
   rt 10
   wait 5
 ]
+showturtle
 
 to tree :size
    if :size < 5 [forward :size back :size stop]

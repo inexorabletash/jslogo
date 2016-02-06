@@ -703,9 +703,7 @@ window.TogetherJSConfig ={
       var image = new Image();
       image.src = msg.image;
       context.drawImage(image, 0, 0);
-      turtle.begin();
       turtle.setstate(msg.turtle);
-      turtle.end();
     },
 
     run: function (msg) {
