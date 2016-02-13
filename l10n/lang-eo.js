@@ -107,7 +107,7 @@
     return {
       // alias: css-color
       'ruĝa': 'red',
-      'orange': 'oranĝo',
+      'oranĝo': 'orange',
       'flava': 'yellow',
       'verda': 'green',
       'bluaj': 'blue',

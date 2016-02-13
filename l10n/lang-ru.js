@@ -1,4 +1,4 @@
-// Esperanto Localization (Sample)
+// Russian Localization (Sample)
 (function() {
 
   //////////////////////////////////////////////////
@@ -38,7 +38,7 @@
     "tl-source": "Исходный код",
     "tl-reference": "Справочник",
     "start-togetherjs": "Сотрудничество",
-    "no-canvas": "Нам очень жаль, но ваш браузер не поддерживает HTML-элемент canvas.",
+    "no-canvas": "Нам очень жаль. Ваш браузер не поддерживает HTML-элемент canvas.",
     "ip-button-run": "Запустить",
     "ip-button-clear": "Очистить",
     "logo-ta-single-line.placeholder": "Место для ввода программного кода",
@@ -107,7 +107,7 @@
     return {
       // alias: css-color
       'красный': 'red',
-      'оранжевый': 'oranĝo',
+      'оранжевый': 'orange',
       'жёлтый': 'yellow',
       'зелёный': 'green',
       'синий': 'blue',
