@@ -1,3 +1,4 @@
 en English
 he עברית
 eo Esperanto
+ru Русский
