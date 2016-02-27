@@ -128,6 +128,12 @@ function initStorage(loadhook) {
 //
 var commandHistory = (function() {
   var entries = [], pos = -1;
+
+  clearhistoryhook = hook(clearhistoryhook, function() {
+    entries = [];
+    pos = -1;
+  });
+
   return {
     push: function(entry) {
       if (entries.length > 0 && entries[entries.length - 1] === entry) {
@@ -163,11 +169,6 @@ var commandHistory = (function() {
       return entries[pos];
     }
   };
-
-  clearhistoryhook = hook(clearhistoryhook, function() {
-    entries = [];
-    pos = -1;
-  });
 }());
 
 

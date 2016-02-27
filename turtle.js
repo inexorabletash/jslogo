@@ -371,6 +371,8 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
   var last_x, last_y, last_r, last_visible;
 
   this.tick = function() {
+    function invert(p) { return [-p[0], p[1]]; }
+
     requestAnimationFrame(this.tick.bind(this));
     if (this.x === last_x &&
         this.y === last_y &&
@@ -415,7 +417,6 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
 
         [0, 13],
       ];
-      function invert(p) { return [-p[0], p[1]]; }
 
       points.concat(points.slice(1, -1).reverse().map(invert))
         .forEach(function(pair, index) {
