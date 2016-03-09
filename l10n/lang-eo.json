@@ -1,0 +1,62 @@
+{
+  "page": {
+    "translations": {
+      "title": "Logo Interpretisto",
+      "tl-title": "Logo Interpretisto",
+      "tl-tests": "Testoj",
+      "tl-source": "Fonto",
+      "tl-reference": "Referenco",
+      "start-togetherjs": "Kunlabori",
+      "no-canvas": "Via retumilo ne subtenas la kanvaso elemento - Mizera !",
+      "ip-button-run": "Run",
+      "ip-button-stop": "Ĉesigi",
+      "ip-button-clear": "Klara",
+      "logo-ta-single-line.placeholder": "Tajpu vian kodon ĉi tie...",
+      "logo-ta-multi-line.placeholder": "Tajpu vian kodon ĉi tie...",
+      "sb-link-reference": "Referenco",
+      "sb-link-text-reference": "la Logo lingvo",
+      "sb-link-library": "Biblioteko",
+      "sb-link-text-library": "via proceduroj",
+      "sb-link-history": "Historio",
+      "sb-link-text-history": "ĉio vi faris tie",
+      "sb-link-examples": "Ekzemploj",
+      "sb-link-text-examples": "amuzaj aferoj provi ekstere",
+      "sb-link-extras": "Ekstraj",
+      "sb-link-text-extras": "helpema utilecoj",
+      "sb-link-links": "Ligoj",
+      "sb-link-text-links": "aliaj Logo rimedoj",
+      "extras-download-library": "Download Biblioteko",
+      "extras-download-drawing": "Download Desegnaĵo",
+      "extras-clear-history": "Klara Historio",
+      "extras-clear-library": "Klara Biblioteko",
+      "github-forkme": "Forko min sur GitHub"
+    }
+  },
+  "interpreter": {
+    "messages": {
+      "Division by zero": "Divido per nulo",
+      "Index out of bounds": "Indekso ekster limojn"
+    },
+    "keywords": {
+      "ALIE": "ELSE",
+      "FINO": "END"
+    },
+    "procedures": {
+      "true": ["vera"],
+      "false": ["falsa"]
+    }
+  },
+  "graphics": {
+    "colors": {
+      "ruĝa": "red",
+      "oranĝo": "orange",
+      "flava": "yellow",
+      "verda": "green",
+      "bluaj": "blue",
+      "viola": "violet",
+      "blanka": "white",
+      "grizaj": "gray",
+      "nigra": "black"
+    }
+  }
+}

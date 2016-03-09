@@ -596,6 +596,68 @@ window.addEventListener('DOMContentLoaded', function() {
   // Localization
   //
   var localizationComplete = (function() {
+    function localize(data) {
+      if ('page' in data) {
+        if ('dir' in data.page)
+          document.body.dir = data.page.dir;
+        if ('examples' in data.page)
+          examples = data.page.examples;
+
+        if ('translations' in data.page) {
+          (function(translation) {
+            var ids = new Set();
+            Object.keys(translation).forEach(function(key) {
+              var parts = key.split('.'), id = parts[0], attr = parts[1], s = translation[key];
+              ids.add(id);
+              var elem = document.querySelector('[data-l10n-id="'+id+'"]');
+              if (!elem)
+                console.warn('Unused translation: ' + id);
+              else if (attr)
+                elem.setAttribute(attr, s);
+              else
+                elem.textContent = s;
+            });
+            Array.from(document.querySelectorAll('[data-l10n-id]'))
+              .map(function(element) { return element.getAttribute('data-l10n-id'); })
+              .filter(function(id) { return !ids.has(id); })
+              .forEach(function(id) { console.warn('Missing translation: ' + id); });
+          }(data.page.translations));
+        }
+      }
+
+      if ('interpreter' in data) {
+        if ('messages' in data.interpreter) {
+          logo.localize = function(s) {
+            return data.interpreter.messages[s];
+          };
+        }
+
+        if ('keywords' in data.interpreter) {
+          logo.keywordAlias = function(s) {
+            return data.interpreter.keywords[s];
+          };
+        }
+
+        if ('procedures' in data.interpreter) {
+          (function(defs) {
+            Object.keys(defs).forEach(function(def) {
+              defs[def].forEach(function(alias) {
+                logo.copydef(alias, def);
+              });
+            });
+          }(data.interpreter.procedures));
+        }
+      }
+
+      if ('graphics' in data) {
+        if ('colors' in data.graphics) {
+          turtle.colorAlias = function(s) {
+            return data.graphics.colors[s];
+          };
+        }
+      }
+    }
+
     var lang = queryParams.lang || navigator.language || navigator.userLanguage;
     if (!lang) return Promise.resolve();
 
@@ -604,13 +666,14 @@ window.addEventListener('DOMContentLoaded', function() {
     document.body.lang = lang;
 
     if (lang === 'en') return Promise.resolve();
-    return fetch('l10n/lang-' + lang + '.js')
+    return fetch('l10n/lang-' + lang + '.json')
       .then(function(response) {
         if (!response.ok) throw Error(response.statusText);
         return response.text();
       })
       .then(function(text) {
-        (1, eval)(text);
+        window.json = text;
+        localize(JSON.parse(text));
       })
       .catch(function(reason) {
         console.warn('Error loading localization file for "' +

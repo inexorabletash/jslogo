@@ -1,0 +1,62 @@
+{
+  "page": {
+    "translations": {
+      "title": "Интерпретатор Лого",
+      "tl-title": "Интерпретатор Лого",
+      "tl-tests": "Юнит-тесты",
+      "tl-source": "Исходный код",
+      "tl-reference": "Справочник",
+      "start-togetherjs": "Сотрудничество",
+      "no-canvas": "Нам очень жаль. Ваш браузер не поддерживает HTML-элемент canvas.",
+      "ip-button-run": "Пуск",
+      "ip-button-stop": "Стоп",
+      "ip-button-clear": "Сброс",
+      "logo-ta-single-line.placeholder": "Место для ввода программного кода",
+      "logo-ta-multi-line.placeholder": "Место для ввода программного кода",
+      "sb-link-reference": "Справочник",
+      "sb-link-text-reference": "язык Лого",
+      "sb-link-library": "Библиотека",
+      "sb-link-text-library": "ваши процедуры",
+      "sb-link-history": "История",
+      "sb-link-text-history": "ваши действия на сайте",
+      "sb-link-examples": "Примеры",
+      "sb-link-text-examples": "классные демо-программы",
+      "sb-link-extras": "Дополнительно",
+      "sb-link-text-extras": "полезные утилиты",
+      "sb-link-links": "Ссылки",
+      "sb-link-text-links": "другие ресурсы о Лого",
+      "extras-download-library": "Скачать библиотеку",
+      "extras-download-drawing": "Скачать рисунок",
+      "extras-clear-history": "Очистить историю",
+      "extras-clear-library": "Очистить библиотеку",
+      "github-forkme": "Сделать fork на GitHub-е"
+    }
+  },
+  "interpreter": {
+    "messages": {
+      "Division by zero": "Деление на ноль",
+      "Index out of bounds": "Индекс вышел за допустимые границы"
+    },
+    "keywords": {
+      "ИНАЧЕ": "ELSE",
+      "КОНЕЦ": "END"
+    },
+    "procedures": {
+      "true": ["истина"],
+      "false": ["ложь"]
+    }
+  },
+  "graphics": {
+    "colors": {
+      "красный": "red",
+      "оранжевый": "orange",
+      "жёлтый": "yellow",
+      "зелёный": "green",
+      "синий": "blue",
+      "фиолетовый": "violet",
+      "белый": "white",
+      "серый": "gray",
+      "чёрный": "black"
+    }
+  }
+}
