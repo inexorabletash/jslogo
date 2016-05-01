@@ -1,5 +1,5 @@
 en English
-hu Magyar
 he עברית
+hu Magyar
 eo Esperanto
 ru Русский
