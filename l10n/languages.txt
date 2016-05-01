@@ -1,4 +1,5 @@
 en English
+hu Magyar
 he עברית
 eo Esperanto
 ru Русский
