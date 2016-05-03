@@ -1,10 +1,10 @@
 jslogo - Logo in JavaScript
 ===========================
 
-This is hosted at http://inexorabletash.github.io/jslogo/ for playing with live.
+This is hosted at https://inexorabletash.github.io/jslogo/ for playing with live.
 
-[Language Reference](http://htmlpreview.github.com/?https://github.com/inexorabletash/jslogo/blob/master/language.html) -
-this attempts to implement a subset of [UCBLogo](http://www.cs.berkeley.edu/~bh/v2ch14/manual.html)
+[Language Reference](https://htmlpreview.github.com/?https://github.com/inexorabletash/jslogo/blob/master/language.html) -
+this attempts to implement a subset of [UCBLogo](https://www.cs.berkeley.edu/~bh/v2ch14/manual.html)
 defined in in *Brian Harvey's Computer Science Logo Style*
 
 Logo Examples
@@ -19,17 +19,16 @@ Logo Examples
 
 Logo Links
 ----------
-* [Logo](http://en.wikipedia.org/wiki/Logo_%28programming_language%29) on Wikipedia
+* [Logo](https://en.wikipedia.org/wiki/Logo_%28programming_language%29) on Wikipedia
 * Other Logo implementations that run in a Web browser:
   * [papert - logo in your browser](http://logo.twentygototen.org/) ([source code](https://code.google.com/p/papert/))
   * [Curly Logo](https://github.com/drj11/curlylogo)
 * [The Logo Foundation](http://el.media.mit.edu/logo-foundation/)
-* [Berkeley Logo (UCBLogo)](http://www.cs.berkeley.edu/~bh/logo.html)
+* [Berkeley Logo (UCBLogo)](https://www.cs.berkeley.edu/~bh/logo.html)
 * [The Logo Tree Project](http://elica.net/download/papers/LogoTreeProject.pdf)
 * [Ian Bicking on Logo](http://blog.ianbicking.org/2007/10/19/logo/)
 * [PyLogo](http://pylogo.sourceforge.net/)
 * [Introduction to Computer Programming](http://www.bfoit.org/itp/itp.html)
-* [LogoForum](http://groups.yahoo.com/group/LogoForum/)
 
 To Do
 -----

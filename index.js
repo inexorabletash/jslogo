@@ -8,7 +8,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-// http://www.apache.org/licenses/LICENSE-2.0
+// https://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -268,7 +268,7 @@ function initInput() {
     });
     $('#logo-ta-single-line + .CodeMirror').id = 'logo-cm-single-line';
 
-    // http://stackoverflow.com/questions/13026285/codemirror-for-just-one-line-textfield
+    // https://stackoverflow.com/questions/13026285/codemirror-for-just-one-line-textfield
     cm.setSize('100%', cm.defaultTextHeight() + 4 + 4); // 4 = theme padding
 
     // Handle paste - switch to multi-line if input is multiple lines
