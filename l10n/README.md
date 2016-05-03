@@ -33,7 +33,9 @@ _Optional:_ include if you want a custom set of examples, e.g. with translated k
     }
 ```
 
-Translations of the HTML page, for elements with `data-l10n-id` attributes.
+#### HTML page
+
+Elements with `data-l10n-id` attributes can have text replaced.
 
 * key: data-l10n-id _or_ data-l10n-id `.` attribute
 * value: replacement text
@@ -49,7 +51,8 @@ If a translation is not found, the element text will not be translated.
     },
 ```
 
-Translations of messages (errors) from the interpreter.
+### Error messages
+
 These can be found in `__("...")` strings in the code.
 
 * key: the untranslated (English) string
@@ -65,7 +68,9 @@ If a translation is not found, the English text will be used.
     },
 ```      
       
-Translations of _keywords_ - words in the Logo language which are not procedures.
+### Keywords
+
+Keywords are special words in the Logo language which are not procedures. 
 There are only two - `ELSE` and `END`.
 
 * key: the keyword alias
@@ -80,7 +85,7 @@ These function as aliases when parsing programs.
     }
 ```
 
-Translations of _procedure_ names.
+### Procedure Names
 
 * key: the untranslated (English) procedure name
 * value: an array of one or more aliases
@@ -96,7 +101,7 @@ The aliases are added to the environment.
     }
 ```    
 
-Translations of _color_ names.
+### Color Names
 
 * key: the color alias
 * value: a CSS color string
