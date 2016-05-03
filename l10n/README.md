@@ -9,47 +9,45 @@ To provide a translation:
 
 The localization file must be a valid JSON file with the following structure:
 
-```json
+```js
 {
-  "page": {
+  "page": { ... },
+  "interpreter": { ... },
+  "graphics": { ... }
+}
 ```
+
+## Page
 
 _Optional:_ include for RTL languages (Arabic, Hebrew, etc)
 
-```json
-    "dir": "rtl",
+```js
+    "dir": "rtl"
 ```
 
 _Optional:_ include if you want a custom set of examples, e.g. with translated keywords:
 
-```json
-    "examples": "l10n/examples.eo.txt",
+```js
+    "examples": "l10n/examples.eo.txt"
 ```
 
-```json
-    "translations": {
-      "title": "...",
-      ...
-    }
-```
+### Text
 
-#### HTML page
-
-Elements with `data-l10n-id` attributes can have text replaced.
+Page elements with `data-l10n-id` attributes can have text replaced.
 
 * key: data-l10n-id _or_ data-l10n-id `.` attribute
 * value: replacement text
 
 If a translation is not found, the element text will not be translated.
 
-```json
-  },
-  "interpreter": {
-    "messages": {
-      "Array size must be positive integer": "...",
+```js
+    "translations": {
+      "title": "...",
       ...
-    },
+    }
 ```
+
+## Interpreter
 
 ### Error messages
 
@@ -59,18 +57,18 @@ These can be found in `__("...")` strings in the code.
 * value: translated string
 
 Parts of the string in `{...}` are substitutions and must be left alone.
-If a translation is not found, the English text will be used.
+If a translation is not found or is `null`, the English text will be used.
 
-```json
-    "keywords": {
-      "...": "END",
-      "...": "ELSE"
-    },
-```      
-      
+```js
+    "messages": {
+      "Array size must be positive integer": "...",
+      ...
+    }
+```
+
 ### Keywords
 
-Keywords are special words in the Logo language which are not procedures. 
+Keywords are special words in the Logo language which are not procedures.
 There are only two - `ELSE` and `END`.
 
 * key: the keyword alias
@@ -78,10 +76,10 @@ There are only two - `ELSE` and `END`.
 
 These function as aliases when parsing programs.
 
-```json   
-    "procedures": {
-      "abs": ["...", ...],
-      ...
+```js
+    "keywords": {
+      "...": "END",
+      "...": "ELSE"
     }
 ```
 
@@ -92,22 +90,23 @@ These function as aliases when parsing programs.
 
 The aliases are added to the environment.
 
-```json
-},
-"graphics": {
-  "colors": {
-    "...": "black",
-    ...
+```js
+    "procedures": {
+      "abs": ["...", ...],
+      ...
     }
-```    
+```
+
+## Graphics
 
 ### Color Names
 
 * key: the color alias
 * value: a CSS color string
 
-
-```json
-  }
-}
+```js
+    "colors": {
+      "...": "black",
+      ...
+    }
 ```
