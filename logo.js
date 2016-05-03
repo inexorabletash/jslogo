@@ -286,11 +286,11 @@ function LogoInterpreter(turtle, stream, savehook)
     } else if (atom instanceof LogoArray) {
       return 'array';
     } else if ('then' in Object(atom)) {
-      throw new Error(__("Unexpected value: a promise"));
+      throw new Error("Internal error: Unexpected value: a promise");
     } else if (!atom) {
-      throw new Error(__("Unexpected value: null"));
+      throw new Error("Internal error: Unexpected value: null");
     } else {
-      throw new Error(__("Unexpected value: unknown type"));
+      throw new Error("Internal error: Unexpected value: unknown type");
     }
   }
 
@@ -592,7 +592,7 @@ function LogoInterpreter(turtle, stream, savehook)
           case "<=": return defer(function(lhs, rhs) { return (aexpr(lhs) <= aexpr(rhs)) ? 1 : 0; }, lhs, rhs);
           case ">=": return defer(function(lhs, rhs) { return (aexpr(lhs) >= aexpr(rhs)) ? 1 : 0; }, lhs, rhs);
           case "<>": return defer(function(lhs, rhs) { return !equal(lhs, rhs) ? 1 : 0; }, lhs, rhs);
-          default: throw new Error(__("Internal error in expression parser"));
+          default: throw new Error("Internal error in expression parser");
         }
       } (lhs);
     }
@@ -625,7 +625,7 @@ function LogoInterpreter(turtle, stream, savehook)
         switch (op) {
           case "+": return defer(function(lhs, rhs) { return aexpr(lhs) + aexpr(rhs); }, lhs, rhs);
           case "-": return defer(function(lhs, rhs) { return aexpr(lhs) - aexpr(rhs); }, lhs, rhs);
-          default: throw new Error(__("Internal error in expression parser"));
+          default: throw new Error("Internal error in expression parser");
         }
       } (lhs);
     }
@@ -653,7 +653,7 @@ function LogoInterpreter(turtle, stream, savehook)
             if (d === 0) { throw new Error(__("Division by zero")); }
             return n % d;
           }, lhs, rhs);
-          default: throw new Error(__("Internal error in expression parser"));
+          default: throw new Error("Internal error in expression parser");
         }
       } (lhs);
     }
@@ -741,7 +741,7 @@ function LogoInterpreter(turtle, stream, savehook)
       // Procedure dispatch
       return self.dispatch(atom, list, true);
 
-    default: throw new Error(__("Internal error in expression parser"));
+    default: throw new Error("Internal error in expression parser");
     }
   }
 
