@@ -639,11 +639,9 @@ window.addEventListener('DOMContentLoaded', function() {
         }
 
         if ('procedures' in data.interpreter) {
-          (function(defs) {
-            Object.keys(defs).forEach(function(def) {
-              defs[def].forEach(function(alias) {
-                logo.copydef(alias, def);
-              });
+          (function(aliases) {
+            Object.keys(aliases).forEach(function(alias) {
+              logo.copydef(alias, aliases[alias]);
             });
           }(data.interpreter.procedures));
         }

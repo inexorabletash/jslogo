@@ -85,14 +85,14 @@ These function as aliases when parsing programs.
 
 ### Procedure Names
 
-* key: the untranslated (English) procedure name
-* value: an array of one or more aliases
+* key: the procedure alias
+* value: the untranslated (English) procedure name
 
 The aliases are added to the environment.
 
 ```js
     "procedures": {
-      "abs": ["...", ...],
+      "...": "abs",
       ...
     }
 ```

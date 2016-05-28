@@ -42,8 +42,8 @@
       "КОНЕЦ": "END"
     },
     "procedures": {
-      "true": ["истина"],
-      "false": ["ложь"]
+      "истина": "true",
+      "ложь": "false"
     }
   },
   "graphics": {

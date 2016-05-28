@@ -79,8 +79,8 @@
       "FINO": "END"
     },
     "procedures": {
-      "true": ["vera"],
-      "false": ["falsa"]
+      "vera": "true",
+      "falsa": "false"
     }
   },
   "graphics": {
