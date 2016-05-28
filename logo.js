@@ -129,19 +129,20 @@ function LogoInterpreter(turtle, stream, savehook)
   }
 
   // Based on: https://www.jbouchard.net/chris/blog/2008/01/currying-in-javascript-fun-for-whole.html
-  function to_arity(func, arity) {
+  // Argument is `$$func$$` to avoid issue if passed function is named `func`.
+  function to_arity($$func$$, arity) {
     var parms = [];
 
-    if (func.length === arity) {
-      return func;
+    if ($$func$$.length === arity) {
+      return $$func$$;
     }
 
     for (var i = 0; i < arity; i += 1) {
       parms.push('a' + i);
     }
 
-    var f = eval('(function ' + func.name + '(' + parms.join(',') + ')' +
-                 '{ return func.apply(this, arguments); })');
+    var f = eval('(function ' + $$func$$.name + '(' + parms.join(',') + ')' +
+                 '{ return $$func$$.apply(this, arguments); })');
     return f;
   }
 
