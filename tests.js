@@ -1070,7 +1070,7 @@ QUnit.test("Workspace Management", function(t) {
 });
 
 QUnit.test("Control Structures", function(t) {
-  t.expect(69);
+  t.expect(71);
   //
   // 8.1 Control
   //
@@ -1184,6 +1184,9 @@ QUnit.test("Control Structures", function(t) {
   this.assert_equals('to double :x output :x * 2 end  map "double [ 1 2 3 ]', [2, 4, 6]);
   this.assert_equals('to double :x output .promise :x * 2 end  map "double [ 1 2 3 ]', [2, 4, 6]);
 
+  this.assert_equals('(map "sum [1 2 3] [40 50 60] [700 800 900])', [741, 852, 963]);
+  this.assert_equals('(map "item [2 1 2 3] [john paul george ringo])', ['o', 'p', 'e', 'n']);
+
   this.assert_equals('to odd :x output :x % 2 end  filter "odd [ 1 2 3 ]', ["1", "3"]);
   this.assert_equals('to odd :x output .promise :x % 2 end  filter "odd [ 1 2 3 ]', ["1", "3"]);
 
@@ -1222,6 +1225,7 @@ QUnit.test("Error Messages", function(t) {
   this.assert_error("(def)", "Expected string");
   this.assert_error("(erase)", "Expected list");
   this.assert_error("(map \"show)", "Expected list");
+  this.assert_error("(map \"sum [1 2] [1])", "Expected lists of equal length");
   this.assert_error("to +", "Expected identifier");
   this.assert_error("to fd :x bk :x end", "Can't redefine primitive FD");
   this.assert_error("def \"nosuchproc", "Don't know how to NOSUCHPROC");

@@ -2793,7 +2793,7 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
 
-  def("map", function(procname, list) {
+  def("map", function(procname, list/*,  ... */) {
     procname = sexpr(procname);
 
     var routine = self.routines.get(procname);
@@ -2805,14 +2805,24 @@ function LogoInterpreter(turtle, stream, savehook)
                              { name: procname }));
     }
 
-    list = lexpr(list);
+    var lists = Array.prototype.slice.call(arguments, 1).map(lexpr);
+    if (!lists.length)
+      throw new Error(__("Expected list"));
+
     var mapped = [];
     return promiseLoop(function(loop, resolve, reject) {
-      if (!list.length) {
+      if (!lists[0].length) {
         resolve(mapped);
         return;
       }
-      Promise.resolve(routine(list.shift()))
+
+      var args = lists.map(function(l) {
+        if (!l.length)
+          throw new Error(__("Expected lists of equal length"));
+        return l.shift();
+      });
+
+      Promise.resolve(routine.apply(null, args))
         .then(function(value) {
           mapped.push(value);
           loop();
