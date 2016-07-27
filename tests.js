@@ -1304,6 +1304,8 @@ QUnit.test("Regression Tests", function(t) {
 
   this.assert_equals('make "a { 1 }  make "b :a  setitem 1 :a 2  item 1 :b', 2);
   this.assert_equals('show "b\n1', 1);
+
+  this.assert_equals('to f output 1 end (f + 1)', 2);
 });
 
 QUnit.test("API Tests", function(t) {

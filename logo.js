@@ -722,9 +722,8 @@ function LogoInterpreter(turtle, stream, savehook)
       }
       if (atom === '(') {
         // parenthesized expression/procedure call
-        if (list.length && Type(list[0]) === 'word' &&
-            self.routines.has(String(list[0]))) {
-
+        if (list.length && Type(list[0]) === 'word' && self.routines.has(String(list[0])) &&
+            !(list.length > 1 && Type(list[1]) === 'word' && String(list[1]).match(regexInfix))) {
           // Lisp-style (procedure input ...) calling syntax
           atom = list.shift();
           return self.dispatch(atom, list, false);
