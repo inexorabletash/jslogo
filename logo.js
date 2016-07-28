@@ -128,6 +128,14 @@ function LogoInterpreter(turtle, stream, savehook)
       });
   }
 
+  // Returns a Promise that will resolve after yielding control to the
+  // event loop.
+  function promiseYield() {
+    return new Promise(function(resolve) {
+      setTimeout(resolve, 0);
+    });
+  }
+
   // Based on: https://www.jbouchard.net/chris/blog/2008/01/currying-in-javascript-fun-for-whole.html
   // Argument is `$$func$$` to avoid issue if passed function is named `func`.
   function to_arity($$func$$, arity) {
@@ -2496,6 +2504,7 @@ function LogoInterpreter(turtle, stream, savehook)
         }
         self.repcount = i++;
         self.execute(statements)
+          .then(promiseYield)
           .then(loop, reject);
       }), function() {
         self.repcount = old_repcount;
@@ -2510,6 +2519,7 @@ function LogoInterpreter(turtle, stream, savehook)
       promiseLoop(function(loop, resolve, reject) {
         self.repcount = i++;
         self.execute(statements)
+          .then(promiseYield)
           .then(loop, reject);
       }), function() {
         self.repcount = old_repcount;
@@ -2621,9 +2631,10 @@ function LogoInterpreter(turtle, stream, savehook)
             })
             .then(function(result) {
               step = aexpr(result);
-                current += step;
-              loop();
-            }, reject);
+              current += step;
+            })
+            .then(promiseYield)
+            .then(loop, reject);
         });
       });
   });
@@ -2649,7 +2660,7 @@ function LogoInterpreter(turtle, stream, savehook)
             resolve();
             return;
           }
-          loop();
+          promiseYield().then(loop);
         }, reject);
     });
   }, {noeval: true});
@@ -2664,6 +2675,7 @@ function LogoInterpreter(turtle, stream, savehook)
             return;
           }
           self.execute(block)
+            .then(promiseYield)
             .then(loop);
         }, reject);
     });
@@ -2822,10 +2834,8 @@ function LogoInterpreter(turtle, stream, savehook)
       });
 
       Promise.resolve(routine.apply(null, args))
-        .then(function(value) {
-          mapped.push(value);
-          loop();
-        }, reject);
+        .then(function(value) { mapped.push(value); })
+        .then(loop, reject);
     });
   });
 
@@ -2852,11 +2862,8 @@ function LogoInterpreter(turtle, stream, savehook)
       }
       var item = list.shift();
       Promise.resolve(routine(item))
-        .then(function(value) {
-          if (value)
-            filtered.push(item);
-          loop();
-        }, reject);
+        .then(function(value) { if (value) filtered.push(item); })
+        .then(loop, reject);
     });
   });
 
@@ -2910,10 +2917,8 @@ function LogoInterpreter(turtle, stream, savehook)
         return;
       }
       Promise.resolve(procedure(value, list.shift()))
-        .then(function(result) {
-          value = result;
-          loop();
-        }, reject);
+        .then(function(result) { value = result; })
+        .then(loop, reject);
     });
   });
 
