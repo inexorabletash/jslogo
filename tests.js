@@ -20,7 +20,7 @@ var canvas_element = document.getElementById("sandbox"), canvas_ctx;
 var turtle_element = document.getElementById("turtle"), turtle_ctx;
 
 QUnit.module("Logo Unit Tests", {
-  setup: function(t) {
+  beforeEach: function(t) {
     // TODO: Replace with mock
     canvas_ctx = canvas_ctx || canvas_element.getContext('2d');
     turtle_ctx = turtle_ctx || turtle_element.getContext('2d');
