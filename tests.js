@@ -1268,6 +1268,7 @@ QUnit.test("Error Messages", function(t) {
   this.assert_error('setpos [1 2 3]', 'Expected list of length 2');
   this.assert_error('towards []', 'Expected list of length 2');
   this.assert_error('make "a { 1 2 3 }@1.5', "Don't know what to do with 0.5");
+  this.assert_error('fd50', "Need a space between FD and 50");
 });
 
 QUnit.test("Regression Tests", function(t) {

@@ -756,6 +756,14 @@ function LogoInterpreter(turtle, stream, savehook)
   self.dispatch = function(name, tokenlist, natural) {
     var procedure = self.routines.get(name);
     if (!procedure) {
+
+      // Give a helpful message in a common error case.
+      var m;
+      if ((m = /^(\w+?)(\d+)$/.exec(name)) && self.routines.get(m[1])) {
+        throw new Error(format(__("Need a space between {name:U} and {value}"),
+                               { name: m[1], value: m[2] }));
+      }
+
       throw new Error(format(__("Don't know how to {name:U}"), { name: name }));
     }
 
