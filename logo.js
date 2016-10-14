@@ -337,12 +337,13 @@ function LogoInterpreter(turtle, stream, savehook)
       string = string.replace(/^\s+/, '');
       if (!string.length) break;
 
-      if (string.match(regexIdentifier) ||
+      var m;
+      if ((m = string.match(regexIdentifier) ||
           string.match(regexStringLiteral) ||
           string.match(regexVariable) ||
-          string.match(regexNumberLiteral)) {
+          string.match(regexNumberLiteral))) {
 
-        atom = RegExp.$1;
+        atom = m[1];
         string = string.substring(atom.length);
         atom = atom.replace(/\\(.)/mg, '$1');
 
@@ -356,8 +357,8 @@ function LogoInterpreter(turtle, stream, savehook)
         atom = r.array;
         string = r.string;
 
-      } else if (string.match(regexOperator)) {
-        atom = RegExp.$1;
+      } else if ((m = string.match(regexOperator))) {
+        atom = m[1];
         string = string.substring(atom.length);
 
         // From UCB Logo:
@@ -479,13 +480,13 @@ function LogoInterpreter(turtle, stream, savehook)
       }
       if (c === '}') {
         string = string.substring(index);
-        var origin = 1;
-        if (string.match(/^(\s*@\s*)(.*)$/)) {
-          string = RegExp.$2;
-          if (!string.match(/^(-?\d+)(.*)$/))
+        var origin = 1, m;
+        if ((m = string.match(/^(\s*@\s*)(.*)$/))) {
+          string = m[2];
+          if (!(m = string.match(/^(-?\d+)(.*)$/)))
             throw new Error(__("Expected number after @"));
-          origin = RegExp.$1;
-          string = RegExp.$2;
+          origin = m[1];
+          string = m[2];
         }
         return { array: LogoArray.from(list, origin), string: string };
       }
@@ -888,6 +889,7 @@ function LogoInterpreter(turtle, stream, savehook)
       }
       return true;
     }
+    return undefined;
   }
 
   //----------------------------------------------------------------------
@@ -2542,7 +2544,7 @@ function LogoInterpreter(turtle, stream, savehook)
     test = aexpr(test);
     statements = reparse(lexpr(statements));
 
-    if (test) { return self.execute(statements, {returnResult: true}); }
+    return test ? self.execute(statements, {returnResult: true}) : undefined;
   });
 
   def("ifelse", function(test, statements1, statements2) {
@@ -2562,13 +2564,13 @@ function LogoInterpreter(turtle, stream, savehook)
   def(["iftrue", "ift"], function(statements) {
     statements = reparse(lexpr(statements));
     var tf = self.scopes[self.scopes.length - 1]._test;
-    if (tf) { return self.execute(statements, {returnResult: true}); }
+    return tf ? self.execute(statements, {returnResult: true}) : undefined;
   });
 
   def(["iffalse", "iff"], function(statements) {
     statements = reparse(lexpr(statements));
     var tf = self.scopes[self.scopes.length - 1]._test;
-    if (!tf) { return self.execute(statements, {returnResult: true}); }
+    return !tf ? self.execute(statements, {returnResult: true}) : undefined;
   });
 
   def("stop", function() {
