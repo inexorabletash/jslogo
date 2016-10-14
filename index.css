@@ -354,6 +354,16 @@ a:hover.forkme {
   background: #f82;
 }
 
+#history .placeholder {
+  text-align: center;
+  font-style: italic;
+  padding: 50px;
+}
+#history .snippets:not(:empty) + .placeholder {
+  display: none;
+}
+
+
 @media only screen and (max-width: 1000px) {
   #topbar-links { display: none; }
 }
