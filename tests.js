@@ -1070,7 +1070,7 @@ QUnit.test("Workspace Management", function(t) {
 });
 
 QUnit.test("Control Structures", function(t) {
-  t.expect(71);
+  t.expect(74);
   //
   // 8.1 Control
   //
