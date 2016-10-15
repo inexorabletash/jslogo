@@ -904,7 +904,7 @@ QUnit.test("Graphics", function(t) {
 });
 
 QUnit.test("Workspace Management", function(t) {
-  t.expect(92);
+  t.expect(97);
 
   //
   // 7.1 Procedure Definition
@@ -919,6 +919,18 @@ QUnit.test("Workspace Management", function(t) {
   this.assert_equals('to foo 1 + 2 - 3 * 4 / 5 % 6 ^ -1 end  def "foo', 'to foo\n  1 + 2 - 3 * 4 / 5 % 6 ^ -1\nend');
 
   this.assert_equals('to square :x output :x * :x end  copydef "multbyself "square  multbyself 5', 25);
+
+  this.assert_equals('define "square [[x][output :x * :x]]  square 5', 25);
+  this.assert_equals('make "a 0  define "p [[][repeat 5 [ make "a :a + 1 ]]]  p 5  :a', 5);
+
+  this.assert_equals('to foo :x :y output :x + :y end  text "foo',
+                     [['x', 'y'], ['output', ':x', '+', ':y']]);
+  this.assert_equals('to foo :x bar 1 "a + :x [ 1 2 ] end  text "foo',
+                     [['x'], ['bar', '1', '"a', '+', ':x', [ '1', '2' ]]]);
+  this.assert_equals('to foo 1 + 2 - 3 * 4 / 5 % 6 ^ -1 end  text "foo',
+                     [[], ['1', '+', '2', '-', '3', '*', '4', '/', '5', '%', '6', '^', '<UNARYMINUS>', '1']]);
+
+
   // TODO: copydef + redefp
 
   //
@@ -1235,6 +1247,8 @@ QUnit.test("Error Messages", function(t) {
   this.assert_error("to fd :x bk :x end", "Can't redefine primitive FD");
   this.assert_error("def \"nosuchproc", "Don't know how to NOSUCHPROC");
   this.assert_error("def \"def", "Can't show definition of primitive DEF");
+  this.assert_error("text \"nosuchproc", "Don't know how to NOSUCHPROC");
+  this.assert_error("text \"def", "Can't show definition of primitive DEF");
   this.assert_error("item 5 [ 1 2 ]", "Index out of bounds");
   this.assert_error("copydef \"newname \"nosuchproc", "Don't know how to NOSUCHPROC");
   this.assert_error("to foo end  copydef \"to \"foo", "Can't overwrite special TO");

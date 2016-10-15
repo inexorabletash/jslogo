@@ -699,9 +699,17 @@ of comparison.</p>
   <dd>Define a new named procedure with optional inputs
   <dd class=example>to star :n repeat 5 [ fd :n rt 144 ] end</dd>
 
+  <dt><code>define <var>procname</var> [[<var>inputs</var> ...][<var>statements</var> ...]]</code>
+  <dd>Define a new named procedure with optional inputs
+  <dd class=example>define "star [[n][repeat 5 [fd :n rt 144]]]</dd>
+
   <dt><code>def <var>procname</var></code>
   <dd>Outputs the definition of a named procedure as a string
   <dd class=example>show def "star</dd>
+
+  <dt><code>text <var>procname</var></code>
+  <dd>Outputs the definition of a named procedure as a list, suitable for use with <code>DEFINE</code>
+  <dd class=example>show text "star</dd>
 
   <dt><code>copydef <var>newname</var> <var>oldname</var></code>
   <dd>Copy a procedure. If a procedure <var>newname</var> already existed it will

@@ -380,7 +380,7 @@ function LogoInterpreter(turtle, stream, savehook)
               (Type(prev) === 'word' && prev === '(') ||
               (leading_space && !trailing_space)
              ) {
-               atom = UNARY_MINUS;
+            atom = UNARY_MINUS;
           }
 
         }
@@ -966,9 +966,9 @@ function LogoInterpreter(turtle, stream, savehook)
 
     function defn(atom) {
       switch (Type(atom)) {
-        case 'word': return String(atom);
-        case 'list': return '[ ' + atom.map(defn).join(' ') + ' ]';
-        case 'array': return '{ ' + atom.list().map(defn).join(' ') + ' }' +
+      case 'word': return String(atom);
+      case 'list': return '[ ' + atom.map(defn).join(' ') + ' ]';
+      case 'array': return '{ ' + atom.list().map(defn).join(' ') + ' }' +
           (atom.origin === 1 ? '' : '@' + atom.origin);
       default: throw new Error(__("Unexpected value: unknown type"));
       }
@@ -1075,10 +1075,6 @@ function LogoInterpreter(turtle, stream, savehook)
       throw new Error(__("Expected identifier"));
     }
 
-    if (self.routines.has(name) && self.routines.get(name).primitive) {
-      throw new Error(format(__("Can't redefine primitive {name:U}"), { name: name }));
-    }
-
     var inputs = [];
     var block = [];
 
@@ -1098,6 +1094,14 @@ function LogoInterpreter(turtle, stream, savehook)
     }
     if (!sawEnd) {
       throw new Error(format(__("Expected END")));
+    }
+
+    defineProc(name, inputs, block);
+  }, {special: true});
+
+  function defineProc(name, inputs, block) {
+    if (self.routines.has(name) && self.routines.get(name).primitive) {
+      throw new Error(format(__("Can't redefine primitive {name:U}"), { name: name }));
     }
 
     // Closure over inputs and block to handle scopes, arguments and outputs
@@ -1128,7 +1132,8 @@ function LogoInterpreter(turtle, stream, savehook)
     if (savehook) {
       savehook(name, self.definition(name, proc));
     }
-  }, {special: true});
+  }
+
 
   def("def", function(list) {
 
@@ -1938,6 +1943,29 @@ function LogoInterpreter(turtle, stream, savehook)
   //
   //----------------------------------------------------------------------
   // 7.1 Procedure Definition
+
+  def("define", function(name, list) {
+    name = sexpr(name);
+    list = lexpr(list);
+    if (list.length != 2)
+      throw new Error(__("Expected list of length 2"));
+
+    var inputs = lexpr(list[0]);
+    var block = reparse(lexpr(list[1]));
+    defineProc(name, inputs, block);
+  });
+
+  def("text", function(name) {
+    var proc = self.routines.get(sexpr(name));
+    if (!proc)
+      throw new Error(format(__("Don't know how to {name:U}"), { name: name }));
+    if (!proc.inputs)
+      throw new Error(format(__("Can't show definition of primitive {name:U}"), { name: name }));
+
+    return [proc.inputs, proc.block];
+  });
+
+  // Not Supported: fulltext
 
   def("copydef", function(newname, oldname) {
 
