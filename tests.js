@@ -240,6 +240,7 @@ QUnit.test("Data Structure Primitives", function(t) {
   this.assert_equals('list 1 2', [1, 2]);
   this.assert_equals('(list 1 2 3)', [1, 2, 3]);
 
+  this.assert_stream('show array 2', '{[] []}\n');
   this.assert_stream('make "a (array 5 0) ' +
                      'repeat 5 [ setitem repcount-1 :a repcount*repcount ] ' +
                      'show :a', '{1 4 9 16 25}@0\n');
@@ -247,6 +248,10 @@ QUnit.test("Data Structure Primitives", function(t) {
                      'show :a', '{1 2 3}\n');
   this.assert_stream('make "a { 1 2 3 } @ 10' +
                      'show :a', '{1 2 3}@10\n');
+
+  this.assert_stream('show mdarray [2 2]', '{{[] []} {[] []}}\n');
+  this.assert_stream('show mdarray [2 2 2]', '{{{[] []} {[] []}} {{[] []} {[] []}}}\n');
+  this.assert_stream('show (mdarray [2 2] 0)', '{{[] []}@0 {[] []}@0}@0\n');
 
   this.assert_stream('show (listtoarray [ 1 2 3 ])', '{1 2 3}\n');
   this.assert_stream('show (listtoarray [ 1 2 3 ] 0)', '{1 2 3}@0\n');
@@ -342,6 +347,18 @@ QUnit.test("Data Structure Primitives", function(t) {
                      'show :a', '{a b q}@0\n');
 
 
+  this.assert_error('mditem [0 1] mdarray [1 1]', 'Index out of bounds');
+  this.assert_error('mditem [1 2] mdarray [1 1]', 'Index out of bounds');
+  this.assert_equals('mditem [1 1] mdarray [1 1]', []);
+  this.assert_equals('mditem [0 0] (mdarray [1 1] 0)', []);
+  this.assert_stream('show mditem [1] mdarray [1 1]', '{[]}\n');
+  this.assert_stream('make "a mdarray [ 2 2 ] ' +
+                     'mdsetitem [1 1] :a 1 ' +
+                     'mdsetitem [1 2] :a 2 ' +
+                     'mdsetitem [2 1] :a 3 ' +
+                     'mdsetitem [2 2] :a 4 ' +
+                     'show :a', '{{1 2} {3 4}}\n');
+
   for (var i = 0; i < 10; i += 1) {
     this.assert_predicate('pick [ 1 2 3 4 ]', function(x) { return 1 <= x && x <= 4; });
   }
@@ -375,6 +392,9 @@ QUnit.test("Data Structure Primitives", function(t) {
   this.assert_equals('make "a { 1 }  make "b :a  setitem 1 :a 2  item 1 :b', 2);
   this.assert_error('make "a { 1 }  setitem 1 :a :a', "SETITEM can't create circular array");
   this.assert_error('make "a { 1 }  make "b { 1 }  setitem 1 :b :a  setitem 1 :a :b', "SETITEM can't create circular array");
+
+  this.assert_equals('make "a mdarray [1 1]  make "b :a  mdsetitem [1 1] :a 2  mditem [1 1] :b', 2);
+  this.assert_error('make "a mdarray [1 1]  mdsetitem [1 1] :a :a', "MDSETITEM can't create circular array");
 
   this.assert_equals('make "a []  .setfirst :a "s  :a', ['s']);
   this.assert_error('.setfirst "x "y', '.SETFIRST expected list');
@@ -445,6 +465,11 @@ QUnit.test("Data Structure Primitives", function(t) {
   this.assert_equals('equalp [1 2] [1 3]', 0);
   this.assert_equals('[ 1 2 ] = [ 1 2 ]', 1);
   this.assert_equals('[ 1 2 ] = [ 1 3 ]', 0);
+
+  this.assert_equals('equalp {1} {1}', 0);
+  this.assert_equals('make "a {1}  equalp :a :a', 1);
+  this.assert_equals('{1} = {1}', 0);
+  this.assert_equals('make "a {1}  :a = :a', 1);
 
   this.assert_equals('equalp "a 1', 0);
   this.assert_equals('equalp "a [ 1 ]', 0);

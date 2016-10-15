@@ -223,7 +223,7 @@ function LogoInterpreter(turtle, stream, savehook)
     this.array = [];
     this.array.length = size;
     for (var i = 0; i < this.array.length; ++i)
-      this.array[i] = '';
+      this.array[i] = [];
     this.origin = origin;
   }
   LogoArray.from = function(list, origin) {
@@ -249,7 +249,7 @@ function LogoInterpreter(turtle, stream, savehook)
       this.array[i] = v;
     },
     list: function() {
-      return this.array.slice();
+      return this.array;
     },
     count: function() {
       return this.array.length;
@@ -880,7 +880,6 @@ function LogoInterpreter(turtle, stream, savehook)
       else
         return String(a) === String(b);
     case 'list':
-    case 'array':
       if (a.length !== b.length)
         return false;
       for (var i = 0; i < a.length; i += 1) {
@@ -888,6 +887,8 @@ function LogoInterpreter(turtle, stream, savehook)
           return false;
       }
       return true;
+    case 'array':
+      return a === b;
     }
     return undefined;
   }
@@ -1193,15 +1194,29 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("array", function(size) {
     size = aexpr(size);
-    if (size < 1) { throw new Error(__("Array size must be positive integer")); }
-    var origin = 1;
-    if (arguments.length > 1) {
-      origin = aexpr(arguments[1]);
-    }
+    if (size < 1)
+      throw new Error(__("Array size must be positive integer"));
+    var origin = (arguments.length < 2) ? 1 : aexpr(arguments[1]);
     return new LogoArray(size, origin);
   });
 
-  // Not Supported: mdarray
+  def("mdarray", function(sizes) {
+    sizes = lexpr(sizes).map(aexpr).map(function(n) { return n|0; });
+    if (sizes.some(function(size) { return size < 1; }))
+      throw new Error(__("Array size must be positive integer"));
+    var origin = (arguments.length < 2) ? 1 : aexpr(arguments[1]);
+
+    function make(index) {
+      var n = sizes[index], a = new LogoArray(n, origin);
+      if (index + 1 < sizes.length) {
+        for (var i = 0; i < n; ++i)
+          a.setItem(i + origin, make(index + 1));
+      }
+      return a;
+    }
+
+    return make(0);
+  });
 
   def("listtoarray", function(list) {
     list = lexpr(list);
@@ -1216,7 +1231,7 @@ function LogoInterpreter(turtle, stream, savehook)
     if (Type(array) !== 'array') {
       throw new Error(__("Expected array"));
     }
-    return array.list();
+    return array.list().slice();
   });
 
   def("combine", function(thing1, thing2) {
@@ -1261,8 +1276,7 @@ function LogoInterpreter(turtle, stream, savehook)
     return Type(list) === 'word' ? String(list).slice(0, -1) : lexpr(list).slice(0, -1);
   });
 
-  def("item", function(index, thing) {
-    index = aexpr(index);
+  function item(index, thing) {
     switch (Type(thing)) {
     case 'list':
       if (index < 1 || index > thing.length)
@@ -1276,9 +1290,19 @@ function LogoInterpreter(turtle, stream, savehook)
         throw new Error(__("Index out of bounds"));
       return thing.charAt(index - 1);
     }
+  }
+
+  def("item", function(index, thing) {
+    index = aexpr(index)|0;
+    return item(index, thing);
   });
 
-  // Not Supported: mditem
+  def("mditem", function(indexes, thing) {
+    indexes = lexpr(indexes).map(aexpr).map(function(n) { return n|0; });
+    while (indexes.length)
+      thing = item(indexes.shift(), thing);
+    return thing;
+  });
 
   def("pick", function(list) {
     list = lexpr(list);
@@ -1304,30 +1328,40 @@ function LogoInterpreter(turtle, stream, savehook)
   // 2.3 Data Mutators
   //
 
+  function contains(atom, value) {
+    if (atom === value) return true;
+    switch (Type(atom)) {
+    case 'list':
+      return atom.some(function(a) { return contains(a, value); });
+    case 'array':
+      return atom.list().some(function(a) { return contains(a, value); });
+    default:
+      return false;
+    }
+  }
+
   def("setitem", function(index, array, value) {
     index = aexpr(index);
     if (Type(array) !== 'array')
       throw new Error(__("Expected array"));
-
-    function contains(atom, value) {
-      if (atom === value) return true;
-      switch (Type(atom)) {
-      case 'list':
-        return atom.some(function(a) { return contains(a, value); });
-      case 'array':
-        return atom.list().some(function(a) { return contains(a, value); });
-      default:
-        return false;
-      }
-    }
-
     if (contains(value, array))
       throw new Error(__("SETITEM can't create circular array"));
-
     array.setItem(index, value);
   });
 
-  // Not Supported: mdsetitem
+  def("mdsetitem", function(indexes, thing, value) {
+    indexes = lexpr(indexes).map(aexpr).map(function(n) { return n|0; });
+    if (Type(thing) !== 'array')
+      throw new Error(__("Expected array"));
+    if (contains(value, thing))
+      throw new Error(__("MDSETITEM can't create circular array"));
+    while (indexes.length > 1) {
+      thing = item(indexes.shift(), thing);
+      if (Type(thing) !== 'array')
+        throw new Error(__("Expected array"));
+    }
+    thing.setItem(indexes.shift(), value);
+  });
 
   def(".setfirst", function(list, value) {
      if (Type(list) !== 'list')
@@ -1427,7 +1461,8 @@ function LogoInterpreter(turtle, stream, savehook)
   //
 
   def("count", function(thing) {
-    if (Type(thing) === 'array') { return thing.count(); }
+    if (Type(thing) === 'array')
+      return thing.count();
     return lexpr(thing).length;
   });
   def("ascii", function(chr) { return sexpr(chr).charCodeAt(0); });

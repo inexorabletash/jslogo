@@ -120,6 +120,11 @@ of comparison.</p>
   <dd>Create a new array. The default origin is 1.
   <dd class=example>show array 10</dd>
 
+  <dt><code>mdarray [<var>dimensions</var> ...]</code>
+  <dt><code>(mdarray [<var>dimensions</var> ...] <var>origin</var>)</code>
+  <dd>Create a new multi-dimensional array. The default origin is 1.
+  <dd class=example>show mdarray [2 2]</dd>
+
   <dt><code>listtoarray <var>list</var></code>
   <dt><code>(listtoarray <var>list</var> <var>origin</var>)</code>
   <dd>Create a new array populated by members of a list
@@ -179,6 +184,10 @@ of comparison.</p>
   <dd class=example>show item 2 [ 1 2 3 ]</dd>
   <dd class=example>show item 2 "abc</dd>
 
+  <dt><code>mditem [<var>index</var> ...] <var>thing</var></code>
+  <dd>Outputs an item from a multi-dimensional array
+  <dd class=example>show mditem [2 1] {{a b} {c d}}</dd>
+
   <dt><code>pick <var>list</var></code>
   <dd>Outputs one item from a list (or word), at random
   <dd class=example>show pick [ 1 2 3 ]</dd>
@@ -201,6 +210,10 @@ of comparison.</p>
   <dt><code>setitem <var>index</var> <var>array</var> <var>value</var></code>
   <dd>Sets the indexth item of the array to value (circular arrays prevented)
   <dd class=example>make "a { 1 2 3 }  setitem 2 :a "x  show :a</dd>
+
+  <dt><code>mdsetitem [<var>index</var>...] <var>array</var> <var>value</var></code>
+  <dd>Sets an item in a multi-dimensional array to value (circular arrays prevented)
+  <dd class=example>make "a {{1 2} {3 4}}  mdsetitem [2 1] :a "x  show :a</dd>
 
   <dt><code>.setfirst <var>list</var> <var>value</var></code>
   <dd>Sets the first item of the list to value
