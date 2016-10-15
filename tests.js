@@ -1200,6 +1200,11 @@ QUnit.test("Control Structures", function(t) {
   this.assert_equals('reduce "add_async [ 1 2 3 4 ]', 10);
   this.assert_equals('(reduce "add_async [ 1 2 3 4 ] 10)', 20);
 
+  this.assert_equals('(crossmap "word [a b c] [1 2 3 4])',
+                     ['a1', 'a2', 'a3', 'a4', 'b1', 'b2', 'b3', 'b4', 'c1', 'c2', 'c3', 'c4']);
+  this.assert_equals('(crossmap "word [a b] [1 2])', ['a1', 'a2', 'b1', 'b2']);
+  this.assert_equals('crossmap "word [[a b] [1 2]]', ['a1', 'a2', 'b1', 'b2']);
+
   // TODO: Order of operations
   // TODO: Structures, lists of lists
 });

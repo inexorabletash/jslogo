@@ -1010,6 +1010,12 @@ The first input is the name of a procedure to call.</p>
   <dt><code>(reduce <var>procname</var> <var>list</var> <var>initial</var>)</code>
   <dd>Call <var>procname</var> repeatedly with two inputs - the current value and the next list item. If <var>initial</var> is not specified, the first list element is used instead.
   <dd class=example>show reduce "sum [ 1 2 3 4 5 ]</dd>
+
+  <dt><code>crossmap <var>procname</var> <var>listlist</var></code>
+  <dt><code>(crossmap <var>procname</var> <var>list</var> <var>list</var> ...)</code>
+  <dd>Call <var>procname</var> repeatedly with inputs from the lists, in all possible combinations.
+  <dd class=example>show crossmap "word [[a b] [x y]]</dd>
+  <dd class=example>show (crossmap "word [a b c] [1 2 3 4])</dd>
 </dl>
 
 

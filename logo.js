@@ -2932,7 +2932,57 @@ function LogoInterpreter(turtle, stream, savehook)
     });
   });
 
-  // Not Supported: crossmap
+
+  def("crossmap", function(procname, list/*,  ... */) {
+    procname = sexpr(procname);
+
+    var routine = self.routines.get(procname);
+    if (!routine) {
+      throw new Error(format(__("Don't know how to {name:U}"), { name: procname }));
+    }
+    if (routine.special || routine.noeval) {
+      throw new Error(format(__("Can't apply MAP to special {name:U}"),
+                             { name: procname }));
+    }
+
+    var lists = Array.prototype.slice.call(arguments, 1).map(lexpr);
+    if (!lists.length)
+      throw new Error(__("Expected list"));
+
+    // Special case: if only one element is present, use as list of lists.
+    if (lists.length === 1)
+      lists = lists[0].map(lexpr);
+
+    var indexes = lists.map(function() { return 0; });
+    var done = false;
+
+    var mapped = [];
+    return promiseLoop(function(loop, resolve, reject) {
+      if (done) {
+        resolve(mapped);
+        return;
+      }
+
+      var args = indexes.map(function(v, i) { return lists[i][v]; });
+
+      var pos = indexes.length - 1;
+      ++indexes[pos];
+      while (indexes[pos] === lists[pos].length) {
+        if (pos === 0) {
+          done = true;
+          break;
+        }
+        indexes[pos] = 0;
+        pos--;
+        ++indexes[pos];
+      }
+
+      Promise.resolve(routine.apply(null, args))
+        .then(function(value) { mapped.push(value); })
+        .then(loop, reject);
+    });
+  });
+
   // Not Supported: cascade
   // Not Supported: cascade.2
   // Not Supported: transfer
