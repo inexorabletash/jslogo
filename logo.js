@@ -1114,7 +1114,7 @@ function LogoInterpreter(turtle, stream, savehook)
         scope.set(inputs[i], {value: arguments[i]});
       }
       self.scopes.push(scope);
-      return promiseFinally(self.execute(block).then(null, function(err) {
+      return promiseFinally(self.execute(block).then(promiseYield, function(err) {
         if (err instanceof Output)
           return err.output;
         throw err;
