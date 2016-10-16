@@ -2603,25 +2603,43 @@ function LogoInterpreter(turtle, stream, savehook)
     return self.repcount;
   });
 
-  def("if", function(test, statements) {
-    test = aexpr(test);
-    statements = reparse(lexpr(statements));
+  def("if", function(tf, statements) {
+    if (Type(tf) === 'list')
+      tf = evaluateExpression(reparse(tf));
 
-    return test ? self.execute(statements, {returnResult: true}) : undefined;
+    return Promise.resolve(tf)
+      .then(function(tf) {
+        tf = aexpr(tf);
+        statements = reparse(lexpr(statements));
+
+        return tf ? self.execute(statements, {returnResult: true}) : undefined;
+      });
   });
 
-  def("ifelse", function(test, statements1, statements2) {
-    test = aexpr(test);
-    statements1 = reparse(lexpr(statements1));
-    statements2 = reparse(lexpr(statements2));
+  def("ifelse", function(tf, statements1, statements2) {
+    if (Type(tf) === 'list')
+      tf = evaluateExpression(reparse(tf));
 
-    return self.execute(test ? statements1 : statements2, {returnResult: true});
+    return Promise.resolve(tf)
+      .then(function(tf) {
+        tf = aexpr(tf);
+        statements1 = reparse(lexpr(statements1));
+        statements2 = reparse(lexpr(statements2));
+
+        return self.execute(tf ? statements1 : statements2, {returnResult: true});
+      });
   });
 
   def("test", function(tf) {
-    tf = aexpr(tf);
-    // NOTE: A property on the scope, not within the scope
-    self.scopes[self.scopes.length - 1]._test = tf;
+    if (Type(tf) === 'list')
+      tf = evaluateExpression(reparse(tf));
+
+    return Promise.resolve(tf)
+    .then(function(tf) {
+      tf = aexpr(tf);
+      // NOTE: A property on the scope, not within the scope
+      self.scopes[self.scopes.length - 1]._test = tf;
+    });
   });
 
   def(["iftrue", "ift"], function(statements) {
@@ -2723,13 +2741,18 @@ function LogoInterpreter(turtle, stream, savehook)
     throw new Error(__("Expected block"));
   }
 
-  def("do.while", function(block, tf) {
+  def("do.while", function(block, tfexpression) {
     block = checkevalblock(block);
     return promiseLoop(function(loop, resolve, reject) {
       self.execute(block)
-        .then(tf)
-        .then(function(cond) {
-          if (!cond) {
+        .then(tfexpression)
+        .then(function(tf) {
+          if (Type(tf) === 'list')
+            tf = evaluateExpression(reparse(tf));
+          return tf;
+        })
+        .then(function(tf) {
+          if (!tf) {
             resolve();
             return;
           }
@@ -2738,12 +2761,17 @@ function LogoInterpreter(turtle, stream, savehook)
     });
   }, {noeval: true});
 
-  def("while", function(tf, block) {
+  def("while", function(tfexpression, block) {
     block = checkevalblock(block);
     return promiseLoop(function(loop, resolve, reject) {
-      Promise.resolve(tf())
-        .then(function(cond) {
-          if (!cond) {
+      Promise.resolve(tfexpression())
+        .then(function(tf) {
+          if (Type(tf) === 'list')
+            tf = evaluateExpression(reparse(tf));
+          return tf;
+        })
+        .then(function(tf) {
+          if (!tf) {
             resolve();
             return;
           }
@@ -2754,18 +2782,45 @@ function LogoInterpreter(turtle, stream, savehook)
     });
   }, {noeval: true});
 
-  function negatePromiseFunction(tf) {
-    return function() {
-      return Promise.resolve(tf()).then(function(r) { return !r; });
-    };
-  }
-
-  def("do.until", function(block, tf) {
-    return self.routines.get("do.while")(block, negatePromiseFunction(tf));
+  def("do.until", function(block, tfexpression) {
+    block = checkevalblock(block);
+    return promiseLoop(function(loop, resolve, reject) {
+      self.execute(block)
+        .then(tfexpression)
+        .then(function(tf) {
+          if (Type(tf) === 'list')
+            tf = evaluateExpression(reparse(tf));
+          return tf;
+        })
+        .then(function(tf) {
+          if (tf) {
+            resolve();
+            return;
+          }
+          promiseYield().then(loop);
+        }, reject);
+    });
   }, {noeval: true});
 
-  def("until", function(tf, block) {
-    return self.routines.get("while")(negatePromiseFunction(tf), block);
+  def("until", function(tfexpression, block) {
+    block = checkevalblock(block);
+    return promiseLoop(function(loop, resolve, reject) {
+      Promise.resolve(tfexpression())
+        .then(function(tf) {
+          if (Type(tf) === 'list')
+            tf = evaluateExpression(reparse(tf));
+          return tf;
+        })
+        .then(function(tf) {
+          if (tf) {
+            resolve();
+            return;
+          }
+          self.execute(block)
+            .then(promiseYield)
+            .then(loop);
+        }, reject);
+    });
   }, {noeval: true});
 
   def("case", function(value, clauses) {

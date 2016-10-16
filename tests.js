@@ -1107,7 +1107,7 @@ QUnit.test("Workspace Management", function(t) {
 });
 
 QUnit.test("Control Structures", function(t) {
-  t.expect(75);
+  t.expect(87);
   //
   // 8.1 Control
   //
@@ -1131,11 +1131,19 @@ QUnit.test("Control Structures", function(t) {
   this.assert_equals('make "r "a  if 0 [ make "r "b ]  :r', 'a');
   this.assert_equals('if 1 [ "a ]', 'a');
   this.assert_error('show if 0 [ "a ]', 'No output from procedure');
+  this.assert_equals('make "r "a  if [1<2] [ make "r "b ]  :r', 'b');
+  this.assert_equals('make "r "a  if [1>2] [ make "r "b ]  :r', 'a');
+  this.assert_equals('if [1<2] [ "a ]', 'a');
+  this.assert_error('show if [1>2] [ "a ]', 'No output from procedure');
 
   this.assert_equals('ifelse 1 [ make "r "a ] [ make "r "b ]  :r', 'a');
   this.assert_equals('ifelse 0 [ make "r "a ] [ make "r "b ]  :r', 'b');
   this.assert_equals('ifelse 1 [ "a ] [ "b ]', 'a');
   this.assert_equals('ifelse 0 [ "a ] [ "b ]', 'b');
+  this.assert_equals('ifelse [1<2] [ make "r "a ] [ make "r "b ]  :r', 'a');
+  this.assert_equals('ifelse [1>2] [ make "r "a ] [ make "r "b ]  :r', 'b');
+  this.assert_equals('ifelse [1<2] [ "a ] [ "b ]', 'a');
+  this.assert_equals('ifelse [1>2] [ "a ] [ "b ]', 'b');
 
   this.assert_equals('to foo if 1 [ output "a ] output "b end  foo', 'a');
   this.assert_equals('to foo if 0 [ output "a ] output "b end  foo', 'b');
@@ -1176,10 +1184,14 @@ QUnit.test("Control Structures", function(t) {
   this.assert_equals('make "x 0  for [ r 10 0 -2-2 ] [ make "x :x + :r ]  :x', 18);
 
   this.assert_equals('make "x 0  do.while [ make "x :x + 1 ] :x < 10  :x', 10);
+  this.assert_equals('make "x 0  do.while [ make "x :x + 1 ] [:x < 10]  :x', 10);
   this.assert_equals('make "x 0  while :x < 10 [ make "x :x + 1 ]     :x', 10);
+  this.assert_equals('make "x 0  while [:x < 10] [ make "x :x + 1 ]     :x', 10);
 
   this.assert_equals('make "x 0  do.until [ make "x :x + 1 ] :x > 10  :x', 11);
+  this.assert_equals('make "x 0  do.until [ make "x :x + 1 ] [:x > 10]  :x', 11);
   this.assert_equals('make "x 0  until :x > 10 [ make "x :x + 1 ]     :x', 11);
+  this.assert_equals('make "x 0  until [:x > 10] [ make "x :x + 1 ]     :x', 11);
 
   this.assert_equals('to vowelp :letter ' +
                      '  output case :letter [ [[a e i o u] "true] [else "false] ] ' +

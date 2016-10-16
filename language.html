@@ -920,14 +920,17 @@ of comparison.</p>
   <dd class=example>repeat 10 [ show # ]</dd>
 
   <dt><code>if <var>expr</var> [ <var>statements ...</var> ]</code>
+  <dt><code>if [<var>expr</var>] [ <var>statements ...</var> ]</code>
   <dd>Execute statements if the expression is non-zero
   <dd class=example>if 2 > 1 [ show "yep ]</dd>
 
   <dt><code>ifelse <var>expr</var> [ <var>statements ...</var> ] [ <var>statements ...</var> ]</code>
+  <dt><code>ifelse [<var>expr</var>] [ <var>statements ...</var> ] [ <var>statements ...</var> ]</code>
   <dd>Execute first set of statements if the expression is non-zero, otherwise execute the second set
   <dd class=example>ifelse 1 > 2 [ show "yep ] [ show "nope ]</dd>
 
   <dt><code>test <var>expr</var></code>
+  <dt><code>test [<var>expr</var>]</code>
   <dd>Test the specified expression, save the result in the local scope for subsequent use by <code>iftrue</code> or <code>iffalse</code>
 
   <dt><code>iftrue [ <var>statements ...</var>]</code>
@@ -965,18 +968,22 @@ of comparison.</p>
   <dd class=example>for [ a 0 20 2 ] [ show :a ]</dd>
 
   <dt><code>do.while [ <var>statements ...</var>] <var>expr</var></code>
+  <dt><code>do.while [ <var>statements ...</var>] [<var>expr</var>]</code>
   <dd>Runs the specified statements at least once, and repeats while the expression is non-zero (true).
   <dd class=example>do.while [ make "a random 10  show :a ] :a < 8</dd>
 
   <dt><code>while <var>expr</var> [ <var>statements ...</var>]</code>
+  <dt><code>while [<var>expr</var>] [ <var>statements ...</var>]</code>
   <dd>Runs the specified statements only while the expression remains non-zero (true).
   <dd class=example>while (random 2) = 0 [ show "zero ] show "one</dd>
 
   <dt><code>do.until [ <var>statements ...</var>] <var>expr</var></code>
+  <dt><code>do.until [ <var>statements ...</var>] [<var>expr</var>]</code>
   <dd>Runs the specified statements at least once, and repeats while the expression is zero (false).
   <dd class=example>do.until [ make "a random 10  show :a ] :a < 8</dd>
 
   <dt><code>until <var>expr</var> [ <var>statements ...</var>]</code>
+  <dt><code>until [<var>expr</var>] [ <var>statements ...</var>]</code>
   <dd>Runs the specified statements only while the expression remains zero (false).
   <dd class=example>until (random 2) = 0 [ show "one ] show "zero</dd>
 
