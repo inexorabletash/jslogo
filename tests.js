@@ -1107,7 +1107,7 @@ QUnit.test("Workspace Management", function(t) {
 });
 
 QUnit.test("Control Structures", function(t) {
-  t.expect(74);
+  t.expect(75);
   //
   // 8.1 Control
   //
@@ -1122,6 +1122,7 @@ QUnit.test("Control Structures", function(t) {
 
   this.assert_equals('make "c 0  repeat 5 [ make "c :c + 1 ]  :c', 5);
   this.assert_equals('make "c 0  repeat 4 [ make "c :c + repcount ]  :c', 10);
+  this.assert_equals('make "c 0  repeat 4 [ make "c :c + # ]  :c', 10);
 
   this.assert_equals('make "c 0  to foo forever [ make "c :c + 1 if repcount = 5 [ stop ] ] end  foo  :c', 5);
   this.assert_equals('make "c 0  to foo forever [ make "c :c + repcount if repcount = 4 [ stop ] ] end  foo  :c', 10);

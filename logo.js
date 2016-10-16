@@ -304,7 +304,7 @@ function LogoInterpreter(turtle, stream, savehook)
   }
 
   // Note: U+2190 ... U+2193 are arrows
-  var regexIdentifier = /^(\.?[A-Za-z\u00A1-\u1FFF][A-Za-z0-9_.\?\u00A1-\u1FFF]*|[\u2190-\u2193])/;
+  var regexIdentifier = /^(\.?[A-Za-z\u00A1-\u1FFF][A-Za-z0-9_.\?\u00A1-\u1FFF]*|[#\u2190-\u2193])/;
   var regexStringLiteral = /^(["'](?:[^ \f\n\r\t\v\[\]\(\)\{\}\\]|\\.)*)/m;
   var regexVariable = /^(:[A-Za-z\u00A1-\u1FFF][A-Za-z0-9_\u00A1-\u1FFF]*)/;
   var regexNumberLiteral = /^([0-9]*\.?[0-9]+(?:[eE]\s*[\-+]?\s*[0-9]+)?)/;
@@ -2599,7 +2599,7 @@ function LogoInterpreter(turtle, stream, savehook)
       });
   });
 
-  def("repcount", function() {
+  def(["repcount", "#"], function() {
     return self.repcount;
   });
 

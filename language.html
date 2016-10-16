@@ -914,8 +914,10 @@ of comparison.</p>
   <dd class=example>forever [ make "n random 100  show :n  if :n == 0 [ bye ] ]</dd>
 
   <dt><code>repcount</code>
+  <dt><code>#</code>
   <dd>Outputs the current iteration number of the current <code>repeat</code> or <code>forever</code>
   <dd class=example>repeat 10 [ show repcount ]</dd>
+  <dd class=example>repeat 10 [ show # ]</dd>
 
   <dt><code>if <var>expr</var> [ <var>statements ...</var> ]</code>
   <dd>Execute statements if the expression is non-zero
