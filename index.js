@@ -1,3 +1,4 @@
+/*global CodeMirror,TogetherJS,LogoInterpreter,CanvasTurtle*/
 //
 // Logo Interpreter in Javascript
 //
@@ -762,7 +763,7 @@ window.TogetherJSConfig ={
     // FIXME: we don't align the height/width of the canvases
     "init": function (msg) {
       var context = $("#sandbox").getContext("2d");
-      var image = new Image();
+      var image = document.createElement('image');
       image.src = msg.image;
       context.drawImage(image, 0, 0);
       turtle.setstate(msg.turtle);
