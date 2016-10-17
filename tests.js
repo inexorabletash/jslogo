@@ -252,6 +252,7 @@ QUnit.test("Data Structure Primitives", function(t) {
   this.assert_stream('show mdarray [2 2]', '{{[] []} {[] []}}\n');
   this.assert_stream('show mdarray [2 2 2]', '{{{[] []} {[] []}} {{[] []} {[] []}}}\n');
   this.assert_stream('show (mdarray [2 2] 0)', '{{[] []}@0 {[] []}@0}@0\n');
+  this.assert_error('mdarray [1 2 0]', 'Array size must be positive integer');
 
   this.assert_stream('show (listtoarray [ 1 2 3 ])', '{1 2 3}\n');
   this.assert_stream('show (listtoarray [ 1 2 3 ] 0)', '{1 2 3}@0\n');
@@ -395,6 +396,8 @@ QUnit.test("Data Structure Primitives", function(t) {
 
   this.assert_equals('make "a mdarray [1 1]  make "b :a  mdsetitem [1 1] :a 2  mditem [1 1] :b', 2);
   this.assert_error('make "a mdarray [1 1]  mdsetitem [1 1] :a :a', "MDSETITEM can't create circular array");
+  this.assert_error('mdsetitem [1 1] "x 0', "Expected array");
+  this.assert_error('mdsetitem [1 1] {"x} 0', "Expected array");
 
   this.assert_equals('make "a []  .setfirst :a "s  :a', ['s']);
   this.assert_error('.setfirst "x "y', '.SETFIRST expected list');
@@ -1283,8 +1286,12 @@ QUnit.test("Error Messages", function(t) {
   this.assert_error("(map \"sum [1 2] [1])", "Expected lists of equal length");
   this.assert_error("to +", "Expected identifier");
   this.assert_error("to fd :x bk :x end", "Can't redefine primitive FD");
+  this.assert_error("define \"fd [[x] [bk :x]]", "Can't redefine primitive FD");
+  this.assert_error("define \"fd [[x]]", "Expected list of length 2");
   this.assert_error("def \"nosuchproc", "Don't know how to NOSUCHPROC");
   this.assert_error("def \"def", "Can't show definition of primitive DEF");
+  this.assert_error("text \"nosuchproc", "Don't know how to NOSUCHPROC");
+  this.assert_error("text \"text", "Can't show definition of primitive TEXT");
   this.assert_error("text \"nosuchproc", "Don't know how to NOSUCHPROC");
   this.assert_error("text \"def", "Can't show definition of primitive DEF");
   this.assert_error("item 5 [ 1 2 ]", "Index out of bounds");
