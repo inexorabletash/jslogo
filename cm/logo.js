@@ -1,3 +1,4 @@
+/*global CodeMirror*/
 
 // Really just a lexer
 
@@ -6,14 +7,14 @@ if (typeof CodeMirror !== 'undefined') {
 
   // states are 'normal', 'defn-name', 'defn-args', 'defn-body'
 
-  // TODO: different highlighting inside list [] and array {} literals ?
+  // TODO: different highlighting inside list [] and array {} literals
 
   // Note: U+2190 ... U+2193 are arrows
   var regexIdentifier = /^(\.?[A-Za-z\u00A1-\u1FFF][A-Za-z0-9_.\?\u00A1-\u1FFF]*|[#\u2190-\u2193])/;
-  var regexStringLiteral = /^["']([^ \[\]\(\)\{\}\\]|\\.)*/;
-  var regexVariable = /^:[A-Za-z\u00A1-\u1FFF][A-Za-z0-9_\u00A1-\u1FFF]*/;
+  var regexStringLiteral = /^(["'](?:[^ \f\n\r\t\v[\](){}\\]|\\.)*)/m;
+  var regexVariable = /^(:(?:[^ \f\n\r\t\v[\](){}+\-*/%^=<>]|\\.)+)/;
   var regexNumberLiteral = /^[0-9]*\.?[0-9]+(?:[eE]\s*[\-+]?\s*[0-9]+)?/;
-  var regexOperator = /^\+|\-|\*|\/|%|\^|>=|<=|<>|=|<|>|\[|\]|\{|\}(\s*@\s*\d+)?|\(|\)/;
+  var regexOperator = /^(>=|<=|<>|[+\-*/%^=<>[\]{}()])/;
 
   return {
     electricChars: "[]dD", // for enD

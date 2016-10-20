@@ -303,13 +303,29 @@ function LogoInterpreter(turtle, stream, savehook)
     }
   }
 
+  // TODO: Make this a little more sane.
+
   // Note: U+2190 ... U+2193 are arrows
   var regexIdentifier = /^(\.?[A-Za-z\u00A1-\u1FFF][A-Za-z0-9_.\?\u00A1-\u1FFF]*|[#\u2190-\u2193])/;
-  var regexStringLiteral = /^(["'](?:[^ \f\n\r\t\v\[\]\(\)\{\}\\]|\\.)*)/m;
-  var regexVariable = /^(:[A-Za-z\u00A1-\u1FFF][A-Za-z0-9_\u00A1-\u1FFF]*)/;
+
+  // "After a quotation mark outside square brackets, a word is
+  // delimited by a space, a square bracket, or a parenthesis."
+  var regexStringLiteral = /^(["'](?:[^ \f\n\r\t\v[\](){}\\]|\\.)*)/m;
+
+  // "A word not after a quotation mark or inside square brackets is
+  // delimited by a space, a bracket, a parenthesis, or an infix
+  // operator +-*/=<>. Note that words following colons are in this
+  // category. Note that quote and colon are not delimiters."
+  var regexVariable = /^(:(?:[^ \f\n\r\t\v[\](){}+\-*/%^=<>]|\\.)+)/;
+
   var regexNumberLiteral = /^([0-9]*\.?[0-9]+(?:[eE]\s*[\-+]?\s*[0-9]+)?)/;
-  var regexOperator = /^(\+|\-|\*|\/|%|\^|>=|<=|<>|=|<|>|\[|\]|\{|\}|\(|\))/;
-  var regexInfix = /^(\+|\-|\*|\/|%|\^|>=|<=|<>|=|<|>)$/;
+  var regexOperator = /^(>=|<=|<>|[+\-*/%^=<>[\]{}()])/;
+
+  // "Each infix operator character is a word in itself, except that
+  // the two-character sequences <=, >=, and <> (the latter meaning
+  // not-equal) with no intervening space are recognized as a single
+  // word."
+  var regexInfix = /^(>=|<=|<>|[+\-*/%^=<>])$/;
 
   //
   // Tokenize into atoms / lists
