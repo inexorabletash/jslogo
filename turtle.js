@@ -41,6 +41,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
 
   var self = this;
   function moveto(x, y, setpos) {
+
     function _go(x1, y1, x2, y2) {
       if (self.filling) {
         canvas_ctx.lineTo(x1, y1);
@@ -53,16 +54,18 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
       }
     }
 
+    var left = -width / 2, right = width / 2, bottom = -height / 2, top = height / 2;
+
     var ix, iy, wx, wy, fx, fy, less;
 
     // Hack to match UCBLogo: don't draw line across viewport on
-    // `SETXY 500 10` `SETXY 550 20` `SETXY 600 30`
+    // `SETXY 250 10` `SETXY 300 20` `SETXY 350 30`
     if (setpos && self.turtlemode === 'wrap') {
-      var oob = (x < 0 || x >= width || y < 0 || y > height);
+      var oob = (x < left || x >= right || y < bottom || y >= top);
       var px = x, py = y;
       if (self.was_oob) {
-        var dx = mod(x, width) - x;
-        var dy = mod(y, height) - y;
+        var dx = mod(x + width / 2, width) - width / 2 - x;
+        var dy = mod(y + height / 2, height) - height / 2 - y;
         x += dx;
         y += dy;
         self.x = self.px + dx;
@@ -93,17 +96,20 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
           fx = 1;
           fy = 1;
 
-          if (x < 0) {
-            fx = (self.x - 0) / (self.x - x);
-          } else if (x >= width) {
-            fx = (self.x - width) / (self.x - x);
+          if (x < left) {
+            fx = (self.x - left) / (self.x - x);
+          } else if (x >= right) {
+            fx = (self.x - right) / (self.x - x);
           }
 
-          if (y < 0) {
-            fy = (self.y - 0) / (self.y - y);
-          } else if (y >= height) {
-            fy = (self.y - height) / (self.y - y);
+          if (y < bottom) {
+            fy = (self.y - bottom) / (self.y - y);
+          } else if (y >= top) {
+            fy = (self.y - top) / (self.y - y);
           }
+
+          if (!isFinite(fx) || !isFinite(fy))
+            throw new Error("Wrapping error: non-finite fraction");
 
           // intersection point (draw current to here)
           ix = x;
@@ -114,19 +120,19 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
           wy = y;
 
           if (fx < 1 && fx <= fy) {
-            less = (x < 0);
-            ix = less ? 0 : width;
+            less = (x < left);
+            ix = less ? left : right;
             iy = self.y - fx * (self.y - y);
             x += less ? width : -width;
-            wx = less ? width : 0;
+            wx = less ? right : left;
             wy = iy;
           } else if (fy < 1 && fy <= fx) {
-            less = (y < 0);
+            less = (y < bottom);
             ix = self.x - fy * (self.x - x);
-            iy = less ? 0 : height;
+            iy = less ? bottom : top;
             y += less ? height : -height;
             wx = ix;
-            wy = less ? height : 0;
+            wy = less ? top : bottom;
           }
 
           _go(self.x, self.y, ix, iy);
@@ -140,9 +146,8 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
             // WRAP - keep going
             self.x = wx;
             self.y = wy;
-            if (fx === 1 && fy === 1) {
+            if (fx >= 1 && fy >= 1)
               return;
-            }
           }
 
           break;
@@ -162,7 +167,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     }
 
     x = this.x + distance * Math.cos(this.r);
-    y = this.y - distance * Math.sin(this.r);
+    y = this.y + distance * Math.sin(this.r);
     moveto(x, y);
 
     if (point) {
@@ -239,17 +244,17 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
   this.getfontname = function() { return this.fontname; };
 
   this.setposition = function(x, y) {
-    x = (x === undefined) ? this.x : x + (width / 2);
-    y = (y === undefined) ? this.y : -y + (height / 2);
+    x = (x === undefined) ? this.x : x;
+    y = (y === undefined) ? this.y : y;
 
     moveto(x, y, /*setpos*/true);
   };
 
   this.towards = function(x, y) {
-    x = x + (width / 2);
-    y = -y + (height / 2);
+    x = x;
+    y = y;
 
-    return 90 - rad2deg(Math.atan2(this.y - y, x - this.x));
+    return 90 - rad2deg(Math.atan2(y - this.y, x - this.x));
   };
 
   this.setheading = function(angle) {
@@ -262,9 +267,10 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
   };
 
   this.clear = function() {
-    canvas_ctx.clearRect(0, 0, width, height);
     canvas_ctx.save();
     try {
+      canvas_ctx.setTransform(1, 0, 0, 1, 0, 0);
+      canvas_ctx.clearRect(0, 0, width, height);
       canvas_ctx.fillStyle = parseColor(this.bgcolor);
       canvas_ctx.fillRect(0, 0, width, height);
     } finally {
@@ -273,7 +279,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
   };
 
   this.home = function() {
-    moveto(width / 2, height / 2);
+    moveto(0, 0);
     this.r = deg2rad(90);
   };
 
@@ -294,12 +300,28 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
   };
 
   this.getxy = function() {
-    return [this.x - (width / 2), -this.y + (height / 2)];
+    return [this.x, this.y];
+  };
+
+  this.setscrunch = function(sx, sy) {
+    this.sx = sx;
+    this.sy = sy;
+
+    [turtle_ctx, canvas_ctx].forEach(function(ctx) {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.translate(width / 2, height / 2);
+      ctx.scale(this.sx, -this.sy);
+    }.bind(this));
+  };
+
+  this.getscrunch = function() {
+    return [this.sx, this.sy];
   };
 
   this.drawtext = function(text) {
     canvas_ctx.save();
     canvas_ctx.translate(this.x, this.y);
+    canvas_ctx.scale(1, -1);
     canvas_ctx.rotate(-this.r);
     canvas_ctx.fillText(text, 0, 0);
     canvas_ctx.restore();
@@ -366,7 +388,8 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
       fontsize: this.getfontsize(),
       fontname: this.getfontname(),
       visible: this.isturtlevisible(),
-      pendown: this.down
+      pendown: this.down,
+      scrunch: this.getscrunch()
     };
   };
 
@@ -384,6 +407,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     this.setposition(state.xy[0], state.xy[1]);
     this.setheading(state.heading);
     this.setpenmode(state.penmode);
+    this.setscrunch(state.scrunch[0], state.scrunch[1]);
     if (state.visible) {
       this.showturtle();
     }
@@ -392,29 +416,26 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     }
   };
 
-  var last_x, last_y, last_r, last_visible;
+  var last;
 
   this.tick = function() {
     function invert(p) { return [-p[0], p[1]]; }
 
     requestAnimationFrame(this.tick.bind(this));
-    if (this.x === last_x &&
-        this.y === last_y &&
-        this.r === last_r &&
-        this.visible === last_visible)
-      return;
+    var cur = JSON.stringify([this.x, this.y, this.r, this.visible, this.sx, this.sy, width, height]);
+    if (cur === last) return;
+    last = cur;
 
-    last_x = this.x;
-    last_y = this.y;
-    last_r = this.r;
-    last_visible = this.visible;
-
+    turtle_ctx.save();
+    turtle_ctx.setTransform(1, 0, 0, 1, 0, 0);
     turtle_ctx.clearRect(0, 0, width, height);
+    turtle_ctx.restore();
+
     if (this.visible) {
       var ctx = turtle_ctx;
       ctx.save();
       ctx.translate(this.x, this.y);
-      ctx.rotate(Math.PI/2 - this.r);
+      ctx.rotate(Math.PI/2 + this.r);
       ctx.beginPath();
 
       var points = [
@@ -454,9 +475,11 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     }
   };
 
-  this.x = this.py = width / 2;
-  this.y = this.py = height / 2;
+  this.x = this.py = 0;
+  this.y = this.py = 0;
   this.r = Math.PI / 2;
+
+  this.sx = this.sy = 1;
 
   this.bgcolor = '#ffffff';
   this.color = '#000000';
@@ -475,7 +498,6 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     turtle_ctx.lineWidth = 2;
 
     canvas_ctx.lineCap = 'round';
-
     canvas_ctx.strokeStyle = parseColor(self.color);
     canvas_ctx.fillStyle = parseColor(self.color);
     canvas_ctx.lineWidth = self.width;
@@ -483,6 +505,12 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     canvas_ctx.globalCompositeOperation =
       (self.penmode === 'erase') ? 'destination-out' :
       (self.penmode === 'reverse') ? 'xor' : 'source-over';
+
+    [turtle_ctx, canvas_ctx].forEach(function(ctx) {
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.translate(width / 2, height / 2);
+      ctx.scale(self.sx, -self.sy);
+    });
   }
 
   this.resize = function(w, h) {

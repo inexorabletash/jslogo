@@ -1849,8 +1849,7 @@ function LogoInterpreter(turtle, stream, savehook)
     if (l.length !== 2) { throw new Error(__("Expected list of length 2")); }
     return turtle.towards(aexpr(l[0]), aexpr(l[1]));
   });
-
-  // Not Supported: scrunch
+  def("scrunch", function() { return turtle.getscrunch(); });
 
   //
   // 6.3 Turtle and Window Control
@@ -1890,7 +1889,15 @@ function LogoInterpreter(turtle, stream, savehook)
   // Not Supported: textscreen
   // Not Supported: fullscreen
   // Not Supported: splitscreen
-  // Not Supported: setscrunch
+
+  def("setscrunch", function(sx, sy) {
+    sx = aexpr(sx);
+    sy = aexpr(sy);
+    if (!isFinite(sx) || sx === 0 || !isFinite(sy) || sy === 0)
+      throw new Error(__("Bad values for SETSCRUNCH"));
+    return turtle.setscrunch(sx, sy);
+  });
+
   // Not Supported: refresh
   // Not Supported: norefresh
 
