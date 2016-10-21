@@ -370,6 +370,13 @@ QUnit.test("Data Structure Primitives", function(t) {
   this.assert_equals('remdup [ a b c a b c ]', ["a", "b", "c"]);
   this.assert_equals('remdup "abcabc', 'abc');
 
+  this.assert_equals('split "a "banana', ['b', 'n', 'n']);
+  this.assert_equals('split "a "alphabetical', ['lph', 'betic', 'l']);
+  this.assert_equals('split 1 [1 2 3 4 1 2 3 4 1 2 3 4 ]', [['2', '3', '4'], ['2', '3', '4'], ['2', '3', '4']]);
+  this.assert_equals('split 2 [1 2 3 4 1 2 3 4 1 2 3 4 ]', [['1'], ['3', '4', '1'], ['3', '4', '1'], ['3', '4']]);
+  this.assert_equals('split 3 [1 2 3 4 1 2 3 4 1 2 3 4 ]', [['1', '2'], ['4', '1', '2'], ['4', '1', '2'], ['4']]);
+  this.assert_equals('split 4 [1 2 3 4 1 2 3 4 1 2 3 4 ]', [['1', '2', '3'], ['1', '2', '3'], ['1', '2', '3']]);
+
   //
   // 2.3 Data Mutators
   //

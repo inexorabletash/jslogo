@@ -1338,6 +1338,16 @@ function LogoInterpreter(turtle, stream, savehook)
     }));
   });
 
+  def("split", function(thing, list) {
+    var l = lexpr(list);
+    return lexpr(list)
+      .reduce(function(ls, i) {
+        return (equal(i, thing) ? ls.push([]) : ls[ls.length - 1].push(i), ls);
+      }, [[]])
+      .filter(function(l) { return l.length > 0; })
+      .map(function(e) { return sifw(list, e); });
+  });
+
   // Not Supported: quoted
 
   //
