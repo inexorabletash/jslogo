@@ -811,7 +811,7 @@ QUnit.test("Logical Operations", function(t) {
 });
 
 QUnit.test("Graphics", function(t) {
-  t.expect(70);
+  t.expect(83);
 
   // NOTE: test canvas is 300,300 (so -150...150 coordinates before hitting)
   // edge
@@ -919,6 +919,12 @@ QUnit.test("Graphics", function(t) {
   this.assert_equals('setpensize 6 pensize', [6, 6]);
   this.assert_equals('setpensize [6 6] pensize', [6, 6]);
 
+  this.assert_equals('setbackground 0 background', '0');
+  this.assert_equals('setscreencolor 0 background', '0');
+  this.assert_equals('setsc 0 background', '0');
+  this.assert_equals('setbackground "#123456 background', '#123456');
+  this.assert_equals('setbackground [0 50 99] background', '#0080ff');
+
   //
   // 6.6 Pen Queries
   //
@@ -933,6 +939,15 @@ QUnit.test("Graphics", function(t) {
   this.assert_equals('setpencolor 0 pencolor', '0');
   this.assert_equals('setpencolor "#123456 pencolor', '#123456');
   this.assert_equals('setpensize 6 pensize', [6, 6]);
+
+  this.assert_equals('setsc 0 background', '0');
+  this.assert_equals('setsc 0 getscreencolor', '0');
+  this.assert_equals('setsc 0 getsc', '0');
+  this.assert_equals('setsc "#123456 background', '#123456');
+  this.assert_equals('setsc "#123456 getscreencolor', '#123456');
+  this.assert_equals('setsc "#123456 getsc', '#123456');
+  this.assert_equals('setsc [0 50 99] background', '#0080ff');
+  this.assert_equals('setsc [0 50 99] getscreencolor', '#0080ff');
 
   // 6.7 Saving and Loading Pictures
   // 6.8 Mouse Queries

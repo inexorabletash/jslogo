@@ -648,8 +648,11 @@ of comparison.</p>
   <dd>Turtle stops leaving a trail
 
   <dt><code>penpaint</code>
+  <dt><code>ppt</code>
   <dt><code>penerase</code>
+  <dt><code>pe</code>
   <dt><code>penreverse</code>
+  <dt><code>px</code>
   <dd>Change the turtle drawing mode - paint (the default) leaves a colored trail, erase
   restores the background, reverse inverts the background.
 
@@ -690,6 +693,12 @@ of comparison.</p>
 
   <dt><code>setpensize <var>expr</var></code>
   <dd>Set pen width in pixels. If <var>expr</var> is a list, the first member is used.
+
+  <dt><code>setbackground <var>color</var></code>
+  <dt><code>setscreencolor <var>color</var></code>
+  <dt><code>setsc <var>color</var></code>
+  <dd>Set the background color; same options as <code>setpencolor</code>
+  <dd class=example>setbackground "red</dd>
 </dl>
 
 <h4>6.6 Pen Queries</h4>
@@ -702,10 +711,16 @@ of comparison.</p>
   <dd>Outputs <code>PAINT</code>, <code>ERASE</code> or <code>REVERSE</code>
 
   <dt><code>pencolor</code>
+  <dt><code>pc</code>
   <dd>Outputs the current pen color. This will be a CSS color string, not necessarily the value passed in.
 
   <dt><code>pensize</code>
   <dd>Outputs a two element list with the pen width and height (usually the same).
+
+  <dt><code>background</code>
+  <dt><code>getscreencolor</code>
+  <dt><code>getsc</code>
+  <dd>Outputs the background color. This will be a CSS color string, not necessarily the value passed in.
 </dl>
 
 <!--

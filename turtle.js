@@ -187,7 +187,11 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     this.penmode = penmode;
     canvas_ctx.globalCompositeOperation =
                 (this.penmode === 'erase') ? 'destination-out' :
-                (this.penmode === 'reverse') ? 'xor' : 'source-over';
+                (this.penmode === 'reverse') ? 'difference' : 'source-over';
+    if (penmode === 'paint')
+      canvas_ctx.strokeStyle = canvas_ctx.fillStyle = parseColor(this.color);
+    else
+      canvas_ctx.strokeStyle = canvas_ctx.fillStyle = '#ffffff';
   };
   this.getpenmode = function() { return this.penmode; };
 
@@ -224,6 +228,12 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     canvas_ctx.fillStyle = parseColor(this.color);
   };
   this.getcolor = function() { return this.color; };
+
+  this.setbgcolor = function(color) {
+    this.bgcolor = color;
+    this.clear();
+  };
+  this.getbgcolor = function() { return this.bgcolor; };
 
   this.setwidth = function(width) {
     this.width = width;
@@ -308,9 +318,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     this.sy = sy;
 
     [turtle_ctx, canvas_ctx].forEach(function(ctx) {
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.translate(width / 2, height / 2);
-      ctx.scale(this.sx, -this.sy);
+      ctx.setTransform(this.sx, 0, 0, -this.sy, width / 2, height / 2);
     }.bind(this));
   };
 
@@ -380,6 +388,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     return {
       isturtlestate: true,
       color: this.getcolor(),
+      bgcolor: this.getbgcolor(),
       xy: this.getxy(),
       heading: this.getheading(),
       penmode: this.getpenmode(),
@@ -401,6 +410,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     this.hideturtle();
     this.setturtlemode(state.turtlemode);
     this.setcolor(state.color);
+    this.setbgcolor(state.bgcolor);
     this.setwidth(state.width);
     this.setfontsize(state.fontsize);
     this.setfontname(state.fontname);
@@ -498,18 +508,13 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     turtle_ctx.lineWidth = 2;
 
     canvas_ctx.lineCap = 'round';
-    canvas_ctx.strokeStyle = parseColor(self.color);
-    canvas_ctx.fillStyle = parseColor(self.color);
     canvas_ctx.lineWidth = self.width;
     canvas_ctx.font = font(self.fontsize, self.fontname);
-    canvas_ctx.globalCompositeOperation =
-      (self.penmode === 'erase') ? 'destination-out' :
-      (self.penmode === 'reverse') ? 'xor' : 'source-over';
+
+    self.setpenmode(self.penmode);
 
     [turtle_ctx, canvas_ctx].forEach(function(ctx) {
-      ctx.setTransform(1, 0, 0, 1, 0, 0);
-      ctx.translate(width / 2, height / 2);
-      ctx.scale(self.sx, -self.sy);
+      ctx.setTransform(self.sx, 0, 0, -self.sy, width / 2, height / 2);
     });
   }
 

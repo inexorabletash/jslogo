@@ -1933,7 +1933,7 @@ function LogoInterpreter(turtle, stream, savehook)
   def(["penerase", "pe"], function() { return turtle.setpenmode('erase'); });
   def(["penreverse", "px"], function() { return turtle.setpenmode('reverse'); });
 
-  def(["setpencolor", "setpc", "setcolor"], function(color) {
+  function parseColor(color) {
     function adjust(n) {
       // Clamp into 0...99
       n = Math.min(99, Math.max(0, Math.floor(n)));
@@ -1947,10 +1947,13 @@ function LogoInterpreter(turtle, stream, savehook)
       var rr = (r < 16 ? "0" : "") + r.toString(16);
       var gg = (g < 16 ? "0" : "") + g.toString(16);
       var bb = (b < 16 ? "0" : "") + b.toString(16);
-      return turtle.setcolor('#' + rr + gg + bb);
-    } else {
-      return turtle.setcolor(sexpr(color));
+      return '#' + rr + gg + bb;
     }
+    return sexpr(color);
+  }
+
+  def(["setpencolor", "setpc", "setcolor"], function(color) {
+    turtle.setcolor(parseColor(color));
   });
 
   // Not Supported: setpalette
@@ -1965,7 +1968,10 @@ function LogoInterpreter(turtle, stream, savehook)
 
   // Not Supported: setpenpattern
   // Not Supported: setpen
-  // Not Supported: setbackground
+
+  def(["setbackground", "setscreencolor", "setsc"], function(color) {
+    turtle.setbgcolor(parseColor(color));
+  });
 
   //
   // 6.6 Pen Queries
@@ -1990,7 +1996,10 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   // Not Supported: pen
-  // Not Supported: background
+
+  def(["background", "getscreencolor", "getsc"], function() {
+    return turtle.getbgcolor();
+  });
 
   // 6.7 Saving and Loading Pictures
 
