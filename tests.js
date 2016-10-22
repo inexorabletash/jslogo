@@ -548,6 +548,13 @@ QUnit.test("Data Structure Primitives", function(t) {
   this.assert_equals('ascii "A', 65);
   this.assert_equals('char 65', 'A');
 
+  this.assert_equals('member "a "banana', 'anana');
+  this.assert_equals('member "z "banana', '');
+  this.assert_equals('member 1 [1 2 3 1 2 3]', ['1', '2', '3', '1', '2', '3']);
+  this.assert_equals('member 2 [1 2 3 1 2 3]', ['2', '3', '1', '2', '3']);
+  this.assert_equals('member 3 [1 2 3 1 2 3]', ['3', '1', '2', '3']);
+  this.assert_equals('member 4 [1 2 3 1 2 3]', []);
+
   this.assert_equals('lowercase "ABcd', 'abcd');
   this.assert_equals('uppercase "ABcd', 'ABCD');
   this.assert_equals('standout "whatever', 'whatever');

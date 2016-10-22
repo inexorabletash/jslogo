@@ -1495,6 +1495,14 @@ function LogoInterpreter(turtle, stream, savehook)
   def("ascii", function(chr) { return sexpr(chr).charCodeAt(0); });
   // Not Supported: rawascii
   def("char", function(integer) { return String.fromCharCode(aexpr(integer)); });
+
+  def("member", function(thing, input) {
+    var list = lexpr(input);
+    var index = list.findIndex(function(x) { return equal(x, thing); });
+    list = (index === -1) ? [] : list.slice(index);
+    return sifw(input, list);
+ });
+
   def("lowercase", function(word) { return sexpr(word).toLowerCase(); });
   def("uppercase", function(word) { return sexpr(word).toUpperCase(); });
   def("standout", function(word) { return sexpr(word); }); // For compat
