@@ -513,10 +513,13 @@ QUnit.test("Data Structure Primitives", function(t) {
   this.assert_equals('before? "b "b', 0);
   this.assert_equals('before? "c "b', 0);
 
-  this.assert_equals('substringp "a "abc', 1);
-  this.assert_equals('substringp "z "abc', 0);
-  this.assert_equals('substring? "a "abc', 1);
-  this.assert_equals('substring? "z "abc', 0);
+  this.assert_equals('.eq 1 1', false);
+  this.assert_equals('.eq 1 "1', false);
+  this.assert_equals('.eq [] []', false);
+  this.assert_equals('.eq {} {}', false);
+  this.assert_equals('make "a 1  .eq :a :a', false);
+  this.assert_equals('make "a []  .eq :a :a', true);
+  this.assert_equals('make "a {}  .eq :a :a', true);
 
   this.assert_equals('memberp "b [ a b c ]', 1);
   this.assert_equals('memberp "e [ a b c ]', 0);
@@ -524,6 +527,11 @@ QUnit.test("Data Structure Primitives", function(t) {
   this.assert_equals('member? "b [ a b c ]', 1);
   this.assert_equals('member? "e [ a b c ]', 0);
   this.assert_equals('member? [ "b ] [ [ "a ] [ "b ] [ "c ] ]', 1);
+
+  this.assert_equals('substringp "a "abc', 1);
+  this.assert_equals('substringp "z "abc', 0);
+  this.assert_equals('substring? "a "abc', 1);
+  this.assert_equals('substring? "z "abc', 0);
 
   //
   // 2.5 Queries

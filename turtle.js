@@ -166,8 +166,15 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
       distance = EPSILON;
     }
 
-    x = this.x + distance * Math.cos(this.r);
-    y = this.y + distance * Math.sin(this.r);
+    // Mostly for tests: limit precision
+    var PRECISION = 10;
+    function precision(n) {
+      var f = Math.pow(10, PRECISION);
+      return Math.round(n * f) / f;
+    }
+
+    x = precision(this.x + distance * Math.cos(this.r));
+    y = precision(this.y + distance * Math.sin(this.r));
     moveto(x, y);
 
     if (point) {

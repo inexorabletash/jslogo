@@ -1470,7 +1470,8 @@ function LogoInterpreter(turtle, stream, savehook)
     return sexpr(word1) < sexpr(word2) ? 1 : 0;
   });
 
-  // Not Supported: .eq
+  def(".eq", function(a, b) { return a === b && a && typeof a === 'object'; });
+
   // Not Supported: vbarredp
 
   def(["memberp", "member?"], function(thing, list) {
