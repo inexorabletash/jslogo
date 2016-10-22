@@ -1505,7 +1505,29 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("lowercase", function(word) { return sexpr(word).toLowerCase(); });
   def("uppercase", function(word) { return sexpr(word).toUpperCase(); });
-  def("standout", function(word) { return sexpr(word); }); // For compat
+
+  def("standout", function(word) {
+    // Hack: Convert English alphanumerics to Mathematical Bold
+    return sexpr(word)
+      .split('')
+      .map(function(c) {
+        var u = c.charCodeAt(0);
+        if ('A' <= c && c <= 'Z') {
+          u = u - 0x41 + 0x1D400;
+        } else if ('a' <= c && c <= 'z') {
+          u = u - 0x61 + 0x1D41A;
+        } else if ('0' <= c && c <= '9') {
+          u = u - 0x30 + 0x1D7CE;
+        } else {
+          return c;
+        }
+        var lead = ((u - 0x10000) >> 10) + 0xD800;
+        var trail = ((u - 0x10000) & 0x3FF) + 0xDC00;
+        return String.fromCharCode(lead, trail);
+      })
+      .join('');
+  });
+
   // Not Supported: parse
   // Not Supported: runparse
 

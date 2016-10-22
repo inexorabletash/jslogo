@@ -557,7 +557,10 @@ QUnit.test("Data Structure Primitives", function(t) {
 
   this.assert_equals('lowercase "ABcd', 'abcd');
   this.assert_equals('uppercase "ABcd', 'ABCD');
-  this.assert_equals('standout "whatever', 'whatever');
+
+  this.assert_equals('standout "whatever', '\uD835\uDC30\uD835\uDC21\uD835\uDC1A\uD835\uDC2D\uD835\uDC1E\uD835\uDC2F\uD835\uDC1E\uD835\uDC2B');
+  this.assert_equals('standout "ABCabc123', '\uD835\uDC00\uD835\uDC01\uD835\uDC02\uD835\uDC1A\uD835\uDC1B\uD835\uDC1C\uD835\uDFCF\uD835\uDFD0\uD835\uDFD1');
+  this.assert_equals('standout "!@#$_,.?', '!@#$_,.?');
 });
 
 QUnit.test("Communication", function(t) {
