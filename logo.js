@@ -22,7 +22,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   var self = this;
 
-  var UNARY_MINUS = '<UNARYMINUS>'; // Must not match regexIdentifier
+  var UNARY_MINUS = '<UNARYMINUS>'; // Must not match regexWord
 
   //----------------------------------------------------------------------
   //
@@ -305,27 +305,28 @@ function LogoInterpreter(turtle, stream, savehook)
 
   // TODO: Make this a little more sane.
 
-  // Note: U+2190 ... U+2193 are arrows
-  var regexIdentifier = /^(\.?[A-Za-z\u00A1-\u1FFF][A-Za-z0-9_.\?\u00A1-\u1FFF]*|[#\u2190-\u2193])/;
-
   // "After a quotation mark outside square brackets, a word is
   // delimited by a space, a square bracket, or a parenthesis."
-  var regexStringLiteral = /^(["'](?:[^ \f\n\r\t\v[\](){}\\]|\\.)*)/m;
+  var regexQuoted = /^(["'](?:[^ \f\n\r\t\v[\](){}\\]|\\.)*)/m;
 
   // "A word not after a quotation mark or inside square brackets is
   // delimited by a space, a bracket, a parenthesis, or an infix
   // operator +-*/=<>. Note that words following colons are in this
   // category. Note that quote and colon are not delimiters."
-  var regexVariable = /^(:(?:[^ \f\n\r\t\v[\](){}+\-*/%^=<>]|\\.)+)/;
+  var regexWord = /^([\u2190-\u2193]|[^ \f\n\r\t\v[\](){}+\-*/%^=<>]+)/;
 
-  var regexNumberLiteral = /^([0-9]*\.?[0-9]+(?:[eE]\s*[\-+]?\s*[0-9]+)?)/;
-  var regexOperator = /^(>=|<=|<>|[+\-*/%^=<>[\]{}()])/;
+  // Nonstandard: U+2190 ... U+2193 are arrows, parsed as own-words.
+  var regexOwnWord = /^([\u2190-\u2193])/;
+
+  // Nonstandard: Numbers support exponential notation (e.g. 1.23e-45)
+  var regexNumber = /^([0-9]*\.?[0-9]+(?:[eE]\s*[\-+]?\s*[0-9]+)?)/;
 
   // "Each infix operator character is a word in itself, except that
   // the two-character sequences <=, >=, and <> (the latter meaning
   // not-equal) with no intervening space are recognized as a single
   // word."
   var regexInfix = /^(>=|<=|<>|[+\-*/%^=<>])$/;
+  var regexOperator = /^(>=|<=|<>|[+\-*/%^=<>[\]{}()])/;
 
   //
   // Tokenize into atoms / lists
@@ -354,10 +355,10 @@ function LogoInterpreter(turtle, stream, savehook)
       if (!string.length) break;
 
       var m;
-      if ((m = string.match(regexIdentifier) ||
-          string.match(regexStringLiteral) ||
-          string.match(regexVariable) ||
-          string.match(regexNumberLiteral))) {
+      if ((m = string.match(regexQuoted) ||
+          string.match(regexOwnWord) ||
+          string.match(regexWord) ||
+          string.match(regexNumber))) {
 
         atom = m[1];
         string = string.substring(atom.length);
@@ -1088,9 +1089,8 @@ function LogoInterpreter(turtle, stream, savehook)
   //
   def("to", function(list) {
     var name = sexpr(list.shift());
-    if (!name.match(regexIdentifier)) {
+    if (!name.match(regexWord))
       throw new Error(__("Expected identifier"));
-    }
 
     var inputs = [];
     var block = [];
@@ -1846,11 +1846,11 @@ function LogoInterpreter(turtle, stream, savehook)
   // Left arrow:
   def(["\u2190"], function() { return turtle.turn(-15); });
   // Right arrow:
-  def(["\u2192"], function() { return turtle.turn(-15); });
+  def(["\u2192"], function() { return turtle.turn(15); });
   // Up arrow:
   def(["\u2191"], function() { return turtle.move(10); });
   // Down arrow:
-  def(["\u2193"], function() { return turtle.turn(-10); });
+  def(["\u2193"], function() { return turtle.move(-10); });
 
 
   def("setpos", function(l) {

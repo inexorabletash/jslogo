@@ -9,11 +9,11 @@ if (typeof CodeMirror !== 'undefined') {
 
   // TODO: different highlighting inside list [] and array {} literals
 
-  // Note: U+2190 ... U+2193 are arrows
-  var regexIdentifier = /^(\.?[A-Za-z\u00A1-\u1FFF][A-Za-z0-9_.\?\u00A1-\u1FFF]*|[#\u2190-\u2193])/;
-  var regexStringLiteral = /^(["'](?:[^ \f\n\r\t\v[\](){}\\]|\\.)*)/m;
-  var regexVariable = /^(:(?:[^ \f\n\r\t\v[\](){}+\-*/%^=<>]|\\.)+)/;
-  var regexNumberLiteral = /^[0-9]*\.?[0-9]+(?:[eE]\s*[\-+]?\s*[0-9]+)?/;
+  var regexQuoted = /^(["'](?:[^ \f\n\r\t\v[\](){}\\]|\\.)*)/m;
+  var regexOwnWord = /^([\u2190-\u2193])/;
+  var regexNumber = /^([0-9]*\.?[0-9]+(?:[eE]\s*[\-+]?\s*[0-9]+)?)/;
+  var regexVariable  = /^(:(:?[\u2190-\u2193]|[^ \f\n\r\t\v[\](){}+\-*/%^=<>]+))/;
+  var regexWord = /^([\u2190-\u2193]|[^ \f\n\r\t\v[\](){}+\-*/%^=<>]+)/;
   var regexOperator = /^(>=|<=|<>|[+\-*/%^=<>[\]{}()])/;
 
   return {
@@ -67,7 +67,8 @@ if (typeof CodeMirror !== 'undefined') {
       }
 
       if (state.state === 'defn-name') {
-        if (stream.match(regexIdentifier, true)) {
+        if (stream.match(regexWord, true)) {
+
           state.state = 'defn-vars';
           return 'logo-defn-name';
         }
@@ -94,12 +95,12 @@ if (typeof CodeMirror !== 'undefined') {
       if (state.state === 'normal' || state.state === 'defn-body') {
 
         // Number literal
-        if (stream.match(regexNumberLiteral, true)) {
+        if (stream.match(regexNumber, true)) {
           return 'logo-number';
         }
 
         // String literal
-        if (stream.match(regexStringLiteral, true)) {
+        if (stream.match(regexQuoted, true)) {
           return 'logo-string';
         }
 
@@ -124,12 +125,12 @@ if (typeof CodeMirror !== 'undefined') {
         }
 
         // Special Words
-        if (stream.match(/^(TRUE|FALSE)\b/i, true)) {
+        if (stream.match(/^(TRUE|FALSE|ELSE)\b/i, true)) {
           return 'logo-keyword';
         }
 
         // Word
-        if (stream.match(regexIdentifier, true)) {
+        if (stream.match(regexOwnWord, true) || stream.match(regexWord, true)) {
           return 'logo-word';
         }
 
