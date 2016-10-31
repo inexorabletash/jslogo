@@ -9,7 +9,7 @@ if (typeof CodeMirror !== 'undefined') {
 
   // TODO: different highlighting inside list [] and array {} literals
 
-  var regexQuoted = /^(["'](?:[^ \f\n\r\t\v[\](){}\\]|\\.)*)/m;
+  var regexQuoted = /^(["'](?:[^ \f\n\r\t\v[\](){}\\]|\\[^])*)/;
   var regexOwnWord = /^([\u2190-\u2193])/;
   var regexNumber = /^([0-9]*\.?[0-9]+(?:[eE]\s*[\-+]?\s*[0-9]+)?)/;
   var regexVariable  = /^(:(:?[\u2190-\u2193]|[^ \f\n\r\t\v[\](){}+\-*/%^=<>]+))/;

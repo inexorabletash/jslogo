@@ -307,7 +307,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   // "After a quotation mark outside square brackets, a word is
   // delimited by a space, a square bracket, or a parenthesis."
-  var regexQuoted = /^(["'](?:[^ \f\n\r\t\v[\](){}\\]|\\.)*)/m;
+  var regexQuoted = /^(["'](?:[^ \f\n\r\t\v[\](){}\\]|\\[^])*)/;
 
   // "A word not after a quotation mark or inside square brackets is
   // delimited by a space, a bracket, a parenthesis, or an infix
@@ -315,10 +315,10 @@ function LogoInterpreter(turtle, stream, savehook)
   // category. Note that quote and colon are not delimiters."
   var regexWord = /^([\u2190-\u2193]|[^ \f\n\r\t\v[\](){}+\-*/%^=<>]+)/;
 
-  // Nonstandard: U+2190 ... U+2193 are arrows, parsed as own-words.
+  // Non-standard: U+2190 ... U+2193 are arrows, parsed as own-words.
   var regexOwnWord = /^([\u2190-\u2193])/;
 
-  // Nonstandard: Numbers support exponential notation (e.g. 1.23e-45)
+  // Non-standard: Numbers support exponential notation (e.g. 1.23e-45)
   var regexNumber = /^([0-9]*\.?[0-9]+(?:[eE]\s*[\-+]?\s*[0-9]+)?)/;
 
   // "Each infix operator character is a word in itself, except that
@@ -343,8 +343,30 @@ function LogoInterpreter(turtle, stream, savehook)
     var atoms = [],
         prev, r;
 
-    // Handle escaping and filter out comments
-    string = string.replace(/^((?:[^;\\\n]|\\.)*);.*$/mg, '$1');
+    // Handle comments (;) and continuations (~\n), respecting escaping (\)
+    string = (function(string) {
+      var out = '', i = 0, comment = false;
+      while (i < string.length) {
+        var c = string.charAt(i++);
+        if (c === '\\')
+          c += string.charAt(i++);
+
+        if (c === '~' && string.charAt(i) === '\n') {
+          ++i;
+          comment = false;
+        } else if (c === '\n') {
+          comment = false;
+          out += c;
+        } else if (comment === true) {
+          continue;
+        } else if (c === ';') {
+          comment = true;
+        } else{
+          out += c;
+        }
+      }
+      return out;
+    }(string));
 
     while (string !== undefined && string !== '') {
       var atom;
@@ -362,7 +384,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
         atom = m[1];
         string = string.substring(atom.length);
-        atom = atom.replace(/\\(.)/mg, '$1');
+        atom = atom.replace(/\\([^])/mg, '$1');
 
       } else if (string.charAt(0) === '[') {
         r = parseList(string.substring(1));

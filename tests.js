@@ -148,6 +148,33 @@ QUnit.module("Logo Unit Tests", {
 });
 
 QUnit.test("Parser", function(t) {
+
+  // Comments
+
+  this.assert_equals('"abc;comment', 'abc');
+  this.assert_equals('"abc;comment\n', 'abc');
+  this.assert_equals('"abc ; comment', 'abc');
+  this.assert_equals('"abc ; comment\n', 'abc');
+
+  this.assert_equals('"abc\\;comment', 'abc;comment');
+  this.assert_equals('"abc\\;comment\n', 'abc;comment');
+
+  // Continuations
+
+  this.assert_equals('"abc~', 'abc~');
+  this.assert_equals('"abc\n"def', 'def');
+  this.assert_equals('"abc~\n', 'abc');
+  this.assert_equals('"abc~\n"def', 'abc"def');
+  this.assert_equals('"abc\\~\n', 'abc~');
+  this.assert_equals('"abc\\~\n"def', 'def');
+
+  // Comment and Continuations
+
+  this.assert_equals('"abc;comment\n"def', 'def');
+  this.assert_equals('"abc;comment~\n"def', 'abc"def');
+  this.assert_equals('"abc;comment\\~\n', 'abc');
+  this.assert_equals('"abc;comment\\~\n"def', 'def');
+
   //
   // Types
   //
@@ -1389,10 +1416,6 @@ QUnit.test("Regression Tests", function(t) {
   this.assert_error("fd 100 50 rt 90", "Don't know what to do with 50");
   this.assert_equals("to foo output 123 end  make \"v foo", undefined);
   this.assert_equals("to foo end", undefined);
-  this.assert_equals("5;comment", 5);
-  this.assert_equals("5;comment\n", 5);
-  this.assert_equals("5 ; comment", 5);
-  this.assert_equals("5 ; comment\n", 5);
   this.assert_equals("setpos [ -1 0 ]  123", 123);
   this.assert_equals("to foo output 234 end foo", 234);
   this.assert_equals("to foo output 234 END foo", 234);
