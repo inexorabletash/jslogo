@@ -175,6 +175,8 @@ QUnit.test("Parser", function(t) {
   this.assert_equals('"abc;comment\\~\n', 'abc');
   this.assert_equals('"abc;comment\\~\n"def', 'def');
 
+  // Escaping
+
   this.assert_equals('count [\\]]', 1);
   this.assert_equals('count [[][]]', 2);
   this.assert_equals('count [[]{}[]]', 3);
@@ -184,6 +186,11 @@ QUnit.test("Parser", function(t) {
   this.assert_equals('count [ \\  ]', 1);
   this.assert_equals('count [ \\ \\  ]', 1);
   this.assert_equals('count [ \\  \\  ]', 2);
+
+  this.assert_equals('count [ abc;com ment\ndef  ]', 2);
+  this.assert_equals('count [ abc;com ment~\ndef  ]', 1);
+  this.assert_equals('count [ abc;com ment\\~\ndef  ]', 2);
+
 
   //
   // Types
@@ -1417,6 +1424,7 @@ QUnit.test("Error Messages", function(t) {
   this.assert_error('setpos [1 2 3]', 'Expected list of length 2');
   this.assert_error('towards []', 'Expected list of length 2');
   this.assert_error('make "a { 1 2 3 }@1.5', "Don't know what to do with 0.5");
+  this.assert_error('make "a { 1 2 3 }@', "Expected number after @");
   this.assert_error('fd50', "Need a space between FD and 50");
 });
 

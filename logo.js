@@ -387,14 +387,14 @@ function LogoInterpreter(turtle, stream, savehook)
         atom = atom.replace(/\\([^])/mg, '$1');
 
       } else if (string.charAt(0) === '[') {
-        r = parseList(string.substring(1));
+        r = parseList(new Stream(string.substring(1)));
         atom = r.list;
-        string = r.string;
+        string = r.stream.rest();
 
       } else if (string.charAt(0) === '{') {
-        r = parseArray(string.substring(1));
+        r = parseArray(new Stream(string.substring(1)));
         atom = r.array;
-        string = r.string;
+        string = r.stream.rest();
 
       } else if ((m = string.match(regexOperator))) {
         atom = m[1];
@@ -443,22 +443,54 @@ function LogoInterpreter(turtle, stream, savehook)
   }
 
 
-  function parseList(string) {
-    var index = 0,
-        list = [],
+  function Stream(string) {
+    this.string = string;
+    this.index = 0;
+  }
+  Stream.prototype = {
+    get: function() {
+      var c = this.string.charAt(this.index++);
+      if (c === '\\')
+        c += this.string.charAt(this.index++);
+      return c;
+    },
+    peek: function() {
+      var c = this.string.charAt(this.index);
+      if (c === '\\')
+        c += this.string.charAt(this.index + 1);
+      return c;
+    },
+    rest: function() {
+      return this.string.substring(this.index);
+    }
+  };
+
+  function inRange(x, a, b) {
+    return a <= x && x <= b;
+  }
+
+  function parseInteger(stream) {
+    var word = '';
+    if (stream.peek() === '-')
+      word += stream.get();
+    while (inRange(stream.peek(), '0', '9'))
+      word += stream.get();
+    return word;
+  }
+
+  function parseList(stream) {
+    var list = [],
         atom = '',
         c, r;
 
     while (true) {
       do {
-        c = string.charAt(index++);
-        if (c === '\\') c += string.charAt(index++);
+        c = stream.get();
       } while (isWS(c));
 
       while (c && !isWS(c) && '[]{}'.indexOf(c) === -1) {
         atom += c;
-        c = string.charAt(index++);
-        if (c === '\\') c += string.charAt(index++);
+        c = stream.get();
       }
 
       if (atom.length) {
@@ -473,42 +505,36 @@ function LogoInterpreter(turtle, stream, savehook)
         continue;
       }
       if (c === ']') {
-        return { list: list, string: string.substring(index) };
+        return { list: list, stream: stream };
       }
       if (c === '[') {
-        r = parseList(string.substring(index));
+        r = parseList(stream);
         list.push(r.list);
-        string = r.string;
-        index = 0;
         continue;
       }
       if (c === '{') {
-        r = parseArray(string.substring(index));
+        r = parseArray(stream);
         list.push(r.array);
-        string = r.string;
-        index = 0;
         continue;
       }
       throw new Error(format(__("Unexpected '{c}'"), {c: c}));
     }
   }
 
-  function parseArray(string) {
-    var index = 0,
-        list = [],
+  function parseArray(stream) {
+    var list = [],
+        origin = 1,
         atom = '',
         c, r;
 
     while (true) {
       do {
-        c = string.charAt(index++);
-        if (c === '\\') c += string.charAt(index++);
+        c = stream.get();
       } while (isWS(c));
 
       while (c && !isWS(c) && '[]{}'.indexOf(c) === -1) {
         atom += c;
-        c = string.charAt(index++);
-        if (c === '\\') c += string.charAt(index++);
+        c = stream.get();
       }
 
       if (atom.length) {
@@ -523,29 +549,25 @@ function LogoInterpreter(turtle, stream, savehook)
         continue;
       }
       if (c === '}') {
-        string = string.substring(index);
-        var origin = 1, m;
-        if ((m = string.match(/^(\s*@\s*)(.*)$/))) {
-          string = m[2];
-          if (!(m = string.match(/^(-?\d+)(.*)$/)))
-            throw new Error(__("Expected number after @"));
-          origin = m[1];
-          string = m[2];
+        while (isWS(stream.peek()))
+          stream.get();
+        if (stream.peek() === '@') {
+          stream.get();
+          while (isWS(stream.peek()))
+            stream.get();
+          origin = parseInteger(stream);
+          if (!origin) throw new Error(__("Expected number after @"));
         }
-        return { array: LogoArray.from(list, origin), string: string };
+        return { array: LogoArray.from(list, origin), stream: stream };
       }
       if (c === '[') {
-        r = parseList(string.substring(index));
+        r = parseList(stream);
         list.push(r.list);
-        string = r.string;
-        index = 0;
         continue;
       }
       if (c === '{') {
-        r = parseArray(string.substring(index));
+        r = parseArray(stream);
         list.push(r.array);
-        string = r.string;
-        index = 0;
         continue;
       }
       throw new Error(format(__("Unexpected '{c}'"), {c: c}));
