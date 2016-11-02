@@ -442,6 +442,7 @@ function LogoInterpreter(turtle, stream, savehook)
     return c === ' ' || c === '\t' || c === '\r' || c === '\n';
   }
 
+
   function parseList(string) {
     var index = 0,
         list = [],
@@ -451,11 +452,13 @@ function LogoInterpreter(turtle, stream, savehook)
     while (true) {
       do {
         c = string.charAt(index++);
+        if (c === '\\') c += string.charAt(index++);
       } while (isWS(c));
 
       while (c && !isWS(c) && '[]{}'.indexOf(c) === -1) {
         atom += c;
         c = string.charAt(index++);
+        if (c === '\\') c += string.charAt(index++);
       }
 
       if (atom.length) {
@@ -499,11 +502,13 @@ function LogoInterpreter(turtle, stream, savehook)
     while (true) {
       do {
         c = string.charAt(index++);
+        if (c === '\\') c += string.charAt(index++);
       } while (isWS(c));
 
       while (c && !isWS(c) && '[]{}'.indexOf(c) === -1) {
         atom += c;
         c = string.charAt(index++);
+        if (c === '\\') c += string.charAt(index++);
       }
 
       if (atom.length) {

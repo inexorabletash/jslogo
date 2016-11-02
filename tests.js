@@ -175,6 +175,16 @@ QUnit.test("Parser", function(t) {
   this.assert_equals('"abc;comment\\~\n', 'abc');
   this.assert_equals('"abc;comment\\~\n"def', 'def');
 
+  this.assert_equals('count [\\]]', 1);
+  this.assert_equals('count [[][]]', 2);
+  this.assert_equals('count [[]{}[]]', 3);
+  this.assert_equals('count [\\[\\]\\{\\}\\[\\]]', 1);
+  this.assert_equals('count [ \\[ \\] \\{ \\} \\[ \\]]', 6);
+  this.assert_equals('count [   ]', 0);
+  this.assert_equals('count [ \\  ]', 1);
+  this.assert_equals('count [ \\ \\  ]', 1);
+  this.assert_equals('count [ \\  \\  ]', 2);
+
   //
   // Types
   //
