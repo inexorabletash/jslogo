@@ -22,7 +22,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   var self = this;
 
-  var UNARY_MINUS = '<UNARYMINUS>'; // Must not match regexWord
+  var UNARY_MINUS = '<UNARYMINUS>'; // Must not parse as a word
 
   //----------------------------------------------------------------------
   //
@@ -256,6 +256,28 @@ function LogoInterpreter(turtle, stream, savehook)
     }
   };
 
+  function Stream(string) {
+    this.string = string;
+    this.index = 0;
+  }
+  Stream.prototype = {
+    get: function() {
+      var c = this.string.charAt(this.index++);
+      if (c === '\\')
+        c += this.string.charAt(this.index++);
+      return c;
+    },
+    peek: function() {
+      var c = this.string.charAt(this.index);
+      if (c === '\\')
+        c += this.string.charAt(this.index + 1);
+      return c;
+    },
+    rest: function() {
+      return this.string.substring(this.index);
+    }
+  };
+
   //----------------------------------------------------------------------
   //
   // Interpreter State
@@ -303,30 +325,6 @@ function LogoInterpreter(turtle, stream, savehook)
     }
   }
 
-  // TODO: Make this a little more sane.
-
-  // "After a quotation mark outside square brackets, a word is
-  // delimited by a space, a square bracket, or a parenthesis."
-  var regexQuoted = /^(["'](?:[^ \f\n\r\t\v[\](){}\\]|\\[^])*)/;
-
-  // "A word not after a quotation mark or inside square brackets is
-  // delimited by a space, a bracket, a parenthesis, or an infix
-  // operator +-*/=<>. Note that words following colons are in this
-  // category. Note that quote and colon are not delimiters."
-  var regexWord = /^([\u2190-\u2193]|[^ \f\n\r\t\v[\](){}+\-*/%^=<>]+)/;
-
-  // Non-standard: U+2190 ... U+2193 are arrows, parsed as own-words.
-  var regexOwnWord = /^([\u2190-\u2193])/;
-
-  // Non-standard: Numbers support exponential notation (e.g. 1.23e-45)
-  var regexNumber = /^([0-9]*\.?[0-9]+(?:[eE]\s*[\-+]?\s*[0-9]+)?)/;
-
-  // "Each infix operator character is a word in itself, except that
-  // the two-character sequences <=, >=, and <> (the latter meaning
-  // not-equal) with no intervening space are recognized as a single
-  // word."
-  var regexInfix = /^(>=|<=|<>|[+\-*/%^=<>])$/;
-  var regexOperator = /^(>=|<=|<>|[+\-*/%^=<>[\]{}()])/;
 
   //
   // Tokenize into atoms / lists
@@ -343,6 +341,7 @@ function LogoInterpreter(turtle, stream, savehook)
     var atoms = [],
         prev, r;
 
+    // TODO: Move this into Stream
     // Handle comments (;) and continuations (~\n), respecting escaping (\)
     string = (function(string) {
       var out = '', i = 0, comment = false;
@@ -368,38 +367,31 @@ function LogoInterpreter(turtle, stream, savehook)
       return out;
     }(string));
 
-    while (string !== undefined && string !== '') {
+    var stream = new Stream(string);
+    while (stream.peek()) {
       var atom;
 
       // Ignore (but track) leading space - needed for unary minus disambiguation
-      var leading_space = /^\s+/.test(string);
-      string = string.replace(/^\s+/, '');
-      if (!string.length) break;
+      var leading_space = isWS(stream.peek());
+      while (isWS(stream.peek()))
+        stream.get();
+      if (!stream.peek())
+        break;
 
-      var m;
-      if ((m = string.match(regexQuoted) ||
-          string.match(regexOwnWord) ||
-          string.match(regexWord) ||
-          string.match(regexNumber))) {
-
-        atom = m[1];
-        string = string.substring(atom.length);
-        atom = atom.replace(/\\([^])/mg, '$1');
-
-      } else if (string.charAt(0) === '[') {
-        r = parseList(new Stream(string.substring(1)));
-        atom = r.list;
-        string = r.stream.rest();
-
-      } else if (string.charAt(0) === '{') {
-        r = parseArray(new Stream(string.substring(1)));
-        atom = r.array;
-        string = r.stream.rest();
-
-      } else if ((m = string.match(regexOperator))) {
-        atom = m[1];
-        string = string.substring(atom.length);
-
+      if (stream.peek() === '[') {
+        stream.get();
+        atom = parseList(stream);
+      } else if (stream.peek() === '{') {
+        stream.get();
+        atom = parseArray(stream);
+      } else if (stream.peek() === '"') {
+        atom = parseQuoted(stream);
+      } else if (isOwnWord(stream.peek())) {
+        atom = stream.get();
+      } else if (inRange(stream.peek(), '0', '9')) {
+        atom = parseNumber(stream);
+      } else if (inChars(stream.peek(), OPERATOR_CHARS)) {
+        atom = parseOperator(stream);
         // From UCB Logo:
 
         // Minus sign means infix difference in ambiguous contexts
@@ -411,22 +403,19 @@ function LogoInterpreter(turtle, stream, savehook)
         // space and followed by a nonspace.
 
         if (atom === '-') {
-
-          var trailing_space = /^\s+/.test(string);
-
+          var trailing_space = isWS(stream.peek());
           if (prev === undefined ||
-              (Type(prev) === 'word' && regexInfix.test(prev)) ||
+              (Type(prev) === 'word' && isInfix(prev)) ||
               (Type(prev) === 'word' && prev === '(') ||
-              (leading_space && !trailing_space)
-             ) {
+              (leading_space && !trailing_space)) {
             atom = UNARY_MINUS;
           }
-
         }
+      } else if (!inChars(stream.peek(), WORD_DELIMITER)) {
+        atom = parseWord(stream);
       } else {
-        throw new Error(format(__("Couldn't parse: '{string}'"), { string: string }));
+        throw new Error(format(__("Couldn't parse: '{string}'"), { string: stream.rest() }));
       }
-
       atoms.push(atom);
       prev = atom;
     }
@@ -434,39 +423,101 @@ function LogoInterpreter(turtle, stream, savehook)
     return atoms;
   }
 
-  function isNumber(s) {
-    return String(s).match(/^-?([0-9]*\.?[0-9]+(?:[eE]\s*[\-+]?\s*[0-9]+)?)$/);
-  }
-
-  function isWS(c) {
-    return c === ' ' || c === '\t' || c === '\r' || c === '\n';
-  }
-
-
-  function Stream(string) {
-    this.string = string;
-    this.index = 0;
-  }
-  Stream.prototype = {
-    get: function() {
-      var c = this.string.charAt(this.index++);
-      if (c === '\\')
-        c += this.string.charAt(this.index++);
-      return c;
-    },
-    peek: function() {
-      var c = this.string.charAt(this.index);
-      if (c === '\\')
-        c += this.string.charAt(this.index + 1);
-      return c;
-    },
-    rest: function() {
-      return this.string.substring(this.index);
-    }
-  };
-
   function inRange(x, a, b) {
     return a <= x && x <= b;
+  }
+
+  function inChars(x, chars) {
+    return x && chars.indexOf(x) !== -1;
+  }
+
+  var WS_CHARS = ' \f\n\r\t\v';
+  function isWS(c) {
+    return inChars(c, WS_CHARS);
+  }
+
+  // "After a quotation mark outside square brackets, a word is
+  // delimited by a space, a square bracket, or a parenthesis."
+  var QUOTED_DELIMITER = WS_CHARS + '[](){}';
+  function parseQuoted(stream) {
+    var word = '';
+    while (stream.peek() && QUOTED_DELIMITER.indexOf(stream.peek()) === -1) {
+      var c = stream.get();
+      word += (c.charAt(0) === '\\') ? c.charAt(1) : c.charAt(0);
+    }
+    return word;
+  }
+
+  // Non-standard: U+2190 ... U+2193 are arrows, parsed as own-words.
+  var OWNWORD_CHARS = '\u2190\u2191\u2192\u2193';
+  function isOwnWord(c) {
+    return inChars(c, OWNWORD_CHARS);
+  }
+
+  // "A word not after a quotation mark or inside square brackets is
+  // delimited by a space, a bracket, a parenthesis, or an infix
+  // operator +-*/=<>. Note that words following colons are in this
+  // category. Note that quote and colon are not delimiters."
+  var WORD_DELIMITER = WS_CHARS + '[](){}+-*/%^=<>';
+  function parseWord(stream) {
+    var word = '';
+    while (stream.peek() && WORD_DELIMITER.indexOf(stream.peek()) === -1) {
+      var c = stream.get();
+      word += (c.charAt(0) === '\\') ? c.charAt(1) : c.charAt(0);
+    }
+    return word;
+  }
+
+  // "Each infix operator character is a word in itself, except that
+  // the two-character sequences <=, >=, and <> (the latter meaning
+  // not-equal) with no intervening space are recognized as a single
+  // word."
+  var OPERATOR_CHARS = '+-*/%^=<>[]{}()';
+  function parseOperator(stream) {
+    var word = '';
+    if (inChars(stream.peek(), OPERATOR_CHARS))
+      word += stream.get();
+    if ((word === '<' && stream.peek() === '=') ||
+        (word === '>' && stream.peek() === '=') ||
+        (word === '<' && stream.peek() === '>')) {
+      word += stream.get();
+    }
+    return word;
+  }
+
+  function isInfix(word) {
+    return ['+', '-', '*', '/', '%', '^', '=', '<', '>', '<=', '>=', '<>']
+      .includes(word);
+  }
+
+  function isOperator(word) {
+    return isInfix(word) || ['[', ']', '{', '}', '(', ')'].includes(word);
+  }
+
+  // Non-standard: Numbers support exponential notation (e.g. 1.23e-45)
+  function parseNumber(stream) {
+    var word = '';
+    while (inRange(stream.peek(), '0', '9'))
+      word += stream.get();
+    if (stream.peek() === '.')
+      word += stream.get();
+    if (inRange(stream.peek(), '0', '9')) {
+      while (inRange(stream.peek(), '0', '9'))
+        word += stream.get();
+    }
+    if (stream.peek() === 'E' || stream.peek() === 'e') {
+      word += stream.get();
+      if (stream.peek() === '-' || stream.peek() === '+')
+        word += stream.get();
+      while (inRange(stream.peek(), '0', '9'))
+        word += stream.get();
+    }
+    return word;
+  }
+
+  // Includes leading - sign, unlike parseNumber().
+  function isNumber(s) {
+    return String(s).match(/^-?([0-9]*\.?[0-9]+(?:[eE][\-+]?[0-9]+)?)$/);
   }
 
   function parseInteger(stream) {
@@ -505,16 +556,14 @@ function LogoInterpreter(turtle, stream, savehook)
         continue;
       }
       if (c === ']') {
-        return { list: list, stream: stream };
+        return list;
       }
       if (c === '[') {
-        r = parseList(stream);
-        list.push(r.list);
+        list.push(parseList(stream));
         continue;
       }
       if (c === '{') {
-        r = parseArray(stream);
-        list.push(r.array);
+        list.push(parseArray(stream));
         continue;
       }
       throw new Error(format(__("Unexpected '{c}'"), {c: c}));
@@ -558,16 +607,14 @@ function LogoInterpreter(turtle, stream, savehook)
           origin = parseInteger(stream);
           if (!origin) throw new Error(__("Expected number after @"));
         }
-        return { array: LogoArray.from(list, origin), stream: stream };
+        return LogoArray.from(list, origin);
       }
       if (c === '[') {
-        r = parseList(stream);
-        list.push(r.list);
+        list.push(parseList(stream));
         continue;
       }
       if (c === '{') {
-        r = parseArray(stream);
-        list.push(r.array);
+        list.push(parseArray(stream));
         continue;
       }
       throw new Error(format(__("Unexpected '{c}'"), {c: c}));
@@ -798,7 +845,7 @@ function LogoInterpreter(turtle, stream, savehook)
       if (atom === '(') {
         // parenthesized expression/procedure call
         if (list.length && Type(list[0]) === 'word' && self.routines.has(String(list[0])) &&
-            !(list.length > 1 && Type(list[1]) === 'word' && String(list[1]).match(regexInfix))) {
+            !(list.length > 1 && Type(list[1]) === 'word' && isInfix(String(list[1])))) {
           // Lisp-style (procedure input ...) calling syntax
           atom = list.shift();
           return self.dispatch(atom, list, false);
@@ -1138,7 +1185,7 @@ function LogoInterpreter(turtle, stream, savehook)
   //
   def("to", function(list) {
     var name = sexpr(list.shift());
-    if (!name.match(regexWord))
+    if (isNumber(name) || isOperator(name))
       throw new Error(__("Expected identifier"));
 
     var inputs = [];

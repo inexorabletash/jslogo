@@ -1376,6 +1376,7 @@ QUnit.test("Error Messages", function(t) {
   this.assert_error("(erase)", "Expected list");
   this.assert_error("(map \"show)", "Expected list");
   this.assert_error("(map \"sum [1 2] [1])", "Expected lists of equal length");
+  this.assert_error("to 123", "Expected identifier");
   this.assert_error("to +", "Expected identifier");
   this.assert_error("to fd :x bk :x end", "Can't redefine primitive FD");
   this.assert_error("define \"fd [[x] [bk :x]]", "Can't redefine primitive FD");
