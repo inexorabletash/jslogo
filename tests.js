@@ -150,7 +150,6 @@ QUnit.module("Logo Unit Tests", {
 QUnit.test("Parser", function(t) {
 
   // Comments
-
   this.assert_equals('"abc;comment', 'abc');
   this.assert_equals('"abc;comment\n', 'abc');
   this.assert_equals('"abc ; comment', 'abc');
@@ -164,14 +163,18 @@ QUnit.test("Parser", function(t) {
   this.assert_equals('"abc~', 'abc~');
   this.assert_equals('"abc\n"def', 'def');
   this.assert_equals('"abc~\n', 'abc');
-  this.assert_equals('"abc~\n"def', 'abc"def');
+  this.assert_equals('"abc~\ndef', 'abcdef');
+  this.assert_equals('"abc~\n~\ndef', 'abcdef');
+  this.assert_equals('"abc~\nd~\nef', 'abcdef');
   this.assert_equals('"abc\\~\n', 'abc~');
   this.assert_equals('"abc\\~\n"def', 'def');
 
   // Comment and Continuations
 
   this.assert_equals('"abc;comment\n"def', 'def');
-  this.assert_equals('"abc;comment~\n"def', 'abc"def');
+  this.assert_equals('"abc;comment~\ndef', 'abcdef');
+  this.assert_equals('"abc;comment~\n~\ndef', 'abcdef');
+  this.assert_equals('"abc;comment~\nde~\nf', 'abcdef');
   this.assert_equals('"abc;comment\\~\n', 'abc');
   this.assert_equals('"abc;comment\\~\n"def', 'def');
 

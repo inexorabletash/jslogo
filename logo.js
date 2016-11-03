@@ -259,19 +259,44 @@ function LogoInterpreter(turtle, stream, savehook)
   function Stream(string) {
     this.string = string;
     this.index = 0;
+    this._skip();
   }
   Stream.prototype = {
-    get: function() {
-      var c = this.string.charAt(this.index++);
-      if (c === '\\')
-        c += this.string.charAt(this.index++);
-      return c;
+    eof: function() {
+      return this.index >= this.string.length;
     },
     peek: function() {
       var c = this.string.charAt(this.index);
       if (c === '\\')
         c += this.string.charAt(this.index + 1);
       return c;
+    },
+    get: function() {
+      var c = this._next();
+      this._skip();
+      return c;
+    },
+    _next: function() {
+      var c = this.string.charAt(this.index++);
+      if (c === '\\')
+        c += this.string.charAt(this.index++);
+      return c;
+    },
+    _skip: function() {
+      while (!this.eof()) {
+        var c = this.peek();
+        if (c === '~' && this.string.charAt(this.index + 1) === '\n') {
+          this.index += 2;
+        } else if (c === ';') {
+          do {
+            c = this._next();
+          } while (!this.eof() && this.peek() !== '\n');
+          if (c === '~')
+            this._next();
+        } else {
+          return;
+        }
+      }
     },
     rest: function() {
       return this.string.substring(this.index);
@@ -340,32 +365,6 @@ function LogoInterpreter(turtle, stream, savehook)
 
     var atoms = [],
         prev, r;
-
-    // TODO: Move this into Stream
-    // Handle comments (;) and continuations (~\n), respecting escaping (\)
-    string = (function(string) {
-      var out = '', i = 0, comment = false;
-      while (i < string.length) {
-        var c = string.charAt(i++);
-        if (c === '\\')
-          c += string.charAt(i++);
-
-        if (c === '~' && string.charAt(i) === '\n') {
-          ++i;
-          comment = false;
-        } else if (c === '\n') {
-          comment = false;
-          out += c;
-        } else if (comment === true) {
-          continue;
-        } else if (c === ';') {
-          comment = true;
-        } else{
-          out += c;
-        }
-      }
-      return out;
-    }(string));
 
     var stream = new Stream(string);
     while (stream.peek()) {
@@ -441,7 +440,7 @@ function LogoInterpreter(turtle, stream, savehook)
   var QUOTED_DELIMITER = WS_CHARS + '[](){}';
   function parseQuoted(stream) {
     var word = '';
-    while (stream.peek() && QUOTED_DELIMITER.indexOf(stream.peek()) === -1) {
+    while (!stream.eof() && QUOTED_DELIMITER.indexOf(stream.peek()) === -1) {
       var c = stream.get();
       word += (c.charAt(0) === '\\') ? c.charAt(1) : c.charAt(0);
     }
@@ -461,7 +460,7 @@ function LogoInterpreter(turtle, stream, savehook)
   var WORD_DELIMITER = WS_CHARS + '[](){}+-*/%^=<>';
   function parseWord(stream) {
     var word = '';
-    while (stream.peek() && WORD_DELIMITER.indexOf(stream.peek()) === -1) {
+    while (!stream.eof() && WORD_DELIMITER.indexOf(stream.peek()) === -1) {
       var c = stream.get();
       word += (c.charAt(0) === '\\') ? c.charAt(1) : c.charAt(0);
     }
