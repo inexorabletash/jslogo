@@ -51,7 +51,7 @@ If a translation is not found, the element text will not be translated.
 
 ### Error messages
 
-These can be found in `__("...")` strings in the code.
+These can be found in `err("...")` strings in the code.
 
 * key: the untranslated (English) string
 * value: translated string

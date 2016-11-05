@@ -301,7 +301,7 @@ QUnit.test("Data Structure Primitives", function(t) {
   this.assert_stream('show mdarray [2 2]', '{{[] []} {[] []}}\n');
   this.assert_stream('show mdarray [2 2 2]', '{{{[] []} {[] []}} {{[] []} {[] []}}}\n');
   this.assert_stream('show (mdarray [2 2] 0)', '{{[] []}@0 {[] []}@0}@0\n');
-  this.assert_error('mdarray [1 2 0]', 'Array size must be positive integer');
+  this.assert_error('mdarray [1 2 0]', 'MDARRAY: Array size must be positive integer');
 
   this.assert_stream('show (listtoarray [ 1 2 3 ])', '{1 2 3}\n');
   this.assert_stream('show (listtoarray [ 1 2 3 ] 0)', '{1 2 3}@0\n');
@@ -360,34 +360,34 @@ QUnit.test("Data Structure Primitives", function(t) {
   this.assert_equals('butlast  123', '12');
 
 
-  this.assert_error('item 0 [ a b c ]', 'Index out of bounds');
+  this.assert_error('item 0 [ a b c ]', 'ITEM: Index out of bounds');
   this.assert_equals('item 1 [ a b c ]', "a");
   this.assert_equals('item 2 [ a b c ]', "b");
   this.assert_equals('item 3 [ a b c ]', "c");
-  this.assert_error('item 4 [ a b c ]', 'Index out of bounds');
+  this.assert_error('item 4 [ a b c ]', 'ITEM: Index out of bounds');
 
-  this.assert_error('item 0 { a b c }', 'Index out of bounds');
+  this.assert_error('item 0 { a b c }', 'ITEM: Index out of bounds');
   this.assert_equals('item 1 { a b c }', "a");
   this.assert_equals('item 2 { a b c }', "b");
   this.assert_equals('item 3 { a b c }', "c");
-  this.assert_error('item 4 { a b c }', 'Index out of bounds');
+  this.assert_error('item 4 { a b c }', 'ITEM: Index out of bounds');
 
   this.assert_equals('item 0 { a b c }@0', 'a');
   this.assert_equals('item 1 { a b c }@0', 'b');
   this.assert_equals('item 2 { a b c }@0', 'c');
-  this.assert_error('item 3 { a b c }@0', 'Index out of bounds');
+  this.assert_error('item 3 { a b c }@0', 'ITEM: Index out of bounds');
 
-  this.assert_error('item 0 "abc', 'Index out of bounds');
+  this.assert_error('item 0 "abc', 'ITEM: Index out of bounds');
   this.assert_equals('item 1 "abc', "a");
   this.assert_equals('item 2 "abc', "b");
   this.assert_equals('item 3 "abc', "c");
-  this.assert_error('item 4 "abc', 'Index out of bounds');
+  this.assert_error('item 4 "abc', 'ITEM: Index out of bounds');
 
-  this.assert_error('item 0 456', 'Index out of bounds');
+  this.assert_error('item 0 456', 'ITEM: Index out of bounds');
   this.assert_equals('item 1 456', "4");
   this.assert_equals('item 2 456', "5");
   this.assert_equals('item 3 456', "6");
-  this.assert_error('item 4 456', 'Index out of bounds');
+  this.assert_error('item 4 456', 'ITEM: Index out of bounds');
 
   this.assert_stream('make "a { a b c } ' +
                      'setitem 2 :a "q ' +
@@ -397,8 +397,8 @@ QUnit.test("Data Structure Primitives", function(t) {
                      'show :a', '{a b q}@0\n');
 
 
-  this.assert_error('mditem [0 1] mdarray [1 1]', 'Index out of bounds');
-  this.assert_error('mditem [1 2] mdarray [1 1]', 'Index out of bounds');
+  this.assert_error('mditem [0 1] mdarray [1 1]', 'MDITEM: Index out of bounds');
+  this.assert_error('mditem [1 2] mdarray [1 1]', 'MDITEM: Index out of bounds');
   this.assert_equals('mditem [1 1] mdarray [1 1]', []);
   this.assert_equals('mditem [0 0] (mdarray [1 1] 0)', []);
   this.assert_stream('show mditem [1] mdarray [1 1]', '{[]}\n');
@@ -447,24 +447,24 @@ QUnit.test("Data Structure Primitives", function(t) {
   this.assert_equals('make "q "abc  dequeue "q  :q', "ab");
 
   this.assert_equals('make "a { 1 }  make "b :a  setitem 1 :a 2  item 1 :b', 2);
-  this.assert_error('make "a { 1 }  setitem 1 :a :a', "SETITEM can't create circular array");
-  this.assert_error('make "a { 1 }  make "b { 1 }  setitem 1 :b :a  setitem 1 :a :b', "SETITEM can't create circular array");
+  this.assert_error('make "a { 1 }  setitem 1 :a :a', "SETITEM: Can't create circular array");
+  this.assert_error('make "a { 1 }  make "b { 1 }  setitem 1 :b :a  setitem 1 :a :b', "SETITEM: Can't create circular array");
 
   this.assert_equals('make "a mdarray [1 1]  make "b :a  mdsetitem [1 1] :a 2  mditem [1 1] :b', 2);
-  this.assert_error('make "a mdarray [1 1]  mdsetitem [1 1] :a :a', "MDSETITEM can't create circular array");
-  this.assert_error('mdsetitem [1 1] "x 0', "Expected array");
-  this.assert_error('mdsetitem [1 1] {"x} 0', "Expected array");
+  this.assert_error('make "a mdarray [1 1]  mdsetitem [1 1] :a :a', "MDSETITEM: Can't create circular array");
+  this.assert_error('mdsetitem [1 1] "x 0', "MDSETITEM: Expected array");
+  this.assert_error('mdsetitem [1 1] {"x} 0', "MDSETITEM: Expected array");
 
   this.assert_equals('make "a []  .setfirst :a "s  :a', ['s']);
-  this.assert_error('.setfirst "x "y', '.SETFIRST expected list');
+  this.assert_error('.setfirst "x "y', '.SETFIRST: Expected list');
 
   this.assert_equals('make "a [a]  .setbf :a [b c]  :a', ['a', 'b', 'c']);
-  this.assert_error('.setbf "x [1]', '.SETBF expected non-empty list');
-  this.assert_error('.setbf [] [1]', '.SETBF expected non-empty list');
+  this.assert_error('.setbf "x [1]', '.SETBF: Expected non-empty list');
+  this.assert_error('.setbf [] [1]', '.SETBF: Expected non-empty list');
 
   this.assert_equals('make "a { 1 }  make "b :a  .setitem 1 :a 2  item 1 :b', 2);
   this.assert_equals('make "a { 1 }  .setitem 1 :a :a  equalp item 1 :a :a', 1);
-  this.assert_error('.setitem 1 "x 123', 'Expected array');
+  this.assert_error('.setitem 1 "x 123', '.SETITEM: Expected array');
 
   //
   // 2.4 Predicates
@@ -1363,6 +1363,9 @@ QUnit.test("Error Messages", function(t) {
   this.assert_error("{ 1 2", "Expected '}'");
   this.assert_error("[ 1 2 }", "Unexpected '}'");
   this.assert_error("{ 1 2 ]", "Unexpected ']'");
+  this.assert_error('make "a { 1 2 3 }@1.5', "Don't know what to do with 0.5");
+  this.assert_error('make "a { 1 2 3 }@', "Expected number after @");
+
   //this.assert_error("!@#$", "Couldn't parse: '!@#$'");
   this.assert_error("show :nosuchvar", "Don't know about variable NOSUCHVAR");
   this.assert_error("1 / 0", "Division by zero");
@@ -1376,60 +1379,63 @@ QUnit.test("Error Messages", function(t) {
   this.assert_error("(minus)", "Expected number");
   this.assert_error("make [] 123", "Expected string");
   this.assert_error("(def)", "Expected string");
-  this.assert_error("(erase)", "Expected list");
-  this.assert_error("(map \"show)", "Expected list");
-  this.assert_error("(map \"sum [1 2] [1])", "Expected lists of equal length");
-  this.assert_error("to 123", "Expected identifier");
-  this.assert_error("to +", "Expected identifier");
-  this.assert_error("to fd :x bk :x end", "Can't redefine primitive FD");
-  this.assert_error("define \"fd [[x] [bk :x]]", "Can't redefine primitive FD");
-  this.assert_error("define \"fd [[x]]", "Expected list of length 2");
-  this.assert_error("def \"nosuchproc", "Don't know how to NOSUCHPROC");
-  this.assert_error("def \"def", "Can't show definition of primitive DEF");
-  this.assert_error("text \"nosuchproc", "Don't know how to NOSUCHPROC");
-  this.assert_error("text \"text", "Can't show definition of primitive TEXT");
-  this.assert_error("text \"nosuchproc", "Don't know how to NOSUCHPROC");
-  this.assert_error("text \"def", "Can't show definition of primitive DEF");
-  this.assert_error("item 5 [ 1 2 ]", "Index out of bounds");
-  this.assert_error("copydef \"newname \"nosuchproc", "Don't know how to NOSUCHPROC");
-  this.assert_error("to foo end  copydef \"to \"foo", "Can't overwrite special TO");
-  this.assert_error("to foo end  copydef \"show \"foo", "Can't overwrite primitives unless REDEFP is TRUE");
+
+  this.assert_error('fd50', "Need a space between FD and 50");
+
+  this.assert_error("(erase)", "ERASE: Expected list");
+  this.assert_error("(map \"show)", "MAP: Expected list");
+  this.assert_error("(map \"sum [1 2] [1])", "MAP: Expected lists of equal length");
+  this.assert_error("to 123", "TO: Expected identifier");
+  this.assert_error("to +", "TO: Expected identifier");
+  this.assert_error("to fd :x bk :x end", "TO: Can't redefine primitive FD");
+  this.assert_error("define \"fd [[x] [bk :x]]", "DEFINE: Can't redefine primitive FD");
+  this.assert_error("define \"fd [[x]]", "DEFINE: Expected list of length 2");
+  this.assert_error("def \"nosuchproc", "DEF: Don't know how to NOSUCHPROC");
+  this.assert_error("def \"def", "DEF: Can't show definition of primitive DEF");
+  this.assert_error("text \"nosuchproc", "TEXT: Don't know how to NOSUCHPROC");
+  this.assert_error("text \"text", "TEXT: Can't show definition of primitive TEXT");
+  this.assert_error("text \"nosuchproc", "TEXT: Don't know how to NOSUCHPROC");
+  this.assert_error("text \"def", "TEXT: Can't show definition of primitive DEF");
+  this.assert_error("item 5 [ 1 2 ]", "ITEM: Index out of bounds");
+  this.assert_error("copydef \"newname \"nosuchproc", "COPYDEF: Don't know how to NOSUCHPROC");
+  this.assert_error("to foo end  copydef \"to \"foo", "COPYDEF: Can't overwrite special TO");
+  this.assert_error("to foo end  copydef \"show \"foo", "COPYDEF: Can't overwrite primitives unless REDEFP is TRUE");
   this.assert_error("erase [ [ TO ] [ ] ]", "Can't ERASE special TO");
   this.assert_error("erase [ [ SHOW ] [ ] ]", "Can't ERASE primitives unless REDEFP is TRUE");
-  this.assert_error("do.while 1 2", "Expected block");
-  this.assert_error("while 1 2", "Expected block");
-  this.assert_error("do.until 1 2", "Expected block");
-  this.assert_error("until 1 2", "Expected block");
-  this.assert_error("apply \"nosuch [ 1 2 ]", "Don't know how to NOSUCH");
+  this.assert_error("do.while 1 2", "DO.WHILE: Expected block");
+  this.assert_error("while 1 2", "WHILE: Expected block");
+  this.assert_error("do.until 1 2", "DO.UNTIL: Expected block");
+  this.assert_error("until 1 2", "UNTIL: Expected block");
+  this.assert_error("apply \"nosuch [ 1 2 ]", "APPLY: Don't know how to NOSUCH");
   this.assert_error("apply \"to [ 1 2 ]", "Can't apply APPLY to special TO");
   this.assert_error("apply \"while [ 1 2 ]", "Can't apply APPLY to special WHILE");
-  this.assert_error("foreach \"nosuch [ 1 2 ]", "Don't know how to NOSUCH");
+  this.assert_error("foreach \"nosuch [ 1 2 ]", "FOREACH: Don't know how to NOSUCH");
   this.assert_error("foreach \"to [ 1 2 ]", "Can't apply FOREACH to special TO");
   this.assert_error("foreach \"while [ 1 2 ]", "Can't apply FOREACH to special WHILE");
-  this.assert_error("invoke \"nosuch [ 1 2 ]", "Don't know how to NOSUCH");
+  this.assert_error("invoke \"nosuch [ 1 2 ]", "INVOKE: Don't know how to NOSUCH");
   this.assert_error("invoke \"to [ 1 2 ]", "Can't apply INVOKE to special TO");
   this.assert_error("invoke \"while [ 1 2 ]", "Can't apply INVOKE to special WHILE");
-  this.assert_error("map \"nosuch [ 1 2 ]", "Don't know how to NOSUCH");
+  this.assert_error("map \"nosuch [ 1 2 ]", "MAP: Don't know how to NOSUCH");
   this.assert_error("map \"to [ 1 2 ]", "Can't apply MAP to special TO");
   this.assert_error("map \"while [ 1 2 ]", "Can't apply MAP to special WHILE");
-  this.assert_error("filter \"nosuch [ 1 2 ]", "Don't know how to NOSUCH");
+  this.assert_error("filter \"nosuch [ 1 2 ]", "FILTER: Don't know how to NOSUCH");
   this.assert_error("filter \"to [ 1 2 ]", "Can't apply FILTER to special TO");
   this.assert_error("filter \"while [ 1 2 ]", "Can't apply FILTER to special WHILE");
-  this.assert_error("find \"nosuch [ 1 2 ]", "Don't know how to NOSUCH");
+  this.assert_error("find \"nosuch [ 1 2 ]", "FIND: Don't know how to NOSUCH");
   this.assert_error("find \"to [ 1 2 ]", "Can't apply FIND to special TO");
   this.assert_error("find \"while [ 1 2 ]", "Can't apply FIND to special WHILE");
-  this.assert_error("reduce \"nosuch [ 1 2 ]", "Don't know how to NOSUCH");
+  this.assert_error("reduce \"nosuch [ 1 2 ]", "REDUCE: Don't know how to NOSUCH");
   this.assert_error("reduce \"to [ 1 2 ]", "Can't apply REDUCE to special TO");
   this.assert_error("reduce \"while [ 1 2 ]", "Can't apply REDUCE to special WHILE");
   this.assert_error("0", "Don't know what to do with 0");
   this.assert_error("1 + 2", "Don't know what to do with 3");
   this.assert_error("to foo output 123 end  foo", "Don't know what to do with 123");
-  this.assert_error('setpos []', 'Expected list of length 2');
-  this.assert_error('setpos [1 2 3]', 'Expected list of length 2');
-  this.assert_error('towards []', 'Expected list of length 2');
-  this.assert_error('make "a { 1 2 3 }@1.5', "Don't know what to do with 0.5");
-  this.assert_error('make "a { 1 2 3 }@', "Expected number after @");
-  this.assert_error('fd50', "Need a space between FD and 50");
+  this.assert_error('setpos []', 'SETPOS: Expected list of length 2');
+  this.assert_error('setpos [1 2 3]', 'SETPOS: Expected list of length 2');
+  this.assert_error('towards []', 'TOWARDS: Expected list of length 2');
+  this.assert_error('item 3 { 1 2 }', 'ITEM: Index out of bounds');
+  this.assert_error('setitem 3 { 1 2 } 0', 'SETITEM: Index out of bounds');
+
 });
 
 QUnit.test("Regression Tests", function(t) {
@@ -1441,7 +1447,7 @@ QUnit.test("Regression Tests", function(t) {
   this.assert_equals("setpos [ -1 0 ]  123", 123);
   this.assert_equals("to foo output 234 end foo", 234);
   this.assert_equals("to foo output 234 END foo", 234);
-  this.assert_error("to whatever fd 100", "Expected END");
+  this.assert_error("to whatever fd 100", "TO: Expected END");
   this.assert_equals('"abc;def', "abc");
   this.assert_equals('"abc\\;def', "abc;def");
   this.assert_equals('"abc\\\\def', "abc\\def");
@@ -1480,20 +1486,20 @@ QUnit.test("API Tests", function(t) {
 
   // LogoInterpreter#localize
   this.assert_error("1 / 0", "Division by zero");
-  this.assert_error("item 5 [ 1 2 ]", "Index out of bounds");
+  this.assert_error("item 5 [ 1 2 ]", "ITEM: Index out of bounds");
   this.queue(function() {
     this.interpreter.localize = function(s) {
       return {
         'Division by zero': 'Divido per nulo',
-        'Index out of bounds': 'Indekso ekster limojn'
+        '{_PROC_}: Index out of bounds': '{_PROC_}: Indekso ekster limojn'
       }[s];
     };
   });
   this.assert_error("1 / 0", "Divido per nulo");
-  this.assert_error("item 5 [ 1 2 ]", "Indekso ekster limojn");
+  this.assert_error("item 5 [ 1 2 ]", "ITEM: Indekso ekster limojn");
 
   // LogoInterpreter#keywordAlias
-  this.assert_error('to foo output 2 fino  foo', "Expected END");
+  this.assert_error('to foo output 2 fino  foo', "TO: Expected END");
   this.assert_equals('case 2 [[[1] "a"] [alie "b]]', undefined);
   this.queue(function() {
     this.interpreter.keywordAlias = function(s) {
