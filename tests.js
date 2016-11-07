@@ -878,7 +878,7 @@ QUnit.test("Logical Operations", function(t) {
 });
 
 QUnit.test("Graphics", function(t) {
-  t.expect(87);
+  t.expect(90);
 
   // NOTE: test canvas is 300,300 (so -150...150 coordinates before hitting)
   // edge
@@ -955,6 +955,10 @@ QUnit.test("Graphics", function(t) {
   this.assert_equals('setlabelheight 10 labelsize', [10, 10]);
 
   this.assert_equals('setlabelfont "Times\\ New\\ Roman  labelfont', 'Times New Roman');
+
+  this.assert_equals('cs  wrap  setscrunch 0.5 0.5  fd 50 pos', [0, 50]);
+  this.assert_equals('cs  wrap  setscrunch 0.5 0.5  fd 350 pos', [0, -250]);
+  this.assert_equals('cs  setscrunch 1 0.5  setxy 50 50  setscrunch 1 1  pos', [50, 25]);
 
   //
   // 6.4 Turtle and Window Queries
@@ -1470,6 +1474,7 @@ QUnit.test("Regression Tests", function(t) {
   this.assert_equals('show "b\n1', 1);
 
   this.assert_equals('to f output 1 end (f + 1)', 2);
+  this.assert_equals('setpos [150 150]  setheading 0  fd 10  pos ', [150, -140]);
 });
 
 QUnit.test("API Tests", function(t) {

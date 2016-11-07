@@ -54,18 +54,21 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
       }
     }
 
-    var left = -width / 2, right = width / 2, bottom = -height / 2, top = height / 2;
+    var w = width / self.sx, h = height / self.sy;
+
+    var left = -w / 2, right = w / 2,
+        bottom = -h / 2, top = h / 2;
 
     var ix, iy, wx, wy, fx, fy, less;
 
     // Hack to match UCBLogo: don't draw line across viewport on
-    // `SETXY 250 10` `SETXY 300 20` `SETXY 350 30`
+    // `SETXY 250 10  SETXY 300 20  SETXY 350 30`
     if (setpos && self.turtlemode === 'wrap') {
       var oob = (x < left || x >= right || y < bottom || y >= top);
       var px = x, py = y;
       if (self.was_oob) {
-        var dx = mod(x + width / 2, width) - width / 2 - x;
-        var dy = mod(y + height / 2, height) - height / 2 - y;
+        var dx = mod(x + w / 2, w) - (x + w / 2);
+        var dy = mod(y + h / 2, h) - (y + h / 2);
         x += dx;
         y += dy;
         self.x = self.px + dx;
@@ -98,18 +101,22 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
 
           if (x < left) {
             fx = (self.x - left) / (self.x - x);
-          } else if (x >= right) {
+          } else if (x > right) {
             fx = (self.x - right) / (self.x - x);
           }
 
           if (y < bottom) {
             fy = (self.y - bottom) / (self.y - y);
-          } else if (y >= top) {
+          } else if (y > top) {
             fy = (self.y - top) / (self.y - y);
           }
 
-          if (!isFinite(fx) || !isFinite(fy))
+          if (!isFinite(fx) || !isFinite(fy)) {
+            console.log('x', x, 'left', left, 'right', right);
+            console.log('y', y, 'bottom', bottom, 'top', top);
+            console.log('fx', fx, 'fy', fy);
             throw new Error("Wrapping error: non-finite fraction");
+          }
 
           // intersection point (draw current to here)
           ix = x;
@@ -123,14 +130,14 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
             less = (x < left);
             ix = less ? left : right;
             iy = self.y - fx * (self.y - y);
-            x += less ? width : -width;
+            x += less ? w : -w;
             wx = less ? right : left;
             wy = iy;
           } else if (fy < 1 && fy <= fx) {
             less = (y < bottom);
             ix = self.x - fy * (self.x - x);
             iy = less ? bottom : top;
-            y += less ? height : -height;
+            y += less ? h : -h;
             wx = ix;
             wy = less ? top : bottom;
           }
@@ -321,6 +328,10 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
   };
 
   this.setscrunch = function(sx, sy) {
+
+    self.x = self.px = self.x / sx * this.sx;
+    self.y = self.py = self.y / sy * this.sy;
+
     this.sx = sx;
     this.sy = sy;
 
