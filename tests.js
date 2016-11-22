@@ -1031,7 +1031,7 @@ QUnit.test("Graphics", function(t) {
 });
 
 QUnit.test("Workspace Management", function(t) {
-  t.expect(97);
+  t.expect(189);
 
   //
   // 7.1 Procedure Definition
@@ -1043,7 +1043,7 @@ QUnit.test("Workspace Management", function(t) {
   this.assert_equals('to foo :x :y output :x + :y end  foo 1 2', 3);
   this.assert_equals('to foo :x :y output :x + :y end  def "foo', 'to foo :x :y\n  output :x + :y\nend');
   this.assert_equals('to foo :x bar 1 "a + :x [ 1 2 ] end  def "foo', 'to foo :x\n  bar 1 "a + :x [ 1 2 ]\nend');
-  this.assert_equals('to foo 1 + 2 - 3 * 4 / 5 % 6 ^ -1 end  def "foo', 'to foo\n  1 + 2 - 3 * 4 / 5 % 6 ^ -1\nend');
+  this.assert_equals('to foo output 1 + 2 - 3 * 4 / 5 % 6 ^ -1 end  def "foo', 'to foo\n  output 1 + 2 - 3 * 4 / 5 % 6 ^ -1\nend');
 
   this.assert_equals('to square :x output :x * :x end  copydef "multbyself "square  multbyself 5', 25);
 
@@ -1054,9 +1054,94 @@ QUnit.test("Workspace Management", function(t) {
                      [['x', 'y'], ['output', ':x', '+', ':y']]);
   this.assert_equals('to foo :x bar 1 "a + :x [ 1 2 ] end  text "foo',
                      [['x'], ['bar', '1', '"a', '+', ':x', [ '1', '2' ]]]);
-  this.assert_equals('to foo 1 + 2 - 3 * 4 / 5 % 6 ^ -1 end  text "foo',
-                     [[], ['1', '+', '2', '-', '3', '*', '4', '/', '5', '%', '6', '^', '<UNARYMINUS>', '1']]);
+  this.assert_equals('to foo output 1 + 2 - 3 * 4 / 5 % 6 ^ -1 end  text "foo',
+                     [[], ['output', '1', '+', '2', '-', '3', '*', '4', '/', '5', '%', '6', '^', '<UNARYMINUS>', '1']]);
 
+  // Various combinations of inputs, optional inputs, rest, and default length
+
+  // No inputs
+  this.assert_equals('to foo (output) end  (foo)', undefined);
+
+  // + Required inputs
+  this.assert_error('to foo :a (output :a) end  (foo)', 'Not enough inputs for FOO');
+  this.assert_equals('to foo :a (output :a) end  (foo 1)', 1);
+
+  this.assert_error('to foo :a :b output (list :a :b) end  (foo)', 'Not enough inputs for FOO');
+  this.assert_error('to foo :a :b output (list :a :b) end  (foo 1)', 'Not enough inputs for FOO');
+  this.assert_equals('to foo :a :b output (list :a :b)) end  (foo 1 2)', [1, 2]);
+  this.assert_equals('to foo :a :b output (list :a :b)) end  foo 1 2', [1, 2]);
+  this.assert_equals('to foo :a :b output (list :a :b)) end  foo 1 2 3', 3);
+
+  // + Optional inputs
+  this.assert_equals('to foo [:a 6] output (list :a) end  (foo)', [6]);
+  this.assert_equals('to foo [:a 6] output (list :a) end  (foo 1)', [1]);
+  this.assert_equals('to foo [:a 6] [:b 7] output (list :a :b) end  (foo)', [6, 7]);
+  this.assert_equals('to foo [:a 6] [:b 7] output (list :a :b) end  (foo 1)', [1, 7]);
+  this.assert_equals('to foo [:a 6] [:b 7] output (list :a :b) end  (foo 1 2)', [1, 2]);
+  this.assert_equals('to foo [:a 6] [:b 7] output (list :a :b) end  (foo 1 2 3)', [1, 2]);
+
+  this.assert_equals('to foo :a [:b 6] output (list :a :b) end  (foo 1)', [1, 6]);
+  this.assert_equals('to foo :a [:b 6] output (list :a :b) end  (foo 1 2)', [1, 2]);
+
+  this.assert_error('to foo :a :b [:c 6] output (list :a :b :c) end  (foo 1)', 'Not enough inputs for FOO');
+  this.assert_equals('to foo :a :b [:c 6] output (list :a :b :c) end  (foo 1 2)', [1, 2, 6]);
+  this.assert_equals('to foo :a :b [:c 6] output (list :a :b :c) end  (foo 1 2 3)', [1, 2, 3]);
+
+  // + Rest inputs
+  this.assert_equals('to foo [:r] output :r end  (foo)', []);
+  this.assert_equals('to foo [:r] output :r end  (foo 1 2)', [1, 2]);
+
+  this.assert_error('to foo :a [:r] output (list :a :r) end  (foo)', 'Not enough inputs for FOO');
+  this.assert_equals('to foo :a [:r] output (list :a :r) end  (foo 1)', [1, []]);
+  this.assert_equals('to foo :a [:r] output (list :a :r) end  (foo 1 2)', [1, [2]]);
+  this.assert_equals('to foo :a [:r] output (list :a :r) end  (foo 1 2 3)', [1, [2, 3]]);
+
+  this.assert_equals('to foo :a :b [:r] output (list :a :b :r) end  (foo 1 2)', [1, 2, []]);
+  this.assert_equals('to foo :a :b [:r] output (list :a :b :r) end  (foo 1 2 3)', [1, 2, [3]]);
+  this.assert_equals('to foo [:a 6] [:r] output (list :a :r) end  (foo)', [6, []]);
+  this.assert_equals('to foo [:a 6] [:r] output (list :a :r) end  (foo 1)', [1, []]);
+  this.assert_equals('to foo [:a 6] [:r] output (list :a :r) end  (foo 1 2)', [1, [2]]);
+  this.assert_equals('to foo [:a 6] [:r] output (list :a :r) end  (foo 1 2 3)', [1, [2, 3]]);
+
+  // + Default length
+  this.assert_error('to foo 4 end', 'TO: Bad default number of inputs for FOO');
+  this.assert_error('to foo :a :b 1 end', 'TO: Bad default number of inputs for FOO');
+  this.assert_error('to foo :a :b 3 end', 'TO: Bad default number of inputs for FOO');
+  this.assert_error('to foo :a [:b 0] 0 end', 'TO: Bad default number of inputs for FOO');
+  this.assert_error('to foo :a [:b 0] 3 end', 'TO: Bad default number of inputs for FOO');
+
+  this.assert_equals('to foo :a 1 output (list :a) end  (foo 1)', [1]);
+  this.assert_equals('to foo :a :b 2 output (list :a :b) end  (foo 1 2)', [1, 2]);
+  this.assert_equals('to foo [:a 6] 0 output (list :a) end  (list foo 1 2 3)', [[6], 1, 2, 3]);
+  this.assert_equals('to foo [:a 6] 1 output (list :a) end  (list foo 1 2 3)', [[1], 2, 3]);
+  this.assert_equals('to foo :a [:b 6] 1 output (list :a :b) end  (list foo 1 2 3)', [[1, 6], 2, 3]);
+  this.assert_equals('to foo :a [:b 6] 2 output (list :a :b) end  (list foo 1 2 3)', [[1, 2], 3]);
+
+  this.assert_equals('to foo [:r] 2 output :r end  (list foo 1 2 3 4)', [[1, 2], 3, 4]);
+  this.assert_equals('to foo :a [:r] 1 output (list :a :r) end  (list foo 1 2 3 4)', [[1, []], 2, 3, 4]);
+  this.assert_equals('to foo :a [:r] 2 output (list :a :r) end  (list foo 1 2 3 4)', [[1, [2]], 3, 4]);
+  this.assert_equals('to foo :a [:r] 3 output (list :a :r) end  (list foo 1 2 3 4)', [[1, [2, 3]], 4]);
+  this.assert_equals('to foo [:a 6] [:r] 0 output (list :a :r) end  (list foo 1 2 3 4)', [[6, []], 1, 2, 3, 4]);
+  this.assert_equals('to foo [:a 6] [:r] 1 output (list :a :r) end  (list foo 1 2 3 4)', [[1, []], 2, 3, 4]);
+  this.assert_equals('to foo [:a 6] [:r] 2 output (list :a :r) end  (list foo 1 2 3 4)', [[1, [2]], 3, 4]);
+  this.assert_equals('to foo [:a 6] [:r] 3 output (list :a :r) end  (list foo 1 2 3 4)', [[1, [2, 3]], 4]);
+  this.assert_equals('to foo :a [:b 6] [:r] 1 output (list :a :b :r) end  (list foo 1 2 3 4)', [[1, 6, []], 2, 3, 4]);
+  this.assert_equals('to foo :a [:b 6] [:r] 2 output (list :a :b :r) end  (list foo 1 2 3 4)', [[1, 2, []], 3, 4]);
+  this.assert_equals('to foo :a [:b 6] [:r] 3 output (list :a :b :r) end  (list foo 1 2 3 4)', [[1, 2, [3]], 4]);
+  this.assert_equals('to foo :a [:b 6] [:r] 4 output (list :a :b :r) end  (list foo 1 2 3 4)', [[1, 2, [3, 4]]]);
+
+  // "a default value expression can be based on earlier inputs"
+  this.assert_equals('to foo :a [:b :a + 5] output (list :a :b) end  (foo 1)', [1, 6]);
+  this.assert_equals('to foo :a [:b :a + 5] [:c :b * :b ] output :c  end  (foo 1)', 36);
+
+  this.assert_equals('to foo :a [:b 1 + 2] [:c] 2 (show :a :b :c)  end  text "foo',
+                     [['a', ["b", ['1', '+', '2']], ['c'], 2], ['(', 'show', ':a', ':b', ':c', ')']]);
+
+  this.assert_equals('to foo :a [:b 1 + 2] [:c] 2 (show :a :b :c)  end  def "foo',
+                     'to foo :a [:b 1 + 2] [:c] 2\n  ( show :a :b :c )\nend');
+
+  this.assert_equals('define "foo [[a [b 1 + 2] [c] 2] [ (show :a :b :c) ]]  text "foo',
+                     [['a', ["b", ['1', '+', '2']], ['c'], 2], ['(', 'show', ':a', ':b', ':c', ')']]);
 
   // TODO: copydef + redefp
 
@@ -1167,6 +1252,40 @@ QUnit.test("Workspace Management", function(t) {
   this.assert_equals('pllist [a]', [[], [], ['a']]);
   this.assert_equals('pllist [a b c]', [[], [], ['a', 'b', 'c']]);
 
+  this.assert_equals('to foo end  arity "foo', [0, 0, 0]);
+  this.assert_equals('to foo :a end  arity "foo', [1, 1, 1]);
+  this.assert_equals('to foo :a :b end  arity "foo', [2, 2, 2]);
+  this.assert_equals('to foo [:a 1] end  arity "foo', [0, 0, 1]);
+  this.assert_equals('to foo [:a 1] [:b 1] end  arity "foo', [0, 0, 2]);
+  this.assert_equals('to foo :a [:b 1] end  arity "foo', [1, 1, 2]);
+  this.assert_equals('to foo :a :b [:c 1] end  arity "foo', [2, 2, 3]);
+  this.assert_equals('to foo [:r] end  arity "foo', [0, 0, -1]);
+  this.assert_equals('to foo :a [:r] end  arity "foo', [1, 1, -1]);
+  this.assert_equals('to foo :a :b [:r] end  arity "foo', [2, 2, -1]);
+  this.assert_equals('to foo [:a 1] [:r] end  arity "foo', [0, 0, -1]);
+  this.assert_equals('to foo [:a 1] [:b 1] [:r] end  arity "foo', [0, 0, -1]);
+  this.assert_equals('to foo :a [:b 1] [:r] end  arity "foo', [1, 1, -1]);
+  this.assert_equals('to foo :a :b [:c 1] [:r] end  arity "foo', [2, 2, -1]);
+
+  this.assert_equals('to foo 0 end  arity "foo', [0, 0, 0]);
+  this.assert_equals('to foo :a 1 end  arity "foo', [1, 1, 1]);
+  this.assert_equals('to foo :a :b 2 end  arity "foo', [2, 2, 2]);
+  this.assert_equals('to foo [:a 1] 0 end  arity "foo', [0, 0, 1]);
+  this.assert_equals('to foo [:a 1] 1 end  arity "foo', [0, 1, 1]);
+  this.assert_equals('to foo [:a 1] [:b 1] 0 end  arity "foo', [0, 0, 2]);
+  this.assert_equals('to foo [:a 1] [:b 1] 1 end  arity "foo', [0, 1, 2]);
+  this.assert_equals('to foo [:a 1] [:b 1] 2 end  arity "foo', [0, 2, 2]);
+  this.assert_equals('to foo :a [:b 1] 1 end  arity "foo', [1, 1, 2]);
+  this.assert_equals('to foo :a [:b 1] 2 end  arity "foo', [1, 2, 2]);
+  this.assert_equals('to foo :a :b [:c 1] 2 end  arity "foo', [2, 2, 3]);
+  this.assert_equals('to foo :a :b [:c 1] 3 end  arity "foo', [2, 3, 3]);
+  this.assert_equals('to foo [:r] 4 end  arity "foo', [0, 4, -1]);
+  this.assert_equals('to foo :a [:r] 4 end  arity "foo', [1, 4, -1]);
+  this.assert_equals('to foo :a :b [:r] 4 end  arity "foo', [2, 4, -1]);
+  this.assert_equals('to foo :a [:b 1] [:r] 4 end  arity "foo', [1, 4, -1]);
+  this.assert_equals('to foo [:a 1] [:r] 4 end  arity "foo', [0, 4, -1]);
+  this.assert_equals('to foo [:a 1] [:b 1] [:r] 4 end  arity "foo', [0, 4, -1]);
+  this.assert_equals('to foo :a :b [:c 1] [:r] 4 end  arity "foo', [2, 4, -1]);
 
   this.assert_equals('unburyall erall  make "a 1  make "b 2  to a output 1 end  to b output 2 end  erase [[a] [b]]  contents', [['b'], ['a'], []]);
   this.assert_equals('unburyall erall  make "a 1  make "b 2  to a output 1 end  to b output 2 end  erall  contents', [[], [], []]);

@@ -1096,10 +1096,18 @@ function LogoInterpreter(turtle, stream, savehook)
     }
 
     var def = "to " + name;
-    if (proc.inputs.length) {
-      def += " ";
-      def += proc.inputs.map(function(a) { return ":" + a; }).join(" ");
-    }
+
+    def += proc.inputs.map(function(i) {
+      return ' :' + i;
+    }).join('');
+    def += proc.optional_inputs.map(function(op) {
+      return ' [:' + op[0] + ' ' + op[1].map(defn).join(' ') + ']';;
+    }).join('');
+    if (proc.rest)
+      def += ' [:' + proc.rest + ']';
+    if (proc.def !== undefined)
+      def += ' ' + proc.def;
+
     def += "\n";
     def += "  " + proc.block.map(defn).join(" ").replace(new RegExp(UNARY_MINUS + ' ', 'g'), '-');
     def += "\n" + "end";
@@ -1172,6 +1180,7 @@ function LogoInterpreter(turtle, stream, savehook)
   }
 
   function def(name, fn, props) {
+    fn.minimum = fn.default = fn.maximum = fn.length;
     if (props) {
       Object.keys(props).forEach(function(key) {
         fn[key] = props[key];
@@ -1195,43 +1204,98 @@ function LogoInterpreter(turtle, stream, savehook)
     if (isNumber(name) || isOperator(name))
       throw err("TO: Expected identifier");
 
-    var inputs = [];
+    var inputs = []; // [var, ...]
+    var optional_inputs = []; // [[var, [expr...]], ...]
+    var rest = undefined; // undefined or var
+    var length = undefined; // undefined or number
     var block = [];
 
     // Process inputs, then the statements of the block
-    var state_inputs = true, sawEnd = false;
+    var REQUIRED = 0, OPTIONAL = 1, REST = 2, DEFAULT = 3, BLOCK = 4;
+    var state = REQUIRED, sawEnd = false;
     while (list.length) {
       var atom = list.shift();
       if (isKeyword(atom, 'END')) {
         sawEnd = true;
         break;
-      } else if (state_inputs && Type(atom) === 'word' && String(atom).charAt(0) === ':') {
-        inputs.push(atom.substring(1));
-      } else {
-        state_inputs = false;
-        block.push(atom);
       }
+
+      if (state === REQUIRED) {
+        if (Type(atom) === 'word' && String(atom).charAt(0) === ':') {
+          inputs.push(atom.substring(1));
+          continue;
+        }
+        state = OPTIONAL;
+      }
+
+      if (state === OPTIONAL) {
+        if (Type(atom) === 'list' && atom.length > 1 &&
+            String(atom[0]).charAt(0) === ':') {
+          optional_inputs.push([atom.shift().substring(1), atom]);
+          continue;
+        }
+        state = REST;
+      }
+
+      if (state === REST) {
+        state = DEFAULT;
+        if (Type(atom) === 'list' && atom.length === 1 &&
+            String(atom[0]).charAt(0) === ':') {
+          rest = atom[0].substring(1);
+          continue;
+        }
+      }
+
+      if (state === DEFAULT) {
+        state = BLOCK;
+        if (Type(atom) === 'word' && isNumber(atom)) {
+          length = parseFloat(atom);
+          continue;
+        }
+      }
+
+      block.push(atom);
     }
     if (!sawEnd)
       throw err("TO: Expected END");
 
-    defineProc(name, inputs, block);
+    defineProc(name, inputs, optional_inputs, rest, length, block);
   }, {special: true});
 
-  function defineProc(name, inputs, block) {
-    if (self.routines.has(name) && self.routines.get(name).primitive) {
+  function defineProc(name, inputs, optional_inputs, rest, def, block) {
+    if (self.routines.has(name) && self.routines.get(name).primitive)
       throw err("{_PROC_}: Can't redefine primitive {name:U}", { name: name });
+
+    if (def !== undefined &&
+        (def < inputs.length || (!rest && def > inputs.length + optional_inputs.length))) {
+      throw err("{_PROC_}: Bad default number of inputs for {name:U}", {name: name});
     }
+
+    var length = (def === undefined) ? inputs.length : def;
 
     // Closure over inputs and block to handle scopes, arguments and outputs
     var func = function() {
+      if (arguments.length < inputs.length)
+        throw err("Not enough inputs for {_PROC_}");
 
       // Define a new scope
       var scope = new StringMap(true);
-      for (var i = 0; i < inputs.length && i < arguments.length; i += 1) {
-        scope.set(inputs[i], {value: arguments[i]});
-      }
       self.scopes.push(scope);
+
+      var i = 0;
+      for (; i < inputs.length && i < arguments.length; ++i)
+        scope.set(inputs[i], {value: arguments[i]});
+      for (; i < inputs.length + optional_inputs.length && i < arguments.length; ++i) {
+        var op = optional_inputs[i - inputs.length];
+        scope.set(op[0], {value: arguments[i]});
+      }
+      for (; i < inputs.length + optional_inputs.length; ++i) {
+        var op = optional_inputs[i - inputs.length];
+        scope.set(op[0], {value: evaluateExpression(reparse(op[1]))});
+      }
+      if (rest)
+        scope.set(rest, {value: [].slice.call(arguments, i)});
+
       return promiseFinally(self.execute(block).then(promiseYield, function(err) {
         if (err instanceof Output)
           return err.output;
@@ -1241,12 +1305,19 @@ function LogoInterpreter(turtle, stream, savehook)
       });
     };
 
-    var proc = to_arity(func, inputs.length);
+    var proc = to_arity(func, length);
     self.routines.set(name, proc);
 
     // For DEF de-serialization
     proc.inputs = inputs;
+    proc.optional_inputs = optional_inputs;
+    proc.rest = rest;
+    proc.def = def;
     proc.block = block;
+
+    proc.minimum = inputs.length;
+    proc.default = length;
+    proc.maximum = rest ? -1 : inputs.length + optional_inputs.length;
 
     if (savehook)
       savehook(name, self.definition(name, proc));
@@ -2151,9 +2222,53 @@ function LogoInterpreter(turtle, stream, savehook)
     if (list.length != 2)
       throw err("{_PROC_}: Expected list of length 2");
 
-    var inputs = lexpr(list[0]);
+    var inputs = [];
+    var optional_inputs = [];
+    var rest = undefined;
+    var def = undefined;
     var block = reparse(lexpr(list[1]));
-    defineProc(name, inputs, block);
+
+    var ins = lexpr(list[0]);
+    var REQUIRED = 0, OPTIONAL = 1, REST = 2, DEFAULT = 3, ERROR = 4;
+    var state = REQUIRED;
+    while (ins.length) {
+      var atom = ins.shift();
+      if (state === REQUIRED) {
+        if (Type(atom) === 'word') {
+          inputs.push(atom);
+          continue;
+        }
+        state = OPTIONAL;
+      }
+
+      if (state === OPTIONAL) {
+        if (Type(atom) === 'list' && atom.length > 1 && Type(atom[0]) === 'word') {
+          optional_inputs.push([atom.shift(), atom]);
+          continue;
+        }
+        state = REST;
+      }
+
+      if (state === REST) {
+        state = DEFAULT;
+        if (Type(atom) === 'list' && atom.length === 1 && Type(atom[0]) === 'word') {
+          rest = atom[0];
+          continue;
+        }
+      }
+
+      if (state === DEFAULT) {
+        state = ERROR;
+        if (Type(atom) === 'word' && isNumber(atom)) {
+          def = parseFloat(atom);
+          continue;
+        }
+      }
+
+      throw err("{_PROC_}: Unexpected inputs");
+    }
+
+    defineProc(name, inputs, optional_inputs, rest, def, block);
   });
 
   def("text", function(name) {
@@ -2163,7 +2278,12 @@ function LogoInterpreter(turtle, stream, savehook)
     if (!proc.inputs)
       throw err("{_PROC_}: Can't show definition of primitive {name:U}", { name: name });
 
-    return [proc.inputs, proc.block];
+    var inputs = proc.inputs.concat(proc.optional_inputs);
+    if (proc.rest)
+      inputs.push([proc.rest]);
+    if (proc.def !== undefined)
+      inputs.push(proc.def);
+    return [inputs, proc.block];
   });
 
   // Not Supported: fulltext
@@ -2416,7 +2536,19 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
 
-  // Not Supported: arity
+  def("arity", function(name) {
+    name = sexpr(name);
+    var proc = self.routines.get(name);
+    if (!proc)
+      throw err("{_PROC_}: Don't know how to {name:U}", { name: name });
+
+    return [
+      proc.minimum,
+      proc.default,
+      proc.maximum
+    ];
+  });
+
   // Not Supported: nodes
 
   // 7.6 Workspace Inspection
