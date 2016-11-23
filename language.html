@@ -462,7 +462,11 @@ of comparison.</p>
 <h4>4.3 Random Numbers</h4>
 <dl>
   <dt><code>random <var>expr</var></code>
-  <dd>Outputs a random number from 0 through one less than <var>expr</var>
+  <dt><code>(random <var>start</var> <var>end</var>)</code>
+  <dd>Outputs a random number from 0 through one less than <var>expr</var>, or from start to end inclusive.
+  <dd class=example>show random 10</dd>
+  <dd class=example>show (random 1 6)</dd>
+
 
   <dt><code>rerandom</code>
   <dt>(<code>rerandom <var>expr</var>)</code>
@@ -750,7 +754,13 @@ of comparison.</p>
 <h4>7.1 Procedure Definition</h4>
 <dl>
   <dt><code>to <var>procname</var> <var>inputs ...</var> <var>statements ...</var> end</code>
-  <dd>Define a new named procedure with optional inputs
+  <dd>Define a new named procedure. Inputs can be:
+    <ul>
+      <li>Required: <code>:a :b</code></li>
+      <li>Optional (with default values): <code>[:c 5] [:d 7]</code></li>
+      <li>Rest (remaining inputs as a list): <code>[:r]</code></li>
+      <li>Default number of inputs: <code>3</code>
+    </ul>
   <dd class=example>to star :n repeat 5 [ fd :n rt 144 ] end</dd>
 
   <dt><code>define <var>procname</var> [[<var>inputs</var> ...][<var>statements</var> ...]]</code>
@@ -876,6 +886,10 @@ of comparison.</p>
   <dt><code>pllist <var>plname</var></code>
   <dt><code>pllist <var>plnamelist</var></code>
   <dd>Return a <code>contents</code>-style list with the given property lists.
+
+  <dt><code>arity <var>procname</var></code>
+  <dd>Return a list with the procedure's minimum, default, and maximum
+    number of inputs; maximum is -1 if unlimited.
 </dl>
 
 <!--

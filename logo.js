@@ -1350,11 +1350,11 @@ function LogoInterpreter(turtle, stream, savehook)
   def("word", function(word1, word2) {
     return arguments.length ?
       Array.from(arguments).map(sexpr).reduce(function(a, b) { return a + b; }) : "";
-  });
+  }, {minimum: 0, maximum: -1});
 
   def("list", function(thing1, thing2) {
     return Array.from(arguments).map(function(x) { return x; }); // Make a copy
-  });
+  }, {minimum: 0, maximum: -1});
 
   def(["sentence", "se"], function(thing1, thing2) {
     var list = [];
@@ -1368,7 +1368,7 @@ function LogoInterpreter(turtle, stream, savehook)
       }
     }
     return list;
-  });
+  }, {minimum: 0, maximum: -1});
 
   def("fput", function(thing, list) {
     var l = lexpr(list); l.unshift(thing); return sifw(list, l);
@@ -1384,7 +1384,7 @@ function LogoInterpreter(turtle, stream, savehook)
       throw err("{_PROC_}: Array size must be positive integer");
     var origin = (arguments.length < 2) ? 1 : aexpr(arguments[1]);
     return new LogoArray(size, origin);
-  });
+  }, {maximum: 2});
 
   def("mdarray", function(sizes) {
     sizes = lexpr(sizes).map(aexpr).map(function(n) { return n|0; });
@@ -1402,7 +1402,7 @@ function LogoInterpreter(turtle, stream, savehook)
     }
 
     return make(0);
-  });
+  }, {maximum: 2});
 
   def("listtoarray", function(list) {
     list = lexpr(list);
@@ -1410,7 +1410,7 @@ function LogoInterpreter(turtle, stream, savehook)
     if (arguments.length > 1)
       origin = aexpr(arguments[1]);
     return LogoArray.from(list, origin);
-  });
+  }, {maximum: 2});
 
   def("arraytolist", function(array) {
     if (Type(array) !== 'array') {
@@ -1428,8 +1428,9 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   def("reverse", function(list) {
-    return sifw(list, lexpr(list).reverse());
-  });
+    var tail = (arguments.length > 1) ? arguments[1] : (Type(list) === 'list' ? [] : '');
+    return sifw(tail, lexpr(list).reverse().concat(lexpr(tail)));
+  }, {maximum: 2});
 
   var gensym_index = 0;
   def("gensym", function() {
@@ -1710,15 +1711,15 @@ function LogoInterpreter(turtle, stream, savehook)
   def(["print", "pr"], function(thing) {
     var s = Array.from(arguments).map(stringify_nodecorate).join(" ");
     self.stream.write(s, "\n");
-  });
+  }, {minimum: 0, maximum: -1});
   def("type", function(thing) {
     var s = Array.from(arguments).map(stringify_nodecorate).join("");
     self.stream.write(s);
-  });
+  }, {minimum: 0, maximum: -1});
   def("show", function(thing) {
     var s = Array.from(arguments).map(stringify).join(" ");
     self.stream.write(s, "\n");
-  });
+  }, {minimum: 0, maximum: -1});
 
   // 3.2 Receivers
 
@@ -1790,7 +1791,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("sum", function(a, b) {
     return Array.from(arguments).map(aexpr).reduce(function(a, b) { return a + b; }, 0);
-  });
+  }, {minimum: 0, maximum: -1});
 
   def("difference", function(a, b) {
     return aexpr(a) - aexpr(b);
@@ -1800,14 +1801,14 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("product", function(a, b) {
     return Array.from(arguments).map(aexpr).reduce(function(a, b) { return a * b; }, 1);
-  });
+  }, {minimum: 0, maximum: -1});
 
   def("quotient", function(a, b) {
     if (b !== undefined)
       return aexpr(a) / aexpr(b);
     else
       return 1 / aexpr(a);
-  });
+  }, {minimum: 1});
 
   def("remainder", function(num1, num2) {
     return aexpr(num1) % aexpr(num2);
@@ -1836,7 +1837,7 @@ function LogoInterpreter(turtle, stream, savehook)
     } else {
       return rad2deg(Math.atan(aexpr(a)));
     }
-  });
+  }, {maximum: 2});
 
   def("sin", function(a) { return Math.sin(deg2rad(aexpr(a))); });
   def("cos", function(a) { return Math.cos(deg2rad(aexpr(a))); });
@@ -1850,7 +1851,7 @@ function LogoInterpreter(turtle, stream, savehook)
     } else {
       return Math.atan(aexpr(a));
     }
-  });
+  }, {maximum: 2});
 
   def("radsin", function(a) { return Math.sin(aexpr(a)); });
   def("radcos", function(a) { return Math.cos(aexpr(a)); });
@@ -1898,14 +1899,20 @@ function LogoInterpreter(turtle, stream, savehook)
   // 4.3 Random Numbers
 
   def("random", function(max) {
-    max = aexpr(max);
-    return Math.floor(self.prng.next() * max);
-  });
+    if (arguments.length < 2) {
+      max = aexpr(max);
+      return Math.floor(self.prng.next() * max);
+    } else {
+      var start = aexpr(arguments[0]);
+      var end = aexpr(arguments[1]);
+      return Math.floor(self.prng.next() * (end - start + 1)) + start;
+    }
+  }, {maximum: 2});
 
   def("rerandom", function() {
     var seed = (arguments.length > 0) ? aexpr(arguments[0]) : 2345678901;
     return self.prng.seed(seed);
-  });
+  }, {maximum: 1});
 
   // 4.4 Print Formatting
 
@@ -1925,13 +1932,13 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("bitand", function(num1, num2) {
     return Array.from(arguments).map(aexpr).reduce(function(a, b) { return a & b; }, -1);
-  });
+  }, {minimum: 0, maximum: -1});
   def("bitor", function(num1, num2) {
     return Array.from(arguments).map(aexpr).reduce(function(a, b) { return a | b; }, 0);
-  });
+  }, {minimum: 0, maximum: -1});
   def("bitxor", function(num1, num2) {
     return Array.from(arguments).map(aexpr).reduce(function(a, b) { return a ^ b; }, 0);
-  });
+  }, {minimum: 0, maximum: -1});
   def("bitnot", function(num) {
     return ~aexpr(num);
   });
@@ -1962,12 +1969,12 @@ function LogoInterpreter(turtle, stream, savehook)
   def("and", function(a, b) {
     var args = Array.from(arguments);
     return booleanReduce(args, function(value) {return value;}, 1);
-  }, {noeval: true});
+  }, {noeval: true, minimum: 0, maximum: -1});
 
   def("or", function(a, b) {
     var args = Array.from(arguments);
     return booleanReduce(args, function(value) {return !value;}, 0);
-  }, {noeval: true});
+  }, {noeval: true, minimum: 0, maximum: -1});
 
   function booleanReduce(args, test, value) {
     return promiseLoop(function(loop, resolve, reject) {
@@ -2327,7 +2334,7 @@ function LogoInterpreter(turtle, stream, savehook)
   def("local", function(varname) {
     var localscope = self.scopes[self.scopes.length - 1];
     Array.from(arguments).forEach(function(name) { localscope.set(sexpr(name), {value: undefined}); });
-  });
+  }, {maximum: -1});
 
   def("localmake", function(varname, value) {
     var localscope = self.scopes[self.scopes.length - 1];
@@ -2342,7 +2349,7 @@ function LogoInterpreter(turtle, stream, savehook)
     var globalscope = self.scopes[0];
     Array.from(arguments).forEach(function(name) {
       globalscope.set(sexpr(name), {value: undefined}); });
-  });
+  }, {maximum: -1});
 
   //
   // 7.3 Property Lists
@@ -2541,6 +2548,8 @@ function LogoInterpreter(turtle, stream, savehook)
     var proc = self.routines.get(name);
     if (!proc)
       throw err("{_PROC_}: Don't know how to {name:U}", { name: name });
+    if (proc.special)
+      return [-1, -1, -1];
 
     return [
       proc.minimum,
@@ -2895,14 +2904,21 @@ function LogoInterpreter(turtle, stream, savehook)
     if (Type(tf) === 'list')
       tf = evaluateExpression(reparse(tf));
 
+    var statements2 = arguments[2];
+
     return Promise.resolve(tf)
       .then(function(tf) {
         tf = aexpr(tf);
         statements = reparse(lexpr(statements));
-
-        return tf ? self.execute(statements, {returnResult: true}) : undefined;
+        if (!statements2) {
+          return tf ? self.execute(statements, {returnResult: true}) : undefined;
+        } else {
+          statements2 = reparse(lexpr(statements2));
+          return self.execute(tf ? statements : statements2, {returnResult: true});
+        }
       });
-  });
+
+  }, {maximum: 3});
 
   def("ifelse", function(tf, statements1, statements2) {
     if (Type(tf) === 'list')
