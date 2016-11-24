@@ -203,7 +203,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
                 (this.penmode === 'erase') ? 'destination-out' :
                 (this.penmode === 'reverse') ? 'difference' : 'source-over';
     if (penmode === 'paint')
-      canvas_ctx.strokeStyle = canvas_ctx.fillStyle = this.parseColor(this.color);
+      canvas_ctx.strokeStyle = canvas_ctx.fillStyle = this.color;
     else
       canvas_ctx.strokeStyle = canvas_ctx.fillStyle = '#ffffff';
   };
@@ -214,32 +214,10 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
 
   this.ispendown = function() { return this.down; };
 
-  // To handle additional color names (localizations, etc):
-  // turtle.colorAlias = function(name) {
-  //   return {internationalorange: '#FF4F00', ... }[name];
-  // };
-  this.colorAlias = null;
-
-  var STANDARD_COLORS = {
-    0: "black", 1: "blue", 2: "lime", 3: "cyan",
-    4: "red", 5: "magenta", 6: "yellow", 7: "white",
-    8: "brown", 9: "tan", 10: "green", 11: "aquamarine",
-    12: "salmon", 13: "purple", 14: "orange", 15: "gray"
-  };
-
-  this.parseColor = function(color) {
-    color = String(color);
-    if (STANDARD_COLORS.hasOwnProperty(color))
-      return STANDARD_COLORS[color];
-    if (self.colorAlias)
-      return self.colorAlias(color) || color;
-    return color;
-  };
-
   this.setcolor = function(color) {
     this.color = color;
-    canvas_ctx.strokeStyle = this.parseColor(this.color);
-    canvas_ctx.fillStyle = this.parseColor(this.color);
+    canvas_ctx.strokeStyle = this.color;
+    canvas_ctx.fillStyle = this.color;
   };
   this.getcolor = function() { return this.color; };
 
@@ -295,7 +273,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     try {
       canvas_ctx.setTransform(1, 0, 0, 1, 0, 0);
       canvas_ctx.clearRect(0, 0, width, height);
-      canvas_ctx.fillStyle = this.parseColor(this.bgcolor);
+      canvas_ctx.fillStyle = this.bgcolor;
       canvas_ctx.fillRect(0, 0, width, height);
     } finally {
       canvas_ctx.restore();
@@ -367,7 +345,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     --this.filling;
     if (this.filling === 0) {
       canvas_ctx.closePath();
-      canvas_ctx.fillStyle = this.parseColor(fillcolor);
+      canvas_ctx.fillStyle = fillcolor;
       canvas_ctx.fill();
       canvas_ctx.fillStyle = this.color;
       if (this.down)

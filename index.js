@@ -557,7 +557,7 @@ window.addEventListener('DOMContentLoaded', function() {
       return $('#overlay').style.color;
     },
     set color(color) {
-      $('#overlay').style.color = turtle.parseColor(color);
+      $('#overlay').style.color = color;
     }
   };
 

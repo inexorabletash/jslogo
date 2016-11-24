@@ -1020,17 +1020,17 @@ QUnit.test("Graphics", function(t) {
   this.assert_equals('penerase penmode', 'ERASE');
   this.assert_equals('penreverse penmode', 'REVERSE');
 
-  this.assert_equals('setpencolor 0 pencolor', '0');
-  this.assert_equals('setpc 0 pencolor', '0');
+  this.assert_equals('setpencolor 0 pencolor', 'black');
+  this.assert_equals('setpc 0 pencolor', 'black');
   this.assert_equals('setpencolor "#123456 pencolor', '#123456');
   this.assert_equals('setpencolor [0 50 99] pencolor', '#0080ff');
 
   this.assert_equals('setpensize 6 pensize', [6, 6]);
   this.assert_equals('setpensize [6 6] pensize', [6, 6]);
 
-  this.assert_equals('setbackground 0 background', '0');
-  this.assert_equals('setscreencolor 0 background', '0');
-  this.assert_equals('setsc 0 background', '0');
+  this.assert_equals('setbackground 0 background', 'black');
+  this.assert_equals('setscreencolor 0 background', 'black');
+  this.assert_equals('setsc 0 background', 'black');
   this.assert_equals('setbackground "#123456 background', '#123456');
   this.assert_equals('setbackground [0 50 99] background', '#0080ff');
 
@@ -1045,13 +1045,13 @@ QUnit.test("Graphics", function(t) {
   this.assert_equals('penerase penmode', 'ERASE');
   this.assert_equals('penreverse penmode', 'REVERSE');
 
-  this.assert_equals('setpencolor 0 pencolor', '0');
+  this.assert_equals('setpencolor 0 pencolor', 'black');
   this.assert_equals('setpencolor "#123456 pencolor', '#123456');
   this.assert_equals('setpensize 6 pensize', [6, 6]);
 
-  this.assert_equals('setsc 0 background', '0');
-  this.assert_equals('setsc 0 getscreencolor', '0');
-  this.assert_equals('setsc 0 getsc', '0');
+  this.assert_equals('setsc 0 background', 'black');
+  this.assert_equals('setsc 0 getscreencolor', 'black');
+  this.assert_equals('setsc 0 getsc', 'black');
   this.assert_equals('setsc "#123456 background', '#123456');
   this.assert_equals('setsc "#123456 getscreencolor', '#123456');
   this.assert_equals('setsc "#123456 getsc', '#123456');
@@ -1677,11 +1677,11 @@ QUnit.test("API Tests", function(t) {
   this.assert_equals('case 2 [[[1] "a"] [alie "b]]', 'b');
   this.assert_equals('to foo output 2 fino  foo', 2);
 
-  // CanvasTurtle#colorAlias
+  // LogoInterpreter#colorAlias
   var done = t.async();
   var hookCalled = false;
   this.queue(function() {
-    this.turtle.colorAlias = function(s) {
+    this.interpreter.colorAlias = function(s) {
       hookCalled = hookCalled || (s === 'internationalorange');
     };
   });

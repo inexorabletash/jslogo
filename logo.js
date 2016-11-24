@@ -2178,6 +2178,19 @@ function LogoInterpreter(turtle, stream, savehook)
   def(["penerase", "pe"], function() { return turtle.setpenmode('erase'); });
   def(["penreverse", "px"], function() { return turtle.setpenmode('reverse'); });
 
+  // To handle additional color names (localizations, etc):
+  // logo.colorAlias = function(name) {
+  //   return {internationalorange: '#FF4F00', ... }[name];
+  // };
+  this.colorAlias = null;
+
+  var STANDARD_COLORS = {
+    0: "black", 1: "blue", 2: "lime", 3: "cyan",
+    4: "red", 5: "magenta", 6: "yellow", 7: "white",
+    8: "brown", 9: "tan", 10: "green", 11: "aquamarine",
+    12: "salmon", 13: "purple", 14: "orange", 15: "gray"
+  };
+
   function parseColor(color) {
     function adjust(n) {
       // Clamp into 0...99
@@ -2194,7 +2207,12 @@ function LogoInterpreter(turtle, stream, savehook)
       var bb = (b < 16 ? "0" : "") + b.toString(16);
       return '#' + rr + gg + bb;
     }
-    return sexpr(color);
+    color = sexpr(color);
+    if (STANDARD_COLORS.hasOwnProperty(color))
+      return STANDARD_COLORS[color];
+    if (self.colorAlias)
+      return self.colorAlias(color) || color;
+    return color;
   }
 
   def(["setpencolor", "setpc", "setcolor"], function(color) {
