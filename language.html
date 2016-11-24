@@ -317,6 +317,14 @@ of comparison.</p>
   <dd>Outputs string with alphanumeric characters in bold
   <dd class=example>show standout "ABCabc123</dd>
 
+  <dt><code>parse <var>word</var></code>
+  <dd>Returns word parsed as a list.
+  <dd class=example>show parse "1+2</dd>
+
+  <dt><code>runparse <var>word</var></code>
+  <dd>Returns word parsed as instructions.
+  <dd class=example>show runparse "1+2</dd>
+
 </dl>
 
 
@@ -735,6 +743,7 @@ of comparison.</p>
   <dd>Outputs a two element list with the pen width and height (usually the same).
 
   <dt><code>background</code>
+  <dt><code>bg</code>
   <dt><code>getscreencolor</code>
   <dt><code>getsc</code>
   <dd>Outputs the background color. This will be a CSS color string, not necessarily the value passed in.

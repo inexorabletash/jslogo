@@ -614,6 +614,11 @@ QUnit.test("Data Structure Primitives", function(t) {
   this.assert_equals('standout "whatever', '\uD835\uDC30\uD835\uDC21\uD835\uDC1A\uD835\uDC2D\uD835\uDC1E\uD835\uDC2F\uD835\uDC1E\uD835\uDC2B');
   this.assert_equals('standout "ABCabc123', '\uD835\uDC00\uD835\uDC01\uD835\uDC02\uD835\uDC1A\uD835\uDC1B\uD835\uDC1C\uD835\uDFCF\uD835\uDFD0\uD835\uDFD1');
   this.assert_equals('standout "!@#$_,.?', '!@#$_,.?');
+
+
+  this.assert_equals('parse "1+\\(2\\ *\\ 3\\)', ['1+(2', '*', '3)']);
+  this.assert_equals('runparse "1+\\(2\\ *\\ 3\\)', ['1', '+', '(', '2', '*', '3', ')']);
+
 });
 
 QUnit.test("Communication", function(t) {
@@ -1707,7 +1712,7 @@ QUnit.test("Arity of Primitives", function(t) {
     ['beforep', [2, 2, 2]],
     ['bf', [1, 1, 1]],
     ['bfs', [1, 1, 1]],
-    //['bg', [0, 0, 0]],
+    ['bg', [0, 0, 0]],
     ['bitand', [0, 2, -1]],
     ['bitnot', [1, 1, 1]],
     ['bitor', [0, 2, -1]],
@@ -1855,7 +1860,7 @@ QUnit.test("Arity of Primitives", function(t) {
     ['or', [0, 2, -1]],
     ['output', [1, 1, 1]],
     //['palette', [1, 1, 1]],
-    //['parse', [1, 1, 1]],
+    ['parse', [1, 1, 1]],
     //['pause', [0, 0, 0]],
     ['pc', [0, 0, 0]],
     ['pd', [0, 0, 0]],
@@ -1922,7 +1927,7 @@ QUnit.test("Arity of Primitives", function(t) {
     ['round', [1, 1, 1]],
     ['rt', [1, 1, 1]],
     ['run', [1, 1, 1]],
-    //['runparse', [1, 1, 1]],
+    ['runparse', [1, 1, 1]],
     ['runresult', [1, 1, 1]],
     //['rw', [0, 0, 0]],
     //['save', [0, 1, 1]],

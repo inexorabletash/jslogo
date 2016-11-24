@@ -1282,15 +1282,15 @@ function LogoInterpreter(turtle, stream, savehook)
       var scope = new StringMap(true);
       self.scopes.push(scope);
 
-      var i = 0;
+      var i = 0, op;
       for (; i < inputs.length && i < arguments.length; ++i)
         scope.set(inputs[i], {value: arguments[i]});
       for (; i < inputs.length + optional_inputs.length && i < arguments.length; ++i) {
-        var op = optional_inputs[i - inputs.length];
+        op = optional_inputs[i - inputs.length];
         scope.set(op[0], {value: arguments[i]});
       }
       for (; i < inputs.length + optional_inputs.length; ++i) {
-        var op = optional_inputs[i - inputs.length];
+        op = optional_inputs[i - inputs.length];
         scope.set(op[0], {value: evaluateExpression(reparse(op[1]))});
       }
       if (rest)
@@ -1697,8 +1697,13 @@ function LogoInterpreter(turtle, stream, savehook)
       .join('');
   });
 
-  // Not Supported: parse
-  // Not Supported: runparse
+  def("parse", function(word) {
+    return parse('[' + sexpr(word) + ']')[0];
+  });
+
+  def("runparse", function(word) {
+    return parse(sexpr(word));
+  });
 
   //----------------------------------------------------------------------
   //
@@ -2199,7 +2204,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   // Not Supported: pen
 
-  def(["background", "getscreencolor", "getsc"], function() {
+  def(["background", "bg", "getscreencolor", "getsc"], function() {
     return turtle.getbgcolor();
   });
 
