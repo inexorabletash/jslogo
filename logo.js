@@ -2223,9 +2223,9 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def(["setpensize", "setwidth", "setpw"], function(a) {
     if (Type(a) === 'list')
-      return turtle.penwidth = aexpr(a[0]);
+      turtle.penwidth = aexpr(a[0]);
     else
-      return turtle.penwidth = aexpr(a);
+      turtle.penwidth = aexpr(a);
   });
 
   // Not Supported: setpenpattern

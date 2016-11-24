@@ -550,8 +550,10 @@ window.addEventListener('DOMContentLoaded', function() {
     get font() {
       return $('#overlay').style.fontFamily;
     },
-    set font(fontname) {
-      $('#overlay').style.fontFamily = fontname;
+    set font(name) {
+      if (['serif', 'sans-serif', 'cursive', 'fantasy', 'monospace'].indexOf(name) === -1)
+        name = JSON.stringify(name);
+      $('#overlay').style.fontFamily = name;
     },
     get color() {
       return $('#overlay').style.color;

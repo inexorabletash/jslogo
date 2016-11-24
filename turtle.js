@@ -16,17 +16,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-function CanvasTurtle(canvas_ctx, turtle_ctx, w, h) {
+(function(global) {
   'use strict';
-
-  // Stub for old browsers w/ canvas but no text functions
-  canvas_ctx.fillText = canvas_ctx.fillText || function fillText(string, x, y) { };
-
-  this.width = Number(w);
-  this.height = Number(h);
 
   function deg2rad(d) { return d / 180 * Math.PI; }
   function rad2deg(r) { return r * 180 / Math.PI; }
+
   function font(px, name) {
     px = Number(px);
     name = String(name).toLowerCase();
@@ -34,56 +29,170 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, w, h) {
       name = JSON.stringify(name);
     return String(px) + 'px ' + name;
   }
+
   function mod(a, b) {
     var r = a % b;
     return r < 0 ? r + b : r;
   }
 
-  this._moveto = function(x, y, setpos) {
+  function CanvasTurtle(canvas_ctx, turtle_ctx, w, h) {
+    // Stub for old browsers w/ canvas but no text functions
+    canvas_ctx.fillText = canvas_ctx.fillText || function fillText(string, x, y) { };
 
-    var _go = function(x1, y1, x2, y2) {
-      if (this.filling) {
-        canvas_ctx.lineTo(x1, y1);
-        canvas_ctx.lineTo(x2, y2);
-      } else if (this.pendown) {
-        canvas_ctx.beginPath();
-        canvas_ctx.moveTo(x1, y1);
-        canvas_ctx.lineTo(x2, y2);
-        canvas_ctx.stroke();
+    this.canvas_ctx = canvas_ctx;
+    this.turtle_ctx = turtle_ctx;
+    this.width = Number(w);
+    this.height = Number(h);
+
+    this.x = this.py = 0;
+    this.y = this.py = 0;
+    this.r = Math.PI / 2;
+
+    this.sx = this.sy = 1;
+
+    this.color = '#000000';
+    this.bgcolor = '#ffffff';
+    this.penwidth = 1;
+    this.penmode = 'paint';
+    this.fontsize = 14;
+    this.fontname = 'sans-serif';
+    this.turtlemode = 'wrap';
+    this.visible = true;
+    this.pendown = true;
+
+    this.was_oob = false;
+    this.filling = 0;
+
+    this._init();
+    this._tick();
+  }
+
+  Object.defineProperties(CanvasTurtle.prototype, {
+
+    // Internal methods
+
+    _init: {value: function() {
+      this.turtle_ctx.lineCap = 'round';
+      this.turtle_ctx.strokeStyle = 'green';
+      this.turtle_ctx.lineWidth = 2;
+
+      this.canvas_ctx.lineCap = 'round';
+
+      // Restore canvas state controlled by properties:
+      this.color = this.color;
+      this.fontname = this.fontname;
+      this.fontsize = this.fontsize;
+      this.penmode = this.penmode;
+      this.penwidth = this.penwidth;
+
+      [this.turtle_ctx, this.canvas_ctx].forEach(function(ctx) {
+        ctx.setTransform(this.sx, 0, 0, -this.sy, this.width / 2, this.height / 2);
+      }.bind(this));
+    }},
+
+    _tick: {value: function() {
+      function invert(p) { return [-p[0], p[1]]; }
+
+      requestAnimationFrame(this._tick.bind(this));
+      var cur = JSON.stringify([this.x, this.y, this.r, this.visible,
+                                this.sx, this.sy, this.width, this.height]);
+      if (cur === this._last_state) return;
+      this._last_state = cur;
+
+      this.turtle_ctx.save();
+      this.turtle_ctx.setTransform(1, 0, 0, 1, 0, 0);
+      this.turtle_ctx.clearRect(0, 0, this.width, this.height);
+      this.turtle_ctx.restore();
+
+      if (this.visible) {
+        var ctx = this.turtle_ctx;
+        ctx.save();
+        ctx.translate(this.x, this.y);
+        ctx.rotate(Math.PI/2 + this.r);
+        ctx.beginPath();
+
+        var points = [
+          [0, -20], // Head
+          [2.5, -17],
+          [3, -12],
+
+          [6, -10],
+          [9, -13], // Arm
+          [13, -12],
+          [18, -4],
+          [18, 0],
+          [14, -1],
+          [10, -7],
+
+          [8, -6], // Shell
+          [10, -2],
+          [9, 3],
+          [6, 10],
+
+          [9, 13], // Foot
+          [6, 15],
+          [3, 12],
+
+          [0, 13],
+        ];
+
+        points.concat(points.slice(1, -1).reverse().map(invert))
+          .forEach(function(pair, index) {
+            ctx[index ? 'lineTo' : 'moveTo'](pair[0], pair[1]);
+          });
+
+        ctx.closePath();
+        ctx.stroke();
+
+        ctx.restore();
       }
-    }.bind(this);
+    }},
 
-    var w = this.width / this.sx, h = this.height / this.sy;
+    _moveto: {value: function(x, y, setpos) {
 
-    var left = -w / 2, right = w / 2,
-        bottom = -h / 2, top = h / 2;
+      var _go = function(x1, y1, x2, y2) {
+        if (this.filling) {
+          this.canvas_ctx.lineTo(x1, y1);
+          this.canvas_ctx.lineTo(x2, y2);
+        } else if (this.pendown) {
+          this.canvas_ctx.beginPath();
+          this.canvas_ctx.moveTo(x1, y1);
+          this.canvas_ctx.lineTo(x2, y2);
+          this.canvas_ctx.stroke();
+        }
+      }.bind(this);
 
-    var ix, iy, wx, wy, fx, fy, less;
+      var w = this.width / this.sx, h = this.height / this.sy;
 
-    // Hack to match UCBLogo: don't draw line across viewport on
-    // `SETXY 250 10  SETXY 300 20  SETXY 350 30`
-    if (setpos && this.turtlemode === 'wrap') {
-      var oob = (x < left || x >= right || y < bottom || y >= top);
-      var px = x, py = y;
-      if (this.was_oob) {
-        var dx = mod(x + w / 2, w) - (x + w / 2);
-        var dy = mod(y + h / 2, h) - (y + h / 2);
-        x += dx;
-        y += dy;
-        this.x = this.px + dx;
-        this.y = this.py + dy;
+      var left = -w / 2, right = w / 2,
+          bottom = -h / 2, top = h / 2;
+
+      var ix, iy, wx, wy, fx, fy, less;
+
+      // Hack to match UCBLogo: don't draw line across viewport on
+      // `SETXY 250 10  SETXY 300 20  SETXY 350 30`
+      if (setpos && this.turtlemode === 'wrap') {
+        var oob = (x < left || x >= right || y < bottom || y >= top);
+        var px = x, py = y;
+        if (this.was_oob) {
+          var dx = mod(x + w / 2, w) - (x + w / 2);
+          var dy = mod(y + h / 2, h) - (y + h / 2);
+          x += dx;
+          y += dy;
+          this.x = this.px + dx;
+          this.y = this.py + dy;
+        }
+        this.was_oob = oob;
+        this.px = px;
+        this.py = py;
+      } else {
+        this.was_oob = false;
       }
-      this.was_oob = oob;
-      this.px = px;
-      this.py = py;
-    } else {
-      this.was_oob = false;
-    }
 
-    while (true) {
-      // TODO: What happens if we switch modes and turtle is outside bounds?
+      while (true) {
+        // TODO: What happens if we switch modes and turtle is outside bounds?
 
-      switch (this.turtlemode) {
+        switch (this.turtlemode) {
         case 'window':
           _go(this.x, this.y, x, y);
           this.x = this.px = x;
@@ -157,43 +266,172 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, w, h) {
           }
 
           break;
+        }
       }
-    }
-  };
+    }},
 
-  this.move = function(distance) {
-    var x, y, point, saved_x, saved_y, EPSILON = 1e-3;
+    // API methods
 
-    point = Math.abs(distance) < EPSILON;
+    resize: {value: function(w, h) {
+      this.width = w;
+      this.height = h;
+      this._init();
+    }},
 
-    if (point) {
-      saved_x = this.x;
-      saved_y = this.y;
-      distance = EPSILON;
-    }
+    move: {value: function(distance) {
+      var x, y, point, saved_x, saved_y, EPSILON = 1e-3;
 
-    // Mostly for tests: limit precision
-    var PRECISION = 10;
-    function precision(n) {
-      var f = Math.pow(10, PRECISION);
-      return Math.round(n * f) / f;
-    }
+      point = Math.abs(distance) < EPSILON;
 
-    x = precision(this.x + distance * Math.cos(this.r));
-    y = precision(this.y + distance * Math.sin(this.r));
-    this._moveto(x, y);
+      if (point) {
+        saved_x = this.x;
+        saved_y = this.y;
+        distance = EPSILON;
+      }
 
-    if (point) {
-      this.x = this.px = saved_x;
-      this.y = this.px = saved_y;
-    }
-  };
+      // Mostly for tests: limit precision
+      var PRECISION = 10;
+      function precision(n) {
+        var f = Math.pow(10, PRECISION);
+        return Math.round(n * f) / f;
+      }
 
-  this.turn = function(angle) {
-    this.r -= deg2rad(angle);
-  };
+      x = precision(this.x + distance * Math.cos(this.r));
+      y = precision(this.y + distance * Math.sin(this.r));
+      this._moveto(x, y);
 
-  Object.defineProperties(this, {
+      if (point) {
+        this.x = this.px = saved_x;
+        this.y = this.px = saved_y;
+      }
+    }},
+
+    turn: {value: function(angle) {
+      this.r -= deg2rad(angle);
+    }},
+
+    towards: {value: function(x, y) {
+      x = x;
+      y = y;
+
+      return 90 - rad2deg(Math.atan2(y - this.y, x - this.x));
+    }},
+
+    clearscreen: {value: function() {
+      this.home();
+      this.clear();
+    }},
+
+    clear: {value: function() {
+      this.canvas_ctx.save();
+      try {
+        this.canvas_ctx.setTransform(1, 0, 0, 1, 0, 0);
+        this.canvas_ctx.clearRect(0, 0, this.width, this.height);
+        this.canvas_ctx.fillStyle = this.bgcolor;
+        this.canvas_ctx.fillRect(0, 0, this.width, this.height);
+      } finally {
+        this.canvas_ctx.restore();
+      }
+    }},
+
+    home: {value: function() {
+      this._moveto(0, 0);
+      this.r = deg2rad(90);
+    }},
+
+    drawtext: {value: function(text) {
+      this.canvas_ctx.save();
+      this.canvas_ctx.translate(this.x, this.y);
+      this.canvas_ctx.scale(1, -1);
+      this.canvas_ctx.rotate(-this.r);
+      this.canvas_ctx.fillText(text, 0, 0);
+      this.canvas_ctx.restore();
+    }},
+
+    beginpath: {value: function() {
+      if (this.filling === 0) {
+        this.saved_turtlemode = this.turtlemode;
+        this.turtlemode = 'window';
+        ++this.filling;
+        this.canvas_ctx.beginPath();
+      }
+    }},
+
+    fillpath: {value: function(fillcolor) {
+      --this.filling;
+      if (this.filling === 0) {
+        this.canvas_ctx.closePath();
+        this.canvas_ctx.fillStyle = fillcolor;
+        this.canvas_ctx.fill();
+        this.canvas_ctx.fillStyle = this.color;
+        if (this.pendown)
+          this.canvas_ctx.stroke();
+        this.turtlemode = this.saved_turtlemode;
+      }
+    }},
+
+    fill: {value: function() {
+      this.canvas_ctx.floodFill(this.x, this.y);
+    }},
+
+    arc: {value: function(angle, radius) {
+      if (this.turtlemode == 'wrap') {
+        [this.x, this.x + this.width, this.x - this.width].forEach(function(x) {
+          [this.y, this.y + this.height, this.y - this.height].forEach(function(y) {
+            if (!this.filling)
+              this.canvas_ctx.beginPath();
+            this.canvas_ctx.arc(x, y, radius, -this.r, -this.r + deg2rad(angle), false);
+            if (!this.filling)
+              this.canvas_ctx.stroke();
+          }.bind(this));
+        }.bind(this));
+      } else {
+        if (!this.filling)
+          this.canvas_ctx.beginPath();
+        this.canvas_ctx.arc(this.x, this.y, radius, -this.r, -this.r + deg2rad(angle), false);
+        if (!this.filling)
+          this.canvas_ctx.stroke();
+      }
+    }},
+
+    getstate: {value: function() {
+      return {
+        isturtlestate: true,
+        color: this.color,
+        bgcolor: this.bgcolor,
+        position: this.position,
+        heading: this.heading,
+        penmode: this.penmode,
+        turtlemode: this.turtlemode,
+        width: this.width,
+        fontsize: this.fontsize,
+        fontname: this.fontname,
+        visible: this.visible,
+        pendown: this.pendown,
+        scrunch: this.scrunch
+      };
+    }},
+
+    setstate: {value: function(state) {
+      if ((! state) || ! state.isturtlestate) {
+        throw new Error("Tried to restore a state that is not a turtle state");
+      }
+      this.turtlemode = state.turtlemode;
+      this.color = state.color;
+      this.bgcolor = state.bgcolor;
+      this.penwidth = state.penwidth;
+      this.fontsize = state.fontsize;
+      this.fontname = state.fontname;
+      this.position = state.position;
+      this.heading = state.heading;
+      this.penmode = state.penmode;
+      this.scrunch = state.scrunch;
+      this.visible = state.visible;
+      this.pendown = state.pendown;
+    }},
+
+    // Properties
+
     pendown: {
       set: function(down) { this._down = down; },
       get: function() { return this._down; }
@@ -203,13 +441,13 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, w, h) {
       get: function() { return this._penmode; },
       set: function(penmode) {
         this._penmode = penmode;
-        canvas_ctx.globalCompositeOperation =
+        this.canvas_ctx.globalCompositeOperation =
           (this.penmode === 'erase') ? 'destination-out' :
           (this.penmode === 'reverse') ? 'difference' : 'source-over';
         if (penmode === 'paint')
-          canvas_ctx.strokeStyle = canvas_ctx.fillStyle = this.color;
+          this.canvas_ctx.strokeStyle = this.canvas_ctx.fillStyle = this.color;
         else
-          canvas_ctx.strokeStyle = canvas_ctx.fillStyle = '#ffffff';
+          this.canvas_ctx.strokeStyle = this.canvas_ctx.fillStyle = '#ffffff';
       }
     },
 
@@ -222,8 +460,8 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, w, h) {
       get: function() { return this._color; },
       set: function(color) {
         this._color = color;
-        canvas_ctx.strokeStyle = this._color;
-        canvas_ctx.fillStyle = this._color;
+        this.canvas_ctx.strokeStyle = this._color;
+        this.canvas_ctx.fillStyle = this._color;
       }
     },
 
@@ -238,7 +476,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, w, h) {
     penwidth: {
       set: function(width) {
         this._penwidth = width;
-        canvas_ctx.lineWidth = this._penwidth;
+        this.canvas_ctx.lineWidth = this._penwidth;
       },
       get: function() { return this._penwidth; }
     },
@@ -247,7 +485,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, w, h) {
     fontsize: {
       set: function(size) {
         this._fontsize = size;
-        canvas_ctx.font = font(this.fontsize, this.fontname);
+        this.canvas_ctx.font = font(this.fontsize, this.fontname);
       },
       get: function() { return this._fontsize; }
     },
@@ -255,7 +493,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, w, h) {
     fontname: {
       set: function(name) {
         this._fontname = name;
-        canvas_ctx.font = font(this.fontsize, this.fontname);
+        this.canvas_ctx.font = font(this.fontsize, this.fontname);
       },
       get: function() { return this._fontname; }
     },
@@ -295,7 +533,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, w, h) {
         this.sx = sx;
         this.sy = sy;
 
-        [turtle_ctx, canvas_ctx].forEach(function(ctx) {
+        [this.turtle_ctx, this.canvas_ctx].forEach(function(ctx) {
           ctx.setTransform(this.sx, 0, 0, -this.sy, this.width / 2, this.height / 2);
         }.bind(this));
       },
@@ -305,228 +543,5 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, w, h) {
     }
   });
 
-  this.towards = function(x, y) {
-    x = x;
-    y = y;
-
-    return 90 - rad2deg(Math.atan2(y - this.y, x - this.x));
-  };
-
-  this.clearscreen = function() {
-    this.home();
-    this.clear();
-  };
-
-  this.clear = function() {
-    canvas_ctx.save();
-    try {
-      canvas_ctx.setTransform(1, 0, 0, 1, 0, 0);
-      canvas_ctx.clearRect(0, 0, this.width, this.height);
-      canvas_ctx.fillStyle = this.bgcolor;
-      canvas_ctx.fillRect(0, 0, this.width, this.height);
-    } finally {
-      canvas_ctx.restore();
-    }
-  };
-
-  this.home = function() {
-    this._moveto(0, 0);
-    this.r = deg2rad(90);
-  };
-
-
-  this.drawtext = function(text) {
-    canvas_ctx.save();
-    canvas_ctx.translate(this.x, this.y);
-    canvas_ctx.scale(1, -1);
-    canvas_ctx.rotate(-this.r);
-    canvas_ctx.fillText(text, 0, 0);
-    canvas_ctx.restore();
-  };
-
-  this.filling = 0;
-  this.beginpath = function() {
-    if (this.filling === 0) {
-      this.saved_turtlemode = this.turtlemode;
-      this.turtlemode = 'window';
-      ++this.filling;
-      canvas_ctx.beginPath();
-    }
-  };
-
-  this.fillpath = function(fillcolor) {
-    --this.filling;
-    if (this.filling === 0) {
-      canvas_ctx.closePath();
-      canvas_ctx.fillStyle = fillcolor;
-      canvas_ctx.fill();
-      canvas_ctx.fillStyle = this.color;
-      if (this.pendown)
-        canvas_ctx.stroke();
-      this.turtlemode = this.saved_turtlemode;
-    }
-  };
-
-  this.fill = function() {
-    canvas_ctx.floodFill(this.x, this.y);
-  };
-
-  this.arc = function(angle, radius) {
-    if (this.turtlemode == 'wrap') {
-      [this.x, this.x + this.width, this.x - this.width].forEach(function(x) {
-        [this.y, this.y + this.height, this.y - this.height].forEach(function(y) {
-          if (!this.filling)
-            canvas_ctx.beginPath();
-          canvas_ctx.arc(x, y, radius, -this.r, -this.r + deg2rad(angle), false);
-          if (!this.filling)
-            canvas_ctx.stroke();
-        }.bind(this));
-      }.bind(this));
-    } else {
-      if (!this.filling)
-        canvas_ctx.beginPath();
-      canvas_ctx.arc(this.x, this.y, radius, -this.r, -this.r + deg2rad(angle), false);
-      if (!this.filling)
-        canvas_ctx.stroke();
-    }
-  };
-
-  this.getstate = function() {
-    return {
-      isturtlestate: true,
-      color: this.color,
-      bgcolor: this.bgcolor,
-      position: this.position,
-      heading: this.heading,
-      penmode: this.penmode,
-      turtlemode: this.turtlemode,
-      width: this.width,
-      fontsize: this.fontsize,
-      fontname: this.fontname,
-      visible: this.visible,
-      pendown: this.pendown,
-      scrunch: this.scrunch
-    };
-  };
-
-  this.setstate = function(state) {
-    if ((! state) || ! state.isturtlestate) {
-      throw new Error("Tried to restore a state that is not a turtle state");
-    }
-    this.turtlemode = state.turtlemode;
-    this.color = state.color;
-    this.bgcolor = state.bgcolor;
-    this.penwidth = state.penwidth;
-    this.fontsize = state.fontsize;
-    this.fontname = state.fontname;
-    this.position = state.position;
-    this.heading = state.heading;
-    this.penmode = state.penmode;
-    this.scrunch = state.scrunch;
-    this.visible = state.visible;
-    this.pendown = state.pendown;
-  };
-
-  var last;
-
-  this.tick = function() {
-    function invert(p) { return [-p[0], p[1]]; }
-
-    requestAnimationFrame(this.tick.bind(this));
-    var cur = JSON.stringify([this.x, this.y, this.r, this.visible,
-                              this.sx, this.sy, this.width, this.height]);
-    if (cur === last) return;
-    last = cur;
-
-    turtle_ctx.save();
-    turtle_ctx.setTransform(1, 0, 0, 1, 0, 0);
-    turtle_ctx.clearRect(0, 0, this.width, this.height);
-    turtle_ctx.restore();
-
-    if (this.visible) {
-      var ctx = turtle_ctx;
-      ctx.save();
-      ctx.translate(this.x, this.y);
-      ctx.rotate(Math.PI/2 + this.r);
-      ctx.beginPath();
-
-      var points = [
-        [0, -20], // Head
-        [2.5, -17],
-        [3, -12],
-
-        [6, -10],
-        [9, -13], // Arm
-        [13, -12],
-        [18, -4],
-        [18, 0],
-        [14, -1],
-        [10, -7],
-
-        [8, -6], // Shell
-        [10, -2],
-        [9, 3],
-        [6, 10],
-
-        [9, 13], // Foot
-        [6, 15],
-        [3, 12],
-
-        [0, 13],
-      ];
-
-      points.concat(points.slice(1, -1).reverse().map(invert))
-        .forEach(function(pair, index) {
-          ctx[index ? 'lineTo' : 'moveTo'](pair[0], pair[1]);
-        });
-
-      ctx.closePath();
-      ctx.stroke();
-
-      ctx.restore();
-    }
-  };
-
-  this.x = this.py = 0;
-  this.y = this.py = 0;
-  this.r = Math.PI / 2;
-
-  this.sx = this.sy = 1;
-
-  this.bgcolor = '#ffffff';
-  this.color = '#000000';
-  this.penwidth = 1;
-  this.penmode = 'paint';
-  this.fontsize = 14;
-  this.fontname = 'sans-serif';
-  this.turtlemode = 'wrap';
-  this.visible = true;
-  this.pendown = true;
-  this.was_oob = false;
-
-  this.init = function() {
-    turtle_ctx.lineCap = 'round';
-    turtle_ctx.strokeStyle = 'green';
-    turtle_ctx.lineWidth = 2;
-
-    canvas_ctx.lineCap = 'round';
-    canvas_ctx.lineWidth = this.penwidth;
-    canvas_ctx.font = font(this.fontsize, this.fontname);
-
-    // This sets up appropriate compositing operations on ctx.
-    this.penmode = this.penmode;
-
-    [turtle_ctx, canvas_ctx].forEach(function(ctx) {
-      ctx.setTransform(this.sx, 0, 0, -this.sy, this.width / 2, this.height / 2);
-    }.bind(this));
-  };
-
-  this.resize = function(w, h) {
-    this.width = w;
-    this.height = h;
-    this.init();
-  };
-
-  this.init();
-  this.tick();
-}
+  global.CanvasTurtle = CanvasTurtle;
+}(self));
