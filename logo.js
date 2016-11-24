@@ -2223,9 +2223,9 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def(["setpensize", "setwidth", "setpw"], function(a) {
     if (Type(a) === 'list')
-      return turtle.width = aexpr(a[0]);
+      return turtle.penwidth = aexpr(a[0]);
     else
-      return turtle.width = aexpr(a);
+      return turtle.penwidth = aexpr(a);
   });
 
   // Not Supported: setpenpattern
@@ -2254,7 +2254,7 @@ function LogoInterpreter(turtle, stream, savehook)
   // Not Supported: palette
 
   def("pensize", function() {
-    return [turtle.width, turtle.width];
+    return [turtle.penwidth, turtle.penwidth];
   });
 
   // Not Supported: pen
