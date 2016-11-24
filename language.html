@@ -353,6 +353,12 @@ of comparison.</p>
 
 <h4>3.2 Receivers</h4>
 <dl>
+  <dt><code>readlist</code>
+  <dt><code>(readlist <var>promptstr</var>)</code>
+  <dd>Prompt the user for a line of input. The result is a list of words.
+  <dd class=example>show readlist</dd>
+  <dd class=example>make "colors (readlist [Type some colors:])  show :colors</dd>
+
   <dt><code>readword</code>
   <dt><code>(readword <var>promptstr</var>)</code>
   <dd>Prompt the user for a line of input. The result (including spaces) is the single word output.

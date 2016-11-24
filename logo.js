@@ -1728,7 +1728,15 @@ function LogoInterpreter(turtle, stream, savehook)
 
   // 3.2 Receivers
 
-  // Not Supported: readlist
+  def("readlist", function() {
+    var word;
+    if (arguments.length > 0)
+      word = stream.read(stringify_nodecorate(arguments[0]));
+    else
+      word = stream.read();
+    return parse('[' + word + ']')[0];
+  });
+
 
   def("readword", function() {
     if (arguments.length > 0)

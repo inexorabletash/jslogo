@@ -622,7 +622,7 @@ QUnit.test("Data Structure Primitives", function(t) {
 });
 
 QUnit.test("Communication", function(t) {
-  t.expect(22);
+  t.expect(28);
 
   // 3.1 Transmitters
 
@@ -646,16 +646,19 @@ QUnit.test("Communication", function(t) {
 
   // 3.2 Receivers
 
-  this.queue(function() {
-    this.stream.inputbuffer = "test";
-  });
+  this.queue(function() { this.stream.inputbuffer = "1+2"; });
+  this.assert_equals('readlist', ['1+2']);
+  this.queue(function() { this.stream.inputbuffer = "1 + 2"; });
+  this.assert_equals('readlist', ['1', '+', '2']);
+  this.assert_prompt('readlist', undefined);
+  this.assert_prompt('(readlist "query)', 'query');
+  this.assert_prompt('(readlist "query "extra)', 'query');
+  this.assert_prompt('(readlist [a b c])', 'a b c');
+
+  this.queue(function() { this.stream.inputbuffer = "test"; });
   this.assert_equals('readword', 'test');
-
-  this.queue(function() {
-    this.stream.inputbuffer = "a b c 1 2 3";
-  });
+  this.queue(function() { this.stream.inputbuffer = "a b c 1 2 3"; });
   this.assert_equals('readword', 'a b c 1 2 3');
-
   this.assert_prompt('readword', undefined);
   this.assert_prompt('(readword "query)', 'query');
   this.assert_prompt('(readword "query "extra)', 'query');
@@ -1912,7 +1915,7 @@ QUnit.test("Arity of Primitives", function(t) {
     //['readchar', [0, 0, 0]],
     //['readchars', [1, 1, 1]],
     //['reader', [0, 0, 0]],
-    //['readlist', [0, 0, 0]],
+    ['readlist', [0, 0, 0]],
     //['readpos', [0, 0, 0]],
     //['readrawline', [0, 0, 0]],
     ['readword', [0, 0, 0]],
