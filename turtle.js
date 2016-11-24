@@ -372,7 +372,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, w, h) {
   };
 
   this.arc = function(angle, radius) {
-    if (self.turtlemode == 'wrap') {
+    if (this.turtlemode == 'wrap') {
       [this.x, this.x + this.width, this.x - this.width].forEach(function(x) {
         [this.y, this.y + this.height, this.y - this.height].forEach(function(y) {
           if (!this.filling)
