@@ -631,7 +631,7 @@ function LogoInterpreter(turtle, stream, savehook)
     var value = maybegetvar(name);
     if (value !== undefined)
       return value;
-    throw err("Don't know about variable {name:U}", { name: name });
+    throw err("Don't know about variable {name:U}", {name: name});
   }
 
   function lvalue(name) {
@@ -894,7 +894,7 @@ function LogoInterpreter(turtle, stream, savehook)
     var args = [];
     if (natural) {
       // Natural arity of the function
-      for (var i = 0; i < procedure.length; ++i) {
+      for (var i = 0; i < procedure.default; ++i) {
         args.push(expression(tokenlist));
       }
     } else {
@@ -903,6 +903,11 @@ function LogoInterpreter(turtle, stream, savehook)
         args.push(expression(tokenlist));
       }
       tokenlist.shift(); // Consume ')'
+
+      if (args.length < procedure.minimum)
+        throw err("Not enough inputs for {name:U}", {name: name});
+      if (procedure.maximum !== -1 && args.length > procedure.maximum)
+        throw err("Too many inputs for {name:U}", {name: name});
     }
 
     if (procedure.noeval) {
@@ -1275,9 +1280,6 @@ function LogoInterpreter(turtle, stream, savehook)
 
     // Closure over inputs and block to handle scopes, arguments and outputs
     var func = function() {
-      if (arguments.length < inputs.length)
-        throw err("Not enough inputs for {_PROC_}");
-
       // Define a new scope
       var scope = new StringMap(true);
       self.scopes.push(scope);
@@ -1735,7 +1737,7 @@ function LogoInterpreter(turtle, stream, savehook)
     else
       word = stream.read();
     return parse('[' + word + ']')[0];
-  });
+  }, {maximum: 1});
 
 
   def("readword", function() {
@@ -1743,7 +1745,7 @@ function LogoInterpreter(turtle, stream, savehook)
       return stream.read(stringify_nodecorate(arguments[0]));
     else
       return stream.read();
-  });
+  }, {maximum: 1});
 
 
   // Not Supported: readrawline
@@ -2010,7 +2012,7 @@ function LogoInterpreter(turtle, stream, savehook)
   def("xor", function(a, b) {
     return Array.from(arguments).map(aexpr)
       .reduce(function(a, b) { return Boolean(a) !== Boolean(b); }, 0) ? 1 : 0;
-  });
+  }, {minimum: 0, maximum: -1});
 
   def("not", function(a) {
     return !aexpr(a) ? 1 : 0;
@@ -2096,7 +2098,7 @@ function LogoInterpreter(turtle, stream, savehook)
   def("label", function(a) {
     var s = Array.from(arguments).map(stringify_nodecorate).join(" ");
     return turtle.drawtext(s);
-  });
+  }, {maximum: -1});
 
   def("setlabelheight", function(a) { return turtle.setfontsize(aexpr(a)); });
 
@@ -3217,7 +3219,7 @@ function LogoInterpreter(turtle, stream, savehook)
       args.push(arguments[i]);
 
     return routine.apply(null, args);
-  });
+  }, {minimum: 1, maximum: -1});
 
   def("foreach", function(procname, list) {
     procname = sexpr(procname);
@@ -3269,7 +3271,7 @@ function LogoInterpreter(turtle, stream, savehook)
         .then(function(value) { mapped.push(value); })
         .then(loop, reject);
     });
-  });
+  }, {maximum: -1});
 
   // Not Supported: map.se
 
@@ -3343,7 +3345,7 @@ function LogoInterpreter(turtle, stream, savehook)
         .then(function(result) { value = result; })
         .then(loop, reject);
     });
-  });
+  }, {maximum: 3});
 
 
   def("crossmap", function(procname, list/*,  ... */) {
@@ -3391,7 +3393,7 @@ function LogoInterpreter(turtle, stream, savehook)
         .then(function(value) { mapped.push(value); })
         .then(loop, reject);
     });
-  });
+  }, {maximum: -1});
 
   // Not Supported: cascade
   // Not Supported: cascade.2

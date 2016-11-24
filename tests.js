@@ -622,7 +622,7 @@ QUnit.test("Data Structure Primitives", function(t) {
 });
 
 QUnit.test("Communication", function(t) {
-  t.expect(28);
+  t.expect(26);
 
   // 3.1 Transmitters
 
@@ -652,7 +652,6 @@ QUnit.test("Communication", function(t) {
   this.assert_equals('readlist', ['1', '+', '2']);
   this.assert_prompt('readlist', undefined);
   this.assert_prompt('(readlist "query)', 'query');
-  this.assert_prompt('(readlist "query "extra)', 'query');
   this.assert_prompt('(readlist [a b c])', 'a b c');
 
   this.queue(function() { this.stream.inputbuffer = "test"; });
@@ -661,7 +660,6 @@ QUnit.test("Communication", function(t) {
   this.assert_equals('readword', 'a b c 1 2 3');
   this.assert_prompt('readword', undefined);
   this.assert_prompt('(readword "query)', 'query');
-  this.assert_prompt('(readword "query "extra)', 'query');
   this.assert_prompt('(readword [a b c])', 'a b c');
 
   // 3.3 File Access
@@ -1075,7 +1073,7 @@ QUnit.test("Workspace Management", function(t) {
   // Various combinations of inputs, optional inputs, rest, and default length
 
   // No inputs
-  this.assert_equals('to foo (output) end  (foo)', undefined);
+  this.assert_equals('to foo (output 1) end  (foo)', 1);
 
   // + Required inputs
   this.assert_error('to foo :a (output :a) end  (foo)', 'Not enough inputs for FOO');
@@ -1093,7 +1091,7 @@ QUnit.test("Workspace Management", function(t) {
   this.assert_equals('to foo [:a 6] [:b 7] output (list :a :b) end  (foo)', [6, 7]);
   this.assert_equals('to foo [:a 6] [:b 7] output (list :a :b) end  (foo 1)', [1, 7]);
   this.assert_equals('to foo [:a 6] [:b 7] output (list :a :b) end  (foo 1 2)', [1, 2]);
-  this.assert_equals('to foo [:a 6] [:b 7] output (list :a :b) end  (foo 1 2 3)', [1, 2]);
+  this.assert_error('to foo [:a 6] [:b 7] output (list :a :b) end  (foo 1 2 3)', 'Too many inputs for FOO');
 
   this.assert_equals('to foo :a [:b 6] output (list :a :b) end  (foo 1)', [1, 6]);
   this.assert_equals('to foo :a [:b 6] output (list :a :b) end  (foo 1 2)', [1, 2]);
@@ -1523,14 +1521,14 @@ QUnit.test("Error Messages", function(t) {
   this.assert_error("nosuchproc", "Don't know how to NOSUCHPROC");
   this.assert_error("1 + \"1+2", "Expected number");
   this.assert_error("1 + []", "Expected number");
-  this.assert_error("(minus)", "Expected number");
+  this.assert_error("(minus [])", "Expected number");
   this.assert_error("make [] 123", "Expected string");
-  this.assert_error("(def)", "Expected string");
+  this.assert_error("(def [])", "Expected string");
 
   this.assert_error('fd50', "Need a space between FD and 50");
 
-  this.assert_error("(erase)", "ERASE: Expected list");
-  this.assert_error("(map \"show)", "MAP: Expected list");
+  this.assert_error("(erase {})", "ERASE: Expected list");
+  this.assert_error("(map \"show {})", "MAP: Expected list");
   this.assert_error("(map \"sum [1 2] [1])", "MAP: Expected lists of equal length");
   this.assert_error("to 123", "TO: Expected identifier");
   this.assert_error("to +", "TO: Expected identifier");
@@ -1814,7 +1812,7 @@ QUnit.test("Arity of Primitives", function(t) {
     ['item', [2, 2, 2]],
     //['key?', [0, 0, 0]],
     //['keyp', [0, 0, 0]],
-    ['label', [1, 1, 1]],
+    ['label', [1, 1, /*1*/ -1]], // nonstandard: unlimited, like PRINT
     ['labelsize', [0, 0, 0]],
     ['last', [1, 1, 1]],
     ['left', [1, 1, 1]],
@@ -1915,10 +1913,10 @@ QUnit.test("Arity of Primitives", function(t) {
     //['readchar', [0, 0, 0]],
     //['readchars', [1, 1, 1]],
     //['reader', [0, 0, 0]],
-    ['readlist', [0, 0, 0]],
+    ['readlist', [0, 0, /*0*/ 1]], // nonstandard: prompt
     //['readpos', [0, 0, 0]],
     //['readrawline', [0, 0, 0]],
-    ['readword', [0, 0, 0]],
+    ['readword', [0, 0, /*0*/ 1]], // nonstandard: prompt
     //['refresh', [0, 0, 0]],
     ['remainder', [2, 2, 2]],
     ['remprop', [2, 2, 2]],
@@ -2021,6 +2019,7 @@ QUnit.test("Arity of Primitives", function(t) {
     ['wrap', [0, 0, 0]],
     //['writepos', [0, 0, 0]],
     //['writer', [0, 0, 0]],
+    ['xor', [0, 2, -1]],
   ];
   arities.forEach(function(pair) {
     var proc = pair[0];
