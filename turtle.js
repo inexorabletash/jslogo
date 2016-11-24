@@ -46,7 +46,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
       if (self.filling) {
         canvas_ctx.lineTo(x1, y1);
         canvas_ctx.lineTo(x2, y2);
-      } else if (self.down) {
+      } else if (self.pendown) {
         canvas_ctx.beginPath();
         canvas_ctx.moveTo(x1, y1);
         canvas_ctx.lineTo(x2, y2);
