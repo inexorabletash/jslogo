@@ -2070,12 +2070,12 @@ function LogoInterpreter(turtle, stream, savehook)
   def("setpos", function(l) {
     l = lexpr(l);
     if (l.length !== 2) throw err("{_PROC_}: Expected list of length 2");
-    return turtle.setposition(aexpr(l[0]), aexpr(l[1]));
+    turtle.position = [aexpr(l[0]), aexpr(l[1])];
   });
-  def("setxy", function(x, y) { return turtle.setposition(aexpr(x), aexpr(y)); });
-  def("setx", function(x) { return turtle.setposition(aexpr(x), undefined); }); // TODO: Replace with ...?
-  def("sety", function(y) { return turtle.setposition(undefined, aexpr(y)); });
-  def(["setheading", "seth"], function(a) { return turtle.setheading(aexpr(a)); });
+  def("setxy", function(x, y) { return turtle.position = [aexpr(x), aexpr(y)]; });
+  def("setx", function(x) { return turtle.position = [aexpr(x), undefined]; });
+  def("sety", function(y) { return turtle.position = [undefined, aexpr(y)]; });
+  def(["setheading", "seth"], function(a) { return turtle.heading = aexpr(a); });
 
   def("home", function() { return turtle.home(); });
 
@@ -2085,31 +2085,31 @@ function LogoInterpreter(turtle, stream, savehook)
   // 6.2 Turtle Motion Queries
   //
 
-  def("pos", function() { var l = turtle.getxy(); return [l[0], l[1]]; });
-  def("xcor", function() { var l = turtle.getxy(); return l[0]; });
-  def("ycor", function() { var l = turtle.getxy(); return l[1]; });
-  def("heading", function() { return turtle.getheading(); });
+  def("pos", function() { return turtle.position; });
+  def("xcor", function() { return turtle.position[0]; });
+  def("ycor", function() { return turtle.position[1]; });
+  def("heading", function() { return turtle.heading; });
   def("towards", function(l) {
     l = lexpr(l);
     if (l.length !== 2) throw err("{_PROC_}: Expected list of length 2");
     return turtle.towards(aexpr(l[0]), aexpr(l[1]));
   });
-  def("scrunch", function() { return turtle.getscrunch(); });
+  def("scrunch", function() { return turtle.scrunch; });
 
   //
   // 6.3 Turtle and Window Control
   //
 
-  def(["showturtle", "st"], function() { return turtle.showturtle(); });
-  def(["hideturtle", "ht"], function() { return turtle.hideturtle(); });
-  def("clean", function() { return turtle.clear(); });
-  def(["clearscreen", "cs"], function() { return turtle.clearscreen(); });
+  def(["showturtle", "st"], function() { turtle.visible = true; });
+  def(["hideturtle", "ht"], function() { turtle.visible = false; });
+  def("clean", function() { turtle.clear(); });
+  def(["clearscreen", "cs"], function() { turtle.clearscreen(); });
 
-  def("wrap", function() { return turtle.setturtlemode('wrap'); });
-  def("window", function() { return turtle.setturtlemode('window'); });
-  def("fence", function() { return turtle.setturtlemode('fence'); });
+  def("wrap", function() { turtle.turtlemode = 'wrap'; });
+  def("window", function() { turtle.turtlemode = 'window'; });
+  def("fence", function() { turtle.turtlemode = 'fence'; });
 
-  def("fill", function() { return turtle.fill(); });
+  def("fill", function() { turtle.fill(); });
 
   def("filled", function(fillcolor, statements) {
     fillcolor = sexpr(fillcolor);
@@ -2127,9 +2127,9 @@ function LogoInterpreter(turtle, stream, savehook)
     return turtle.drawtext(s);
   }, {maximum: -1});
 
-  def("setlabelheight", function(a) { return turtle.setfontsize(aexpr(a)); });
+  def("setlabelheight", function(a) { return turtle.fontsize = aexpr(a); });
 
-  def("setlabelfont", function(a) { return turtle.setfontname(sexpr(a)); });
+  def("setlabelfont", function(a) { return turtle.fontname = sexpr(a); });
 
   // Not Supported: textscreen
   // Not Supported: fullscreen
@@ -2140,7 +2140,7 @@ function LogoInterpreter(turtle, stream, savehook)
     sy = aexpr(sy);
     if (!isFinite(sx) || sx === 0 || !isFinite(sy) || sy === 0)
       throw err("{_PROC_}: Expected non-zero values");
-    return turtle.setscrunch(sx, sy);
+    return turtle.scrunch = [sx, sy];
   });
 
   // Not Supported: refresh
@@ -2151,32 +2151,32 @@ function LogoInterpreter(turtle, stream, savehook)
   //
 
   def(["shownp", "shown?"], function() {
-    return turtle.isturtlevisible() ? 1 : 0;
+    return turtle.visible ? 1 : 0;
   });
 
   // Not Supported: screenmode
 
   def("turtlemode", function() {
-    return turtle.getturtlemode().toUpperCase();
+    return turtle.turtlemode.toUpperCase();
   });
 
   def("labelsize", function() {
-    return [turtle.getfontsize(), turtle.getfontsize()];
+    return [turtle.fontsize, turtle.fontsize];
   });
 
   def("labelfont", function() {
-    return turtle.getfontname();
+    return turtle.fontname;
   });
 
   //
   // 6.5 Pen and Background Control
   //
-  def(["pendown", "pd"], function() { return turtle.pendown(); });
-  def(["penup", "pu"], function() { return turtle.penup(); });
+  def(["pendown", "pd"], function() { return turtle.pendown = true; });
+  def(["penup", "pu"], function() { return turtle.pendown = false; });
 
-  def(["penpaint", "ppt"], function() { return turtle.setpenmode('paint'); });
-  def(["penerase", "pe"], function() { return turtle.setpenmode('erase'); });
-  def(["penreverse", "px"], function() { return turtle.setpenmode('reverse'); });
+  def(["penpaint", "ppt"], function() { return turtle.penmode = 'paint'; });
+  def(["penerase", "pe"], function() { return turtle.penmode = 'erase'; });
+  def(["penreverse", "px"], function() { return turtle.penmode = 'reverse'; });
 
   // To handle additional color names (localizations, etc):
   // logo.colorAlias = function(name) {
@@ -2216,23 +2216,23 @@ function LogoInterpreter(turtle, stream, savehook)
   }
 
   def(["setpencolor", "setpc", "setcolor"], function(color) {
-    turtle.setcolor(parseColor(color));
+    turtle.color = parseColor(color);
   });
 
   // Not Supported: setpalette
 
   def(["setpensize", "setwidth", "setpw"], function(a) {
     if (Type(a) === 'list')
-      return turtle.setwidth(aexpr(a[0]));
+      return turtle.width = aexpr(a[0]);
     else
-      return turtle.setwidth(aexpr(a));
+      return turtle.width = aexpr(a);
   });
 
   // Not Supported: setpenpattern
   // Not Supported: setpen
 
   def(["setbackground", "setscreencolor", "setsc"], function(color) {
-    turtle.setbgcolor(parseColor(color));
+    turtle.bgcolor = parseColor(color);
   });
 
   //
@@ -2240,27 +2240,27 @@ function LogoInterpreter(turtle, stream, savehook)
   //
 
   def(["pendownp", "pendown?"], function() {
-    return turtle.ispendown() ? 1 : 0;
+    return turtle.pendown ? 1 : 0;
   });
 
   def("penmode", function() {
-    return turtle.getpenmode().toUpperCase();
+    return turtle.penmode.toUpperCase();
   });
 
   def(["pencolor", "pc"], function() {
-    return turtle.getcolor();
+    return turtle.color;
   });
 
   // Not Supported: palette
 
   def("pensize", function() {
-    return [turtle.getwidth(), turtle.getwidth()];
+    return [turtle.width, turtle.width];
   });
 
   // Not Supported: pen
 
   def(["background", "bg", "getscreencolor", "getsc"], function() {
-    return turtle.getbgcolor();
+    return turtle.bgcolor;
   });
 
   // 6.7 Saving and Loading Pictures
