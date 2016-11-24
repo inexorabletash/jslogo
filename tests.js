@@ -52,7 +52,19 @@ QUnit.module("Logo Unit Tests", {
       clear: function() {
         this.outputbuffer = "";
         this.last_prompt = undefined;
-      }
+      },
+
+      _font: 'monospace',
+      get font() { return this._font; },
+      set font(v) { this._font = v; },
+
+      _color: 'black',
+      get color() { return this._color; },
+      set color(v) { this._color = v; },
+
+      _size: 13,
+      get size() { return this._size; },
+      set size(v) { this._size = v; }
     };
 
     this.interpreter = new LogoInterpreter(this.turtle, this.stream);
@@ -622,7 +634,7 @@ QUnit.test("Data Structure Primitives", function(t) {
 });
 
 QUnit.test("Communication", function(t) {
-  t.expect(26);
+  t.expect(31);
 
   // 3.1 Transmitters
 
@@ -667,6 +679,13 @@ QUnit.test("Communication", function(t) {
 
   this.assert_stream('print "a cleartext', '');
   this.assert_stream('print "a ct', '');
+
+  this.assert_equals('settextcolor "red  textcolor', 'red');
+  this.assert_equals('settextcolor "#123456  textcolor', '#123456');
+  this.assert_equals('settextcolor [ 0 100 0 ]  textcolor', '#00ff00');
+
+  this.assert_equals('setfont "serif  font', 'serif');
+  this.assert_equals('settextsize 66  textsize', 66);
 
   this.stream.clear();
 });
@@ -1748,7 +1767,7 @@ QUnit.test("Arity of Primitives", function(t) {
     //['cslsload', [1, 1, 1]],
     ['ct', [0, 0, 0]],
     //['cursor', [0, 0, 0]],
-    //['decreasefont', [0, 0, 0]],
+    ['decreasefont', [0, 0, 0]],
     ['define', [2, 2, 2]],
     ['defined?', [1, 1, 1]],
     ['definedp', [1, 1, 1]],
@@ -1780,7 +1799,7 @@ QUnit.test("Arity of Primitives", function(t) {
     ['filled', [2, 2, 2]],
     ['first', [1, 1, 1]],
     ['firsts', [1, 1, 1]],
-    //['font', [0, 0, 0]],
+    ['font', [0, 0, 0]],
     ['forever', [1, 1, 1]],
     ['form', [3, 3, 3]],
     ['forward', [1, 1, 1]],
@@ -1807,7 +1826,7 @@ QUnit.test("Arity of Primitives", function(t) {
     ['iffalse', [1, 1, 1]],
     ['ift', [1, 1, 1]],
     ['iftrue', [1, 1, 1]],
-    //['increasefont', [0, 0, 0]],
+    ['increasefont', [0, 0, 0]],
     ['int', [1, 1, 1]],
     ['item', [2, 2, 2]],
     //['key?', [0, 0, 0]],
@@ -1942,7 +1961,7 @@ QUnit.test("Arity of Primitives", function(t) {
     //['setcslsloc', [1, 1, 1]],
     //['setcursor', [1, 1, 1]],
     //['seteditor', [1, 1, 1]],
-    //['setfont', [1, 1, 1]],
+    ['setfont', [1, 1, 1]],
     ['seth', [1, 1, 1]],
     ['setheading', [1, 1, 1]],
     //['sethelploc', [1, 1, 1]],
@@ -1962,8 +1981,8 @@ QUnit.test("Arity of Primitives", function(t) {
     ['setscrunch', [2, 2, 2]],
     //['settc', [2, 2, 2]],
     //['settemploc', [1, 1, 1]],
-    //['settextcolor', [2, 2, 2]],
-    //['settextsize', [1, 1, 1]],
+    ['settextcolor', /*[2, 2, 2]*/ [1, 1, 1]], /* Does not support background color */
+    ['settextsize', [1, 1, 1]],
     //['setwrite', [1, 1, 1]],
     //['setwritepos', [1, 1, 1]],
     ['setx', [1, 1, 1]],

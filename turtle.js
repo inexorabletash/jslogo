@@ -203,7 +203,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
                 (this.penmode === 'erase') ? 'destination-out' :
                 (this.penmode === 'reverse') ? 'difference' : 'source-over';
     if (penmode === 'paint')
-      canvas_ctx.strokeStyle = canvas_ctx.fillStyle = parseColor(this.color);
+      canvas_ctx.strokeStyle = canvas_ctx.fillStyle = this.parseColor(this.color);
     else
       canvas_ctx.strokeStyle = canvas_ctx.fillStyle = '#ffffff';
   };
@@ -227,19 +227,19 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     12: "salmon", 13: "purple", 14: "orange", 15: "gray"
   };
 
-  function parseColor(color) {
+  this.parseColor = function(color) {
     color = String(color);
     if (STANDARD_COLORS.hasOwnProperty(color))
       return STANDARD_COLORS[color];
     if (self.colorAlias)
       return self.colorAlias(color) || color;
     return color;
-  }
+  };
 
   this.setcolor = function(color) {
     this.color = color;
-    canvas_ctx.strokeStyle = parseColor(this.color);
-    canvas_ctx.fillStyle = parseColor(this.color);
+    canvas_ctx.strokeStyle = this.parseColor(this.color);
+    canvas_ctx.fillStyle = this.parseColor(this.color);
   };
   this.getcolor = function() { return this.color; };
 
@@ -295,7 +295,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     try {
       canvas_ctx.setTransform(1, 0, 0, 1, 0, 0);
       canvas_ctx.clearRect(0, 0, width, height);
-      canvas_ctx.fillStyle = parseColor(this.bgcolor);
+      canvas_ctx.fillStyle = this.parseColor(this.bgcolor);
       canvas_ctx.fillRect(0, 0, width, height);
     } finally {
       canvas_ctx.restore();
@@ -367,7 +367,7 @@ function CanvasTurtle(canvas_ctx, turtle_ctx, width, height) {
     --this.filling;
     if (this.filling === 0) {
       canvas_ctx.closePath();
-      canvas_ctx.fillStyle = parseColor(fillcolor);
+      canvas_ctx.fillStyle = this.parseColor(fillcolor);
       canvas_ctx.fill();
       canvas_ctx.fillStyle = this.color;
       if (this.down)

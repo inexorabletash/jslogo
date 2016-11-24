@@ -518,6 +518,10 @@ window.addEventListener('DOMContentLoaded', function() {
   }());
 
 
+  $('#overlay').style.fontSize = '13px';
+  $('#overlay').style.fontFamily = 'monospace';
+  $('#overlay').style.color = 'black';
+
   var stream = {
     read: function(s) {
       return window.prompt(s ? s : "");
@@ -536,6 +540,24 @@ window.addEventListener('DOMContentLoaded', function() {
     readback: function() {
       var div = $('#overlay');
       return div.innerHTML;
+    },
+    get textsize() {
+      return parseFloat($('#overlay').style.fontSize.replace('px', ''));
+    },
+    set textsize(height) {
+      $('#overlay').style.fontSize = Math.max(height, 1) + 'px';
+    },
+    get font() {
+      return $('#overlay').style.fontFamily;
+    },
+    set font(fontname) {
+      $('#overlay').style.fontFamily = fontname;
+    },
+    get color() {
+      return $('#overlay').style.color;
+    },
+    set color(color) {
+      $('#overlay').style.color = turtle.parseColor(color);
     }
   };
 

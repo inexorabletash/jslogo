@@ -1789,12 +1789,39 @@ function LogoInterpreter(turtle, stream, savehook)
   // Not Supported: setcursor
   // Not Supported: cursor
   // Not Supported: setmargins
-  // Not Supported: settextcolor
-  // Not Supported: increasefont
-  // Not Supported: settextsize
-  // Not Supported: textsize
-  // Not Supported: setfont
-  // Not Supported: font
+
+  def('settextcolor', function(color) {
+    self.stream.color = parseColor(color);
+  });
+
+  def('textcolor', function() {
+    return self.stream.color;
+  });
+
+  def('increasefont', function() {
+    self.stream.textsize = Math.round(self.stream.textsize * 1.25);
+  });
+
+  def('decreasefont', function() {
+    self.stream.textsize = Math.round(self.stream.textsize / 1.25);
+  });
+
+  def('settextsize', function(size) {
+    self.stream.textsize = aexpr(size);
+  });
+
+  def('textsize', function() {
+    return self.stream.textsize;
+  });
+
+  def('setfont', function(size) {
+    self.stream.font = sexpr(size);
+  });
+
+  def('font', function() {
+    return self.stream.font;
+  });
+
 
   //----------------------------------------------------------------------
   //
