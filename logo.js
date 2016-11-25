@@ -190,121 +190,125 @@ function LogoInterpreter(turtle, stream, savehook)
   }
 
   function StringMap(case_fold) {
-    var map = new Map();
-    Object.assign(this, {
-      get: function(key) {
-        key = case_fold ? String(key).toLowerCase() : String(key);
-        return map.get(key);
-      },
-      set: function(key, value) {
-        key = case_fold ? String(key).toLowerCase() : String(key);
-        map.set(key, value);
-      },
-      has: function(key) {
-        key = case_fold ? String(key).toLowerCase() : String(key);
-        return map.has(key);
-      },
-      delete: function(key) {
-        key = case_fold ? String(key).toLowerCase() : String(key);
-        return map.delete(key);
-      },
-      keys: function() {
-        var keys = [];
-        map.forEach(function(value, key) { keys.push(key); });
-        return keys;
-      },
-      empty: function() {
-        return map.size === 0;
-      },
-      forEach: function(fn) {
-        return map.forEach(function(value, key) {
-          fn(key, value);
-        });
-      }
-    });
+    this._map = new Map();
+    this._case_fold = case_fold;
   }
+  Object.defineProperties(StringMap.prototype, {
+    get: {value: function(key) {
+      key = this._case_fold ? String(key).toLowerCase() : String(key);
+      return this._map.get(key);
+    }},
+    set: {value: function(key, value) {
+      key = this._case_fold ? String(key).toLowerCase() : String(key);
+      this._map.set(key, value);
+    }},
+    has: {value: function(key) {
+      key = this._case_fold ? String(key).toLowerCase() : String(key);
+      return this._map.has(key);
+    }},
+    delete: {value: function(key) {
+      key = this._case_fold ? String(key).toLowerCase() : String(key);
+      return this._map.delete(key);
+    }},
+    keys: {value: function() {
+      var keys = [];
+      this._map.forEach(function(value, key) { keys.push(key); });
+      return keys;
+    }},
+    empty: {value: function() {
+      return this._map.size === 0;
+    }},
+    forEach: {value: function(fn) {
+      return this._map.forEach(function(value, key) {
+        fn(key, value);
+      });
+    }}
+  });
 
   function LogoArray(size, origin) {
-    this.array = [];
-    this.array.length = size;
-    for (var i = 0; i < this.array.length; ++i)
-      this.array[i] = [];
-    this.origin = origin;
+    this._array = [];
+    this._array.length = size;
+    for (var i = 0; i < this._array.length; ++i)
+      this._array[i] = [];
+    this._origin = origin;
   }
   LogoArray.from = function(list, origin) {
     var array = new LogoArray(0, origin);
-    array.array = Array.from(list);
+    array._array = Array.from(list);
     return array;
   };
-  LogoArray.prototype = {
-    item: function(i) {
+  Object.defineProperties(LogoArray.prototype, {
+    item: {value: function(i) {
       i = Number(i)|0;
-      i -= this.origin;
-      if (i < 0 || i >= this.array.length)
+      i -= this._origin;
+      if (i < 0 || i >= this._array.length)
         throw err("{_PROC_}: Index out of bounds");
-      return this.array[i];
-    },
-    setItem: function(i, v) {
+      return this._array[i];
+    }},
+    setItem: {value: function(i, v) {
       i = Number(i)|0;
-      i -= this.origin;
-      if (i < 0 || i >= this.array.length)
+      i -= this._origin;
+      if (i < 0 || i >= this._array.length)
         throw err("{_PROC_}: Index out of bounds");
-      this.array[i] = v;
-    },
-    list: function() {
-      return this.array;
-    },
-    count: function() {
-      return this.array.length;
-    }
-  };
+      this._array[i] = v;
+    }},
+    list: {get: function() {
+      return this._array;
+    }},
+    origin: {get: function() {
+      return this._origin;
+    }},
+    length: {get: function() {
+      return this._array.length;
+    }}
+  });
 
   function Stream(string) {
-    this.string = string;
-    this.index = 0;
+    this._string = string;
+    this._index = 0;
     this._skip();
   }
-  Stream.prototype = {
-    eof: function() {
-      return this.index >= this.string.length;
-    },
-    peek: function() {
-      var c = this.string.charAt(this.index);
+  Object.defineProperties(Stream.prototype, {
+    eof: {get: function() {
+      return this._index >= this._string.length;
+    }},
+    peek: {value: function() {
+      var c = this._string.charAt(this._index);
       if (c === '\\')
-        c += this.string.charAt(this.index + 1);
+        c += this._string.charAt(this._index + 1);
       return c;
-    },
-    get: function() {
+    }},
+    get: {value: function() {
       var c = this._next();
       this._skip();
       return c;
-    },
-    _next: function() {
-      var c = this.string.charAt(this.index++);
+    }},
+    _next: {value: function() {
+      var c = this._string.charAt(this._index++);
       if (c === '\\')
-        c += this.string.charAt(this.index++);
+        c += this._string.charAt(this._index++);
       return c;
-    },
-    _skip: function() {
-      while (!this.eof()) {
+    }},
+    _skip: {value: function() {
+      while (!this.eof) {
         var c = this.peek();
-        if (c === '~' && this.string.charAt(this.index + 1) === '\n') {
-          this.index += 2;
+        if (c === '~' && this._string.charAt(this._index + 1) === '\n') {
+          this._index += 2;
         } else if (c === ';') {
           do {
             c = this._next();
-          } while (!this.eof() && this.peek() !== '\n');
+          } while (!this.eof && this.peek() !== '\n');
           if (c === '~')
             this._next();
         } else {
           return;
         }
       }
-    },
-    rest: function() {
-      return this.string.substring(this.index);
-    }
-  };
+    }},
+    rest: {get: function() {
+      return this._string.substring(this._index);
+    }}
+  });
 
   //----------------------------------------------------------------------
   //
@@ -416,7 +420,7 @@ function LogoInterpreter(turtle, stream, savehook)
       } else if (!inChars(stream.peek(), WORD_DELIMITER)) {
         atom = parseWord(stream);
       } else {
-        throw err("Couldn't parse: '{string}'", { string: stream.rest() });
+        throw err("Couldn't parse: '{string}'", { string: stream.rest });
       }
       atoms.push(atom);
       prev = atom;
@@ -443,7 +447,7 @@ function LogoInterpreter(turtle, stream, savehook)
   var QUOTED_DELIMITER = WS_CHARS + '[](){}';
   function parseQuoted(stream) {
     var word = '';
-    while (!stream.eof() && QUOTED_DELIMITER.indexOf(stream.peek()) === -1) {
+    while (!stream.eof && QUOTED_DELIMITER.indexOf(stream.peek()) === -1) {
       var c = stream.get();
       word += (c.charAt(0) === '\\') ? c.charAt(1) : c.charAt(0);
     }
@@ -463,7 +467,7 @@ function LogoInterpreter(turtle, stream, savehook)
   var WORD_DELIMITER = WS_CHARS + '[](){}+-*/%^=<>';
   function parseWord(stream) {
     var word = '';
-    while (!stream.eof() && WORD_DELIMITER.indexOf(stream.peek()) === -1) {
+    while (!stream.eof && WORD_DELIMITER.indexOf(stream.peek()) === -1) {
       var c = stream.get();
       word += (c.charAt(0) === '\\') ? c.charAt(1) : c.charAt(0);
     }
@@ -1094,7 +1098,7 @@ function LogoInterpreter(turtle, stream, savehook)
       switch (Type(atom)) {
       case 'word': return String(atom);
       case 'list': return '[ ' + atom.map(defn).join(' ') + ' ]';
-      case 'array': return '{ ' + atom.list().map(defn).join(' ') + ' }' +
+      case 'array': return '{ ' + atom.list.map(defn).join(' ') + ' }' +
           (atom.origin === 1 ? '' : '@' + atom.origin);
       default: throw new Error("Internal error: unknown type");
       }
@@ -1166,7 +1170,7 @@ function LogoInterpreter(turtle, stream, savehook)
     case 'list':
       return "[" + thing.map(stringify).join(" ") + "]";
     case 'array':
-      return "{" + thing.list().map(stringify).join(" ") + "}" +
+      return "{" + thing.list.map(stringify).join(" ") + "}" +
         (thing.origin === 1 ? '' : '@' + thing.origin);
     default:
       return sexpr(thing);
@@ -1178,7 +1182,7 @@ function LogoInterpreter(turtle, stream, savehook)
     case 'list':
       return thing.map(stringify).join(" ");
     case 'array':
-      return thing.list().map(stringify).join(" ");
+      return thing.list.map(stringify).join(" ");
     default:
       return sexpr(thing);
     }
@@ -1418,7 +1422,7 @@ function LogoInterpreter(turtle, stream, savehook)
     if (Type(array) !== 'array') {
       throw err("{_PROC_}: Expected array");
     }
-    return array.list().slice();
+    return array.list.slice();
   });
 
   def("combine", function(thing1, thing2) {
@@ -1532,7 +1536,7 @@ function LogoInterpreter(turtle, stream, savehook)
     case 'list':
       return atom.some(function(a) { return contains(a, value); });
     case 'array':
-      return atom.list().some(function(a) { return contains(a, value); });
+      return atom.list.some(function(a) { return contains(a, value); });
     default:
       return false;
     }
@@ -1660,7 +1664,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("count", function(thing) {
     if (Type(thing) === 'array')
-      return thing.count();
+      return thing.length;
     return lexpr(thing).length;
   });
   def("ascii", function(chr) { return sexpr(chr).charCodeAt(0); });
