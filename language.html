@@ -1079,6 +1079,18 @@ of comparison.</p>
   <dd>Evaluate and ignore results of the expression
   <dd class=example>make "q [ 1 2 3 ]  ignore dequeue "q</dd>
 
+  <dt><code>` <var>list</var></code></dt>
+  <dd>Outputs the list with substitutions:
+    <ul>
+      <li><code>, <var>instructionlist</var></code> replaced by output
+      <li><code>,@ <var>instructionlist</var></code> replaced by output list members
+      <li><code>",<var>instruction</var></code> replaced by output prefixed with "
+      <li><code>,@<var>instruction</var></code> replaced by output prefixed with :
+    </ul>
+  </dd>
+  <dd class=example>show `[a b ,[bf [c d e]] f ,@[bf [g h i]]]</dd>
+  <dd class=example>make "v "x  show `[",:v :,:v]</dd>
+
   <dt><code>for <var>controllist</var> [ <var>statements ...</var>]</code>
   <dd>Typical <code>for</code> loop. The <var>controllist</var> specifies three or four members:
   the local <var>varname</var>, <var>start</var> value, <var>limit</var> value,

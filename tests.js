@@ -1374,7 +1374,7 @@ QUnit.test("Workspace Management", function(t) {
 });
 
 QUnit.test("Control Structures", function(t) {
-  t.expect(95);
+  t.expect(98);
   //
   // 8.1 Control
   //
@@ -1452,6 +1452,12 @@ QUnit.test("Control Structures", function(t) {
 
 
   this.assert_equals('ignore 1 > 2', undefined);
+
+  this.assert_equals('`[foo baz ,[bf [a b c]] garply ,@[bf [a b c]]]',
+                     [ 'foo', 'baz', ['b', 'c'], 'garply', 'b', 'c']);
+  this.assert_equals('make "n "x `[",:n]', ['"x']);
+  this.assert_equals('make "n "x `[:,:n]', [':x']);
+
 
   this.assert_equals('make "x 0  for [ r 1 5 ] [ make "x :x + :r ]  :x', 15);
   this.assert_equals('make "x 0  for [ r 0 10 2 ] [ make "x :x + :r ]  :x', 30);
@@ -2053,6 +2059,8 @@ QUnit.test("Arity of Primitives", function(t) {
     //['writepos', [0, 0, 0]],
     //['writer', [0, 0, 0]],
     ['xor', [0, 2, -1]],
+
+    ['`', [1, 1, 1]],
   ];
   arities.forEach(function(pair) {
     var proc = pair[0];

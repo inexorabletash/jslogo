@@ -3074,7 +3074,59 @@ function LogoInterpreter(turtle, stream, savehook)
   def("ignore", function(value) {
   });
 
-  // Not Supported: `
+  def("`", function(list) {
+    list = lexpr(list);
+    var out = [];
+    return promiseLoop(function(loop, resolve, reject) {
+      if (!list.length) {
+        resolve(out);
+        return;
+      }
+      var member = list.shift(), instructionlist;
+
+      // TODO: Nested backquotes: "Substitution is done only for
+      // commas at the same depth as the backquote in which they are
+      // found."
+      if (member === ',' && list.length) {
+        member = list.shift();
+        if (Type(member) === 'word')
+          member = [member];
+        instructionlist = reparse(member);
+        self.execute(instructionlist, {returnResult: true})
+          .then(function(result) {
+            out.push(result);
+            loop();
+          }).catch(reject);
+      } else if (member === ',@' && list.length) {
+        member = list.shift();
+        if (Type(member) === 'word')
+          member = [member];
+        instructionlist = reparse(member);
+        self.execute(instructionlist, {returnResult: true})
+          .then(function(result) {
+            out = out.concat(result);
+            loop();
+          }).catch(reject);
+      } else if (Type(member) === 'word' && /^",/.test(member)) {
+        instructionlist = reparse(member.substring(2));
+        self.execute(instructionlist, {returnResult: true})
+          .then(function(result) {
+            out.push('"' + (Type(result) === 'list' ? result[0] : result));
+            loop();
+          }).catch(reject);
+      } else if (Type(member) === 'word' && /^:,/.test(member)) {
+        instructionlist = reparse(member.substring(2));
+        self.execute(instructionlist, {returnResult: true})
+          .then(function(result) {
+            out.push(':' + (Type(result) === 'list' ? result[0] : result));
+            loop();
+          }).catch(reject);
+      } else {
+        out.push(member);
+        loop();
+      }
+    });
+  });
 
   def("for", function(control, statements) {
     control = reparse(lexpr(control));
