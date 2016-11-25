@@ -1524,7 +1524,12 @@ function LogoInterpreter(turtle, stream, savehook)
       .map(function(e) { return sifw(list, e); });
   });
 
-  // Not Supported: quoted
+  def("quoted", function(thing) {
+    if (Type(thing) === 'word')
+      return '"' + thing;
+    return thing;
+  });
+
 
   //
   // 2.3 Data Mutators

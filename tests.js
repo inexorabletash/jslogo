@@ -435,6 +435,9 @@ QUnit.test("Data Structure Primitives", function(t) {
   this.assert_equals('remdup [ a b c a b c ]', ["a", "b", "c"]);
   this.assert_equals('remdup "abcabc', 'abc');
 
+  this.assert_equals('quoted "abc', '"abc');
+  this.assert_equals('quoted [ a b c ]', ['a', 'b', 'c']);
+
   this.assert_equals('split "a "banana', ['b', 'n', 'n']);
   this.assert_equals('split "a "alphabetical', ['lph', 'betic', 'l']);
   this.assert_equals('split 1 [1 2 3 4 1 2 3 4 1 2 3 4 ]', [['2', '3', '4'], ['2', '3', '4'], ['2', '3', '4']]);
@@ -2058,8 +2061,9 @@ QUnit.test("Arity of Primitives", function(t) {
     ['wrap', [0, 0, 0]],
     //['writepos', [0, 0, 0]],
     //['writer', [0, 0, 0]],
-    ['xor', [0, 2, -1]],
 
+    ['quoted', [1, 1, 1]],
+    ['xor', [0, 2, -1]],
     ['`', [1, 1, 1]],
   ];
   arities.forEach(function(pair) {
