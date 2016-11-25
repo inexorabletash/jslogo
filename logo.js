@@ -2287,7 +2287,6 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   // Not Supported: clickpos
-  // Not Supported: buttonp
 
   def(["buttonp", "button?"], function() {
     return turtle.button > 0 ? 1 : 0;
