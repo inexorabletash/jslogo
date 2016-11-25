@@ -744,6 +744,13 @@ of comparison.</p>
   <dd class=example>setpencolor "#ff0000</dd>
   <dd class=example>setpencolor [ 99 0 0 ]</dd>
 
+  <dt><code>setpalette <var>colornumber</var> <var>csscolor</var></code>
+  <dt><code>setpalette <var>colornumber</var> [<var>r</var> <var>g</var> <var>b</var>]</code>
+  <dd>Change one of the standard color entries (8 or above) to the given color.</dd>
+  <dd class=example>setpalette 8 "pink  setbg 8</dd>
+  <dd class=example>setpalette 8 "#ff4f00  setbg 8</dd>
+  <dd class=example>setpalette 8 [ 99 31 0 ]  setbg 8</dd>
+
   <dt><code>setpensize <var>expr</var></code>
   <dd>Set pen width in pixels. If <var>expr</var> is a list, the first member is used.
 
@@ -766,6 +773,10 @@ of comparison.</p>
   <dt><code>pencolor</code>
   <dt><code>pc</code>
   <dd>Outputs the current pen color. This will be a CSS color string, not necessarily the value passed in.
+
+  <dt><code>palette <var>colornumber</var></code>
+  <dd>Outputs the a palette entry. This will be a CSS color string, not necessarily the value passed in.</dd>
+  <dd class=example>show palette 8</dd>
 
   <dt><code>pensize</code>
   <dd>Outputs a two element list with the pen width and height (usually the same).

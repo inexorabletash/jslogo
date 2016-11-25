@@ -910,7 +910,7 @@ QUnit.test("Logical Operations", function(t) {
 });
 
 QUnit.test("Graphics", function(t) {
-  t.expect(94);
+  t.expect(98);
 
   // NOTE: test canvas is 300,300 (so -150...150 coordinates before hitting)
   // edge
@@ -986,6 +986,9 @@ QUnit.test("Graphics", function(t) {
   this.assert_equals('setlabelheight 5 labelsize', [5, 5]);
   this.assert_equals('setlabelheight 10 labelsize', [10, 10]);
 
+  this.assert_equals('setpalette 8 "pink  palette 8', 'pink');
+  this.assert_equals('setpalette 9 [0 50 99]  palette 9', '#0080ff');
+
   this.assert_equals('setlabelfont "Times\\ New\\ Roman  labelfont', 'Times New Roman');
 
   this.assert_equals('cs  wrap  setscrunch 0.5 0.5  fd 50 pos', [0, 50]);
@@ -1047,6 +1050,10 @@ QUnit.test("Graphics", function(t) {
 
   this.assert_equals('setpencolor 0 pencolor', 'black');
   this.assert_equals('setpencolor "#123456 pencolor', '#123456');
+
+  this.assert_equals('setpalette 8 "pink  palette 8', 'pink');
+  this.assert_equals('setpalette 9 [0 50 99]  palette 9', '#0080ff');
+
   this.assert_equals('setpensize 6 pensize', [6, 6]);
 
   this.assert_equals('setsc 0 background', 'black');
@@ -1885,7 +1892,7 @@ QUnit.test("Arity of Primitives", function(t) {
     //['openwrite', [1, 1, 1]],
     ['or', [0, 2, -1]],
     ['output', [1, 1, 1]],
-    //['palette', [1, 1, 1]],
+    ['palette', [1, 1, 1]],
     ['parse', [1, 1, 1]],
     //['pause', [0, 0, 0]],
     ['pc', [0, 0, 0]],
@@ -1975,7 +1982,7 @@ QUnit.test("Arity of Primitives", function(t) {
     ['setlabelheight', [1, 1, 1]],
     //['setlibloc', [1, 1, 1]],
     //['setmargins', [1, 1, 1]],
-    //['setpalette', [2, 2, 2]],
+    ['setpalette', [2, 2, 2]],
     ['setpc', [1, 1, 1]],
     ['setpencolor', [1, 1, 1]],
     //['setpenpattern', [1, 1, 1]],

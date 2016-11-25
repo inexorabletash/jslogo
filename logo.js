@@ -2188,7 +2188,7 @@ function LogoInterpreter(turtle, stream, savehook)
   // };
   this.colorAlias = null;
 
-  var STANDARD_COLORS = {
+  var PALETTE = {
     0: "black", 1: "blue", 2: "lime", 3: "cyan",
     4: "red", 5: "magenta", 6: "yellow", 7: "white",
     8: "brown", 9: "tan", 10: "green", 11: "aquamarine",
@@ -2212,8 +2212,8 @@ function LogoInterpreter(turtle, stream, savehook)
       return '#' + rr + gg + bb;
     }
     color = sexpr(color);
-    if (STANDARD_COLORS.hasOwnProperty(color))
-      return STANDARD_COLORS[color];
+    if (PALETTE.hasOwnProperty(color))
+      return PALETTE[color];
     if (self.colorAlias)
       return self.colorAlias(color) || color;
     return color;
@@ -2223,7 +2223,12 @@ function LogoInterpreter(turtle, stream, savehook)
     turtle.color = parseColor(color);
   });
 
-  // Not Supported: setpalette
+  def("setpalette", function(colornumber, color) {
+    colornumber = aexpr(colornumber);
+    if (colornumber < 8)
+      throw err("{_PROC_}: Expected number greater than 8");
+    PALETTE[colornumber] = parseColor(color);
+  });
 
   def(["setpensize", "setwidth", "setpw"], function(a) {
     if (Type(a) === 'list')
@@ -2235,7 +2240,7 @@ function LogoInterpreter(turtle, stream, savehook)
   // Not Supported: setpenpattern
   // Not Supported: setpen
 
-  def(["setbackground", "setscreencolor", "setsc"], function(color) {
+  def(["setbackground", "setbg", "setscreencolor", "setsc"], function(color) {
     turtle.bgcolor = parseColor(color);
   });
 
@@ -2255,7 +2260,9 @@ function LogoInterpreter(turtle, stream, savehook)
     return turtle.color;
   });
 
-  // Not Supported: palette
+  def("palette", function(colornumber) {
+    return PALETTE[aexpr(colornumber)];
+  });
 
   def("pensize", function() {
     return [turtle.penwidth, turtle.penwidth];
