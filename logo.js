@@ -2286,7 +2286,9 @@ function LogoInterpreter(turtle, stream, savehook)
     return turtle.mousepos;
   });
 
-  // Not Supported: clickpos
+  def("clickpos", function() {
+    return turtle.clickpos;
+  });
 
   def(["buttonp", "button?"], function() {
     return turtle.button > 0 ? 1 : 0;

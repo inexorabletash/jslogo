@@ -318,11 +318,11 @@ of comparison.</p>
   <dd class=example>show standout "ABCabc123</dd>
 
   <dt><code>parse <var>word</var></code>
-  <dd>Returns word parsed as a list.
+  <dd>Outputs word parsed as a list.
   <dd class=example>show parse "1+2</dd>
 
   <dt><code>runparse <var>word</var></code>
-  <dd>Returns word parsed as instructions.
+  <dd>Outputs word parsed as instructions.
   <dd class=example>show runparse "1+2</dd>
 
 </dl>
@@ -512,7 +512,7 @@ of comparison.</p>
 <h4>4.4 Print Formatting</h4>
 <dl>
   <dt><code>form <var>expr</var> <var>width</var> <var>precision</var></code>
-  <dd>Returns a formatted string with the result of a numeric expression with <var>precision</var> decimal places and
+  <dd>Outputs a formatted string with the result of a numeric expression with <var>precision</var> decimal places and
   padded on the left with spaces (if necessary) to be at least <var>width</width> characters long.
   <dd class=example>show form 1/3 10 3</dd>
 </dl>
@@ -797,8 +797,12 @@ of comparison.</p>
 <h4>6.8 Mouse Queries</h4>
 <dl>
   <dt><code>mousepos</code></dt>
-  <dd>Returns a list of the x, y coordinates of the last mouse position</dd>
+  <dd>Outputs a list of the x, y coordinates of the last mouse position</dd>
   <dd class=example>forever [setpos mousepos]</dd>
+
+  <dt><code>clickpos</code></dt>
+  <dd>Outputs a list of the x, y coordinates of the last mouse press</dd>
+  <dd class=example>forever [setpos clickpos]</dd>
 
   <dt><code>buttonp</code></dt>
   <dt><code>button?</code></dt>

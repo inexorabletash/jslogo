@@ -910,7 +910,7 @@ QUnit.test("Logical Operations", function(t) {
 });
 
 QUnit.test("Graphics", function(t) {
-  t.expect(98);
+  t.expect(99);
 
   // NOTE: test canvas is 300,300 (so -150...150 coordinates before hitting)
   // edge
@@ -1073,6 +1073,7 @@ QUnit.test("Graphics", function(t) {
   this.assert_equals('buttonp', 0);
   this.assert_equals('button?', 0);
   this.assert_equals('mousepos', [0, 0]);
+  this.assert_equals('clickpos', [0, 0]);
 });
 
 QUnit.test("Workspace Management", function(t) {
@@ -1768,7 +1769,7 @@ QUnit.test("Arity of Primitives", function(t) {
     ['clean', [0, 0, 0]],
     ['clearscreen', [0, 0, 0]],
     ['cleartext', [0, 0, 0]],
-    //['clickpos', [0, 0, 0]],
+    ['clickpos', [0, 0, 0]],
     //['close', [1, 1, 1]],
     //['co', [0, 1, 1]],
     ['contents', [0, 0, 0]],
