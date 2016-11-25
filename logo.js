@@ -3052,7 +3052,6 @@ function LogoInterpreter(turtle, stream, savehook)
   // Not Supported: error
   // Not Supported: pause
   // Not Supported: continue
-  // Not Supported: wait
 
   def("wait", function(time) {
     return new Promise(function(resolve) {
