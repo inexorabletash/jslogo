@@ -2072,10 +2072,10 @@ function LogoInterpreter(turtle, stream, savehook)
     if (l.length !== 2) throw err("{_PROC_}: Expected list of length 2");
     turtle.position = [aexpr(l[0]), aexpr(l[1])];
   });
-  def("setxy", function(x, y) { return turtle.position = [aexpr(x), aexpr(y)]; });
-  def("setx", function(x) { return turtle.position = [aexpr(x), undefined]; });
-  def("sety", function(y) { return turtle.position = [undefined, aexpr(y)]; });
-  def(["setheading", "seth"], function(a) { return turtle.heading = aexpr(a); });
+  def("setxy", function(x, y) { turtle.position = [aexpr(x), aexpr(y)]; });
+  def("setx", function(x) { turtle.position = [aexpr(x), undefined]; });
+  def("sety", function(y) { turtle.position = [undefined, aexpr(y)]; });
+  def(["setheading", "seth"], function(a) { turtle.heading = aexpr(a); });
 
   def("home", function() { return turtle.home(); });
 
@@ -2127,9 +2127,9 @@ function LogoInterpreter(turtle, stream, savehook)
     return turtle.drawtext(s);
   }, {maximum: -1});
 
-  def("setlabelheight", function(a) { return turtle.fontsize = aexpr(a); });
+  def("setlabelheight", function(a) { turtle.fontsize = aexpr(a); });
 
-  def("setlabelfont", function(a) { return turtle.fontname = sexpr(a); });
+  def("setlabelfont", function(a) { turtle.fontname = sexpr(a); });
 
   // Not Supported: textscreen
   // Not Supported: fullscreen
@@ -2140,7 +2140,7 @@ function LogoInterpreter(turtle, stream, savehook)
     sy = aexpr(sy);
     if (!isFinite(sx) || sx === 0 || !isFinite(sy) || sy === 0)
       throw err("{_PROC_}: Expected non-zero values");
-    return turtle.scrunch = [sx, sy];
+    turtle.scrunch = [sx, sy];
   });
 
   // Not Supported: refresh
@@ -2171,12 +2171,12 @@ function LogoInterpreter(turtle, stream, savehook)
   //
   // 6.5 Pen and Background Control
   //
-  def(["pendown", "pd"], function() { return turtle.pendown = true; });
-  def(["penup", "pu"], function() { return turtle.pendown = false; });
+  def(["pendown", "pd"], function() { turtle.pendown = true; });
+  def(["penup", "pu"], function() { turtle.pendown = false; });
 
-  def(["penpaint", "ppt"], function() { return turtle.penmode = 'paint'; });
-  def(["penerase", "pe"], function() { return turtle.penmode = 'erase'; });
-  def(["penreverse", "px"], function() { return turtle.penmode = 'reverse'; });
+  def(["penpaint", "ppt"], function() { turtle.penmode = 'paint'; });
+  def(["penerase", "pe"], function() { turtle.penmode = 'erase'; });
+  def(["penreverse", "px"], function() { turtle.penmode = 'reverse'; });
 
   // To handle additional color names (localizations, etc):
   // logo.colorAlias = function(name) {
@@ -2271,10 +2271,20 @@ function LogoInterpreter(turtle, stream, savehook)
 
   // 6.8 Mouse Queries
 
-  // Not Supported: mousepos
+  def("mousepos", function() {
+    return turtle.mousepos;
+  });
+
   // Not Supported: clickpos
   // Not Supported: buttonp
-  // Not Supported: button
+
+  def(["buttonp", "button?"], function() {
+    return turtle.button > 0 ? 1 : 0;
+  });
+
+  def("button", function() {
+    return turtle.button;
+  });
 
   //----------------------------------------------------------------------
   //

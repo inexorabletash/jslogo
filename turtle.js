@@ -35,7 +35,7 @@
     return r < 0 ? r + b : r;
   }
 
-  function CanvasTurtle(canvas_ctx, turtle_ctx, w, h) {
+  function CanvasTurtle(canvas_ctx, turtle_ctx, w, h, events) {
     // Stub for old browsers w/ canvas but no text functions
     canvas_ctx.fillText = canvas_ctx.fillText || function fillText(string, x, y) { };
 
@@ -63,8 +63,18 @@
     this.was_oob = false;
     this.filling = 0;
 
+    this._mousex = this._mousey = 0;
+    this._buttons = 0;
+
     this._init();
     this._tick();
+
+    if (events) {
+      events.addEventListener('mousemove', function(e) {
+        var rect = events.getBoundingClientRect();
+        this._mousemove(e.clientX - rect.left, e.clientY - rect.top, e.buttons);
+      }.bind(this));
+    }
   }
 
   Object.defineProperties(CanvasTurtle.prototype, {
@@ -268,6 +278,12 @@
           break;
         }
       }
+    }},
+
+    _mousemove: {value: function(x, y, b) {
+      this._mousex = (x - this.width / 2) / this.sx;
+      this._mousey = (y - this.height / 2) / -this.sy;
+      this._buttons = b;
     }},
 
     // API methods
@@ -540,7 +556,16 @@
       get: function() {
         return [this.sx, this.sy];
       }
+    },
+
+    mousepos: {
+      get: function() { return [this._mousex, this._mousey]; }
+    },
+
+    button: {
+      get: function() { return this._buttons; }
     }
+
   });
 
   global.CanvasTurtle = CanvasTurtle;

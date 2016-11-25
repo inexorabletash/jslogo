@@ -568,7 +568,7 @@ window.addEventListener('DOMContentLoaded', function() {
   turtle = new CanvasTurtle(
     canvas_ctx,
     turtle_ctx,
-    canvas_element.width, canvas_element.height);
+    canvas_element.width, canvas_element.height, $('#overlay'));
 
   logo = new LogoInterpreter(
     turtle, stream,

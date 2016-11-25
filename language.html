@@ -781,11 +781,23 @@ of comparison.</p>
 <h4>6.7 Saving and Loading Pictures</h4>
 <dl>
 </dl>
+-->
 
 <h4>6.8 Mouse Queries</h4>
 <dl>
+  <dt><code>mousepos</code></dt>
+  <dd>Returns a list of the x, y coordinates of the last mouse position</dd>
+  <dd class=example>forever [setpos mousepos]</dd>
+
+  <dt><code>buttonp</code></dt>
+  <dt><code>button?</code></dt>
+  <dd>Outputs 1 if any mouse button is down, 0 otherwise.</dd>
+  <dd class=example>forever [ifelse button? [pd] [pu] setpos mousepos]</dd>
+
+  <dt><code>button</code></dt>
+  <dd>Outputs a number indicating the pressed mouse buttons
+    (<code>1</code> = left, 2 = right, etc) or 0 for none.
 </dl>
--->
 
 <h3 id="sec7">7. Workspace Management</h3>
 <h4>7.1 Procedure Definition</h4>

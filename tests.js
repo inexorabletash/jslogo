@@ -910,7 +910,7 @@ QUnit.test("Logical Operations", function(t) {
 });
 
 QUnit.test("Graphics", function(t) {
-  t.expect(90);
+  t.expect(94);
 
   // NOTE: test canvas is 300,300 (so -150...150 coordinates before hitting)
   // edge
@@ -1059,7 +1059,13 @@ QUnit.test("Graphics", function(t) {
   this.assert_equals('setsc [0 50 99] getscreencolor', '#0080ff');
 
   // 6.7 Saving and Loading Pictures
+
   // 6.8 Mouse Queries
+
+  this.assert_equals('button', 0);
+  this.assert_equals('buttonp', 0);
+  this.assert_equals('button?', 0);
+  this.assert_equals('mousepos', [0, 0]);
 });
 
 QUnit.test("Workspace Management", function(t) {
@@ -1425,7 +1431,7 @@ QUnit.test("Control Structures", function(t) {
   var now;
   this.queue(function() { now = Date.now(); });
   this.assert_equals('wait 60/6', undefined);
-  this.queue(function() { t.ok((Date.now() - now) > (1000/6)); });
+  this.queue(function() { t.ok((Date.now() - now) >= (1000/6)); });
 
   this.assert_equals('forever [ if repcount = 5 [ bye ] ]', undefined);
 
@@ -1746,9 +1752,9 @@ QUnit.test("Arity of Primitives", function(t) {
     ['butfirst', [1, 1, 1]],
     ['butfirsts', [1, 1, 1]],
     ['butlast', [1, 1, 1]],
-    //['button', [0, 0, 0]],
-    //['button?', [0, 0, 0]],
-    //['buttonp', [0, 0, 0]],
+    ['button', [0, 0, 0]],
+    ['button?', [0, 0, 0]],
+    ['buttonp', [0, 0, 0]],
     ['bye', [0, 0, 0]],
     //['catch', [2, 2, 2]],
     ['char', [1, 1, 1]],
@@ -1860,7 +1866,7 @@ QUnit.test("Arity of Primitives", function(t) {
     ['memberp', [2, 2, 2]],
     ['minus', [1, 1, 1]],
     ['modulo', [2, 2, 2]],
-    //['mousepos', [0, 0, 0]],
+    ['mousepos', [0, 0, 0]],
     ['name?', [1, 1, 1]],
     ['namep', [1, 1, 1]],
     ['names', [0, 0, 0]],
