@@ -1377,7 +1377,7 @@ QUnit.test("Workspace Management", function(t) {
 });
 
 QUnit.test("Control Structures", function(t) {
-  t.expect(98);
+  t.expect(102);
   //
   // 8.1 Control
   //
@@ -1438,6 +1438,11 @@ QUnit.test("Control Structures", function(t) {
   this.assert_error('test 2 > 1  show iffalse [ "a ]', 'No output from procedure');
 
   this.assert_equals('to foo forever [ if repcount = 5 [ make "c 234 stop ] ] end  foo  :c', 234);
+
+  this.assert_stream('catch "x [ show "a throw "x show "b ] show "b', 'a\nb\n');
+  this.assert_equals('catch "x [ show "a (throw "x "z) show "b ]', 'z');
+  this.assert_error('catch "x [ throw "q ]', 'No CATCH for tag Q');
+  this.assert_error('throw "q', 'No CATCH for tag Q');
 
   var now;
   this.queue(function() { now = Date.now(); });
@@ -1773,7 +1778,7 @@ QUnit.test("Arity of Primitives", function(t) {
     ['button?', [0, 0, 0]],
     ['buttonp', [0, 0, 0]],
     ['bye', [0, 0, 0]],
-    //['catch', [2, 2, 2]],
+    ['catch', [2, 2, 2]],
     ['char', [1, 1, 1]],
     ['clean', [0, 0, 0]],
     ['clearscreen', [0, 0, 0]],
@@ -2036,7 +2041,7 @@ QUnit.test("Arity of Primitives", function(t) {
     //['textscreen', [0, 0, 0]],
     //['textsize', [0, 0, 0]],
     ['thing', [1, 1, 1]],
-    //['throw', [1, 1, 2]],
+    ['throw', [1, 1, 2]],
     ['to', [-1, -1, -1]],
     //['tone', [2, 2, 2]],
     ['towards', [1, 1, 1]],

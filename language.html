@@ -1063,12 +1063,21 @@ of comparison.</p>
   <dd>Run the statements if the result of the last local <code>test</code> was non-zero (true) or zero (false) respectively.
   <dd class=example>test 1 > 2  iftrue [ show "yep ]  iffalse [ show "nope ]</dd>
 
-  <dt><code>stop</code>
-  <dd>End the running procedure with no output value
+  <dt><code>stop</code></dt>
+  <dd>End the running procedure with no output value.</dd>
 
-  <dt><code>output <var>expr</var></code>
-  <dt><code>op <var>expr</var></code>
-  <dd>End the running procedure and output the specified value
+  <dt><code>output <var>expr</var></code></dt>
+  <dt><code>op <var>expr</var></code></dt>
+  <dd>End the running procedure and output the specified value.</dd>
+
+  <dt><code>catch tag instructionlist</code></dt>
+  <dd>Run instructions, but if an error with matching tag is thrown, return the thrown value (if any).</dd>
+  <dd class=example>catch "t [ show "before throw "t show "after ]</dd>
+
+  <dt><code>throw tag</code></dt>
+  <dt><code>(throw tag value)</code></dt>
+  <dd>Throw an error with the given tag which may be caught. An optional return value can be passed.</dd>
+  <dd class=example>show catch "t [ show "hello (throw "t "world) ]</dd>
 
   <dt><code>wait <var>time</var></code>
   <dd>Pauses execution. <var>time</var> is in 60ths of a second.

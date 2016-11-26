@@ -3053,8 +3053,29 @@ function LogoInterpreter(turtle, stream, savehook)
     throw new Output(atom);
   });
 
-  // Not Supported: catch
-  // Not Supported: throw
+  function LogoException(tag, value) {
+    this.tag = tag;
+    this.value = value;
+    this.message = format(__('No CATCH for tag {tag}'), {tag: tag});
+  }
+
+  def("catch", function(tag, instructionlist) {
+    tag = sexpr(tag).toUpperCase();;
+    instructionlist = reparse(lexpr(instructionlist));
+    return self.execute(instructionlist, {returnResult: true})
+      .catch(function(ex) {
+        if (!(ex instanceof LogoException) || ex.tag !== tag)
+          throw ex;
+         return ex.value;
+      });
+  }, {maximum: 2});
+
+  def("throw", function(tag) {
+    tag = sexpr(tag).toUpperCase();;
+    var value = arguments[1];
+    throw new LogoException(tag, value);
+  }, {maximum: 2});
+
   // Not Supported: error
   // Not Supported: pause
   // Not Supported: continue
