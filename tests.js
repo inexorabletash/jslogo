@@ -1377,7 +1377,7 @@ QUnit.test("Workspace Management", function(t) {
 });
 
 QUnit.test("Control Structures", function(t) {
-  t.expect(102);
+  t.expect(105);
   //
   // 8.1 Control
   //
@@ -1443,6 +1443,13 @@ QUnit.test("Control Structures", function(t) {
   this.assert_equals('catch "x [ show "a (throw "x "z) show "b ]', 'z');
   this.assert_error('catch "x [ throw "q ]', 'No CATCH for tag Q');
   this.assert_error('throw "q', 'No CATCH for tag Q');
+
+  this.assert_equals('catch "x [ show "a throw "x show "b ] error',
+                     [-1, 'No CATCH for tag X', 'THROW', -1]);
+  this.assert_equals('catch "x [ show "a (throw "x "z) show "b ] error',
+                     [-1, 'No CATCH for tag X', 'THROW', -1]);
+  this.assert_equals('catch "ERROR [ show 1 / 0 ] error',
+                     [-1, 'Division by zero', 'SHOW', -1]);
 
   var now;
   this.queue(function() { now = Date.now(); });
@@ -1819,7 +1826,7 @@ QUnit.test("Arity of Primitives", function(t) {
     ['erns', [0, 0, 0]],
     ['erpls', [0, 0, 0]],
     ['erps', [0, 0, 0]],
-    //['error', [0, 0, 0]],
+    ['error', [0, 0, 0]],
     ['exp', [1, 1, 1]],
     ['fd', [1, 1, 1]],
     ['fence', [0, 0, 0]],

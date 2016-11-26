@@ -1071,13 +1071,22 @@ of comparison.</p>
   <dd>End the running procedure and output the specified value.</dd>
 
   <dt><code>catch tag instructionlist</code></dt>
-  <dd>Run instructions, but if an error with matching tag is thrown, return the thrown value (if any).</dd>
+  <dd>Run instructions, but if an error with matching tag is thrown, return the thrown value (if any).
+    Use <code>"ERROR</code> to catch errors from regular procedures.
+  </dd>
   <dd class=example>catch "t [ show "before throw "t show "after ]</dd>
+  <dd class=example>catch "error [ show 1 / 0 ] show error</dd>
 
   <dt><code>throw tag</code></dt>
   <dt><code>(throw tag value)</code></dt>
   <dd>Throw an error with the given tag which may be caught. An optional return value can be passed.</dd>
   <dd class=example>show catch "t [ show "hello (throw "t "world) ]</dd>
+
+  <dt><code>error</code></dt>
+  <dd>Outputs a list describing the last error caught.
+    The second member is the message and the third is the procedure name where the error occurred.
+  </dd>
+  <dd class=example>catch "error [ show 1 / 0 ] show error</dd>
 
   <dt><code>wait <var>time</var></code>
   <dd>Pauses execution. <var>time</var> is in 60ths of a second.

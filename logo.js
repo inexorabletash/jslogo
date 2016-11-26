@@ -58,9 +58,18 @@ function LogoInterpreter(turtle, stream, savehook)
 
   // Shortcut for common use of format() and __()
   function err(string, params) {
-    return new Error(format(__(string), params));
+    return new LogoError('ERROR', undefined, format(__(string), params));
   }
 
+  function LogoError(tag, value, message) {
+    this.name = 'LogoError';
+    this.message = message || format(__('No CATCH for tag {tag}'), {tag: tag});
+    this.tag = tag;
+    this.value = value;
+    this.proc = self.stack[self.stack.length - 1];
+    this.code = -1; // TODO: Support code.
+    this.line = -1; // TODO: Support line.
+  }
 
   // To handle additional keyword aliases (localizations, etc), assign
   // a function to keywordAlias. Input will be the uppercased word,
@@ -151,7 +160,7 @@ function LogoInterpreter(turtle, stream, savehook)
     if ($$func$$.length === arity)
       return $$func$$;
 
-    for (var i = 0; i < arity; i += 1)
+    for (var i = 0; i < arity; ++i)
       parms.push('a' + i);
 
     var f = eval('(function ' + $$func$$.name + '(' + parms.join(',') + ')' +
@@ -888,7 +897,7 @@ function LogoInterpreter(turtle, stream, savehook)
       // * workspace modifiers like TO that special-case varnames
       self.stack.push(name);
       try {
-        procedure(tokenlist);
+        procedure.call(null, tokenlist);
         return function() { };
       } finally {
         self.stack.pop();
@@ -1011,7 +1020,7 @@ function LogoInterpreter(turtle, stream, savehook)
     case 'list':
       if (a.length !== b.length)
         return false;
-      for (var i = 0; i < a.length; i += 1) {
+      for (var i = 0; i < a.length; ++i) {
         if (!equal(a[i], b[i]))
           return false;
       }
@@ -1364,7 +1373,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def(["sentence", "se"], function(thing1, thing2) {
     var list = [];
-    for (var i = 0; i < arguments.length; i += 1) {
+    for (var i = 0; i < arguments.length; ++i) {
       var thing = arguments[i];
       if (Type(thing) === 'list') {
         thing = lexpr(thing);
@@ -1438,10 +1447,10 @@ function LogoInterpreter(turtle, stream, savehook)
     return sifw(tail, lexpr(list).reverse().concat(lexpr(tail)));
   }, {maximum: 2});
 
-  var gensym_index = 0;
+  this.gensym_index = 0;
   def("gensym", function() {
-    gensym_index += 1;
-    return 'G' + gensym_index;
+    ++self.gensym_index;
+    return 'G' + self.gensym_index;
   });
 
   //
@@ -3053,30 +3062,40 @@ function LogoInterpreter(turtle, stream, savehook)
     throw new Output(atom);
   });
 
-  function LogoException(tag, value) {
-    this.tag = tag;
-    this.value = value;
-    this.message = format(__('No CATCH for tag {tag}'), {tag: tag});
-  }
+  this.last_error = undefined;
 
   def("catch", function(tag, instructionlist) {
     tag = sexpr(tag).toUpperCase();;
     instructionlist = reparse(lexpr(instructionlist));
     return self.execute(instructionlist, {returnResult: true})
-      .catch(function(ex) {
-        if (!(ex instanceof LogoException) || ex.tag !== tag)
-          throw ex;
-         return ex.value;
+      .catch(function(error) {
+        if (!(error instanceof LogoError) || error.tag !== tag)
+          throw error;
+        self.last_error = error;
+        return error.value;
       });
   }, {maximum: 2});
 
   def("throw", function(tag) {
     tag = sexpr(tag).toUpperCase();;
     var value = arguments[1];
-    throw new LogoException(tag, value);
+    throw new LogoError(tag, value);
   }, {maximum: 2});
 
-  // Not Supported: error
+  def("error", function() {
+    if (!self.last_error)
+      return [];
+
+    var list = [
+      self.last_error.code,
+      self.last_error.message,
+      self.last_error.proc,
+      self.last_error.line
+    ];
+    self.last_error = undefined;
+    return list;
+  });
+
   // Not Supported: pause
   // Not Supported: continue
 
@@ -3359,7 +3378,7 @@ function LogoInterpreter(turtle, stream, savehook)
       throw err("Can't apply {_PROC_} to special {name:U}", { name: procname });
 
     var args = [];
-    for (var i = 1; i < arguments.length; i += 1)
+    for (var i = 1; i < arguments.length; ++i)
       args.push(arguments[i]);
 
     return routine.apply(null, args);
