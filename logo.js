@@ -2888,7 +2888,11 @@ function LogoInterpreter(turtle, stream, savehook)
     });
   });
 
-  // Not Supported: buryname
+  def("buryname", function(varname) {
+    var bury = this.routines.get('bury');
+    var namelist = this.routines.get('namelist');
+    return bury.call(this, namelist.call(this, varname));
+  });
 
   def("unbury", function(list) {
     list = lexpr(list);
@@ -2943,7 +2947,11 @@ function LogoInterpreter(turtle, stream, savehook)
     });
   });
 
-  // Not Supported: unburyname
+  def("unburyname", function(varname) {
+    var unbury = this.routines.get('unbury');
+    var namelist = this.routines.get('namelist');
+    return unbury.call(this, namelist.call(this, varname));
+  });
 
   def(["buriedp", "buried?"], function(list) {
     list = lexpr(list);
@@ -3557,10 +3565,10 @@ function LogoInterpreter(turtle, stream, savehook)
         resolve(value);
         return;
       }
-      Promise.resolve(procedure(value, list.shift()))
+      Promise.resolve(procedure.call(this, value, list.shift()))
         .then(function(result) { value = result; })
         .then(loop, reject);
-    });
+    }.bind(this));
   }, {maximum: 3});
 
 

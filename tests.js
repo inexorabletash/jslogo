@@ -1089,7 +1089,7 @@ QUnit.test("Graphics", function(t) {
 });
 
 QUnit.test("Workspace Management", function(t) {
-  t.expect(189);
+  t.expect(191);
 
   //
   // 7.1 Procedure Definition
@@ -1380,6 +1380,9 @@ QUnit.test("Workspace Management", function(t) {
   this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  bury [[] [] [c]]  buriedp [[b]]', 0);
   this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  bury [[] [] [c]]  buriedp [[] [a]]', 0);
   this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  bury [[] [] [c]]  buriedp [[] [] [c]]', 1);
+
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  buryname "a  contents', [['b'], [], ['c']]);
+  this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  buryall unburyname "a  contents', [[], ['a'], []]);
 
   // 7.6 Workspace Inspection
   // 7.7 Workspace Control
