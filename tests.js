@@ -129,7 +129,7 @@ QUnit.module("Logo Unit Tests", {
       }).then(done);
     };
 
-    this.assert_error = function(expression, expected) {
+    this.assert_error = function(expression, expected, code) {
       var done = t.async();
       try {
         var result = this.interpreter.run(expression);
@@ -138,6 +138,9 @@ QUnit.module("Logo Unit Tests", {
           done();
         }, function (ex) {
           t.push(ex.message === expected, ex.message, expected, 'Expected error from: ' + expression);
+          if (code !== undefined) {
+            t.push(ex.code === code, ex.code, code, 'Expected error from: ' + expression);
+          }
           done();
         });
       } catch (ex) {
@@ -277,7 +280,8 @@ QUnit.test("Parser", function(t) {
   this.assert_equals('count { a b c }@0', 3);
   this.assert_equals('count { a b c }@123', 3);
   this.assert_equals('count { a b c } @ 0', 3);
-  this.assert_error('make "a count { 1 2 3 }@1.5', "Don't know what to do with 0.5");
+  this.assert_error('make "a count { 1 2 3 }@1.5', "Don't know what to do with 0.5", 9);
+  this.assert_equals('item 0 { 1 2 3 }@', '1');
 
   //
   // Nested Structures
@@ -287,6 +291,11 @@ QUnit.test("Parser", function(t) {
   this.assert_equals('count { a b { c d e } f }', 4);
   this.assert_equals('count { a b [ c d e ] f }', 4);
   this.assert_equals('count [ a b { c d e } f ]', 4);
+
+
+  this.assert_error('show ]', "Unexpected ']'");
+  this.assert_error('show }', "Unexpected '}'");
+  this.assert_error('show )', "Unexpected ')'");
 });
 
 QUnit.test("Data Structure Primitives", function(t) {
@@ -1377,7 +1386,7 @@ QUnit.test("Workspace Management", function(t) {
 });
 
 QUnit.test("Control Structures", function(t) {
-  t.expect(105);
+  t.expect(107);
   //
   // 8.1 Control
   //
@@ -1437,6 +1446,10 @@ QUnit.test("Control Structures", function(t) {
   this.assert_equals('test 1 > 2  iffalse [ "a ]', 'a');
   this.assert_error('test 2 > 1  show iffalse [ "a ]', 'No output from procedure');
 
+  // Introduce new scope, since root scope persists across tests.
+  this.assert_error('to x iftrue [ "a ] end  x', 'IFTRUE: Called without TEST');
+  this.assert_error('to x iffalse [ "b ] end  x', 'IFFALSE: Called without TEST');
+
   this.assert_equals('to foo forever [ if repcount = 5 [ make "c 234 stop ] ] end  foo  :c', 234);
 
   this.assert_stream('catch "x [ show "a throw "x show "b ] show "b', 'a\nb\n');
@@ -1445,11 +1458,11 @@ QUnit.test("Control Structures", function(t) {
   this.assert_error('throw "q', 'No CATCH for tag Q');
 
   this.assert_equals('catch "x [ show "a throw "x show "b ] error',
-                     [-1, 'No CATCH for tag X', 'THROW', -1]);
+                     [21, 'No CATCH for tag X', 'THROW', -1]);
   this.assert_equals('catch "x [ show "a (throw "x "z) show "b ] error',
-                     [-1, 'No CATCH for tag X', 'THROW', -1]);
+                     [35, 'No CATCH for tag X', 'THROW', -1]);
   this.assert_equals('catch "ERROR [ show 1 / 0 ] error',
-                     [-1, 'Division by zero', 'SHOW', -1]);
+                     [4, 'Division by zero', 'SHOW', -1]);
 
   var now;
   this.queue(function() { now = Date.now(); });
@@ -1557,83 +1570,82 @@ QUnit.test("Control Structures", function(t) {
 });
 
 QUnit.test("Error Messages", function(t) {
-  this.assert_error("to foo end show foo", "No output from procedure");
-  this.assert_error("[ 1 2", "Expected ']'");
-  this.assert_error("{ 1 2", "Expected '}'");
-  this.assert_error("[ 1 2 }", "Unexpected '}'");
-  this.assert_error("{ 1 2 ]", "Unexpected ']'");
-  this.assert_error('make "a { 1 2 3 }@1.5', "Don't know what to do with 0.5");
-  this.assert_error('make "a { 1 2 3 }@', "Expected number after @");
+  this.assert_error("to foo end show foo", "No output from procedure", 5);
+  this.assert_error("[ 1 2", "Expected ']'", 26);
+  this.assert_error("{ 1 2", "Expected '}'", 27);
+  this.assert_error("[ 1 2 }", "Unexpected '}'", 27);
+  this.assert_error("{ 1 2 ]", "Unexpected ']'", 26);
+  this.assert_error('make "a { 1 2 3 }@1.5', "Don't know what to do with 0.5", 9);
 
   //this.assert_error("!@#$", "Couldn't parse: '!@#$'");
-  this.assert_error("show :nosuchvar", "Don't know about variable NOSUCHVAR");
-  this.assert_error("1 / 0", "Division by zero");
-  this.assert_error("1 % 0", "Division by zero");
+  this.assert_error("show :nosuchvar", "Don't know about variable NOSUCHVAR", 11);
+  this.assert_error("1 / 0", "Division by zero", 4);
+  this.assert_error("1 % 0", "Division by zero", 4);
   this.assert_error("1 + -", "Unexpected end of instructions");
-  this.assert_error("( 1 + 2", "Expected ')'");
-  this.assert_error("( 1 + 2 3", "Expected ')', saw 3");
-  this.assert_error("nosuchproc", "Don't know how to NOSUCHPROC");
-  this.assert_error("1 + \"1+2", "Expected number");
-  this.assert_error("1 + []", "Expected number");
-  this.assert_error("(minus [])", "Expected number");
-  this.assert_error("make [] 123", "Expected string");
-  this.assert_error("(def [])", "Expected string");
+  this.assert_error("( 1 + 2", "Expected ')'", 10);
+  this.assert_error("( 1 + 2 3", "Expected ')', saw 3", 10);
+  this.assert_error("nosuchproc", "Don't know how to NOSUCHPROC", 24);
+  this.assert_error("1 + \"1+2", "Expected number", 4);
+  this.assert_error("1 + []", "Expected number", 4);
+  this.assert_error("(minus [])", "Expected number", 4);
+  this.assert_error("make [] 123", "Expected string", 4);
+  this.assert_error("(def [])", "Expected string", 4);
 
-  this.assert_error('fd50', "Need a space between FD and 50");
+  this.assert_error('fd50', "Need a space between FD and 50", 39);
 
-  this.assert_error("(erase {})", "ERASE: Expected list");
-  this.assert_error("(map \"show {})", "MAP: Expected list");
-  this.assert_error("(map \"sum [1 2] [1])", "MAP: Expected lists of equal length");
+  this.assert_error("(erase {})", "ERASE: Expected list", 4);
+  this.assert_error("(map \"show {})", "MAP: Expected list", 4);
+  this.assert_error("(map \"sum [1 2] [1])", "MAP: Expected lists of equal length", 4);
   this.assert_error("to 123", "TO: Expected identifier");
   this.assert_error("to +", "TO: Expected identifier");
-  this.assert_error("to fd :x bk :x end", "TO: Can't redefine primitive FD");
-  this.assert_error("define \"fd [[x] [bk :x]]", "DEFINE: Can't redefine primitive FD");
-  this.assert_error("define \"fd [[x]]", "DEFINE: Expected list of length 2");
-  this.assert_error("def \"nosuchproc", "DEF: Don't know how to NOSUCHPROC");
-  this.assert_error("def \"def", "DEF: Can't show definition of primitive DEF");
-  this.assert_error("text \"nosuchproc", "TEXT: Don't know how to NOSUCHPROC");
-  this.assert_error("text \"text", "TEXT: Can't show definition of primitive TEXT");
-  this.assert_error("text \"nosuchproc", "TEXT: Don't know how to NOSUCHPROC");
-  this.assert_error("text \"def", "TEXT: Can't show definition of primitive DEF");
-  this.assert_error("item 5 [ 1 2 ]", "ITEM: Index out of bounds");
-  this.assert_error("copydef \"newname \"nosuchproc", "COPYDEF: Don't know how to NOSUCHPROC");
-  this.assert_error("to foo end  copydef \"to \"foo", "COPYDEF: Can't overwrite special TO");
-  this.assert_error("to foo end  copydef \"show \"foo", "COPYDEF: Can't overwrite primitives unless REDEFP is TRUE");
-  this.assert_error("erase [ [ TO ] [ ] ]", "Can't ERASE special TO");
-  this.assert_error("erase [ [ SHOW ] [ ] ]", "Can't ERASE primitives unless REDEFP is TRUE");
-  this.assert_error("do.while 1 2", "DO.WHILE: Expected block");
-  this.assert_error("while 1 2", "WHILE: Expected block");
-  this.assert_error("do.until 1 2", "DO.UNTIL: Expected block");
-  this.assert_error("until 1 2", "UNTIL: Expected block");
-  this.assert_error("apply \"nosuch [ 1 2 ]", "APPLY: Don't know how to NOSUCH");
-  this.assert_error("apply \"to [ 1 2 ]", "Can't apply APPLY to special TO");
-  this.assert_error("apply \"while [ 1 2 ]", "Can't apply APPLY to special WHILE");
-  this.assert_error("foreach \"nosuch [ 1 2 ]", "FOREACH: Don't know how to NOSUCH");
-  this.assert_error("foreach \"to [ 1 2 ]", "Can't apply FOREACH to special TO");
-  this.assert_error("foreach \"while [ 1 2 ]", "Can't apply FOREACH to special WHILE");
-  this.assert_error("invoke \"nosuch [ 1 2 ]", "INVOKE: Don't know how to NOSUCH");
-  this.assert_error("invoke \"to [ 1 2 ]", "Can't apply INVOKE to special TO");
-  this.assert_error("invoke \"while [ 1 2 ]", "Can't apply INVOKE to special WHILE");
-  this.assert_error("map \"nosuch [ 1 2 ]", "MAP: Don't know how to NOSUCH");
-  this.assert_error("map \"to [ 1 2 ]", "Can't apply MAP to special TO");
-  this.assert_error("map \"while [ 1 2 ]", "Can't apply MAP to special WHILE");
-  this.assert_error("filter \"nosuch [ 1 2 ]", "FILTER: Don't know how to NOSUCH");
-  this.assert_error("filter \"to [ 1 2 ]", "Can't apply FILTER to special TO");
-  this.assert_error("filter \"while [ 1 2 ]", "Can't apply FILTER to special WHILE");
-  this.assert_error("find \"nosuch [ 1 2 ]", "FIND: Don't know how to NOSUCH");
-  this.assert_error("find \"to [ 1 2 ]", "Can't apply FIND to special TO");
-  this.assert_error("find \"while [ 1 2 ]", "Can't apply FIND to special WHILE");
-  this.assert_error("reduce \"nosuch [ 1 2 ]", "REDUCE: Don't know how to NOSUCH");
-  this.assert_error("reduce \"to [ 1 2 ]", "Can't apply REDUCE to special TO");
-  this.assert_error("reduce \"while [ 1 2 ]", "Can't apply REDUCE to special WHILE");
-  this.assert_error("0", "Don't know what to do with 0");
-  this.assert_error("1 + 2", "Don't know what to do with 3");
-  this.assert_error("to foo output 123 end  foo", "Don't know what to do with 123");
-  this.assert_error('setpos []', 'SETPOS: Expected list of length 2');
-  this.assert_error('setpos [1 2 3]', 'SETPOS: Expected list of length 2');
-  this.assert_error('towards []', 'TOWARDS: Expected list of length 2');
-  this.assert_error('item 3 { 1 2 }', 'ITEM: Index out of bounds');
-  this.assert_error('setitem 3 { 1 2 } 0', 'SETITEM: Index out of bounds');
+  this.assert_error("to fd :x bk :x end", "TO: Can't redefine primitive FD", 22);
+  this.assert_error("define \"fd [[x] [bk :x]]", "DEFINE: Can't redefine primitive FD", 22);
+  this.assert_error("define \"fd [[x]]", "DEFINE: Expected list of length 2", 4);
+  this.assert_error("def \"nosuchproc", "DEF: Don't know how to NOSUCHPROC", 24);
+  this.assert_error("def \"def", "DEF: Can't show definition of primitive DEF", 22);
+  this.assert_error("text \"nosuchproc", "TEXT: Don't know how to NOSUCHPROC", 24);
+  this.assert_error("text \"text", "TEXT: Can't show definition of primitive TEXT", 22);
+  this.assert_error("text \"nosuchproc", "TEXT: Don't know how to NOSUCHPROC", 24);
+  this.assert_error("text \"def", "TEXT: Can't show definition of primitive DEF", 22);
+  this.assert_error("item 5 [ 1 2 ]", "ITEM: Index out of bounds", 4);
+  this.assert_error("copydef \"newname \"nosuchproc", "COPYDEF: Don't know how to NOSUCHPROC", 24);
+  this.assert_error("to foo end  copydef \"to \"foo", "COPYDEF: Can't overwrite special TO", 4);
+  this.assert_error("to foo end  copydef \"show \"foo", "COPYDEF: Can't overwrite primitives unless REDEFP is TRUE", 4);
+  this.assert_error("erase [ [ TO ] [ ] ]", "Can't ERASE special TO", 4);
+  this.assert_error("erase [ [ SHOW ] [ ] ]", "Can't ERASE primitives unless REDEFP is TRUE", 4);
+  this.assert_error("do.while 1 2", "DO.WHILE: Expected block", 4);
+  this.assert_error("while 1 2", "WHILE: Expected block", 4);
+  this.assert_error("do.until 1 2", "DO.UNTIL: Expected block", 4);
+  this.assert_error("until 1 2", "UNTIL: Expected block", 4);
+  this.assert_error("apply \"nosuch [ 1 2 ]", "APPLY: Don't know how to NOSUCH", 24);
+  this.assert_error("apply \"to [ 1 2 ]", "Can't apply APPLY to special TO", 4);
+  this.assert_error("apply \"while [ 1 2 ]", "Can't apply APPLY to special WHILE", 4);
+  this.assert_error("foreach \"nosuch [ 1 2 ]", "FOREACH: Don't know how to NOSUCH", 24);
+  this.assert_error("foreach \"to [ 1 2 ]", "Can't apply FOREACH to special TO", 4);
+  this.assert_error("foreach \"while [ 1 2 ]", "Can't apply FOREACH to special WHILE", 4);
+  this.assert_error("invoke \"nosuch [ 1 2 ]", "INVOKE: Don't know how to NOSUCH", 24);
+  this.assert_error("invoke \"to [ 1 2 ]", "Can't apply INVOKE to special TO", 4);
+  this.assert_error("invoke \"while [ 1 2 ]", "Can't apply INVOKE to special WHILE", 4);
+  this.assert_error("map \"nosuch [ 1 2 ]", "MAP: Don't know how to NOSUCH", 24);
+  this.assert_error("map \"to [ 1 2 ]", "Can't apply MAP to special TO", 4);
+  this.assert_error("map \"while [ 1 2 ]", "Can't apply MAP to special WHILE", 4);
+  this.assert_error("filter \"nosuch [ 1 2 ]", "FILTER: Don't know how to NOSUCH", 24);
+  this.assert_error("filter \"to [ 1 2 ]", "Can't apply FILTER to special TO", 4);
+  this.assert_error("filter \"while [ 1 2 ]", "Can't apply FILTER to special WHILE", 4);
+  this.assert_error("find \"nosuch [ 1 2 ]", "FIND: Don't know how to NOSUCH", 24);
+  this.assert_error("find \"to [ 1 2 ]", "Can't apply FIND to special TO", 4);
+  this.assert_error("find \"while [ 1 2 ]", "Can't apply FIND to special WHILE", 4);
+  this.assert_error("reduce \"nosuch [ 1 2 ]", "REDUCE: Don't know how to NOSUCH", 24);
+  this.assert_error("reduce \"to [ 1 2 ]", "Can't apply REDUCE to special TO", 4);
+  this.assert_error("reduce \"while [ 1 2 ]", "Can't apply REDUCE to special WHILE", 4);
+  this.assert_error("0", "Don't know what to do with 0", 9);
+  this.assert_error("1 + 2", "Don't know what to do with 3", 9);
+  this.assert_error("to foo output 123 end  foo", "Don't know what to do with 123", 9);
+  this.assert_error('setpos []', 'SETPOS: Expected list of length 2', 4);
+  this.assert_error('setpos [1 2 3]', 'SETPOS: Expected list of length 2', 4);
+  this.assert_error('towards []', 'TOWARDS: Expected list of length 2', 4);
+  this.assert_error('item 3 { 1 2 }', 'ITEM: Index out of bounds', 4);
+  this.assert_error('setitem 3 { 1 2 } 0', 'SETITEM: Index out of bounds', 4);
 
 });
 
