@@ -970,7 +970,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
     return function() {
       self.stack.push(name);
-      return promiseFinally(serialExecute(args).then(function(args) {
+      return promiseFinally(serialExecute(args.slice()).then(function(args) {
         return procedure.apply(self, args);
       }), function() { self.stack.pop(); });
     };

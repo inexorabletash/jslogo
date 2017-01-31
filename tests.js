@@ -1685,6 +1685,9 @@ QUnit.test("Regression Tests", function(t) {
 
   this.assert_equals('to f output 1 end (f + 1)', 2);
   this.assert_equals('setpos [150 150]  setheading 0  fd 10  pos ', [150, -140]);
+
+  this.assert_equals(
+    'make "a 0  do.while [ make "a :a + 1 ] notequalp :a 5  :a', 5);
 });
 
 QUnit.test("API Tests", function(t) {
