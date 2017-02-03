@@ -407,19 +407,23 @@
 
     arc: {value: function(angle, radius) {
       if (this.turtlemode == 'wrap') {
-        [this.x, this.x + this.width, this.x - this.width].forEach(function(x) {
-          [this.y, this.y + this.height, this.y - this.height].forEach(function(y) {
-            if (!this.filling)
-              this.canvas_ctx.beginPath();
-            this.canvas_ctx.arc(x, y, radius, -this.r, -this.r + deg2rad(angle), false);
-            if (!this.filling)
-              this.canvas_ctx.stroke();
-          }.bind(this));
-        }.bind(this));
+        [this.x,
+         this.x + this.width / this.sx,
+         this.x - this.width / this.sx].forEach(function(x) {
+           [this.y,
+            this.y + this.height / this.sy,
+            this.y - this.height].forEach(function(y) {
+              if (!this.filling)
+                this.canvas_ctx.beginPath();
+              this.canvas_ctx.arc(x, y, radius, this.r, this.r - deg2rad(angle), angle > 0);
+              if (!this.filling)
+                this.canvas_ctx.stroke();
+            }.bind(this));
+         }.bind(this));
       } else {
         if (!this.filling)
           this.canvas_ctx.beginPath();
-        this.canvas_ctx.arc(this.x, this.y, radius, -this.r, -this.r + deg2rad(angle), false);
+        this.canvas_ctx.arc(this.x, this.y, radius, this.r, this.r - deg2rad(angle), angle > 0);
         if (!this.filling)
           this.canvas_ctx.stroke();
       }
