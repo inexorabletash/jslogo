@@ -398,7 +398,11 @@
     }},
 
     fill: {value: function() {
-      this.canvas_ctx.floodFill(this.x, this.y);
+      this.canvas_ctx.save();
+      this.canvas_ctx.setTransform(1, 0, 0, 1, 0, 0);
+      this.canvas_ctx.floodFill(this.x*this.sx + this.width/2,
+                                - this.y*this.sy + this.height/2);
+      this.canvas_ctx.restore();
     }},
 
     arc: {value: function(angle, radius) {
