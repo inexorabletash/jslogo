@@ -39,7 +39,7 @@ dd.example {
 of comparison.</p>
 
 <ol>
-  <li><a href="#types">Data Types</a>
+  <li><a href="#types">Data Types and Syntax</a>
   <li><a href="#sec2">Data Structure Primitives</a>
   <li><a href="#sec3">Communication</a>
   <li><a href="#sec4">Arithmetic</a>
@@ -50,7 +50,7 @@ of comparison.</p>
 </ol>
 
 
-<h3 id="types">Types</h3>
+<h3 id="types">Data Types and Syntax</h3>
 <dl>
   <dt><code>"<var>word</var></code>
   <dt><code>'<var>word</var></code>
@@ -70,7 +70,7 @@ of comparison.</p>
 
   <dt><code>{ <var>word ...</var> }</code>
   <dt><code>{ <var>word ...</var> }@<var>origin</var></code>
-  <dd>Array of words whitespace separated
+  <dd>Array of words, whitespace separated
   <dd class=example>show {1 2 3}</dd>
 
   <dt><code> ( <var>expression</var> )</code>
@@ -588,12 +588,13 @@ of comparison.</p>
   <dt><code>setx <var>expr</var></code>
   <dt><code>sety <var>expr</var></code>
   <dd>Move turtle to the specified location
+  <dd class=example>setpos [ 100 -100 ]</dd>
   <dd class=example>setxy -100 100</dd>
 
   <dt><code>setheading <var>expr</var></code>
   <dt><code>seth <var>expr</var></code>
   <dd>Rotate the turtle to the specified heading
-  <dd class=example>seth 45</dd>
+  <dd class=example>setheading 45</dd>
 
   <dt><code>home</code>
   <dd>Moves the turtle to center, pointing upwards
@@ -710,8 +711,11 @@ of comparison.</p>
   <dt><code>pe</code>
   <dt><code>penreverse</code>
   <dt><code>px</code>
-  <dd>Change the turtle drawing mode - paint (the default) leaves a colored trail, erase
-  restores the background, reverse inverts the background.
+  <dd>Change the turtle drawing mode -
+    <em>paint</em> (the default) leaves a colored trail,
+    <em>erase</em> restores the background,
+    <em>reverse</em> inverts the background.
+  <dd class=example>setpw 10  px  repeat 5 [ fd 100 rt 144 ]</dd>
 
   <dt><code>setpencolor <var>logocolor</var></code>
   <dt><code>setpencolor <var>csscolor</var></code>
@@ -719,29 +723,29 @@ of comparison.</p>
   <dd>Set pen/text color. Color can be a standard Logo color number (0-15), CSS color string (<a target="_blank" href="https://www.w3.org/TR/css3-color/">CSS color names or #rrggbb</a>), or in the list version, r/g/b values in 0...99.
   <dd>The standard Logo colors are:
   <style>
-    #colortable td { width: 25%; padding-left: 4px; padding-right: 4px;}
+    #colortable td { width: 25%; padding-left: 4px; padding-right: 4px; text-align: center; }
   </style>
   <table id="colortable">
     <tr>
-      <td style="background-color: black; color: white;">0: black
-      <td style="background-color: blue;">1: blue
-      <td style="background-color: lime;">2: green
-      <td style="background-color: cyan;">3: cyan
+      <td style="background-color: black; color: white;">0<br>black
+      <td style="background-color: blue;">1<br>blue
+      <td style="background-color: lime;">2<br>green
+      <td style="background-color: cyan;">3<br>cyan
     <tr>
-      <td style="background-color: red;">4: red
-      <td style="background-color: magenta;">5: magenta
-      <td style="background-color: yellow;">6: yellow
-      <td style="background-color: white;">7: white
+      <td style="background-color: red;">4<br>red
+      <td style="background-color: magenta;">5<br>magenta
+      <td style="background-color: yellow;">6<br>yellow
+      <td style="background-color: white;">7<br>white
     <tr>
-      <td style="background-color: brown;">8: brown
-      <td style="background-color: tan;">9: tan
-      <td style="background-color: green;">10: green
-      <td style="background-color: aquamarine;">11: aqua
+      <td style="background-color: brown;">8<br>brown
+      <td style="background-color: tan;">9<br>tan
+      <td style="background-color: green;">10<br>green
+      <td style="background-color: aquamarine;">11<br>aqua
     <tr>
-      <td style="background-color: salmon;">12: salmon
-      <td style="background-color: purple;">13: purple
-      <td style="background-color: orange;">14: orange
-      <td style="background-color: gray;">15: gray
+      <td style="background-color: salmon;">12<br>salmon
+      <td style="background-color: purple;">13<br>purple
+      <td style="background-color: orange;">14<br>orange
+      <td style="background-color: gray;">15<br>gray
   </table>
   <dd class=example>setpencolor 4</dd>
   <dd class=example>setpencolor "red</dd>
@@ -770,13 +774,16 @@ of comparison.</p>
   <dt><code>pendownp</code>
   <dt><code>pendown?</code>
   <dd>Outputs 1 if the pen is down, 0 otherwise
+  <dd class=example>show pendown?</dd>
 
   <dt><code>penmode</code>
   <dd>Outputs <code>PAINT</code>, <code>ERASE</code> or <code>REVERSE</code>
+  <dd class=example>show penmode</dd>
 
   <dt><code>pencolor</code>
   <dt><code>pc</code>
   <dd>Outputs the current pen color. This will be a CSS color string, not necessarily the value passed in.
+  <dd class=example>show pencolor</dd>
 
   <dt><code>palette <var>colornumber</var></code>
   <dd>Outputs the a palette entry. This will be a CSS color string, not necessarily the value passed in.</dd>
@@ -784,12 +791,14 @@ of comparison.</p>
 
   <dt><code>pensize</code>
   <dd>Outputs a two element list with the pen width and height (usually the same).
+  <dd class=example>show pensize</dd>
 
   <dt><code>background</code>
   <dt><code>bg</code>
   <dt><code>getscreencolor</code>
   <dt><code>getsc</code>
   <dd>Outputs the background color. This will be a CSS color string, not necessarily the value passed in.
+  <dd class=example>show background</dd>
 </dl>
 
 <!--
@@ -829,11 +838,11 @@ of comparison.</p>
       <li>Rest (remaining inputs as a list): <code>[:r]</code></li>
       <li>Default number of inputs: <code>3</code>
     </ul>
-  <dd class=example>to star :n repeat 5 [ fd :n rt 144 ] end</dd>
+  <dd class=example>to star :n  repeat 5 [ fd :n rt 144 ]  end</dd>
 
   <dt><code>define <var>procname</var> [[<var>inputs</var> ...][<var>statements</var> ...]]</code>
   <dd>Define a new named procedure with optional inputs
-  <dd class=example>define "star [[n][repeat 5 [fd :n rt 144]]]</dd>
+  <dd class=example>define "star [[n][repeat 5 [fd :n  rt 144]]]</dd>
 
   <dt><code>def <var>procname</var></code>
   <dd>Outputs the definition of a named procedure as a string
