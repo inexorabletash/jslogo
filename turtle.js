@@ -412,7 +412,7 @@
          this.x - this.width / this.sx].forEach(function(x) {
            [this.y,
             this.y + this.height / this.sy,
-            this.y - this.height].forEach(function(y) {
+            this.y - this.height / this.sy].forEach(function(y) {
               if (!this.filling)
                 this.canvas_ctx.beginPath();
               this.canvas_ctx.arc(x, y, radius, this.r, this.r - deg2rad(angle), angle > 0);

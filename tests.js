@@ -89,6 +89,25 @@ QUnit.module("Logo Unit Tests", {
       }).then(done);
     };
 
+    this.assert_pixel = function(expression, x, y, rgba) {
+      return this.assert_pixels(expression, [[x, y, rgba]]);
+    };
+
+    this.assert_pixels = function(expression, pixels) {
+      var actual = this.interpreter.run(expression);
+      var done = t.async();
+      actual.then(function(result) {
+        pixels.forEach(function(px) {
+          var x = px[0]|0, y = px[1]|0, rgba = px[2];
+          var pix = canvas_ctx.getImageData(x, y, 1, 1).data;
+          t.deepEqual([pix[0], pix[1], pix[2], pix[3]], rgba,
+                      expression + ': Pixel data at ' + x + ',' + y);
+        });
+      }, function(failure) {
+        t.ok(false, expression + ': Exception: ' + failure);
+      }).then(done);
+    };
+
     this.assert_stream = function(expression, expected) {
       this.stream.clear();
       var result = this.interpreter.run(expression, {returnResult: true});
@@ -922,13 +941,17 @@ QUnit.test("Logical Operations", function(t) {
 });
 
 QUnit.test("Graphics", function(t) {
-  t.expect(99);
+  t.expect(150);
 
   // NOTE: test canvas is 300,300 (so -150...150 coordinates before hitting)
   // edge
+  var white = [0xff, 0xff, 0xff, 0xff],
+      black = [0, 0, 0, 0xff],
+      red = [0xff, 0, 0, 0xff];
 
   this.run('clearscreen');
   this.assert_equals('clean home (list heading xcor ycor)', [0, 0, 0]);
+  this.assert_pixel('cs', 150, 150, [0xff,0xff,0xff,0xff]);
 
   //
   // 6.1 Turtle Motion
@@ -960,6 +983,44 @@ QUnit.test("Graphics", function(t) {
   this.assert_equals('forward 100 rt 90 home (list heading xcor ycor)', [0, 0, 0]);
 
   this.assert_equals('home arc 123 456 (list heading xcor ycor)', [0, 0, 0]);
+
+  this.assert_pixels('cs  setpw 10  arc 45 100', [
+    [150, 150, white],
+    [150+100*Math.cos(Math.PI * 8/8), 150-100*Math.sin(Math.PI * 8/8)|0, white],
+    [150+100*Math.cos(Math.PI * 7/8), 150-100*Math.sin(Math.PI * 7/8)|0, white],
+    [150+100*Math.cos(Math.PI * 6/8), 150-100*Math.sin(Math.PI * 6/8)|0, white],
+    [150+100*Math.cos(Math.PI * 5/8), 150-100*Math.sin(Math.PI * 5/8)|0, white],
+    [150+100*Math.cos(Math.PI * 4/8), 150-100*Math.sin(Math.PI * 4/8)|0, black],
+    [150+100*Math.cos(Math.PI * 3/8), 150-100*Math.sin(Math.PI * 3/8)|0, black],
+    [150+100*Math.cos(Math.PI * 2/8), 150-100*Math.sin(Math.PI * 2/8)|0, black],
+    [150+100*Math.cos(Math.PI * 1/8), 150-100*Math.sin(Math.PI * 1/8)|0, white],
+    [150+100*Math.cos(Math.PI * 0/8), 150-100*Math.sin(Math.PI * 0/8)|0, white]
+  ]);
+  this.assert_pixels('cs  setpw 10  arc -45 100', [
+    [150, 150, white],
+    [150+100*Math.cos(Math.PI * 8/8), 150-100*Math.sin(Math.PI * 8/8)|0, white],
+    [150+100*Math.cos(Math.PI * 7/8), 150-100*Math.sin(Math.PI * 7/8)|0, white],
+    [150+100*Math.cos(Math.PI * 6/8), 150-100*Math.sin(Math.PI * 6/8)|0, black],
+    [150+100*Math.cos(Math.PI * 5/8), 150-100*Math.sin(Math.PI * 5/8)|0, black],
+    [150+100*Math.cos(Math.PI * 4/8), 150-100*Math.sin(Math.PI * 4/8)|0, black],
+    [150+100*Math.cos(Math.PI * 3/8), 150-100*Math.sin(Math.PI * 3/8)|0, white],
+    [150+100*Math.cos(Math.PI * 2/8), 150-100*Math.sin(Math.PI * 2/8)|0, white],
+    [150+100*Math.cos(Math.PI * 1/8), 150-100*Math.sin(Math.PI * 1/8)|0, white],
+    [150+100*Math.cos(Math.PI * 0/8), 150-100*Math.sin(Math.PI * 0/8)|0, white]
+  ]);
+
+  this.assert_pixels('cs  pu  setxy 50 50  arc 360 20  fill', [
+    [150, 150, white],
+    [150 + 50, 150 - 50, black]
+  ]);
+
+  this.assert_pixels('cs  pu  filled "red [ arc 135 100 ]', [
+    [150, 150, white],
+    [150 + 100, 150 - 100, white],
+    [150 + 10, 150 - 90, red],
+    [150 + 90, 150, red],
+  ]);
+
 
   //
   // 6.2 Turtle Motion Queries
@@ -1007,6 +1068,39 @@ QUnit.test("Graphics", function(t) {
   this.assert_equals('cs  wrap  setscrunch 0.5 0.5  fd 350 pos', [0, -250]);
   this.assert_equals('cs  setscrunch 1 0.5  setxy 50 50  setscrunch 1 1  pos', [50, 25]);
 
+
+  // SETSCRUNCH + ARC
+  this.assert_pixels('cs  setscrunch 0.5 1.5  setpw 10  arc 360 100', [
+    [150, 150, white],
+
+    [150 - 100, 150, white],
+    [150 + 100, 150, white],
+    [150 - 50, 150, black],
+    [150 + 50, 150, black],
+
+    [150, 150 - 100, white],
+    [150, 150 + 100, white],
+    [150, 150 - 149, black],
+    [150, 150 + 149, black]
+  ]);
+
+  // WRAP + SETSCRUNCH + ARC
+  this.assert_pixels('cs  setscrunch 0.5 3  setpw 10  arc 360 100', [
+    [150, 150, black],
+
+    [150 - 100, 150, white],
+    [150 + 100, 150, white],
+    [150 - 50, 150, black],
+    [150 + 50, 150, black],
+
+    [150, 150 - 100, white],
+    [150, 150 + 100, white],
+    [150, 150 - 149, white],
+    [150, 150 + 149, white]
+  ]);
+
+  this.run('cs setscrunch 1 1');
+
   //
   // 6.4 Turtle and Window Queries
   //
@@ -1030,15 +1124,24 @@ QUnit.test("Graphics", function(t) {
   this.assert_equals('penup pendownp', 0);
   this.assert_equals('pd pendownp', 1);
   this.assert_equals('pu pendownp', 0);
+  this.run('pendown');
 
   this.assert_equals('penpaint penmode', 'PAINT');
   this.assert_equals('penerase penmode', 'ERASE');
   this.assert_equals('penreverse penmode', 'REVERSE');
+  this.run('penpaint');
 
   this.assert_equals('setpencolor 0 pencolor', 'black');
+  this.assert_pixel('cs setpw 10  fd 0', 150, 150, black);
+
   this.assert_equals('setpc 0 pencolor', 'black');
+  this.assert_pixel('cs setpw 10  fd 0', 150, 150, black);
+
   this.assert_equals('setpencolor "#123456 pencolor', '#123456');
+  this.assert_pixel('cs setpw 10  fd 0', 150, 150, [0x12, 0x34, 0x56, 0xff]);
+
   this.assert_equals('setpencolor [0 50 99] pencolor', '#0080ff');
+  this.assert_pixel('cs setpw 10  fd 0', 150, 150, [0, 0x80, 0xff, 0xff]);
 
   this.assert_equals('setpensize 6 pensize', [6, 6]);
   this.assert_equals('setpensize [6 6] pensize', [6, 6]);
@@ -1048,6 +1151,8 @@ QUnit.test("Graphics", function(t) {
   this.assert_equals('setsc 0 background', 'black');
   this.assert_equals('setbackground "#123456 background', '#123456');
   this.assert_equals('setbackground [0 50 99] background', '#0080ff');
+  this.assert_pixel('setbackground "white', 150, 150, white);
+  this.assert_pixel('setbackground "red', 150, 150, red);
 
   //
   // 6.6 Pen Queries
