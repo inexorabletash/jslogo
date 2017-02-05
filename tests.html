@@ -1,31 +1,27 @@
 <!DOCTYPE html>
 <title>Logo Unit Tests</title>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width">
+<link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.1.1.css">
+<script src="https://code.jquery.com/qunit/qunit-2.1.1.js"></script>
+
+<div id=qunit></div>
+<div id=qunit-fixture>
+  <div id="display" style="width: 200px; height: 200px; position: relative;">
+    <canvas id="sandbox" width="300" height="300"
+            style="position: absolute; border: solid 1px black; z-index: 0;"></canvas>
+    <canvas id="turtle" width="300" height="300"
+            style="position: absolute; border: solid 1px black; z-index: 1;"></canvas>
+    <div id="overlay"
+         style="position: absolute; z-index: 2;
+                width: 280px; height: 280px; padding: 10px; margin: 0;
+                background-color: transparent; overflow: hidden;
+                white-space: pre-wrap; font-family: Monospace;"></div>
+  </div>
+</div>
 
 <script src="https://cdn.rawgit.com/inexorabletash/polyfill/v0.1.29/polyfill.min.js"></script>
-
-<script src="https://code.jquery.com/qunit/qunit-2.0.1.js"></script>
-<link rel="stylesheet" href="https://code.jquery.com/qunit/qunit-2.0.1.css">
-
-<h1 id="qunit-header">Logo Unit Tests</h1>
-<h2 id="qunit-banner"></h2>
-<div id="qunit-testrunner-toolbar"></div>
-<h2 id="qunit-userAgent"></h2>
-<ol id="qunit-tests"></ol>
-<div id="qunit-fixture">test markup, will be hidden</div>
-
-<div id="my-fixture" style="display: none">
-<div id="display" style="width: 200px; height: 200px; position: relative;">
-    <canvas id="sandbox" width="300" height="300" style="position: absolute; border: solid 1px black; z-index: 0;">
-        <span style="color: red; background-color: yellow; font-weight: bold;">Your browser does not support the canvas element - sorry!</span>
-    </canvas>
-    <canvas id="turtle" width="300" height="300" style="position: absolute; border: solid 1px black; z-index: 1;"></canvas>
-    <div id="overlay" style="width: 280px; height: 280px; padding: 10px; margin: 0; position: absolute; z-index: 2; background-color: transparent; overflow: hidden; white-space: pre-wrap; font-family: Monospace;"></div>
-</div>
-<div id="output"></div>
-</div>
-
 <script src="logo.js"></script> <!-- Logo interpreter -->
-<script src="floodfill.js"></script> <!-- Flood fill addition for canvas -->
+<script src="floodfill.js"></script> <!-- Flood fill for canvas -->
 <script src="turtle.js"></script> <!-- Canvas turtle -->
 <script src="tests.js"></script> <!-- Unit tests -->

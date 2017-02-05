@@ -79,8 +79,11 @@ QUnit.module("Logo Unit Tests", {
           t.deepEqual(result, expected, expression);
         } else if (typeof expected === 'number' && typeof result === 'number' &&
                    (Math.floor(expected) != expected || Math.floor(result) != result)) {
-          t.ok(Math.abs(result - expected) < EPSILON, expression +
-               ': expected: ' + expected + ' actual: ' + result);
+          t.pushResult({
+            result: Math.abs(result - expected) < EPSILON,
+            actual: result,
+            expected: expected,
+            message: expression});
         } else {
           t.strictEqual(result, expected, expression);
         }
@@ -104,7 +107,11 @@ QUnit.module("Logo Unit Tests", {
                       expression + ': Pixel data at ' + x + ',' + y);
         });
       }, function(failure) {
-        t.ok(false, expression + ': Exception: ' + failure);
+        t.pushResult({
+          result: false,
+          actual: failure,
+          expected: '(no error)',
+          message: expression});
       }).then(done);
     };
 
@@ -153,17 +160,33 @@ QUnit.module("Logo Unit Tests", {
       try {
         var result = this.interpreter.run(expression);
         result.then(function (result) {
-          t.push(false, '(no error)', expected, 'Expected to error but did not: ' + expression);
+          t.pushResult({
+            result:false,
+            actual: '(no error)',
+            expected: expected,
+            message:'Expected to error but did not: ' + expression});
           done();
         }, function (ex) {
-          t.push(ex.message === expected, ex.message, expected, 'Expected error from: ' + expression);
+          t.pushResult({
+            result: ex.message === expected,
+            actual: ex.message,
+            expected: expected,
+            message: 'Expected error from: ' + expression});
           if (code !== undefined) {
-            t.push(ex.code === code, ex.code, code, 'Expected error from: ' + expression);
+            t.pushResult({
+              result: ex.code === code,
+              actual: ex.code,
+              expected: code,
+              message: 'Expected error from: ' + expression});
           }
           done();
         });
       } catch (ex) {
-        t.push(ex.message === expected, ex.message, expected, 'Expected error from: ' + expression);
+        t.push({
+          result: ex.message === expected,
+          actual: ex.message,
+          expected: expected,
+          message: 'Expected error from: ' + expression});
         done();
       }
     };
@@ -174,8 +197,13 @@ QUnit.module("Logo Unit Tests", {
 
     this.run = function(code) {
       this.interpreter.run(code).catch(function(error) {
-        console.warn(error);
-        this.ok(false, 'Failed: ' + code + ' - ' + error);
+        console.warn(error.message);
+        t.pushResult({
+          result: false,
+          actual: 'Failed: ' + error.message,
+          expected: '(no error)',
+          message: code
+        });
       });
     };
   }
