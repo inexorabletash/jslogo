@@ -1,0 +1,35 @@
+{
+  "page": {
+    "translations": {
+      "title": "Logoインタープリタ",
+      "tl-title": "Logoインタープリタ",
+      "tl-tests": "テスト",
+      "tl-source": "ソースコード",
+      "tl-reference": "リファレンス",
+      "start-togetherjs": "コラボレーション",
+      "no-canvas": "ご利用のブラウザはcanvasを利用できません。",
+      "ip-button-run": "実行",
+      "ip-button-stop": "ストップ",
+      "ip-button-clear": "クリア",
+      "logo-ta-single-line.placeholder": "ここにコードを入力してください...",
+      "logo-ta-multi-line.placeholder": "ここにコードを入力してください...",
+      "sb-link-reference": "リファレンス",
+      "sb-link-text-reference": "Logo言語リファレンス",
+      "sb-link-library": "ライブラリ",
+      "sb-link-text-library": "作成した手続き",
+      "sb-link-history": "履歴",
+      "sb-link-text-history": "実行したコード",
+      "sb-link-examples": "サンプル",
+      "sb-link-text-examples": "サンプルコード",
+      "sb-link-extras": "エキストラ",
+      "sb-link-text-extras": "役立つユーティリティ",
+      "sb-link-links": "リンク",
+      "sb-link-text-links": "その他のLogo関連リンク",
+      "extras-download-library": "ライブラリをダウンロード",
+      "extras-download-drawing": "画像をダウンロード",
+      "extras-clear-history": "履歴を削除",
+      "extras-clear-library": "ライブラリを削除",
+      "github-forkme": "GitHubをフォーク"
+    }
+  }
+}
