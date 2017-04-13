@@ -292,6 +292,23 @@ function initInput() {
     $('#logo-ta-multi-line + .CodeMirror').id = 'logo-cm-multi-line';
     cm2.setSize('100%', '100%');
 
+    // Handle ctrl+enter in Multi-Line
+    cm2.on('keydown', function(x, e) {
+        switch(e.keyCode)
+        {
+          case 3:
+          case 10:
+          case 13:
+            if(e.ctrlKey)
+            {
+              e.stopPropagation();
+              e.preventDefault();
+              run();
+            }
+            break;
+        }
+    });
+
     input.getValue = function() {
       return (isMulti() ? cm2 : cm).getValue();
     };
