@@ -179,6 +179,13 @@ var commandHistory = (function() {
 var input = {};
 function initInput() {
 
+  function keyNameForEvent(e) {
+    window.ke = e;
+    return e.key ||
+      ({ 3: 'Enter', 10: 'Enter', 13: 'Enter',
+         38: 'ArrowUp', 40: 'ArrowDown', 63232: 'ArrowUp', 63233: 'ArrowDown' })[e.keyCode];
+  }
+
   input.setMulti = function() {
     // TODO: Collapse these to a single class?
     document.body.classList.remove('single');
@@ -293,20 +300,11 @@ function initInput() {
     cm2.setSize('100%', '100%');
 
     // Handle ctrl+enter in Multi-Line
-    cm2.on('keydown', function(x, e) {
-        switch(e.keyCode)
-        {
-          case 3:
-          case 10:
-          case 13:
-            if(e.ctrlKey)
-            {
-              e.stopPropagation();
-              e.preventDefault();
-              run();
-            }
-            break;
-        }
+    cm2.on('keydown', function(instance, event) {
+      if (keyNameForEvent(event) === 'Enter' && event.ctrlKey) {
+        event.preventDefault();
+        run();
+      }
     });
 
     input.getValue = function() {
@@ -324,22 +322,19 @@ function initInput() {
 
     $('#logo-ta-single-line').addEventListener('keydown', function(e) {
 
-      var keyNames = { 3: 'Enter', 10: 'Enter', 13: 'Enter',
-                       38: 'Up', 40: 'Down', 63232: 'Up', 63233: 'Down' };
-
-      var elem = $('#logo-ta-single-line');
+     var elem = $('#logo-ta-single-line');
 
       var keyMap = {
         'Enter': function(elem) {
           run();
         },
-        'Up': function(elem) {
+        'ArrowUp': function(elem) {
           var v = commandHistory.prev();
           if (v !== undefined) {
             elem.value = v;
           }
         },
-        'Down': function(elem) {
+        'ArrowDown': function(elem) {
           var v = commandHistory.next();
           if (v !== undefined) {
             elem.value = v;
@@ -347,7 +342,7 @@ function initInput() {
         }
       };
 
-      var keyName = keyNames[e.keyCode];
+      var keyName = keyNameForEvent(e);
       if (keyName in keyMap && typeof keyMap[keyName] === 'function') {
         keyMap[keyName](elem);
         e.stopPropagation();
