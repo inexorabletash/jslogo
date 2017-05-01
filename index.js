@@ -536,7 +536,10 @@ window.addEventListener('DOMContentLoaded', function() {
 
   var stream = {
     read: function(s) {
-      return window.prompt(s ? s : "");
+      return new Promise(function(resolve, reject) {
+        // TODO: Replace with non-modal UI (https://github.com/inexorabletash/jslogo/issues/94)
+        resolve(window.prompt(s ? s : ""));
+      });
     },
     write: function() {
       var div = $('#overlay');

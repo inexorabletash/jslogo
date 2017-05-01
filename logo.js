@@ -1791,14 +1791,14 @@ function LogoInterpreter(turtle, stream, savehook)
   // 3.2 Receivers
 
   def("readlist", function() {
-    var word;
-    if (arguments.length > 0)
-      word = stream.read(stringify_nodecorate(arguments[0]));
-    else
-      word = stream.read();
-    return parse('[' + word + ']')[0];
+    return (
+      (arguments.length > 0)
+        ? stream.read(stringify_nodecorate(arguments[0]))
+        : stream.read()
+    ).then(function(word) {
+      return parse('[' + word + ']')[0];
+    });
   }, {maximum: 1});
-
 
   def("readword", function() {
     if (arguments.length > 0)

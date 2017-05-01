@@ -38,7 +38,7 @@ QUnit.module("Logo Unit Tests", {
         this.last_prompt = prompt;
         var res = this.inputbuffer;
         this.inputbuffer = "";
-        return res;
+        return Promise.resolve(res);
       },
 
       outputbuffer: "",
