@@ -1,4 +1,4 @@
-/*global CodeMirror,TogetherJS,LogoInterpreter,CanvasTurtle*/
+/*global CodeMirror,TogetherJS,LogoInterpreter,CanvasTurtle,Dialog*/
 //
 // Logo Interpreter in Javascript
 //
@@ -58,7 +58,7 @@ function initStorage(loadhook) {
 
   var req = indexedDB.open('logo', 3);
   req.onblocked = function() {
-    alert("Please close other Logo pages to allow database upgrade to proceed.");
+    Dialog.alert("Please close other Logo pages to allow database upgrade to proceed.");
   };
   req.onerror = function(e) {
     console.error(e);
@@ -536,10 +536,7 @@ window.addEventListener('DOMContentLoaded', function() {
 
   var stream = {
     read: function(s) {
-      return new Promise(function(resolve, reject) {
-        // TODO: Replace with non-modal UI (https://github.com/inexorabletash/jslogo/issues/94)
-        resolve(window.prompt(s ? s : ""));
-      });
+      return Dialog.prompt(s ? s : "");
     },
     write: function() {
       var div = $('#overlay');
@@ -614,13 +611,13 @@ window.addEventListener('DOMContentLoaded', function() {
     var library = logo.procdefs().replace('\n', '\r\n');
     var url = 'data:text/plain,' + encodeURIComponent(library);
     if (!saveDataAs(url, 'logo_library.txt'))
-      alert("Sorry, not supported by your browser");
+      Dialog.alert("Sorry, not supported by your browser");
   });
   $('#screenshot').addEventListener('click', function() {
     var canvas = document.querySelector('#sandbox');
     var url = canvas.toDataURL('image/png');
     if (!saveDataAs(url, 'logo_drawing.png'))
-      alert("Sorry, not supported by your browser");
+      Dialog.alert("Sorry, not supported by your browser");
   });
   $('#clearhistory').addEventListener('click', function() {
     if (!confirm('Clear history: Are you sure?')) return;
@@ -775,7 +772,7 @@ window.addEventListener('DOMContentLoaded', function() {
       param = decodeURIComponent(param.substring(1).replace(/\_/g, ' '));
       input.setValue(param);
       logo.run(param).catch(function (e) {
-        window.alert("Error: " + e.message);
+        Dialog.alert("Error: " + e.message);
       });
     }
   }
