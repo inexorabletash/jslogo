@@ -3252,6 +3252,11 @@ function LogoInterpreter(turtle, stream, savehook)
       })
       .then(function(r) {
         limit = aexpr(r);
+        return control.length ?
+          evaluateExpression(control) : (limit < start ? -1 : 1);
+      })
+      .then(function(r) {
+        step = aexpr(r);
       })
       .then(function() {
         return promiseLoop(function(loop, resolve, reject) {
@@ -3262,11 +3267,6 @@ function LogoInterpreter(turtle, stream, savehook)
           setvar(varname, current);
           this.execute(statements)
             .then(function() {
-              return (control.length) ?
-                evaluateExpression(control.slice()) : sign(limit - start);
-            })
-            .then(function(result) {
-              step = aexpr(result);
               current += step;
             })
             .then(promiseYield)
