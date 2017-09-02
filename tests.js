@@ -1793,7 +1793,10 @@ QUnit.test("Error Messages", function(t) {
 });
 
 QUnit.test("Regression Tests", function(t) {
+  this.assert_error('ern "i  make "x :i + 1', "Don't know about variable I");
   this.assert_equals('make "x 0  repeat 3 [ for [ i 1 4 ] [ make "x :x + 1 ] ]  :x', 12);
+  this.assert_error('ern "i  for [i 0 100 :i+1] []', "Don't know about variable I");
+  this.assert_error('ern "i  for [i 0 100 :i + 1] []', "Don't know about variable I");
   this.assert_equals('make "i 5  make "x 0  for [ i 0 100 :i ] [ make "x :x + :i ]  :x', 1050);
   this.assert_error("fd 100 50 rt 90", "Don't know what to do with 50");
   this.assert_equals("to foo output 123 end  make \"v foo", undefined);

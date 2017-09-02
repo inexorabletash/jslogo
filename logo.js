@@ -705,6 +705,17 @@ function LogoInterpreter(turtle, stream, savehook)
     }
   }
 
+  function local(name) {
+    var scope = self.scopes[self.scopes.length - 1];
+    scope.set(sexpr(name), {value: undefined});
+  }
+
+  function setlocal(name, value) {
+    value = copy(value);
+    var scope = self.scopes[self.scopes.length - 1];
+    scope.set(sexpr(name), {value: value});
+  }
+
   //----------------------------------------------------------------------
   //
   // Expression Evaluation
@@ -2474,13 +2485,11 @@ function LogoInterpreter(turtle, stream, savehook)
   });
 
   def("local", function(varname) {
-    var localscope = this.scopes[this.scopes.length - 1];
-    Array.from(arguments).forEach(function(name) { localscope.set(sexpr(name), {value: undefined}); });
+    Array.from(arguments).forEach(function(name) { local(sexpr(name)); });
   }, {maximum: -1});
 
   def("localmake", function(varname, value) {
-    var localscope = this.scopes[this.scopes.length - 1];
-    localscope.set(sexpr(varname), {value: value});
+    setlocal(sexpr(varname), value);
   });
 
   def("thing", function(varname) {
@@ -3264,7 +3273,7 @@ function LogoInterpreter(turtle, stream, savehook)
             resolve();
             return;
           }
-          setvar(varname, current);
+          setlocal(varname, current);
           this.execute(statements)
             .then(function() {
               current += step;
