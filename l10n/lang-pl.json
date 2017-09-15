@@ -1,0 +1,62 @@
+{
+  "page": {
+    "translations": {
+      "title": "Interpreter Logo",
+      "tl-title": "Interpreter Logo",
+      "tl-tests": "Testy",
+      "tl-source": "Kod źródłowy",
+      "tl-reference": "Poradnik",
+      "start-togetherjs": "Współpracuj",
+      "no-canvas": "Twoja przeglądarka nie obsługuje HTML-5. Jest nam strasznie przykro! :(",
+      "ip-button-run": "Zacznij",
+      "ip-button-stop": "Zatrzymaj",
+      "ip-button-clear": "Wyczyść",
+      "logo-ta-single-line.placeholder": "Miejsce na twój kod",
+      "logo-ta-multi-line.placeholder": "Miejsce na twój kod",
+      "sb-link-reference": "Poradnik",
+      "sb-link-text-reference": "język Logo",
+      "sb-link-library": "Biblioteczka",
+      "sb-link-text-library": "Twoje funkcje",
+      "sb-link-history": "Historia",
+      "sb-link-text-history": "Wszystko co zrobiłeś",
+      "sb-link-examples": "Przykłady",
+      "sb-link-text-examples": "Rzeczy, które możesz wypróbować",
+      "sb-link-extras": "Dodatki",
+      "sb-link-text-extras": "Pomocne treści",
+      "sb-link-links": "Linki",
+      "sb-link-text-links": "Inne pomocne treści",
+      "extras-download-library": "Pobierz biblioteczkę",
+      "extras-download-drawing": "Pobierz swój rysunek",
+      "extras-clear-history": "Wyczyść historię",
+      "extras-clear-library": "Wyczyść biblioteczkę",
+      "github-forkme": "Zrób fork na GitHubie!"
+    }
+  },
+  "interpreter": {
+    "messages": {
+      "Division by zero": "Dzielenie przez zero",
+      "Index out of bounds": "Indeks jest poza ciągiem"
+    },
+    "keywords": {
+      "LUB": "ELSE",
+      "KONIEC": "END"
+    },
+    "procedures": {
+      "prawda": "true",
+      "fałsz": "false"
+    }
+  },
+  "graphics": {
+    "colors": {
+      "czerwony": "red",
+      "pomarańczowy": "orange",
+      "zółty": "yellow",
+      "zielony": "green",
+      "niebieski": "blue",
+      "fioletowy": "violet",
+      "biały": "white",
+      "szary": "gray",
+      "czarny": "black"
+    }
+  }
+}
