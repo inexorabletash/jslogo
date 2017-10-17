@@ -693,7 +693,7 @@ QUnit.test("Data Structure Primitives", function(t) {
 });
 
 QUnit.test("Communication", function(t) {
-  t.expect(31);
+  t.expect(33);
 
   // 3.1 Transmitters
 
@@ -745,6 +745,8 @@ QUnit.test("Communication", function(t) {
 
   this.assert_equals('setfont "serif  font', 'serif');
   this.assert_equals('settextsize 66  textsize', 66);
+  this.assert_equals('settextsize 100  increasefont  textsize', 125);
+  this.assert_equals('settextsize 100  decreasefont  textsize', 80);
 
   this.stream.clear();
 });
@@ -1222,7 +1224,7 @@ QUnit.test("Graphics", function(t) {
 });
 
 QUnit.test("Workspace Management", function(t) {
-  t.expect(191);
+  t.expect(197);
 
   //
   // 7.1 Procedure Definition
@@ -1431,7 +1433,10 @@ QUnit.test("Workspace Management", function(t) {
 
   this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  contents', [['b'], ['a'], ['c']]);
   this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  procedures', ['b']);
-  // TODO: primitives
+
+  this.assert_equals('memberp "firsts primitives', 1);
+  this.assert_equals('memberp "nopenopefirsts primitives', 0);
+
   this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  globals', ['a']);
   this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  names', [[], ['a']]);
   this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  plists', [[], [], ['c']]);
@@ -1517,12 +1522,20 @@ QUnit.test("Workspace Management", function(t) {
   this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  buryname "a  contents', [['b'], [], ['c']]);
   this.assert_equals('unburyall erall  make "a 1  to b output 2 end  pprop "c "d "e  buryall unburyname "a  contents', [[], ['a'], []]);
 
+  this.assert_equals('buried', [['b'], [], ['c']]);
+  // TODO: tests when STEP and TRACE are actually implemented.
+  this.assert_equals('stepped', [[],[],[]]);
+  this.assert_equals('traced', [[],[],[]]);
+
   // 7.6 Workspace Inspection
   // 7.7 Workspace Control
+
+  this.assert_equals('pprop "pl "p 1  erase [[] [] [pl]]  gprop "pl "p', []);
+
 });
 
 QUnit.test("Control Structures", function(t) {
-  t.expect(112);
+  t.expect(114);
   //
   // 8.1 Control
   //
@@ -1635,6 +1648,9 @@ QUnit.test("Control Structures", function(t) {
 
   this.assert_equals('make "x 0  for [ r 10 20 -1 ] [ make "x :x + :r ]  :x', 0);
   this.assert_equals('make "x 0  for [ r 20 10 1 ] [ make "x :x + :r ]  :x', 0);
+
+  this.assert_equals('make "x 0  dotimes [ i 5 ] [ make "x :x + :i ]  :x', 15);
+  this.assert_equals('make "x 0  dotimes [ i 0 ] [ make "x :x + :i ]  :x', 0);
 
   this.assert_equals('make "x 0  do.while [ make "x :x + 1 ] :x < 10  :x', 10);
   this.assert_equals('make "x 0  do.while [ make "x :x + 1 ] [:x < 10]  :x', 10);

@@ -461,6 +461,7 @@ function LogoInterpreter(turtle, stream, savehook)
       } else if (!inChars(stream.peek(), WORD_DELIMITER)) {
         atom = parseWord(stream);
       } else {
+        // NOTE: This shouldn't be reachable.
         throw err("Couldn't parse: '{string}'", { string: stream.rest });
       }
       atoms.push(atom);
@@ -2609,36 +2610,36 @@ function LogoInterpreter(turtle, stream, savehook)
   def("buried", function() {
     return [
       this.routines.keys().filter(function(x) {
-        return !this.routines.get(x).primitive && this.routines.get(x).buried; }),
+        return !this.routines.get(x).primitive && this.routines.get(x).buried; }.bind(this)),
       this.scopes.reduce(
         function(list, scope) {
           return list.concat(scope.keys().filter(function(x) { return scope.get(x).buried; })); },
         []),
-      this.plists.keys().filter(function(x) { return this.plists.get(x).buried; })
+      this.plists.keys().filter(function(x) { return this.plists.get(x).buried; }.bind(this))
     ];
   });
 
   def("traced", function() {
     return [
       this.routines.keys().filter(function(x) {
-        return !this.routines.get(x).primitive && this.routines.get(x).traced; }),
+        return !this.routines.get(x).primitive && this.routines.get(x).traced; }.bind(this)),
       this.scopes.reduce(
         function(list, scope) {
           return list.concat(scope.keys().filter(function(x) { return scope.get(x).traced; })); },
         []),
-      this.plists.keys().filter(function(x) { return this.plists.get(x).traced; })
+      this.plists.keys().filter(function(x) { return this.plists.get(x).traced; }.bind(this))
     ];
   });
 
   def(["stepped"], function() {
     return [
       this.routines.keys().filter(function(x) {
-        return !this.routines.get(x).primitive && this.routines.get(x).stepped; }),
+        return !this.routines.get(x).primitive && this.routines.get(x).stepped; }.bind(this)),
       this.scopes.reduce(
         function(list, scope) {
           return list.concat(scope.keys().filter(function(x) { return scope.get(x).stepped; })); },
         []),
-      this.plists.keys().filter(function(x) { return this.plists.get(x).stepped; })
+      this.plists.keys().filter(function(x) { return this.plists.get(x).stepped; }.bind(this))
     ];
   });
 
@@ -3286,7 +3287,30 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("dotimes", function(control, statements) {
     control = reparse(lexpr(control));
-    return this.routines.get("for")([control[0], 0, control[1]], statements);
+    statements = reparse(lexpr(statements));
+
+    var varname = sexpr(control.shift());
+    var times, current = 1;
+
+    return Promise.resolve(evaluateExpression(control))
+      .then(function(r) {
+        times = aexpr(r);
+      })
+      .then(function() {
+        return promiseLoop(function(loop, resolve, reject) {
+          if (current > times) {
+            resolve();
+            return;
+          }
+          setlocal(varname, current);
+          this.execute(statements)
+            .then(function() {
+              ++current;
+            })
+            .then(promiseYield)
+            .then(loop, reject);
+        }.bind(this));
+      }.bind(this));
   });
 
   function checkevalblock(block) {

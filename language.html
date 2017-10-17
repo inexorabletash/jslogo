@@ -1137,6 +1137,11 @@ of comparison.</p>
   <dd class=example>for [ a 1 10 ] [ show :a ]</dd>
   <dd class=example>for [ a 0 20 2 ] [ show :a ]</dd>
 
+  <dt><code>dotimes [<var>varname</var> <var>times</var>] [ <var>statements ...</var></code></dt>
+  <dd>Run the statements the specified number of <var>times</var>. The variable
+    <var>varname</var> is set to the current iteration number.</dd>
+  <dd class=example>dotimes [ i 5 ] [ show :i * :i ]</dd>
+
   <dt><code>do.while [ <var>statements ...</var>] <var>expr</var></code>
   <dt><code>do.while [ <var>statements ...</var>] [<var>expr</var>]</code>
   <dd>Runs the specified statements at least once, and repeats while the expression is non-zero (true).
