@@ -28,8 +28,7 @@
       "extras-download-library": "ライブラリをダウンロード",
       "extras-download-drawing": "画像をダウンロード",
       "extras-clear-history": "履歴を削除",
-      "extras-clear-library": "ライブラリを削除",
-      "github-forkme": "GitHubをフォーク"
+      "extras-clear-library": "ライブラリを削除"
     }
   }
 }

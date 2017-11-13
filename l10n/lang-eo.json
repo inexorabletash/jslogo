@@ -28,8 +28,7 @@
       "extras-download-library": "Download Biblioteko",
       "extras-download-drawing": "Download Desegnaĵo",
       "extras-clear-history": "Klara Historio",
-      "extras-clear-library": "Klara Biblioteko",
-      "github-forkme": "Forko min sur GitHub"
+      "extras-clear-library": "Klara Biblioteko"
     }
   },
   "interpreter": {

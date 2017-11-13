@@ -28,8 +28,7 @@
       "extras-download-library": "Скачать библиотеку",
       "extras-download-drawing": "Скачать рисунок",
       "extras-clear-history": "Очистить историю",
-      "extras-clear-library": "Очистить библиотеку",
-      "github-forkme": "Сделать fork на GitHub-е"
+      "extras-clear-library": "Очистить библиотеку"
     }
   },
   "interpreter": {

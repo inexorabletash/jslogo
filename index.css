@@ -322,38 +322,6 @@ body {
   display: block;
 }
 
-/* "Fork me on GitHub" banner */
-
-a.forkme {
-  background-color: #e71;
-  color: #fff;
-  text-decoration: none;
-  font-family: Michroma, sans-serif;
-  text-align: center;
-  font-weight: bold;
-  padding: 5px 5px;
-  font-size: 10px;
-
-  display: block;
-  position: absolute;
-  overflow: hidden;
-  z-index: 9999;
-  top: 0;
-  left: auto; right: 0;
-  width: 300px;
-
-  transform: translateX(50%) translateY(-50%) translateX(-60px) translateY(60px) rotate(45deg);
-  box-shadow:4px 4px 10px rgba(0,0,0,0.8);
-}
-[dir="rtl"] a.forkme {
-  right: auto; left: 0;
-  transform: translateX(-50%) translateY(-50%) translateX(60px) translateY(60px) rotate(-45deg);
-}
-
-a:hover.forkme {
-  background: #f82;
-}
-
 #history .placeholder {
   text-align: center;
   font-style: italic;
@@ -376,7 +344,6 @@ a:hover.forkme {
   }
   #sidebar-header, #sidebar { width: 200px;; }
   .linkdesc { display: none; }
-  a.forkme { display: none; }
 }
 
 @media only screen and (max-width: 600px) {
@@ -387,7 +354,6 @@ a:hover.forkme {
     right: 0; left: 0;
   }
   #sidebar-header, #sidebar { display: none; }
-  a.forkme { display: none; }
   #topbar-altlinks { display: inline-block; }
 
   #topbar h1 { font-size: 14pt; }
