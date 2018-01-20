@@ -172,11 +172,27 @@ function LogoInterpreter(turtle, stream, savehook)
       });
   }
 
-  // Returns a Promise that will resolve after yielding control to the
-  // event loop.
+  // Returns a Promise that will resolve as soon as possible while ensuring
+  // that control is yielded back to the event loop at least every 20ms.
+  var lastTimeYielded = Date.now();
   function promiseYield() {
+    var currentTime = Date.now();
+    if (currentTime - lastTimeYielded > 20) {
+      lastTimeYielded = currentTime;
+      return new Promise(function(resolve) {
+        setTimeout(resolve, 0);
+      });
+    } else {
+      return Promise.resolve();
+    }
+  }
+
+  function promiseYieldTime(msec) {
+    // Not adding msec would generally cause a yield right after the wait.
+    // Adding msec just once might cause additional tear of animations.
+    lastTimeYielded = Date.now() + msec * 2;
     return new Promise(function(resolve) {
-      setTimeout(resolve, 0);
+      setTimeout(resolve, msec);
     });
   }
 
@@ -3173,9 +3189,7 @@ function LogoInterpreter(turtle, stream, savehook)
   // Not Supported: continue
 
   def("wait", function(time) {
-    return new Promise(function(resolve) {
-      setTimeout(resolve, aexpr(time) / 60 * 1000);
-    });
+    return promiseYieldTime(aexpr(time) / 60 * 1000);
   });
 
   def("bye", function() {
