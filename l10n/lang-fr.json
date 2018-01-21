@@ -1,0 +1,92 @@
+{
+  "page": {
+    "translations": {
+      "title": "Logo Interprète",
+      "tl-title": "Logo Interprète",
+      "tl-tests": "Tests",
+      "tl-source": "Source",
+      "tl-reference": "Référence",
+      "start-togetherjs": "Coopérer",
+      "no-canvas": "Votre navigateur ne supporte pas l'élément canvas - Désolé!",
+      "ip-button-run": "Executer",
+      "ip-button-stop": "Arrêter",
+      "ip-button-clear": "Effacer",
+      "logo-ta-single-line.placeholder": "Entrez votre code ici ...",
+      "logo-ta-multi-line.placeholder": "Entrez votre code ici ...",
+      "sb-link-reference": "Référence",
+      "sb-link-text-reference": "Le langage Logo",
+      "sb-link-library": "Bibliothèque",
+      "sb-link-text-library": "Vos procédures",
+      "sb-link-history": "Histoire",
+      "sb-link-text-history": "Tout ce qui a était fait jusqu'a maintenant",
+      "sb-link-examples": "Exemples",
+      "sb-link-text-examples": "Choses amusantes à essayer",
+      "sb-link-extras": "Extras",
+      "sb-link-text-extras": "Utilitaires utiles",
+      "sb-link-links": "Liens",
+      "sb-link-text-links": "Autres ressources de Logo",
+      "extras-download-library": "Télécharger la bibliothèque",
+      "extras-download-drawing": "Télécharger l'image",
+      "extras-clear-history": "Effacer l'historique",
+      "extras-clear-library": "Effacer la bibliothèque"
+    }
+  },
+  "interpreter": {
+	"messages": {
+      "Can't apply {_PROC_} to special {name:U}": "Ne peut pas appliquer {_PROC_} pour spécial {name:U}",
+      "Can't {_PROC_} primitives unless REDEFP is TRUE": "Ne peut pas {_PROC_} primitives à moins que REDEFP est VRAI",
+      "Can't {_PROC_} special {name:U}": "Ne peut pas {_PROC_} spécial {name:U}",
+      "Couldn't parse: '{string}'": "Impossible d'analyser: '{string}'",
+      "Division by zero": "Division par zéro",
+      "Don't know about variable {name:U}": "Je ne sais pas à propos de la variable {name:U}",
+      "Don't know how to {name:U}": "Je ne sais pas comment {name:U}",
+      "Don't know what to do with {result}": "Je ne sais pas quoi faire avec {result}",
+      "Expected ')'": "Attendu ')'",
+      "Expected ')', saw {word}": "Attendu ')', voir {word}",
+      "Expected ']'": "Attendu ']'",
+      "Expected '}'": "Attendu '}'",
+      "Expected number after @": "Nombre attendu après @",
+      "Expected number": "Numéro attendu",
+      "Expected string": "Chaîne attendue",
+      "No output from procedure": "Pas de sortie de procédure",
+      "TO: Expected END":  "FIN attendue",
+      "TO: Expected identifier": "Identifiant attendu",
+      "Unexpected '{c}'": "Inattendu '{c}'",
+      "Unexpected end of instructions": "Fin inattendue des instructions",
+      "{_PROC_}: Array size must be positive integer": "{_PROC_}: La taille du tableau doit être un nombre entier positif",
+      "{_PROC_}: Can't create circular array": "{_PROC_}: Impossible de créer un tableau circulaire",
+      "{_PROC_}: Can't overwrite primitives unless REDEFP is TRUE": "{_PROC_}: Impossible d'écraser les primitives à moins que REDEFP ne soit VRAI",
+      "{_PROC_}: Can't overwrite special {name:U}": "{_PROC_}: Impossible d'écraser {name:U}",
+      "{_PROC_}: Can't redefine primitive {name:U}": "{_PROC_}: Impossible de redéfinir la primitive {name:U}",
+      "{_PROC_}: Can't show definition of primitive {name:U}": "{_PROC_}: Impossible d'afficher la définition de la primitive {name:U}",
+      "{_PROC_}: Expected array": "{_PROC_}: Tableau attendu",
+      "{_PROC_}: Expected block": "{_PROC_}: Bloc attendu",
+      "{_PROC_}: Expected list of length 2": "{_PROC_}: Attente d'une liste de longueur 2",
+      "{_PROC_}: Expected list": "{_PROC_} Liste attendue",
+      "{_PROC_}: Expected lists of equal length": "{_PROC_}: Listes attendues de longueur égale",
+      "{_PROC_}: Expected non-empty list": "{_PROC_} Attente d'une liste non vide",
+      "{_PROC_}: Index out of bounds": "{_PROC_}: Indice hors limites"
+    },
+    "keywords": {
+      "SINON": "ELSE",
+      "FIN": "END"
+    },
+    "procedures": {
+      "vrai": "true",
+      "faux": "false"
+    }
+  },
+  "graphics": {
+    "colors": {
+      "rouge": "red",
+      "orange": "orange",
+      "jaune": "yellow",
+      "vert": "green",
+      "bleu": "blue",
+      "violet": "violet",
+      "blanc": "white",
+      "gris": "gray",
+      "noir": "black"
+    }
+  }
+}
