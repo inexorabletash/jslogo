@@ -1,6 +1,6 @@
 en English
-he עברית
 eo Esperanto
-ru Русский
-ja 日本語
 fr French
+he עברית
+ja 日本語
+ru Русский
