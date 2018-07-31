@@ -2200,7 +2200,7 @@ function LogoInterpreter(turtle, stream, savehook)
   def("fill", function() { turtle.fill(); });
 
   def("filled", function(fillcolor, statements) {
-    fillcolor = sexpr(fillcolor);
+    fillcolor = parseColor(fillcolor);
     statements = reparse(lexpr(statements));
     turtle.beginpath();
     return promiseFinally(
