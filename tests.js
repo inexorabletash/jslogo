@@ -971,7 +971,7 @@ QUnit.test("Logical Operations", function(t) {
 });
 
 QUnit.test("Graphics", function(t) {
-  t.expect(150);
+  t.expect(158);
 
   // NOTE: test canvas is 300,300 (so -150...150 coordinates before hitting)
   // edge
@@ -1044,13 +1044,14 @@ QUnit.test("Graphics", function(t) {
     [150 + 50, 150 - 50, black]
   ]);
 
-  this.assert_pixels('cs  pu  filled "red [ arc 135 100 ]', [
-    [150, 150, white],
-    [150 + 100, 150 - 100, white],
-    [150 + 10, 150 - 90, red],
-    [150 + 90, 150, red],
-  ]);
-
+  ['"red', '4', '[99 0 0]'].forEach(function(color) {
+    this.assert_pixels('cs  pu  filled ' + color + ' [ arc 135 100 ]', [
+      [150, 150, white],
+      [150 + 100, 150 - 100, white],
+      [150 + 10, 150 - 90, red],
+      [150 + 90, 150, red],
+    ]);
+  }.bind(this));
 
   //
   // 6.2 Turtle Motion Queries
