@@ -713,6 +713,7 @@ window.addEventListener('DOMContentLoaded', function() {
       .catch(function(reason) {
         console.warn('Error loading localization file for "' +
                      lang + '": ' + reason.message);
+        document.body.lang = 'en';
       });
   }());
 
