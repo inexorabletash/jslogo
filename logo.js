@@ -3506,9 +3506,9 @@ function LogoInterpreter(turtle, stream, savehook)
         resolve();
         return;
       }
-      Promise.resolve(routine(list.shift()))
+      Promise.resolve(routine.call(this, list.shift()))
         .then(loop, reject);
-    });
+    }.bind(this));
   });
 
 
@@ -3563,10 +3563,10 @@ function LogoInterpreter(turtle, stream, savehook)
         return;
       }
       var item = list.shift();
-      Promise.resolve(routine(item))
+      Promise.resolve(routine.call(this, item))
         .then(function(value) { if (value) filtered.push(item); })
         .then(loop, reject);
-    });
+    }.bind(this));
   });
 
   def("find", function(procname, list) {
@@ -3585,7 +3585,7 @@ function LogoInterpreter(turtle, stream, savehook)
         return;
       }
       var item = list.shift();
-      Promise.resolve(routine(item))
+      Promise.resolve(routine.call(this, item))
         .then(function(value) {
           if (value) {
             resolve(item);
@@ -3593,7 +3593,7 @@ function LogoInterpreter(turtle, stream, savehook)
           }
           loop();
       }, reject);
-    });
+    }.bind(this));
   });
 
   def("reduce", function(procname, list) {
@@ -3673,5 +3673,14 @@ function LogoInterpreter(turtle, stream, savehook)
   // Helper for testing that wraps a result in a Promise
   def(".promise", function(value) {
     return Promise.resolve(value);
+  });
+  def(".verify_bound_ignore", function(value) {
+    if (this === undefined)
+      throw new Error("Internal error: Unbound procedure");
+  });
+  def(".verify_bound_identity", function(value) {
+    if (this === undefined)
+      throw new Error("Internal error: Unbound procedure");
+    return value;
   });
 }

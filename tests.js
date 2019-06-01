@@ -1536,7 +1536,7 @@ QUnit.test("Workspace Management", function(t) {
 });
 
 QUnit.test("Control Structures", function(t) {
-  t.expect(114);
+  t.expect(115);
   //
   // 8.1 Control
   //
@@ -1709,6 +1709,7 @@ QUnit.test("Control Structures", function(t) {
 
   this.assert_equals('to odd :x output :x % 2 end  filter "odd [ 1 2 3 ]', ["1", "3"]);
   this.assert_equals('to odd :x output .promise :x % 2 end  filter "odd [ 1 2 3 ]', ["1", "3"]);
+  this.assert_equals('filter "numberp [ 1 "a 2 "b ]', ["1", "2"]);
 
   this.assert_equals('find "numberp (list "a "b "c 4 "e "f )', 4);
   this.assert_equals('find "numberp (list "a "b "c "d "e "f )', []);
@@ -1848,6 +1849,13 @@ QUnit.test("Regression Tests", function(t) {
 
   this.assert_equals(
     'make "a 0  do.while [ make "a :a + 1 ] notequalp :a 5  :a', 5);
+
+  this.run('foreach ".verify_bound_ignore [ 1 2 3 4 5 ]');
+  this.assert_equals('map ".verify_bound_identity [ 1 2 ]', ['1', '2']);
+  this.assert_equals('filter ".verify_bound_identity [ 1 2 ]', ['1', '2']);
+  this.assert_equals('find ".verify_bound_identity [ 1 ]', '1');
+  this.run('reduce ".verify_bound_ignore [ 1 2 ]');
+  this.run('ignore crossmap ".verify_bound_ignore [[ 1 2 ] [ 3 4 ]]');
 });
 
 QUnit.test("API Tests", function(t) {
