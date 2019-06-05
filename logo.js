@@ -1456,11 +1456,15 @@ function LogoInterpreter(turtle, stream, savehook)
   }, {minimum: 0, maximum: -1});
 
   def("fput", function(thing, list) {
-    var l = lexpr(list); l.unshift(thing); return sifw(list, l);
+    var l = lexpr(list);
+    l.unshift(thing);
+    return sifw(list, l);
   });
 
   def("lput", function(thing, list) {
-    var l = lexpr(list); l.push(thing); return sifw(list, l);
+    var l = lexpr(list);
+    l.push(thing);
+    return sifw(list, l);
   });
 
   def("array", function(size) {

@@ -318,6 +318,10 @@ QUnit.test("Parser", function(t) {
   //
 
   this.assert_stream('type .2 + .3', '0.5');
+  this.assert_equals('1e2', 100);
+  this.assert_equals('1e+2', 100);
+  this.assert_equals('1e-2', 0.01);
+  this.assert_equals('-1', -1);
 
   //
   // Arrays
@@ -329,6 +333,17 @@ QUnit.test("Parser", function(t) {
   this.assert_equals('count { a b c } @ 0', 3);
   this.assert_error('make "a count { 1 2 3 }@1.5', "Don't know what to do with 0.5", 9);
   this.assert_equals('item 0 { 1 2 3 }@', '1');
+
+  this.assert_equals('item 1 { 1 2 3 }@1', '1');
+  this.assert_equals('item 2 { 1 2 3 }@1', '2');
+  this.assert_equals('item 3 { 1 2 3 }@1', '3');
+
+  this.assert_equals('item 2 { 1 2 3 }@2', '1');
+  this.assert_equals('item 3 { 1 2 3 }@2', '2');
+  this.assert_equals('item 4 { 1 2 3 }@2', '3');
+
+  this.assert_equals('item -1 { 1 2 3 }@-1', '1');
+  this.assert_equals('item 0 { 1 2 3 }@-1', '2');
 
   //
   // Nested Structures
@@ -524,6 +539,7 @@ QUnit.test("Data Structure Primitives", function(t) {
   this.assert_equals('make "a { 1 }  make "b :a  setitem 1 :a 2  item 1 :b', 2);
   this.assert_error('make "a { 1 }  setitem 1 :a :a', "SETITEM: Can't create circular array");
   this.assert_error('make "a { 1 }  make "b { 1 }  setitem 1 :b :a  setitem 1 :a :b', "SETITEM: Can't create circular array");
+  this.assert_error('setitem 1 "x 123', 'SETITEM: Expected array');
 
   this.assert_equals('make "a mdarray [1 1]  make "b :a  mdsetitem [1 1] :a 2  mditem [1 1] :b', 2);
   this.assert_error('make "a mdarray [1 1]  mdsetitem [1 1] :a :a', "MDSETITEM: Can't create circular array");
@@ -590,6 +606,8 @@ QUnit.test("Data Structure Primitives", function(t) {
   this.assert_equals('3 <> 4', 1);
   this.assert_equals('3 <> 3', 0);
   this.assert_equals('3 <> 2', 1);
+  this.assert_equals('[] = []', 1);
+  this.assert_equals('[] <> [ 1 ]', 1);
 
   this.assert_equals('equalp "a "a', 1);
   this.assert_equals('equalp "a "b', 0);
@@ -1602,7 +1620,7 @@ QUnit.test("Control Structures", function(t) {
 
   this.assert_equals('to foo forever [ if repcount = 5 [ make "c 234 stop ] ] end  foo  :c', 234);
 
-  this.assert_stream('catch "x [ show "a throw "x show "b ] show "b', 'a\nb\n');
+  this.assert_stream('catch "x [ show "a throw "x show "c ] show "b', 'a\nb\n');
   this.assert_equals('catch "x [ show "a (throw "x "z) show "b ]', 'z');
   this.assert_error('catch "x [ throw "q ]', 'No CATCH for tag Q');
   this.assert_error('throw "q', 'No CATCH for tag Q');
@@ -1748,9 +1766,11 @@ QUnit.test("Error Messages", function(t) {
   this.assert_error("nosuchproc", "Don't know how to NOSUCHPROC", 24);
   this.assert_error("1 + \"1+2", "Expected number", 4);
   this.assert_error("1 + []", "Expected number", 4);
+  this.assert_error("1 + ignore 1", "Expected number", 4);
   this.assert_error("(minus [])", "Expected number", 4);
   this.assert_error("make [] 123", "Expected string", 4);
   this.assert_error("(def [])", "Expected string", 4);
+  this.assert_error("erase ignore 1", "ERASE: Expected list", 4);
 
   this.assert_error('fd50', "Need a space between FD and 50", 39);
 
