@@ -2172,6 +2172,7 @@ function LogoInterpreter(turtle, stream, savehook)
   def("home", function() { return turtle.home(); });
 
   def("arc", function(angle, radius) { return turtle.arc(aexpr(angle), aexpr(radius)); });
+  def("ellipse", function(width, height) { return turtle.ellipse(aexpr(width), aexpr(height)); });
 
   //
   // 6.2 Turtle Motion Queries
