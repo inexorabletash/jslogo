@@ -1,0 +1,92 @@
+{
+  "page": {
+    "translations": {
+      "title": "Interprete Logo",
+      "tl-title": "Interprete Logo",
+      "tl-tests": "Test",
+      "tl-source": "Sorgenti",
+      "tl-reference": "Riferimenti",
+      "start-togetherjs": "Collabora",
+      "no-canvas": "Il tuo browser non supporta l'elemento canvas",
+      "ip-button-run": "Esegui",
+      "ip-button-stop": "Stop",
+      "ip-button-clear": "Pulisci",
+      "logo-ta-single-line.placeholder": "Inserisci il tuo codice qui ...",
+      "logo-ta-multi-line.placeholder": "Inserisci il tuo codice qui ...",
+      "sb-link-reference": "Riferimenti",
+      "sb-link-text-reference": "Il linguaggio Logo",
+      "sb-link-library": "Libreria",
+      "sb-link-text-library": "I tuoi programmi",
+      "sb-link-history": "Cronologia",
+      "sb-link-text-history": "Tutto quello che hai fatto finora",
+      "sb-link-examples": "Esempi",
+      "sb-link-text-examples": "Cose divertenti da provare",
+      "sb-link-extras": "Extra",
+      "sb-link-text-extras": "Utilità varie",
+      "sb-link-links": "Links",
+      "sb-link-text-links": "Altre risorse web su Logo",
+      "extras-download-library": "Scarica la libreria dei programmi",
+      "extras-download-drawing": "Scarica l'immagine prodotta",
+      "extras-clear-history": "Cancella la cronologia",
+      "extras-clear-library": "Cancella la libreria"
+    }
+  },
+  "interpreter": {
+	"messages": {
+      "Can't apply {_PROC_} to special {name:U}": "Impossibile utilizzare {_PROC_} per {name:U}",
+      "Can't {_PROC_} primitives unless REDEFP is TRUE": "Non posso eseguire {_PROC_} a meno che REDEFP non sia VERO",
+      "Can't {_PROC_} special {name:U}": "Non posso eseguire {_PROC_} con {name:U}",
+      "Couldn't parse: '{string}'": "Non capisco questa frase: '{string}'",
+      "Division by zero": "Impossibile dividere per zero",
+      "Don't know about variable {name:U}": "Non conosco la variabile {name:U}",
+      "Don't know how to {name:U}": "Non so come eseguire {name:U}",
+      "Don't know what to do with {result}": "Non so cosa fare con {result}",
+      "Expected ')'": "Mi aspetto la chiusura della parentesi ')'",
+      "Expected ')', saw {word}": "E' prevista la ')', invece trovo {word}",
+      "Expected ']'": "Mi aspetto la chiusura della parentesi ']'",
+      "Expected '}'": "Mi aspetto la chiusura della parentesi '}'",
+      "Expected number after @": "Mi aspetto un numero dopo @",
+      "Expected number": "Mi aspetto un numero",
+      "Expected string": "Mi aspetto una stringa",
+      "No output from procedure": "Nessun risultato dal programma",
+      "TO: Expected END":  "TO: Mi aspetto il comando FINE",
+      "TO: Expected identifier": "TO: Mi aspetto un identificatore",
+      "Unexpected '{c}'": "'{c}' non previsto",
+      "Unexpected end of instructions": "Fine inattesa delle istruzioni",
+      "{_PROC_}: Array size must be positive integer": "{_PROC_}: La dimensione della tabella deve essere un numero intero positivo",
+      "{_PROC_}: Can't create circular array": "{_PROC_}: Non posso creare una tabella che fa riferimento a se stessa",
+      "{_PROC_}: Can't overwrite primitives unless REDEFP is TRUE": "{_PROC_}: Non è possibile sovrascrivere le primitive a meno che REDEFP non sia VERO",
+      "{_PROC_}: Can't overwrite special {name:U}": "{_PROC_}: Non posso sovrascrivere {name:U}",
+      "{_PROC_}: Can't redefine primitive {name:U}": "{_PROC_}: Impossibile ridefinire {name:U}",
+      "{_PROC_}: Can't show definition of primitive {name:U}": "{_PROC_}: Non posso mostrare la definizione di {name:U}",
+      "{_PROC_}: Expected array": "{_PROC_}: Mi aspetto una tabella",
+      "{_PROC_}: Expected block": "{_PROC_}: Mi aspetto un blocco",
+      "{_PROC_}: Expected list of length 2": "{_PROC_}: Mi aspetto una lista di due elementi",
+      "{_PROC_}: Expected list": "{_PROC_} Mi aspetto una lista",
+      "{_PROC_}: Expected lists of equal length": "{_PROC_}: Le liste devono avere uguale lunghezza",
+      "{_PROC_}: Expected non-empty list": "{_PROC_} La lista non può essere vuota",
+      "{_PROC_}: Index out of bounds": "{_PROC_}: Indice fuori dai limiti"
+    },
+    "keywords": {
+      "ALTRIMENTI": "ELSE",
+      "FINE": "END"
+    },
+    "procedures": {
+      "vero": "true",
+      "falso": "false"
+    }
+  },
+  "graphics": {
+    "colors": {
+      "rosso": "red",
+      "arancione": "orange",
+      "giallo": "yellow",
+      "verde": "green",
+      "blu": "blue",
+      "violetto": "violet",
+      "bianco": "white",
+      "grigio": "gray",
+      "nero": "black"
+    }
+  }
+}
