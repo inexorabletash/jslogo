@@ -1,0 +1,34 @@
+{
+  "page": {
+    "translations": {
+      "title": "Środowisko Logo",
+      "tl-title": "Środowisko Logo",
+      "tl-tests": "Testy",
+      "tl-source": "Kod źródłowy",
+      "tl-reference": "Instrukcja",
+      "start-togetherjs": "współpracuj",
+      "no-canvas": "Twoja przeglądarka nie obsługuje elementu canvas - przepraszam!",
+      "ip-button-run": "Uruchom",
+      "ip-button-stop": "Zatrzymaj",
+      "ip-button-clear": "Wyczyść",
+      "logo-ta-single-line.placeholder": "Wpisz swój kod tutaj ...",
+      "logo-ta-multi-line.placeholder": "Wpisz swój kod tutaj ...",
+      "sb-link-reference": "Instrukcja",
+      "sb-link-text-reference": "-Jezyk programowania Logo",
+      "sb-link-library": "Pamięć",
+      "sb-link-text-library": "-twoje procedury",
+      "sb-link-history": "Historia",
+      "sb-link-text-history": "-to co już zrobiłeś tu",
+      "sb-link-examples": "Przykłady",
+      "sb-link-text-examples": "-fajne rzeczy które tu możesz zrobić",
+      "sb-link-extras": "Extra",
+      "sb-link-text-extras": "-pomocne narzędzia",
+      "sb-link-links": "Linki",
+      "sb-link-text-links": "-inne rzeczy z logo",
+      "extras-download-library": "Pobierz bibliotekę",
+      "extras-download-drawing": "Pobierz rysunek",
+      "extras-clear-history": "Wyczyść historie",
+      "extras-clear-library": "Usuń bibliotekę"
+    }
+  }
+}
