@@ -1809,15 +1809,15 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def(["print", "pr"], function(thing) {
     var s = Array.from(arguments).map(stringify_nodecorate).join(" ");
-    this.stream.write(s, "\n");
+    return this.stream.write(s, "\n");
   }, {minimum: 0, maximum: -1});
   def("type", function(thing) {
     var s = Array.from(arguments).map(stringify_nodecorate).join("");
-    this.stream.write(s);
+    return this.stream.write(s);
   }, {minimum: 0, maximum: -1});
   def("show", function(thing) {
     var s = Array.from(arguments).map(stringify).join(" ");
-    this.stream.write(s, "\n");
+    return this.stream.write(s, "\n");
   }, {minimum: 0, maximum: -1});
 
   // 3.2 Receivers
@@ -1875,7 +1875,7 @@ function LogoInterpreter(turtle, stream, savehook)
   // Not Supported: keyp
 
   def(["cleartext", "ct"], function() {
-    this.stream.clear();
+    return this.stream.clear();
   });
 
   // Not Supported: setcursor

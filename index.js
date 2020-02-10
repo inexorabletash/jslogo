@@ -534,6 +534,12 @@ window.addEventListener('DOMContentLoaded', function() {
   $('#overlay').style.fontFamily = 'monospace';
   $('#overlay').style.color = 'black';
 
+  function asyncResult(value) {
+    return new Promise(function(resolve) {
+      setTimeout(function() { resolve(value); }, 0);
+    });
+  }
+
   var stream = {
     read: function(s) {
       return Dialog.prompt(s ? s : "");
@@ -544,14 +550,16 @@ window.addEventListener('DOMContentLoaded', function() {
         div.innerHTML += arguments[i];
       }
       div.scrollTop = div.scrollHeight;
+      return asyncResult();
     },
     clear: function() {
       var div = $('#overlay');
       div.innerHTML = "";
+      return asyncResult();
     },
     readback: function() {
       var div = $('#overlay');
-      return div.innerHTML;
+      return asyncResult(div.innerHTML);
     },
     get textsize() {
       return parseFloat($('#overlay').style.fontSize.replace('px', ''));
