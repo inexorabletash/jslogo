@@ -3414,7 +3414,7 @@ function LogoInterpreter(turtle, stream, savehook)
           }
           this.execute(block)
             .then(promiseYield)
-            .then(loop);
+            .then(loop, reject);
         }.bind(this), reject);
     }.bind(this));
   }, {noeval: true});

@@ -1877,7 +1877,13 @@ QUnit.test("Regression Tests", function(t) {
   this.run('reduce ".verify_bound_ignore [ 1 2 ]');
   this.run('ignore crossmap ".verify_bound_ignore [[ 1 2 ] [ 3 4 ]]');
 
+  this.assert_equals('forever [ bye ] 123', undefined);
+  this.assert_equals('for [ i 1 2 ] [ bye ] 123', undefined);
+  this.assert_equals('dotimes [ i 1 ] [ bye ] 123', undefined);
+  this.assert_equals('do.while [ bye ] [ 1 = 1 ] 123', undefined);
   this.assert_equals('while [ 1 = 1 ] [ bye ] 123', undefined);
+  this.assert_equals('do.until [ bye ] [ 1 = 0 ] 123', undefined);
+  this.assert_equals('until [ 1 = 0 ] [ bye ] 123', undefined);
 });
 
 QUnit.test("API Tests", function(t) {
