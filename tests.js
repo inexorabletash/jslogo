@@ -1876,6 +1876,8 @@ QUnit.test("Regression Tests", function(t) {
   this.assert_equals('find ".verify_bound_identity [ 1 ]', '1');
   this.run('reduce ".verify_bound_ignore [ 1 2 ]');
   this.run('ignore crossmap ".verify_bound_ignore [[ 1 2 ] [ 3 4 ]]');
+
+  this.assert_equals('while [ 1 = 1 ] [ bye ] 123', undefined);
 });
 
 QUnit.test("API Tests", function(t) {
