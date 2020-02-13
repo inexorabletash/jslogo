@@ -3193,7 +3193,7 @@ function LogoInterpreter(turtle, stream, savehook)
   // Not Supported: continue
 
   def("wait", function(time) {
-    return promiseYieldTime(aexpr(time) / 60 * 1000);
+    return promiseYieldTime(Math.ceil(aexpr(time) / 60 * 1000));
   });
 
   def("bye", function() {
