@@ -6,3 +6,4 @@ it Italiano
 ja 日本語
 pl Polski
 ru Русский
+zh 中文
