@@ -68,25 +68,25 @@
       "{_PROC_}: Index out of bounds": "{_PROC_}: Indice fuori dai limiti"
     },
     "keywords": {
-      "ALTRIMENTI": "ELSE",
-      "FINE": "END"
+      "ELSE": "ELSE",
+      "END": "END"
     },
     "procedures": {
-      "vero": "true",
-      "falso": "false"
+      "true": "true",
+      "false": "false"
     }
   },
   "graphics": {
     "colors": {
-      "rosso": "red",
-      "arancione": "orange",
-      "giallo": "yellow",
+      "rojo": "red",
+      "naranja": "orange",
+      "amarillo": "yellow",
       "verde": "green",
-      "blu": "blue",
-      "violetto": "violet",
-      "bianco": "white",
-      "grigio": "gray",
-      "nero": "black"
+      "azul": "blue",
+      "violeta": "violet",
+      "blanco": "white",
+      "gris": "gray",
+      "negro": "black"
     }
   }
 }
