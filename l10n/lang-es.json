@@ -78,15 +78,22 @@
   },
   "graphics": {
     "colors": {
-      "rojo": "red",
-      "naranja": "orange",
-      "amarillo": "yellow",
-      "verde": "green",
+      "negro": "black",
       "azul": "blue",
-      "violeta": "violet",
+      "lima": "lime",
+      "cian": "cyan",
+      "rojo": "red",
+      "magenta": "magenta",
+      "amarillo": "yellow",
       "blanco": "white",
-      "gris": "gray",
-      "negro": "black"
+      "marrón": "brown",
+      "bronce": "tan",
+      "aguamarina": "aquamarine",
+      "salmon", "salmon",
+      "verde": "green",
+      "morado": "purple",
+      "naranja": "orange",
+      "gris": "gray"
     }
   }
 }
