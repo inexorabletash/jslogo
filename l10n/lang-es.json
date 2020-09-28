@@ -1,34 +1,34 @@
 {
   "page": {
     "translations": {
-      "title": "Interprete Logo",
-      "tl-title": "Interprete Logo",
+      "title": "Intérprete Logo",
+      "tl-title": "Intérprete Logo",
       "tl-tests": "Test",
-      "tl-source": "Sorgenti",
+      "tl-source": "Código",
       "tl-reference": "Riferimenti",
-      "start-togetherjs": "Collabora",
-      "no-canvas": "Il tuo browser non supporta l'elemento canvas",
-      "ip-button-run": "Esegui",
-      "ip-button-stop": "Stop",
-      "ip-button-clear": "Pulisci",
-      "logo-ta-single-line.placeholder": "Inserisci il tuo codice qui ...",
-      "logo-ta-multi-line.placeholder": "Inserisci il tuo codice qui ...",
-      "sb-link-reference": "Riferimenti",
-      "sb-link-text-reference": "Il linguaggio Logo",
-      "sb-link-library": "Libreria",
-      "sb-link-text-library": "I tuoi programmi",
-      "sb-link-history": "Cronologia",
-      "sb-link-text-history": "Tutto quello che hai fatto finora",
-      "sb-link-examples": "Esempi",
-      "sb-link-text-examples": "Cose divertenti da provare",
-      "sb-link-extras": "Extra",
-      "sb-link-text-extras": "Utilità varie",
-      "sb-link-links": "Links",
-      "sb-link-text-links": "Altre risorse web su Logo",
-      "extras-download-library": "Scarica la libreria dei programmi",
-      "extras-download-drawing": "Scarica l'immagine prodotta",
-      "extras-clear-history": "Cancella la cronologia",
-      "extras-clear-library": "Cancella la libreria"
+      "start-togetherjs": "Colabora",
+      "no-canvas": "Su navegador no soporta el elemento canvas",
+      "ip-button-run": "Iniciar",
+      "ip-button-stop": "Parar",
+      "ip-button-clear": "Limpiar",
+      "logo-ta-single-line.placeholder": "Ingrese su código aquí...",
+      "logo-ta-multi-line.placeholder": "Ingrese su código aquí...",
+      "sb-link-reference": "Referencias",
+      "sb-link-text-reference": "El lenguaje Logo",
+      "sb-link-library": "Biblioteca",
+      "sb-link-text-library": "Tus programas",
+      "sb-link-history": "Histórico",
+      "sb-link-text-history": "Todo lo que has hecho hasta ahora",
+      "sb-link-examples": "Ejemplos",
+      "sb-link-text-examples": "Cosas divertidas para probar",
+      "sb-link-extras": "Extras",
+      "sb-link-text-extras": "Varias utilidades",
+      "sb-link-links": "Enlaces",
+      "sb-link-text-links": "Otros recursos sobre Logo",
+      "extras-download-library": "Descarga la biblioteca de programas",
+      "extras-download-drawing": "Descarga la imagen producida",
+      "extras-clear-history": "Limpia el historial",
+      "extras-clear-library": "Limpia la biblioteca"
     }
   },
   "interpreter": {
@@ -72,8 +72,8 @@
       "END": "END"
     },
     "procedures": {
-      "true": "true",
-      "false": "false"
+      "verdadero": "true",
+      "falso": "false"
     }
   },
   "graphics": {
