@@ -44,6 +44,11 @@ function LogoInterpreter(turtle, stream, savehook)
     MISSING_SPACE: 39
   };
 
+  function saveproc(name, def) {
+    if (savehook)
+      savehook(String(name).toLowerCase(), def);
+  }
+
   //----------------------------------------------------------------------
   //
   // Utilities
@@ -1402,8 +1407,7 @@ function LogoInterpreter(turtle, stream, savehook)
     proc.default = length;
     proc.maximum = rest ? -1 : inputs.length + optional_inputs.length;
 
-    if (savehook)
-      savehook(name, self.definition(name, proc));
+    saveproc(name, self.definition(name, proc));
   }
 
 
@@ -2488,10 +2492,8 @@ function LogoInterpreter(turtle, stream, savehook)
     }
 
     this.routines.set(newname, this.routines.get(oldname));
-    if (savehook) {
-      // TODO: This is broken if copying a built-in, so disable for now
-      //savehook(newname, this.definition(newname, this.routines.get(newname)));
-    }
+    // TODO: This is broken if copying a built-in, so disable for now
+    //saveproc(newname, this.definition(newname, this.routines.get(newname)));
   });
 
 
@@ -2755,7 +2757,7 @@ function LogoInterpreter(turtle, stream, savehook)
             throw err("Can't {_PROC_} special {name:U}", { name: name }, ERRORS.BAD_INPUT);
           if (!this.routines.get(name).primitive || maybegetvar("redefp")) {
             this.routines['delete'](name);
-            if (savehook) savehook(name);
+            saveproc(name);
           } else {
             throw err("Can't {_PROC_} primitives unless REDEFP is TRUE", ERRORS.BAD_INPUT);
           }
@@ -2791,7 +2793,7 @@ function LogoInterpreter(turtle, stream, savehook)
       return !this.routines.get(x).primitive && !this.routines.get(x).buried;
     }.bind(this)).forEach(function(name) {
       this.routines['delete'](name);
-      if (savehook) savehook(name);
+      saveproc(name);
     }.bind(this));
 
     this.scopes.forEach(function(scope) {
@@ -2814,7 +2816,7 @@ function LogoInterpreter(turtle, stream, savehook)
       return !this.routines.get(x).primitive && !this.routines.get(x).buried;
     }.bind(this)).forEach(function(name) {
       this.routines['delete'](name);
-      if (savehook) savehook(name);
+      saveproc(name);
     }.bind(this));
   });
 

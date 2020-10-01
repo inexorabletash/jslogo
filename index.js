@@ -628,14 +628,16 @@ window.addEventListener('DOMContentLoaded', function() {
       Dialog.alert("Sorry, not supported by your browser");
   });
   $('#clearhistory').addEventListener('click', function() {
-    if (!confirm('Clear history: Are you sure?')) return;
+    if (!confirm(__('Clear history: Are you sure?'))) return;
     clearhistoryhook();
   });
   $('#clearlibrary').addEventListener('click', function() {
-    if (!confirm('Clear library: Are you sure?')) return;
+    if (!confirm(__('Clear library: Are you sure?'))) return;
     logo.run('erall');
   });
 
+  // Default translation replacement function is a no-op.
+  var __ = function(s) { return s; };
 
   //
   // Localization
@@ -667,6 +669,9 @@ window.addEventListener('DOMContentLoaded', function() {
               .filter(function(id) { return !ids.has(id); })
               .forEach(function(id) { console.warn('Missing translation: ' + id); });
           }(data.page.translations));
+
+          // Actual string translation replacement function.
+          __ = function(s) { return data.page.translations[s] || s; };
         }
       }
 
