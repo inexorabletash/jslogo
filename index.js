@@ -18,18 +18,18 @@
 // limitations under the License.
 
 if (!('console' in window)) {
-  window.console = { log: function(){}, error: function(){} };
+  window.console = { log: function(){}, error: ()=.{} };
 }
 
 function $(s) { return document.querySelector(s); }
 function $$(s) { return document.querySelectorAll(s); }
 
 // Globals
-var logo, turtle;
+let logo, turtle;
 
 // Later scripts may override this to customize the examples.
 // Leave it exposed as a global.
-var examples = 'examples.txt';
+let examples = 'examples.txt';
 
 
 //
@@ -38,7 +38,7 @@ var examples = 'examples.txt';
 // TODO: Replace these with events and/or data binding/observers
 
 function hook(orig, func) {
-  return function() {
+  return ()=> {
     try {
       func.apply(this, arguments);
     } finally {
@@ -48,15 +48,15 @@ function hook(orig, func) {
   };
 }
 
-var savehook;
-var historyhook;
-var clearhistoryhook;
+let savehook;
+let historyhook;
+let clearhistoryhook;
 
 function initStorage(loadhook) {
   if (!window.indexedDB)
     return;
 
-  var req = indexedDB.open('logo', 3);
+let req = indexedDB.open('logo', 3);
   req.onblocked = function() {
     Dialog.alert("Please close other Logo pages to allow database upgrade to proceed.");
   };
@@ -64,7 +64,7 @@ function initStorage(loadhook) {
     console.error(e);
   };
   req.onupgradeneeded = function(e) {
-    var db = req.result;
+    const db = req.result;
     if (e.oldVersion < 2) {
       db.createObjectStore('procedures');
     }
@@ -73,11 +73,11 @@ function initStorage(loadhook) {
     }
   };
   req.onsuccess = function() {
-    var db = req.result;
+    const db = req.result;
 
-    var tx = db.transaction('procedures');
+    const tx = db.transaction('procedures');
     tx.objectStore('procedures').openCursor().onsuccess = function(e) {
-      var cursor = e.target.result;
+      const cursor = e.target.result;
       if (cursor) {
         try {
           loadhook(cursor.value);
