@@ -1,5 +1,6 @@
 en English
 eo Esperanto
+es Español
 fr Français
 he עברית
 it Italiano

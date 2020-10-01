@@ -1,0 +1,99 @@
+{
+  "page": {
+    "translations": {
+      "title": "Intérprete Logo",
+      "tl-title": "Intérprete Logo",
+      "tl-tests": "Test",
+      "tl-source": "Código",
+      "tl-reference": "Referencias",
+      "start-togetherjs": "Colabora",
+      "no-canvas": "Su navegador no soporta el elemento canvas",
+      "ip-button-run": "Iniciar",
+      "ip-button-stop": "Parar",
+      "ip-button-clear": "Limpiar",
+      "logo-ta-single-line.placeholder": "Ingrese su código aquí...",
+      "logo-ta-multi-line.placeholder": "Ingrese su código aquí...",
+      "sb-link-reference": "Referencias",
+      "sb-link-text-reference": "El lenguaje Logo",
+      "sb-link-library": "Biblioteca",
+      "sb-link-text-library": "Tus programas",
+      "sb-link-history": "Histórico",
+      "sb-link-text-history": "Todo lo que has hecho hasta ahora",
+      "sb-link-examples": "Ejemplos",
+      "sb-link-text-examples": "Cosas divertidas para probar",
+      "sb-link-extras": "Extras",
+      "sb-link-text-extras": "Varias utilidades",
+      "sb-link-links": "Enlaces",
+      "sb-link-text-links": "Otros recursos sobre Logo",
+      "extras-download-library": "Descarga la biblioteca de programas",
+      "extras-download-drawing": "Descarga la imagen producida",
+      "extras-clear-history": "Limpia el historial",
+      "extras-clear-library": "Limpia la biblioteca"
+    }
+  },
+  "interpreter": {
+	"messages": {
+      "Can't apply {_PROC_} to special {name:U}": "No se peude usar {_PROC_} para un {name:U} especial",
+      "Can't {_PROC_} primitives unless REDEFP is TRUE": "No se pueden ejecutar primitivas {_PROC_} a menos que REDEFP sea VERDADERO",
+      "Can't {_PROC_} special {name:U}": "No se peude ejecutar {_PROC_} con {name:U} especial",
+      "Couldn't parse: '{string}'": "No puedo analizar: '{string}'",
+      "Division by zero": "división por cero",
+      "Don't know about variable {name:U}": "No se conoce la variable {name:U}",
+      "Don't know how to {name:U}": "No se cómo {name:U}",
+      "Don't know what to do with {result}": "No se que hacer con {result}",
+      "Expected ')'": "Se espera ')'",
+      "Expected ')', saw {word}": "Se espera ')', ver {word}",
+      "Expected ']'": "Se espera ']'",
+      "Expected '}'": "Se espera '}'",
+      "Expected number after @": "Se espera un número después de @",
+      "Expected number": "Se espera un número",
+      "Expected string": "Se espera una cadena",
+      "No output from procedure": "Procedimiento sin resultados",
+      "TO: Expected END":  "TO: Se espera END",
+      "TO: Expected identifier": "TO: Se espera un identificador",
+      "Unexpected '{c}'": "'{c}' inesperado",
+      "Unexpected end of instructions": "Final inesperado de las instrucciones",
+      "{_PROC_}: Array size must be positive integer": "{_PROC_}: El tamaño de la matriz debe ser un número entero positivo",
+      "{_PROC_}: Can't create circular array": "{_PROC_}: No se puede crear una matriz circular, que se refiere a si misma",
+      "{_PROC_}: Can't overwrite primitives unless REDEFP is TRUE": "{_PROC_}: No se pueden sobrescribir las primitivas a menos que REDEFP sea VERDADERO",
+      "{_PROC_}: Can't overwrite special {name:U}": "{_PROC_}: No se puede sobrescribir el {name:U} especial",
+      "{_PROC_}: Can't redefine primitive {name:U}": "{_PROC_}: No se peude redifinir la primitiva {name:U}",
+      "{_PROC_}: Can't show definition of primitive {name:U}": "{_PROC_}: No se puede mostrar la definición del a primitiva {name:U}",
+      "{_PROC_}: Expected array": "{_PROC_}: Se espera una matriz",
+      "{_PROC_}: Expected block": "{_PROC_}: Se espera un bloque",
+      "{_PROC_}: Expected list of length 2": "{_PROC_}: Se espera una lista de dos elementos",
+      "{_PROC_}: Expected list": "{_PROC_} Se espera una lista",
+      "{_PROC_}: Expected lists of equal length": "{_PROC_}: Se esperan listas de igual longitud",
+      "{_PROC_}: Expected non-empty list": "{_PROC_} Se espera una lista que no esté vacía",
+      "{_PROC_}: Index out of bounds": "{_PROC_}: Índice fuera de los límites"
+    },
+    "keywords": {
+      "ELSE": "ELSE",
+      "END": "END"
+    },
+    "procedures": {
+      "verdadero": "true",
+      "falso": "false"
+    }
+  },
+  "graphics": {
+    "colors": {
+      "negro": "black",
+      "azul": "blue",
+      "lima": "lime",
+      "cian": "cyan",
+      "rojo": "red",
+      "magenta": "magenta",
+      "amarillo": "yellow",
+      "blanco": "white",
+      "marrón": "brown",
+      "bronce": "tan",
+      "aguamarina": "aquamarine",
+      "salmón": "salmon",
+      "verde": "green",
+      "morado": "purple",
+      "naranja": "orange",
+      "gris": "gray"
+    }
+  }
+}
