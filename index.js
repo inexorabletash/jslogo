@@ -669,9 +669,10 @@ window.addEventListener('DOMContentLoaded', function() {
               .filter(function(id) { return !ids.has(id); })
               .forEach(function(id) { console.warn('Missing translation: ' + id); });
           }(data.page.translations));
-
+        }
+        if ('messages' in data.page) {
           // Actual string translation replacement function.
-          __ = function(s) { return data.page.translations[s] || s; };
+          __ = function(s) { return data.page.messages[s] || s; };
         }
       }
 

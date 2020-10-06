@@ -3,7 +3,7 @@
     "translations": {
       "title": "Intérprete Logo",
       "tl-title": "Intérprete Logo",
-      "tl-tests": "Test",
+      "tl-tests": "Pruebas",
       "tl-source": "Código",
       "tl-reference": "Referencias",
       "start-togetherjs": "Colabora",
@@ -11,8 +11,8 @@
       "ip-button-run": "Iniciar",
       "ip-button-stop": "Parar",
       "ip-button-clear": "Limpiar",
-      "logo-ta-single-line.placeholder": "Ingrese su código aquí...",
-      "logo-ta-multi-line.placeholder": "Ingrese su código aquí...",
+      "logo-ta-single-line.placeholder": "Introduzca su código aquí...",
+      "logo-ta-multi-line.placeholder": "Introduzca su código aquí...",
       "sb-link-reference": "Referencias",
       "sb-link-text-reference": "El lenguaje Logo",
       "sb-link-library": "Biblioteca",
@@ -28,7 +28,12 @@
       "extras-download-library": "Descarga la biblioteca de programas",
       "extras-download-drawing": "Descarga la imagen producida",
       "extras-clear-history": "Limpia el historial",
-      "extras-clear-library": "Limpia la biblioteca"
+      "extras-clear-library": "Limpia la biblioteca",
+      "history-placeholder": "Los comandos que introduzca aparecerán aquí para que pueda encontrarlos, modificarlos y volver a ejecutarlos."
+    },
+    "messages": {
+      "Clear history: Are you sure?": "Limpiar el historial: ¿Está seguro?",
+      "Clear library: Are you sure?": "Limpiar la biblioteca: ¿Está seguro?"
     }
   },
   "interpreter": {

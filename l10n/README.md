@@ -47,6 +47,22 @@ If a translation is not found, the element text will not be translated.
     }
 ```
 
+### Messages
+
+Alerts and other prompts show messages.
+
+* key: the untranslated (English) string
+* value: translated string
+
+If a translation is not found, the message text will not be translated.
+
+```js
+    "messages": {
+      "Clear history: Are you sure?": "...",
+      ...
+    }
+```
+
 ## Interpreter
 
 ### Error messages
