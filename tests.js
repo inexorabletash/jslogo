@@ -989,7 +989,7 @@ QUnit.test("Logical Operations", function(t) {
 });
 
 QUnit.test("Graphics", function(t) {
-  t.expect(158);
+  t.expect(162);
 
   // NOTE: test canvas is 300,300 (so -150...150 coordinates before hitting)
   // edge
@@ -1070,6 +1070,13 @@ QUnit.test("Graphics", function(t) {
       [150 + 90, 150, red],
     ]);
   }.bind(this));
+
+  this.assert_pixels('cs  pd  filled "black [ fd 100 pu bk 100 rt 90 fd 100 pd lt 90 fd 100 ]', [
+    [150 + 25, 150 - 50, black],
+    [150 + 75, 150 - 50, black],
+    [150 + 50, 150 - 25, white],
+    [150 + 50, 150 - 75, white],
+  ]);
 
   //
   // 6.2 Turtle Motion Queries

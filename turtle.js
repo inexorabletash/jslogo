@@ -166,14 +166,16 @@
     _moveto: {value: function(x, y, setpos) {
 
       var _go = function(x1, y1, x2, y2) {
-        if (this.filling) {
-          this.canvas_ctx.lineTo(x1, y1);
-          this.canvas_ctx.lineTo(x2, y2);
-        } else if (this.pendown) {
-          this.canvas_ctx.beginPath();
-          this.canvas_ctx.moveTo(x1, y1);
-          this.canvas_ctx.lineTo(x2, y2);
-          this.canvas_ctx.stroke();
+        if (this.pendown) {
+          if (this.filling) {
+            this.canvas_ctx.lineTo(x1, y1);
+            this.canvas_ctx.lineTo(x2, y2);
+          } else {
+            this.canvas_ctx.beginPath();
+            this.canvas_ctx.moveTo(x1, y1);
+            this.canvas_ctx.lineTo(x2, y2);
+            this.canvas_ctx.stroke();
+          }
         }
       }.bind(this);
 
