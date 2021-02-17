@@ -3340,7 +3340,7 @@ function LogoInterpreter(turtle, stream, savehook)
   }
 
   def("do.while", function(block, tfexpression) {
-    block = checkevalblock(block);
+    block = reparse(lexpr(checkevalblock(block)));
     return promiseLoop(function(loop, resolve, reject) {
       this.execute(block)
         .then(tfexpression)
@@ -3360,7 +3360,7 @@ function LogoInterpreter(turtle, stream, savehook)
   }, {noeval: true});
 
   def("while", function(tfexpression, block) {
-    block = checkevalblock(block);
+    block = reparse(lexpr(checkevalblock(block)));
     return promiseLoop(function(loop, resolve, reject) {
       Promise.resolve(tfexpression())
         .then(function(tf) {
@@ -3381,7 +3381,7 @@ function LogoInterpreter(turtle, stream, savehook)
   }, {noeval: true});
 
   def("do.until", function(block, tfexpression) {
-    block = checkevalblock(block);
+    block = reparse(lexpr(checkevalblock(block)));
     return promiseLoop(function(loop, resolve, reject) {
       this.execute(block)
         .then(tfexpression)
@@ -3401,7 +3401,7 @@ function LogoInterpreter(turtle, stream, savehook)
   }, {noeval: true});
 
   def("until", function(tfexpression, block) {
-    block = checkevalblock(block);
+    block = reparse(lexpr(checkevalblock(block)));
     return promiseLoop(function(loop, resolve, reject) {
       Promise.resolve(tfexpression())
         .then(function(tf) {

@@ -1561,7 +1561,7 @@ QUnit.test("Workspace Management", function(t) {
 });
 
 QUnit.test("Control Structures", function(t) {
-  t.expect(115);
+  t.expect(123);
   //
   // 8.1 Control
   //
@@ -1680,13 +1680,21 @@ QUnit.test("Control Structures", function(t) {
 
   this.assert_equals('make "x 0  do.while [ make "x :x + 1 ] :x < 10  :x', 10);
   this.assert_equals('make "x 0  do.while [ make "x :x + 1 ] [:x < 10]  :x', 10);
+  this.assert_equals('make "x 0  do.while [ make "x :x+1 ] :x < 10  :x', 10);
+  this.assert_equals('make "x 0  do.while [ make "x :x + 1 ] [:x<10]  :x', 10);
   this.assert_equals('make "x 0  while :x < 10 [ make "x :x + 1 ]     :x', 10);
   this.assert_equals('make "x 0  while [:x < 10] [ make "x :x + 1 ]     :x', 10);
+  this.assert_equals('make "x 0  while :x < 10 [ make "x :x+1 ]     :x', 10);
+  this.assert_equals('make "x 0  while [:x<10] [ make "x :x + 1 ]     :x', 10);
 
   this.assert_equals('make "x 0  do.until [ make "x :x + 1 ] :x > 10  :x', 11);
   this.assert_equals('make "x 0  do.until [ make "x :x + 1 ] [:x > 10]  :x', 11);
+  this.assert_equals('make "x 0  do.until [ make "x :x+1 ] :x > 10  :x', 11);
+  this.assert_equals('make "x 0  do.until [ make "x :x + 1 ] [:x>10]  :x', 11);
   this.assert_equals('make "x 0  until :x > 10 [ make "x :x + 1 ]     :x', 11);
   this.assert_equals('make "x 0  until [:x > 10] [ make "x :x + 1 ]     :x', 11);
+  this.assert_equals('make "x 0  until :x > 10 [ make "x :x+1 ]     :x', 11);
+  this.assert_equals('make "x 0  until [:x>10] [ make "x :x + 1 ]     :x', 11);
 
   this.assert_equals('to vowelp :letter ' +
                      '  output case :letter [ [[a e i o u] "true] [else "false] ] ' +
