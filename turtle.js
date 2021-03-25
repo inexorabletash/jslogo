@@ -71,14 +71,13 @@
     this._tick();
 
     if (events) {
-      events.addEventListener('mousemove', function(e) {
+      var handler = function(e) {
         var rect = events.getBoundingClientRect();
         this._mousemove(e.clientX - rect.left, e.clientY - rect.top, e.buttons);
-      }.bind(this));
-      events.addEventListener('mousedown', function(e) {
-        var rect = events.getBoundingClientRect();
-        this._mouseclick(e.clientX - rect.left, e.clientY - rect.top, e.buttons);
-      }.bind(this));
+      }.bind(this);
+      ['mousemove', 'mousedown', 'mouseup'].forEach(function(e) {
+        events.addEventListener(e, handler);
+      });
     }
   }
 
