@@ -2390,6 +2390,10 @@ function LogoInterpreter(turtle, stream, savehook)
     return turtle.button;
   });
 
+  def("touches", function() {
+    return turtle.touches;
+  });
+
   //----------------------------------------------------------------------
   //
   // 7. Workspace Management

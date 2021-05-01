@@ -66,18 +66,31 @@
     this._clickx = this._clicky = 0;
     this._mousex = this._mousey = 0;
     this._buttons = 0;
+    this._touches = [];
 
     this._init();
     this._tick();
 
     if (events) {
-      var handler = function(e) {
+      var mouse_handler = function(e) {
         var rect = events.getBoundingClientRect();
         this._mousemove(e.clientX - rect.left, e.clientY - rect.top, e.buttons);
       }.bind(this);
       ['mousemove', 'mousedown', 'mouseup'].forEach(function(e) {
-        events.addEventListener(e, handler);
+        events.addEventListener(e, mouse_handler);
       });
+
+      var touch_handler = function(e) {
+        var rect = events.getBoundingClientRect();
+        var touches = Array.from(e.touches).map(function(t) {
+          return {x: t.clientX - rect.left, y: t.clientY - rect.top};
+        });
+        this._touch(touches);
+      }.bind(this);
+      ['touchstart', 'touchmove', 'touchend'].forEach(function(e) {
+        events.addEventListener(e, touch_handler);
+      });
+
     }
   }
 
@@ -296,6 +309,15 @@
       this._clickx = (x - this.width / 2) / this.sx;
       this._clicky = (y - this.height / 2) / -this.sy;
       this._buttons = b;
+    }},
+
+    _touch: {value: function(touches) {
+      this._touches = touches.map(function(touch) {
+        return [
+          (touch.x - this.width / 2) / this.sx,
+          (touch.y - this.height / 2) / -this.sy
+        ];
+      }.bind(this));
     }},
 
     // API methods
@@ -588,6 +610,10 @@
 
     button: {
       get: function() { return this._buttons; }
+    },
+
+    touches: {
+      get: function() { return this._touches; }
     }
 
   });

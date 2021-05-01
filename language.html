@@ -807,7 +807,7 @@ of comparison.</p>
 </dl>
 -->
 
-<h4>6.8 Mouse Queries</h4>
+<h4>6.8 Mouse/Touch Queries</h4>
 <dl>
   <dt><code>mousepos</code></dt>
   <dd>Outputs a list of the x, y coordinates of the last mouse position</dd>
@@ -825,6 +825,10 @@ of comparison.</p>
   <dt><code>button</code></dt>
   <dd>Outputs a number indicating the pressed mouse buttons
     (<code>1</code> = left, 2 = right, etc) or 0 for none.
+
+  <dt><code>touches</code></dt>
+  <dd>Outputs a list of current touch coordinates</dd>
+  <dd class=example>forever [ifelse count touches [setpos first touches pendown] [penup]]</dd>
 </dl>
 
 <h3 id="sec7">7. Workspace Management</h3>
