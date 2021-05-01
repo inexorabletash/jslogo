@@ -24,6 +24,17 @@ if (!('console' in window)) {
 function $(s) { return document.querySelector(s); }
 function $$(s) { return document.querySelectorAll(s); }
 
+function escapeHTML(s) {
+  return String(s).replace(/[&<>]/g, function(c) {
+    switch (c) {
+    case '&': return '&amp;';
+    case '<': return '&lt;';
+    case '>': return '&gt;';
+    default: return c;
+    }
+  });
+}
+
 // Globals
 var logo, turtle;
 
@@ -547,7 +558,7 @@ window.addEventListener('DOMContentLoaded', function() {
     write: function() {
       var div = $('#overlay');
       for (var i = 0; i < arguments.length; i += 1) {
-        div.innerHTML += arguments[i];
+        div.innerHTML += escapeHTML(arguments[i]);
       }
       div.scrollTop = div.scrollHeight;
       return asyncResult();
