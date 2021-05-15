@@ -1,0 +1,20 @@
+{
+  "name": "jslogo",
+  "version": "1.0.0",
+  "main": "index.js",
+  "source": "./bundle.js",
+  "main": "dist/jslogo.js",           
+  "exports": "dist/jslogo.modern.js", 
+  "module": "dist/jslogo.module.js",  
+  "unpkg": "dist/jslogo.umd.js",      
+  "scripts": {
+    "build": "microbundle",        
+    "dev": "microbundle watch"     
+  },
+  "repository": "git@github.com:zekenie/jslogo.git",
+  "author": "Zeke Nierenberg <zeke@getfrank.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "microbundle": "^0.13.0"
+  }
+}
