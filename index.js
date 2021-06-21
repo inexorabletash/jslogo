@@ -17,6 +17,8 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+window._attachJsLogo();
+
 if (!('console' in window)) {
   window.console = { log: function(){}, error: function(){} };
 }

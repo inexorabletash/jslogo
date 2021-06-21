@@ -16,7 +16,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-function LogoInterpreter(turtle, stream, savehook)
+export function LogoInterpreter(turtle, stream, savehook)
 {
   'use strict';
 
