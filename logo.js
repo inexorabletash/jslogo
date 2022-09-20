@@ -3693,4 +3693,47 @@ function LogoInterpreter(turtle, stream, savehook)
       throw new Error("Internal error: Unbound procedure");
     return value;
   });
+
+  //----------------------------------------------------------------------
+  //
+  // 9. Sound / Basic Music / Web Speech
+  //
+  //----------------------------------------------------------------------
+
+  var soundSeq = [];
+  var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+
+  function playSound(frequency, duration) {
+      const oscillator = audioCtx.createOscillator();
+
+      oscillator.type = 'square';
+      oscillator.frequency.value = frequency; // value in hertz
+      oscillator.connect(audioCtx.destination);
+      oscillator.start();
+
+      setTimeout(
+          function() {
+                  oscillator.stop();
+                  playSequence();
+          }, duration);
+  }
+
+  function playSoundSeq() {
+      if (soundSeq.length > 0) {
+          let sound2play = soundSeq.pop();
+          playSound(sound2play[0], sound2play[1]);
+      }
+  }
+
+  playSoundSeq();
+
+  // 9.1 Play sound with a frequency and a time interval
+
+  def("beep", function(frequency, duration) {
+      var frequency = aexpr(frequency),
+          duration = aexpr(duration);
+      sequence.push([frequency, duration]);
+      playSoundSeq();
+  });
+
 }
