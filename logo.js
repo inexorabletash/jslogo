@@ -3696,15 +3696,19 @@ function LogoInterpreter(turtle, stream, savehook)
 
   //----------------------------------------------------------------------
   //
-  // 9. Sound / Basic Music / Web Speech
+  // Sound supports: basic sound / basic music / web speech
   //
   //----------------------------------------------------------------------
 
-  var soundSeq = [];
-  var audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  if ('AudioContext' in window) {
+    var audioCtx = new window.AudioContext();
+    var soundqueue = [];
 
-  function playSound(frequency, duration) {
-      const oscillator = audioCtx.createOscillator();
+    function playSound(frequency, duration) {
+      // Adapted from:
+      // https://stackoverflow.com/questions/39200994/how-to-play-a-specific-frequency-with-javascript
+
+      var oscillator = audioCtx.createOscillator();
 
       oscillator.type = 'square';
       oscillator.frequency.value = frequency; // value in hertz
@@ -3712,28 +3716,26 @@ function LogoInterpreter(turtle, stream, savehook)
       oscillator.start();
 
       setTimeout(
-          function() {
-                  oscillator.stop();
-                  playSequence();
-          }, duration);
-  }
+        function() {
+          oscillator.stop();
+          playSoundQ();
+        }, duration);
+    }
 
-  function playSoundSeq() {
-      if (soundSeq.length > 0) {
-          let sound2play = soundSeq.pop();
-          playSound(sound2play[0], sound2play[1]);
+    function playSoundQ() {
+      if (soundqueue.length > 0) {
+        var sound2play = soundqueue.pop();
+        playSound(sound2play[0], sound2play[1]);
       }
+    }
+
+    // Play sound with a frequency and a time interval
+    def("beep", function(frequency, duration) {
+      var freq = aexpr(frequency),
+        dura = aexpr(duration);
+      soundqueue.push([freq, dura]);
+      playSoundQ();
+    });
   }
-
-  playSoundSeq();
-
-  // 9.1 Play sound with a frequency and a time interval
-
-  def("beep", function(frequency, duration) {
-      var frequency = aexpr(frequency),
-          duration = aexpr(duration);
-      sequence.push([frequency, duration]);
-      playSoundSeq();
-  });
 
 }
