@@ -3693,4 +3693,48 @@ function LogoInterpreter(turtle, stream, savehook)
       throw new Error("Internal error: Unbound procedure");
     return value;
   });
+
+  //----------------------------------------------------------------------
+  //
+  // Sound supports: basic sound / basic music / web speech
+  //
+  //----------------------------------------------------------------------
+
+  if ('AudioContext' in window) {
+    var audioCtx = new window.AudioContext();
+    var soundqueue = [];
+
+    function playSound(frequency, duration) {
+      // Adapted from:
+      // https://stackoverflow.com/questions/39200994/how-to-play-a-specific-frequency-with-javascript
+
+      var oscillator = audioCtx.createOscillator();
+
+      oscillator.type = 'square';
+      oscillator.frequency.value = frequency; // value in hertz
+      oscillator.connect(audioCtx.destination);
+      oscillator.start();
+
+      setTimeout(
+        function() {
+          oscillator.stop();
+          playSoundQ();
+        }, duration);
+    }
+
+    function playSoundQ() {
+      if (soundqueue.length > 0) {
+        var sound2play = soundqueue.pop();
+        playSound(sound2play[0], sound2play[1]);
+      }
+    }
+
+    // Play sound with a frequency and a time interval
+    def("beep", function(frequency, duration) {
+      var freq = aexpr(frequency),
+        dura = aexpr(duration);
+      soundqueue.push([freq, dura]);
+      playSoundQ();
+    });
+  }
 }
