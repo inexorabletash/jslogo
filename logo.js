@@ -3704,37 +3704,37 @@ function LogoInterpreter(turtle, stream, savehook)
     var audioCtx = new window.AudioContext();
     var soundqueue = [];
 
-    function playSound(frequency, duration) {
-      // Adapted from:
-      // https://stackoverflow.com/questions/39200994/how-to-play-a-specific-frequency-with-javascript
-
-      var oscillator = audioCtx.createOscillator();
-
-      oscillator.type = 'square';
-      oscillator.frequency.value = frequency; // value in hertz
-      oscillator.connect(audioCtx.destination);
-      oscillator.start();
-
-      setTimeout(
-        function() {
-          oscillator.stop();
-          playSoundQ();
-        }, duration);
+    function oscillate(frequency, duration) {
+      soundqueue.push([frequency, duration]);
     }
 
-    function playSoundQ() {
-      if (soundqueue.length > 0) {
-        var sound2play = soundqueue.pop();
-        playSound(sound2play[0], sound2play[1]);
+    function soundgo() {
+      var sound = soundqueue.pop();
+      if (sound) {
+        var frequency = sound[0], duration = sound[1];
+        var oscillator = audioCtx.createOscillator();
+        oscillator.type = 'sine';
+        oscillator.frequency.value = frequency; // value in hertz
+        oscillator.connect(audioCtx.destination);
+        oscillator.onended = function() {
+          oscillator.disconnect();
+          if (soundqueue.length > 0) {
+            var next = soundqueue.shift();
+            oscillate(next[0], next[1]);
+          }
+        }
+        oscillator.start();
+        setTimeout(
+          function() {
+            oscillator.stop();
+          }, duration);
       }
     }
 
     // Play sound with a frequency and a time interval
     def("beep", function(frequency, duration) {
-      var freq = aexpr(frequency),
-        dura = aexpr(duration);
-      soundqueue.push([freq, dura]);
-      playSoundQ();
+      oscillate(aexpr(frequency), aexpr(duration));
+      soundgo();
     });
   }
 }
