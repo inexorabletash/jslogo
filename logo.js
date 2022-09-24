@@ -3709,8 +3709,8 @@ function LogoInterpreter(turtle, stream, savehook)
     }
 
     function soundgo() {
-      var sound = soundqueue.pop();
-      if (sound) {
+      if (soundqueue.length > 0) {
+        var sound = soundqueue.shift();
         var frequency = sound[0], duration = sound[1];
         var oscillator = audioCtx.createOscillator();
         oscillator.type = 'sine';
@@ -3727,6 +3727,9 @@ function LogoInterpreter(turtle, stream, savehook)
         setTimeout(
           function() {
             oscillator.stop();
+            if (soundqueue.length > 0) {
+              soundgo();
+            }
           }, duration);
       }
     }
@@ -3736,5 +3739,6 @@ function LogoInterpreter(turtle, stream, savehook)
       oscillate(aexpr(frequency), aexpr(duration));
       soundgo();
     });
+
   }
 }
