@@ -586,7 +586,7 @@ function LogoInterpreter(turtle, stream, savehook)
 
   // Includes leading - sign, unlike parseNumber().
   function isNumber(s) {
-    return String(s).match(/^-?([0-9]*\.?[0-9]+(?:[eE][\-+]?[0-9]+)?)$/);
+    return String(s).match(/^-?([0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?)$/);
   }
 
   function parseInteger(stream) {
@@ -603,7 +603,7 @@ function LogoInterpreter(turtle, stream, savehook)
         atom = '',
         c, r;
 
-    while (true) {
+    for (;;) {
       do {
         c = stream.get();
       } while (isWS(c));
@@ -644,7 +644,7 @@ function LogoInterpreter(turtle, stream, savehook)
         atom = '',
         c, r;
 
-    while (true) {
+    for (;;) {
       do {
         c = stream.get();
       } while (isWS(c));
@@ -1190,7 +1190,7 @@ function LogoInterpreter(turtle, stream, savehook)
       return ' :' + i;
     }).join('');
     def += proc.optional_inputs.map(function(op) {
-      return ' [:' + op[0] + ' ' + op[1].map(defn).join(' ') + ']';;
+      return ' [:' + op[0] + ' ' + op[1].map(defn).join(' ') + ']';
     }).join('');
     if (proc.rest)
       def += ' [:' + proc.rest + ']';
@@ -2304,7 +2304,7 @@ function LogoInterpreter(turtle, stream, savehook)
       return '#' + rr + gg + bb;
     }
     color = sexpr(color);
-    if (PALETTE.hasOwnProperty(color))
+    if (Object.prototype.hasOwnProperty.call(PALETTE, color))
       return PALETTE[color];
     if (self.colorAlias)
       return self.colorAlias(color) || color;
@@ -3162,7 +3162,7 @@ function LogoInterpreter(turtle, stream, savehook)
   this.last_error = undefined;
 
   def("catch", function(tag, instructionlist) {
-    tag = sexpr(tag).toUpperCase();;
+    tag = sexpr(tag).toUpperCase();
     instructionlist = reparse(lexpr(instructionlist));
     return this.execute(instructionlist, {returnResult: true})
       .catch(function(error) {

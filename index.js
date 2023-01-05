@@ -761,7 +761,7 @@ window.addEventListener('DOMContentLoaded', function() {
       select.value = document.body.lang;
       select.addEventListener('change', function() {
         var url = String(document.location);
-        url = url.replace(/[\?#].*/, '');
+        url = url.replace(/[?#].*/, '');
         document.location = url + '?lang=' + select.value;
       });
     });
@@ -795,7 +795,7 @@ window.addEventListener('DOMContentLoaded', function() {
   function demo(param) {
     param = String(param);
     if (param.length > 0) {
-      param = decodeURIComponent(param.substring(1).replace(/\_/g, ' '));
+      param = decodeURIComponent(param.substring(1).replace(/_/g, ' '));
       input.setValue(param);
       logo.run(param).catch(function (e) {
         Dialog.alert("Error: " + e.message);
