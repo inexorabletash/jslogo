@@ -1198,9 +1198,9 @@ The first input is the name of a procedure to call.</p>
   <dd>Call <var>procname</var> with the specified inputs as inputs
   <dd class=example>invoke "show "hello</dd>
 
-  <dt><code>foreach <var>procname</var> <var>list</var></code>
+  <dt><code>foreach <var>list</var> <var>procname</var></code>
   <dd>call <var>procname</var> for each item in the list
-  <dd class=example>foreach "show [1 2 3]</dd>
+  <dd class=example>foreach [1 2 3] "show</dd>
 
   <dt><code>map <var>procname</var> <var>list</var></code>
   <dd>Outputs a list composed of the results of calling <var>procname</var> for each item in the list
