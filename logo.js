@@ -3502,7 +3502,7 @@ function LogoInterpreter(turtle, stream, savehook)
     return routine.apply(this, args);
   }, {minimum: 1, maximum: -1});
 
-  def("foreach", function(procname, list) {
+  def("foreach", function(list, procname) {
     procname = sexpr(procname);
 
     var routine = this.routines.get(procname);

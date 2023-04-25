@@ -1731,8 +1731,8 @@ QUnit.test("Control Structures", function(t) {
   this.assert_equals('(invoke "word)', '');
   this.assert_equals('(invoke "add_async 1 2)', 3);
 
-  this.assert_equals('make "x 0  to addx :a make "x :x+:a end  foreach "addx [ 1 2 3 4 5 ]  :x', 15);
-  this.assert_equals('make "x 0  to addx :a make "x .promise :x+:a end  foreach "addx [ 1 2 3 4 5 ]  :x', 15);
+  this.assert_equals('make "x 0  to addx :a make "x :x+:a end  foreach [ 1 2 3 4 5 ] "addx  :x', 15);
+  this.assert_equals('make "x 0  to addx :a make "x .promise :x+:a end  foreach [ 1 2 3 4 5 ] "addx  :x', 15);
 
   this.assert_equals('to double :x output :x * 2 end  map "double [ 1 2 3 ]', [2, 4, 6]);
   this.assert_equals('to double :x output .promise :x * 2 end  map "double [ 1 2 3 ]', [2, 4, 6]);
@@ -1816,9 +1816,9 @@ QUnit.test("Error Messages", function(t) {
   this.assert_error("apply \"nosuch [ 1 2 ]", "APPLY: Don't know how to NOSUCH", 24);
   this.assert_error("apply \"to [ 1 2 ]", "Can't apply APPLY to special TO", 4);
   this.assert_error("apply \"while [ 1 2 ]", "Can't apply APPLY to special WHILE", 4);
-  this.assert_error("foreach \"nosuch [ 1 2 ]", "FOREACH: Don't know how to NOSUCH", 24);
-  this.assert_error("foreach \"to [ 1 2 ]", "Can't apply FOREACH to special TO", 4);
-  this.assert_error("foreach \"while [ 1 2 ]", "Can't apply FOREACH to special WHILE", 4);
+  this.assert_error("foreach [ 1 2 ] \"nosuch", "FOREACH: Don't know how to NOSUCH", 24);
+  this.assert_error("foreach [ 1 2 ] \"to", "Can't apply FOREACH to special TO", 4);
+  this.assert_error("foreach [ 1 2 ] \"while", "Can't apply FOREACH to special WHILE", 4);
   this.assert_error("invoke \"nosuch [ 1 2 ]", "INVOKE: Don't know how to NOSUCH", 24);
   this.assert_error("invoke \"to [ 1 2 ]", "Can't apply INVOKE to special TO", 4);
   this.assert_error("invoke \"while [ 1 2 ]", "Can't apply INVOKE to special WHILE", 4);
@@ -1885,7 +1885,7 @@ QUnit.test("Regression Tests", function(t) {
   this.assert_equals(
     'make "a 0  do.while [ make "a :a + 1 ] notequalp :a 5  :a', 5);
 
-  this.run('foreach ".verify_bound_ignore [ 1 2 3 4 5 ]');
+  this.run('foreach [ 1 2 3 4 5 ] ".verify_bound_ignore');
   this.assert_equals('map ".verify_bound_identity [ 1 2 ]', ['1', '2']);
   this.assert_equals('filter ".verify_bound_identity [ 1 2 ]', ['1', '2']);
   this.assert_equals('find ".verify_bound_identity [ 1 ]', '1');
