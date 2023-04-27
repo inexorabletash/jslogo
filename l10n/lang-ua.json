@@ -1,0 +1,61 @@
+{
+  "page": {
+    "translations": {
+      "title": "Інтерпретатор LOGO",
+      "tl-title": "Iнтерпретатор LOGO",
+      "tl-tests": "Незалежні тести",
+      "tl-source": "Вихідний код",
+      "tl-reference": "Довідник",
+      "start-togetherjs": "Співпраця",
+      "no-canvas": "Шкода, але ваш браузер не підтримує HTML-елемент canvas.",
+      "ip-button-run": "Пуск",
+      "ip-button-stop": "Стоп",
+      "ip-button-clear": "Скидання",
+      "logo-ta-single-line.placeholder": "Місце вводу коду програми",
+      "logo-ta-multi-line.placeholder": "Місце вводу коду програми",
+      "sb-link-reference": "Довідник",
+      "sb-link-text-reference": "Мова LOGO",
+      "sb-link-library": "Бібліотека",
+      "sb-link-text-library": "Ваші процедури",
+      "sb-link-history": "Історія",
+      "sb-link-text-history": "Ваші дії на сайті",
+      "sb-link-examples": "Приклади",
+      "sb-link-text-examples": "Цікаві демо-програми",
+      "sb-link-extras": "Додатково",
+      "sb-link-text-extras": "Корисні утиліти",
+      "sb-link-links": "Посилання",
+      "sb-link-text-links": "Інші ресурси о LOGO",
+      "extras-download-library": "Завантажити бібліотеку",
+      "extras-download-drawing": "Завантажити малюнок",
+      "extras-clear-history": "Очистити історію",
+      "extras-clear-library": "Очистити бібліотеку"
+    }
+  },
+  "interpreter": {
+    "messages": {
+      "Division by zero": "Ділення на ноль",
+      "Index out of bounds": "Індекс поза діапазоном"
+    },
+    "keywords": {
+      "ІНАКШЕ": "ELSE",
+      "КІНЕЦЬ": "END"
+    },
+    "procedures": {
+      "істина": "true",
+      "хиба": "false"
+    }
+  },
+  "graphics": {
+    "colors": {
+      "червоний": "red",
+      "помаранчевий": "orange",
+      "жовтий": "yellow",
+      "зелений": "green",
+      "синій": "blue",
+      "фіолетовий": "violet",
+      "білий": "white",
+      "сірий": "gray",
+      "чорний": "black"
+    }
+  }
+}
