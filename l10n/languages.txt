@@ -7,4 +7,5 @@ it Italiano
 ja 日本語
 pl Polski
 ru Русский
+ua Українська
 zh 中文
