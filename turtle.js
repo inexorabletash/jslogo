@@ -600,6 +600,16 @@
       }
     },
 
+    bounds: {
+      get: function() {
+        // xmin, xmax, ymin, ymax
+        return [
+          -this.width/2/this.sx, this.width/2/this.sx,
+          -this.height/2/this.sy, this.height/2/this.sy
+        ];
+      }
+    },
+
     mousepos: {
       get: function() { return [this._mousex, this._mousey]; }
     },

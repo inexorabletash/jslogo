@@ -2191,6 +2191,7 @@ function LogoInterpreter(turtle, stream, savehook)
     return turtle.towards(aexpr(l[0]), aexpr(l[1]));
   });
   def("scrunch", function() { return turtle.scrunch; });
+  def("bounds", function() { return turtle.bounds; });
 
   //
   // 6.3 Turtle and Window Control

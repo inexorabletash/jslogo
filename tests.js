@@ -989,7 +989,7 @@ QUnit.test("Logical Operations", function(t) {
 });
 
 QUnit.test("Graphics", function(t) {
-  t.expect(162);
+  t.expect(166);
 
   // NOTE: test canvas is 300,300 (so -150...150 coordinates before hitting)
   // edge
@@ -1171,6 +1171,12 @@ QUnit.test("Graphics", function(t) {
 
 
   this.assert_equals('setlabelheight 5 labelsize', [5, 5]);
+
+  this.assert_equals('( item 2 bounds ) + ( item 1 bounds )', 0);
+  this.assert_equals('( item 4 bounds ) + ( item 3 bounds )', 0);
+  this.assert_equals('make "x ( item 1 bounds )  setscrunch 2 1  :x = (item 1 bounds) * 2', 1);
+  this.assert_equals('make "y ( item 3 bounds )  setscrunch 1 3  :x = (item 3 bounds) * 3', 1);
+
 
   //
   // 6.5 Pen and Background Control
@@ -2218,6 +2224,7 @@ QUnit.test("Arity of Primitives", function(t) {
     //['savepict', [1, 1, 1]],
     //['screenmode', [0, 0, 0]],
     ['scrunch', [0, 0, 0]],
+    ['bounds', [0, 0, 0]],
     ['se', [0, 2, -1]],
     ['sentence', [0, 2, -1]],
     ['setbackground', [1, 1, 1]],
