@@ -68,6 +68,9 @@
     this._buttons = 0;
     this._touches = [];
 
+    this._turtles = [{}];
+    this._currentturtle = 0;
+
     this._init();
     this._tick();
 
@@ -122,7 +125,7 @@
 
       requestAnimationFrame(this._tick.bind(this));
       var cur = JSON.stringify([this.x, this.y, this.r, this.visible,
-                                this.sx, this.sy, this.width, this.height]);
+                                this.sx, this.sy, this.width, this.height, this._turtles]);
       if (cur === this._last_state) return;
       this._last_state = cur;
 
@@ -131,48 +134,60 @@
       this.turtle_ctx.clearRect(0, 0, this.width, this.height);
       this.turtle_ctx.restore();
 
-      if (this.visible) {
-        var ctx = this.turtle_ctx;
-        ctx.save();
-        ctx.translate(this.x, this.y);
-        ctx.rotate(Math.PI/2 + this.r);
-        ctx.beginPath();
+      function _draw(ctx, turtle) {
+        if (turtle.visible) {
+          ctx.save();
+          ctx.translate(turtle.x, turtle.y);
+          ctx.rotate(Math.PI/2 + turtle.r);
+          ctx.beginPath();
 
-        var points = [
-          [0, -20], // Head
-          [2.5, -17],
-          [3, -12],
+          var points = [
+            [0, -20], // Head
+            [2.5, -17],
+            [3, -12],
 
-          [6, -10],
-          [9, -13], // Arm
-          [13, -12],
-          [18, -4],
-          [18, 0],
-          [14, -1],
-          [10, -7],
+            [6, -10],
+            [9, -13], // Arm
+            [13, -12],
+            [18, -4],
+            [18, 0],
+            [14, -1],
+            [10, -7],
 
-          [8, -6], // Shell
-          [10, -2],
-          [9, 3],
-          [6, 10],
+            [8, -6], // Shell
+            [10, -2],
+            [9, 3],
+            [6, 10],
 
-          [9, 13], // Foot
-          [6, 15],
-          [3, 12],
+            [9, 13], // Foot
+            [6, 15],
+            [3, 12],
 
-          [0, 13],
-        ];
+            [0, 13],
+          ];
 
-        points.concat(points.slice(1, -1).reverse().map(invert))
-          .forEach(function(pair, index) {
-            ctx[index ? 'lineTo' : 'moveTo'](pair[0], pair[1]);
-          });
+          points.concat(points.slice(1, -1).reverse().map(invert))
+            .forEach(function(pair, index) {
+              ctx[index ? 'lineTo' : 'moveTo'](pair[0], pair[1]);
+            });
 
-        ctx.closePath();
-        ctx.stroke();
+          ctx.closePath();
+          ctx.stroke();
 
-        ctx.restore();
+          ctx.restore();
+        }
       }
+
+      _draw(this.turtle_ctx, this);
+
+      for (var i in this._turtles) {
+        if (this._turtles[i] === undefined) {
+          continue;
+        }
+        _draw(this.turtle_ctx, this._turtles[i]);
+      }
+
+
     }},
 
     _moveto: {value: function(x, y, setpos) {
@@ -369,6 +384,7 @@
 
     clearscreen: {value: function() {
       this.home();
+      this.clearturtles();
       this.clear();
     }},
 
@@ -382,6 +398,11 @@
       } finally {
         this.canvas_ctx.restore();
       }
+    }},
+
+    clearturtles: {value: function() {
+      this._turtles = [{}];
+      this._currentturtle = 0;
     }},
 
     home: {value: function() {
@@ -624,6 +645,39 @@
 
     touches: {
       get: function() { return this._touches; }
+    },
+
+    currentturtle: {
+      get: function() { return this._currentturtle; },
+      set: function(newturtle) {
+        if (newturtle === this._currentturtle) return;
+        this._turtles[this._currentturtle] = {
+          x: this.x,
+          y: this.y,
+          r: this.r,
+          pendown: this.pendown,
+          visible: this.visible,
+        };
+        this._currentturtle = newturtle;
+        if (this._turtles[this._currentturtle] !== undefined) {
+          this.x = this._turtles[this._currentturtle].x;
+          this.y = this._turtles[this._currentturtle].y;
+          this.r = this._turtles[this._currentturtle].r;
+          this.pendown = this._turtles[this._currentturtle].pendown;
+          this.visible = this._turtles[this._currentturtle].visible;
+        } else {
+          this.x = 0;
+          this.y = 0;
+          this.r = Math.PI / 2;
+          this.pendown = true;
+          this.visible = true;
+        }
+        this._turtles[this._currentturtle] = {};
+      }
+    },
+
+    turtles: {
+      get: function() { return this._turtles.length; }
     }
 
   });

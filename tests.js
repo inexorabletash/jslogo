@@ -989,7 +989,7 @@ QUnit.test("Logical Operations", function(t) {
 });
 
 QUnit.test("Graphics", function(t) {
-  t.expect(166);
+  t.expect(180);
 
   // NOTE: test canvas is 300,300 (so -150...150 coordinates before hitting)
   // edge
@@ -1157,6 +1157,17 @@ QUnit.test("Graphics", function(t) {
 
   this.run('cs setscrunch 1 1');
 
+  this.assert_equals('cs fd 100 setturtle 2 pos', [0, 0]);
+  this.assert_equals('cs fd 100 setturtle 2 rt 90 setturtle 1 pos', [0, 100]);
+  this.assert_equals('cs ht setturtle 2 shownp', 1);
+  this.assert_equals('cs setturtle 2 ht setturtle 1 shownp', 1);
+  this.assert_equals('cs ht setturtle 2 setturtle 1 shownp', 0);
+  this.assert_equals('cs ht ask 2 [ pu ] shownp', 0);
+  this.assert_equals('cs pu setturtle 2 pendownp', 1);
+  this.assert_equals('cs setturtle 2 pu setturtle 1 pendownp', 1);
+  this.assert_equals('cs pu setturtle 2 setturtle 1 pendownp', 0);
+  this.assert_equals('cs pu ask 2 [ ht ] pendownp', 0);
+
   //
   // 6.4 Turtle and Window Queries
   //
@@ -1177,6 +1188,10 @@ QUnit.test("Graphics", function(t) {
   this.assert_equals('make "x ( item 1 bounds )  setscrunch 2 1  :x = (item 1 bounds) * 2', 1);
   this.assert_equals('make "y ( item 3 bounds )  setscrunch 1 3  :x = (item 3 bounds) * 3', 1);
 
+  this.assert_equals('clearturtles turtle', 1);
+  this.assert_equals('clearturtles setturtle 10 setturtle 5 turtle', 5);
+  this.assert_equals('clearturtles setturtle 10 setturtle 5 turtles', 10);
+  this.assert_equals('clearscreen setturtle 3 turtles', 3);
 
   //
   // 6.5 Pen and Background Control
@@ -1996,6 +2011,7 @@ QUnit.test("Arity of Primitives", function(t) {
     ['arraytolist', [1, 1, 1]],
     ['ascii', [1, 1, 1]],
     ['ashift', [2, 2, 2]],
+    ['ask', [2, 2, 2]],
     ['back', [1, 1, 1]],
     ['background', [0, 0, 0]],
     ['before?', [2, 2, 2]],
@@ -2025,6 +2041,7 @@ QUnit.test("Arity of Primitives", function(t) {
     ['clean', [0, 0, 0]],
     ['clearscreen', [0, 0, 0]],
     ['cleartext', [0, 0, 0]],
+    ['clearturtles', [0, 0, 0]],
     ['clickpos', [0, 0, 0]],
     //['close', [1, 1, 1]],
     //['co', [0, 1, 1]],
@@ -2254,6 +2271,7 @@ QUnit.test("Arity of Primitives", function(t) {
     //['settemploc', [1, 1, 1]],
     ['settextcolor', /*[2, 2, 2]*/ [1, 1, 1]], /* Does not support background color */
     ['settextsize', [1, 1, 1]],
+    ['setturtle', [1, 1, 1]],
     //['setwrite', [1, 1, 1]],
     //['setwritepos', [1, 1, 1]],
     ['setx', [1, 1, 1]],
@@ -2293,7 +2311,9 @@ QUnit.test("Arity of Primitives", function(t) {
     //['traced?', [1, 1, 1]],
     //['tracedp', [1, 1, 1]],
     //['ts', [0, 0, 0]],
+    ['turtle', [0, 0, 0]],
     ['turtlemode', [0, 0, 0]],
+    ['turtles', [0, 0, 0]],
     ['type', [0, 1, -1]],
     ['unbury', [1, 1, 1]],
     //['unstep', [1, 1, 1]],
