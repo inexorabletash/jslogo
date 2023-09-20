@@ -2243,6 +2243,31 @@ function LogoInterpreter(turtle, stream, savehook)
   // Not Supported: refresh
   // Not Supported: norefresh
 
+  def("setturtle", function(index) {
+    index = aexpr(index)|0;
+    if (index < 1)
+      throw err("{_PROC_}: Expected positive turtle index", ERRORS.BAD_INPUT);
+    turtle.currentturtle = index - 1;
+  });
+
+  def("ask", function(index, statements) {
+    index = aexpr(index)|0;
+    if (index < 1)
+      throw err("{_PROC_}: Expected positive turtle index", ERRORS.BAD_INPUT);
+    statements = reparse(lexpr(statements));
+    var originalturtle = turtle.currentturtle;
+    turtle.currentturtle = index - 1;
+    return promiseFinally(
+      this.execute(statements),
+      function() {
+        turtle.currentturtle = originalturtle;
+      });
+  });
+
+  def("clearturtles", function() {
+    turtle.clearturtles();
+  });
+
   //
   // 6.4 Turtle and Window Queries
   //
@@ -2263,6 +2288,14 @@ function LogoInterpreter(turtle, stream, savehook)
 
   def("labelfont", function() {
     return turtle.fontname;
+  });
+
+  def("turtles", function() {
+    return turtle.turtles;
+  });
+
+  def("turtle", function() {
+    return turtle.currentturtle + 1;
   });
 
   //

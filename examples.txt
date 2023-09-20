@@ -51,3 +51,11 @@ to fern :size :sign
 end
 window clearscreen pu bk 150 pd
 fern 25 1
+
+clearscreen
+setturtle 2 penup right 90 forward 100 left 90 pendown
+repeat 100 [
+  setturtle 1 forward random 4
+  setturtle 2 forward random 4
+  wait 2
+]
