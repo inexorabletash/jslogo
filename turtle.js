@@ -180,14 +180,12 @@
 
       _draw(this.turtle_ctx, this);
 
-      for (var i in this._turtles) {
-        if (this._turtles[i] === undefined) {
+      for (var i = 0; i < this._turtles.length; ++i) {
+        if (this._turtles[i] === undefined || i == this.currentturtle) {
           continue;
         }
         _draw(this.turtle_ctx, this._turtles[i]);
       }
-
-
     }},
 
     _moveto: {value: function(x, y, setpos) {
