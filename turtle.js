@@ -607,6 +607,15 @@
         this.x = this.px = this.x / sx * this.sx;
         this.y = this.py = this.y / sy * this.sy;
 
+        for (var i = 0; i < this._turtles.length; ++i) {
+          if (this._turtles[i] === undefined || i == this.currentturtle) {
+            continue;
+          }
+          var t = this._turtles[i];
+          t.x = t.x / sx * this.sx;
+          t.y = t.y / sy * this.sy;
+        }
+
         this.sx = sx;
         this.sy = sy;
 

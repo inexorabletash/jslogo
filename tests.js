@@ -989,7 +989,7 @@ QUnit.test("Logical Operations", function(t) {
 });
 
 QUnit.test("Graphics", function(t) {
-  t.expect(180);
+  t.expect(182);
 
   // NOTE: test canvas is 300,300 (so -150...150 coordinates before hitting)
   // edge
@@ -1167,6 +1167,12 @@ QUnit.test("Graphics", function(t) {
   this.assert_equals('cs setturtle 2 pu setturtle 1 pendownp', 1);
   this.assert_equals('cs pu setturtle 2 setturtle 1 pendownp', 0);
   this.assert_equals('cs pu ask 2 [ ht ] pendownp', 0);
+
+  this.assert_equals('cs  setxy 100 100  setscrunch 2 2  pos', [50, 50]);
+  this.run('cs setscrunch 1 1');
+  this.assert_equals('cs  ask 2 [ setxy 100 100 ]  setscrunch 2 2  setturtle 2  pos', [50, 50]);
+  this.run('cs setscrunch 1 1');
+
 
   //
   // 6.4 Turtle and Window Queries
