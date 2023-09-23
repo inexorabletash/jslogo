@@ -826,9 +826,18 @@ of comparison.</p>
 
 <!--
 <h4>6.7 Saving and Loading Pictures</h4>
-<dl>
-</dl>
 -->
+<h4>6.7 Bitmap Operations</h4>
+<dl>
+  <dt><code>bitcut <var>width</var> <var>height</var></code>
+  <dd>Copy a bitmap, from the turtle's position <var>width</var> by <var>height</var> pixels.
+
+  <dt><code>bitpaste</code>
+  <dd>Paste the previously copied bitmap at the current turtle position.
+  <dd class=example>repeat 4 [ rt 90 fd 40 ] bitcut 50 50 pu fd 100 bitpaste</dd>
+</dl>
+
+
 
 <h4>6.8 Mouse/Touch Queries</h4>
 <dl>

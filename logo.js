@@ -2428,6 +2428,16 @@ function LogoInterpreter(turtle, stream, savehook)
     return turtle.touches;
   });
 
+  // Extensions
+
+  def("bitcut", function(w, h) {
+    return turtle.copy(w, h);
+  });
+
+  def("bitpaste", function() {
+    return turtle.paste();
+  });
+
   //----------------------------------------------------------------------
   //
   // 7. Workspace Management

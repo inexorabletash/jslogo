@@ -507,6 +507,23 @@
       this.pendown = state.pendown;
     }},
 
+    copy: {value: function(w, h) {
+      var x = this.width / 2 + this.x * this.sx;
+      var y = this.height / 2 - this.y * this.sy;
+      w *= this.sx;
+      h *= this.sy;
+      this._clipboard = this.canvas_ctx.getImageData(x, y, w, h);
+    }},
+
+    paste: {value: function() {
+      if (!this._clipboard)
+        return;
+
+      var x = this.width / 2 + this.x * this.sx;
+      var y = this.height / 2 - this.y * this.sy;
+      this.canvas_ctx.putImageData(this._clipboard, x, y);
+    }},
+
     // Properties
 
     pendown: {
