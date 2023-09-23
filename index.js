@@ -18,14 +18,14 @@
 // limitations under the License.
 
 if (!('console' in window)) {
-  window.console = { log: function(){}, error: function(){} };
+  window.console = { log() {}, error() {} };
 }
 
 function $(s) { return document.querySelector(s); }
 function $$(s) { return document.querySelectorAll(s); }
 
 function escapeHTML(s) {
-  return String(s).replace(/[&<>]/g, function(c) {
+  return String(s).replace(/[&<>]/g, c => {
     switch (c) {
     case '&': return '&amp;';
     case '<': return '&lt;';
@@ -36,11 +36,11 @@ function escapeHTML(s) {
 }
 
 // Globals
-var logo, turtle;
+let logo, turtle;
 
 // Later scripts may override this to customize the examples.
 // Leave it exposed as a global.
-var examples = 'examples.txt';
+let examples = 'examples.txt';
 
 
 //
@@ -49,33 +49,33 @@ var examples = 'examples.txt';
 // TODO: Replace these with events and/or data binding/observers
 
 function hook(orig, func) {
-  return function() {
+  return function(...args) {
     try {
-      func.apply(this, arguments);
+      func.apply(this, args);
     } finally {
       if (orig)
-        orig.apply(this, arguments);
+        orig.apply(this, args);
     }
   };
 }
 
-var savehook;
-var historyhook;
-var clearhistoryhook;
+let savehook;
+let historyhook;
+let clearhistoryhook;
 
 function initStorage(loadhook) {
   if (!window.indexedDB)
     return;
 
-  var req = indexedDB.open('logo', 3);
-  req.onblocked = function() {
+  const req = indexedDB.open('logo', 3);
+  req.onblocked = () => {
     Dialog.alert("Please close other Logo pages to allow database upgrade to proceed.");
   };
-  req.onerror = function(e) {
+  req.onerror = e => {
     console.error(e);
   };
-  req.onupgradeneeded = function(e) {
-    var db = req.result;
+  req.onupgradeneeded = e => {
+    const db = req.result;
     if (e.oldVersion < 2) {
       db.createObjectStore('procedures');
     }
@@ -83,12 +83,12 @@ function initStorage(loadhook) {
       db.createObjectStore('history', {autoIncrement: true});
     }
   };
-  req.onsuccess = function() {
-    var db = req.result;
+  req.onsuccess = () => {
+    const db = req.result;
 
-    var tx = db.transaction('procedures');
-    tx.objectStore('procedures').openCursor().onsuccess = function(e) {
-      var cursor = e.target.result;
+    let tx = db.transaction('procedures');
+    tx.objectStore('procedures').openCursor().onsuccess = e => {
+      const cursor = e.target.result;
       if (cursor) {
         try {
           loadhook(cursor.value);
@@ -100,8 +100,8 @@ function initStorage(loadhook) {
       }
     };
     tx = db.transaction('history');
-    tx.objectStore('history').openCursor().onsuccess = function(e) {
-      var cursor = e.target.result;
+    tx.objectStore('history').openCursor().onsuccess = e => {
+      const cursor = e.target.result;
       if (cursor) {
         try {
           historyhook(cursor.value);
@@ -113,22 +113,22 @@ function initStorage(loadhook) {
       }
     };
 
-    tx.oncomplete = function() {
-      savehook = hook(savehook, function(name, def) {
-        var tx = db.transaction('procedures', 'readwrite');
+    tx.oncomplete = () => {
+      savehook = hook(savehook, (name, def) => {
+        const tx = db.transaction('procedures', 'readwrite');
         if (def)
           tx.objectStore('procedures').put(def, name);
         else
           tx.objectStore('procedures')['delete'](name);
       });
 
-      historyhook = hook(historyhook, function(entry) {
-        var tx = db.transaction('history', 'readwrite');
+      historyhook = hook(historyhook, entry => {
+        const tx = db.transaction('history', 'readwrite');
         tx.objectStore('history').put(entry);
       });
 
-      clearhistoryhook = hook(clearhistoryhook, function() {
-        var tx = db.transaction('history', 'readwrite');
+      clearhistoryhook = hook(clearhistoryhook, () => {
+        const tx = db.transaction('history', 'readwrite');
         tx.objectStore('history').clear();
       });
     };
@@ -138,16 +138,17 @@ function initStorage(loadhook) {
 //
 // Command history
 //
-var commandHistory = (function() {
-  var entries = [], pos = -1;
+const commandHistory = (() => {
+  const entries = [];
+  let pos = -1;
 
-  clearhistoryhook = hook(clearhistoryhook, function() {
+  clearhistoryhook = hook(clearhistoryhook, () => {
     entries = [];
     pos = -1;
   });
 
   return {
-    push: function(entry) {
+    push: entry => {
       if (entries.length > 0 && entries[entries.length - 1] === entry) {
         pos = -1;
         return;
@@ -158,7 +159,7 @@ var commandHistory = (function() {
         historyhook(entry);
       }
     },
-    next: function() {
+    next() {
       if (entries.length === 0) {
         return undefined;
       }
@@ -169,7 +170,7 @@ var commandHistory = (function() {
       }
       return entries[pos];
     },
-    prev: function() {
+    prev() {
       if (entries.length === 0) {
         return undefined;
       }
@@ -181,13 +182,13 @@ var commandHistory = (function() {
       return entries[pos];
     }
   };
-}());
+})();
 
 
 //
 // Input UI
 //
-var input = {};
+const input = {};
 function initInput() {
 
   function keyNameForEvent(e) {
@@ -197,19 +198,19 @@ function initInput() {
          38: 'ArrowUp', 40: 'ArrowDown', 63232: 'ArrowUp', 63233: 'ArrowDown' })[e.keyCode];
   }
 
-  input.setMulti = function() {
+  input.setMulti = () => {
     // TODO: Collapse these to a single class?
     document.body.classList.remove('single');
     document.body.classList.add('multi');
   };
 
-  input.setSingle = function() {
+  input.setSingle = () => {
     // TODO: Collapse these to a single class?
     document.body.classList.remove('multi');
     document.body.classList.add('single');
   };
 
-  var isMulti = function() {
+  const isMulti = () => {
     return document.body.classList.contains('multi');
   };
 
@@ -217,10 +218,10 @@ function initInput() {
     if (remote !== true && window.TogetherJS && window.TogetherJS.running) {
       TogetherJS.send({type: "run"});
     }
-    var error = $('#display #error');
+    const error = $('#display #error');
     error.classList.remove('shown');
 
-    var v = input.getValue();
+    const v = input.getValue();
     if (v === '') {
       return;
     }
@@ -228,15 +229,16 @@ function initInput() {
     if (!isMulti()) {
       input.setValue('');
     }
-    setTimeout(function() {
+    setTimeout(async () => {
       document.body.classList.add('running');
-      logo.run(v).catch(function (e) {
+      try {
+        await logo.run(v);
+      } catch(e) {
         error.innerHTML = '';
         error.appendChild(document.createTextNode(e.message));
         error.classList.add('shown');
-      }).then(function() {
-        document.body.classList.remove('running');
-      });
+      }
+      document.body.classList.remove('running');
     }, 100);
   }
 
@@ -256,22 +258,22 @@ function initInput() {
   input.clear = clear;
 
   if (typeof CodeMirror !== 'undefined') {
-    var BRACKETS = '()[]{}';
+    const BRACKETS = '()[]{}';
 
     // Single Line
     CodeMirror.keyMap['single-line'] = {
-      'Enter': function(cm) {
+      'Enter': cm => {
          run();
        },
-      'Up': function(cm) {
-        var v = commandHistory.prev();
+      'Up': cm => {
+        const v = commandHistory.prev();
         if (v !== undefined) {
           cm.setValue(v);
           cm.setCursor({line: 0, ch: v.length});
         }
       },
-      'Down': function(cm) {
-        var v = commandHistory.next();
+      'Down': cm => {
+        const v = commandHistory.next();
         if (v !== undefined) {
           cm.setValue(v);
           cm.setCursor({line: 0, ch: v.length});
@@ -279,7 +281,7 @@ function initInput() {
       },
       fallthrough: ['default']
     };
-    var cm = CodeMirror.fromTextArea($('#logo-ta-single-line'), {
+    const cm = CodeMirror.fromTextArea($('#logo-ta-single-line'), {
       autoCloseBrackets: { pairs: BRACKETS, explode: false },
       matchBrackets: true,
       lineComment: ';',
@@ -291,9 +293,9 @@ function initInput() {
     cm.setSize('100%', cm.defaultTextHeight() + 4 + 4); // 4 = theme padding
 
     // Handle paste - switch to multi-line if input is multiple lines
-    cm.on("change", function(cm, change) {
+    cm.on("change", (cm, change) => {
       if (change.text.length > 1) {
-        var v = input.getValue();
+        const v = input.getValue();
         input.setMulti();
         input.setValue(v);
         input.setFocus();
@@ -301,7 +303,7 @@ function initInput() {
     });
 
     // Multi-Line
-    var cm2 = CodeMirror.fromTextArea($('#logo-ta-multi-line'), {
+    const cm2 = CodeMirror.fromTextArea($('#logo-ta-multi-line'), {
       autoCloseBrackets: { pairs: BRACKETS, explode: BRACKETS },
       matchBrackets: true,
       lineComment: ';',
@@ -311,49 +313,49 @@ function initInput() {
     cm2.setSize('100%', '100%');
 
     // Handle ctrl+enter in Multi-Line
-    cm2.on('keydown', function(instance, event) {
+    cm2.on('keydown', (instance, event) => {
       if (keyNameForEvent(event) === 'Enter' && event.ctrlKey) {
         event.preventDefault();
         run();
       }
     });
 
-    input.getValue = function() {
+    input.getValue = () => {
       return (isMulti() ? cm2 : cm).getValue();
     };
-    input.setValue = function(v) {
+    input.setValue = (v) => {
       (isMulti() ? cm2 : cm).setValue(v);
     };
-    input.setFocus = function() {
+    input.setFocus = () => {
       (isMulti() ? cm2 : cm).focus();
     };
 
   } else {
     // Fallback in case of no CodeMirror
 
-    $('#logo-ta-single-line').addEventListener('keydown', function(e) {
+    $('#logo-ta-single-line').addEventListener('keydown', e => {
 
-     var elem = $('#logo-ta-single-line');
+      const elem = $('#logo-ta-single-line');
 
-      var keyMap = {
-        'Enter': function(elem) {
+      const keyMap = {
+        'Enter': elem => {
           run();
         },
-        'ArrowUp': function(elem) {
-          var v = commandHistory.prev();
+        'ArrowUp': elem => {
+          const v = commandHistory.prev();
           if (v !== undefined) {
             elem.value = v;
           }
         },
-        'ArrowDown': function(elem) {
-          var v = commandHistory.next();
+        'ArrowDown': elem => {
+          const v = commandHistory.next();
           if (v !== undefined) {
             elem.value = v;
           }
         }
       };
 
-      var keyName = keyNameForEvent(e);
+      const keyName = keyNameForEvent(e);
       if (keyName in keyMap && typeof keyMap[keyName] === 'function') {
         keyMap[keyName](elem);
         e.stopPropagation();
@@ -361,24 +363,24 @@ function initInput() {
       }
     });
 
-    input.getValue = function() {
+    input.getValue = () => {
       return $(isMulti() ? '#logo-ta-multi-line' : '#logo-ta-single-line').value;
     };
-    input.setValue = function(v) {
+    input.setValue = v => {
       $(isMulti() ? '#logo-ta-multi-line' : '#logo-ta-single-line').value = v;
     };
-    input.setFocus = function() {
+    input.setFocus = () => {
       $(isMulti() ? '#logo-ta-multi-line' : '#logo-ta-single-line').focus();
     };
   }
 
   input.setFocus();
-  $('#input').addEventListener('click', function() {
+  $('#input').addEventListener('click', () => {
     input.setFocus();
   });
 
-  $('#toggle').addEventListener('click', function() {
-    var v = input.getValue();
+  $('#toggle').addEventListener('click', () => {
+    let v = input.getValue();
     document.body.classList.toggle('single');
     document.body.classList.toggle('multi');
     if (!isMulti()) {
@@ -394,9 +396,9 @@ function initInput() {
   $('#stop').addEventListener('click', stop);
   $('#clear').addEventListener('click', clear);
 
-  window.addEventListener('message', function(e) {
+  window.addEventListener('message', e => {
     if ('example' in e.data) {
-      var text = e.data.example;
+      const text = e.data.example;
       input.setSingle();
       input.setValue(text);
       input.setFocus();
@@ -408,11 +410,11 @@ function initInput() {
 //
 // Canvas resizing
 //
-(function() {
+{
   window.addEventListener('resize', resize);
   window.addEventListener('DOMContentLoaded', resize);
   function resize() {
-    var box = $('#display-panel .inner'), rect = box.getBoundingClientRect(),
+    const box = $('#display-panel .inner'), rect = box.getBoundingClientRect(),
         w = rect.width, h = rect.height;
     $('#sandbox').width = w; $('#sandbox').height = h;
     $('#turtle').width = w; $('#turtle').height = h;
@@ -423,58 +425,57 @@ function initInput() {
       logo.run('cs');
     }
   }
-}());
+}
 
 
 //
 // Hook up sidebar links
 //
-(function() {
-  var sidebars = Array.from($$('#sidebar .choice')).map(
-    function(elem) { return elem.id; });
-  sidebars.forEach(function(k) {
-    $('#sb-link-' + k).addEventListener('click', function() {
-      var cl = $('#sidebar').classList;
-      sidebars.forEach(function(sb) { cl.remove(sb); });
+{
+  const sidebars = Array.from($$('#sidebar .choice')).map(elem => elem.id);
+  sidebars.forEach(k => {
+    $('#sb-link-' + k).addEventListener('click', () => {
+      const cl = $('#sidebar').classList;
+      sidebars.forEach(sb => { cl.remove(sb); });
       cl.add(k);
     });
   });
-}());
+}
 
 
 //
 // Hooks for Library and History sidebars
 //
-(function() {
-  savehook = hook(savehook, function(name, def) {
-    var parent = $('#library .snippets');
+{
+  savehook = hook(savehook, (name, def) => {
+    const parent = $('#library .snippets');
     if (def)
       insertSnippet(def, parent, name);
     else
       removeSnippet(parent, name);
   });
 
-  historyhook = hook(historyhook, function(entry) {
-    var parent = $('#history .snippets');
+  historyhook = hook(historyhook, entry => {
+    const parent = $('#history .snippets');
     insertSnippet(entry, parent);
   });
 
-  clearhistoryhook = hook(clearhistoryhook, function() {
-    var parent = $('#history .snippets');
+  clearhistoryhook = hook(clearhistoryhook, () => {
+    const parent = $('#history .snippets');
     while (parent.firstChild)
       parent.removeChild(parent.firstChild);
   });
-}());
+}
 
 
 //
 // Code snippets
 //
-var snippets = new Map();
+const snippets = new Map();
 function insertSnippet(text, parent, key, options) {
   options = options || {};
 
-  var snippet;
+  let snippet;
   if (key && snippets.has(key)) {
     snippet = snippets.get(key);
     snippet.innerHTML = '';
@@ -482,7 +483,7 @@ function insertSnippet(text, parent, key, options) {
     snippet = document.createElement('div');
     snippet.className = 'snippet';
     snippet.title = "Click to edit";
-    snippet.addEventListener('click', function() {
+    snippet.addEventListener('click', () => {
       input.setMulti();
       input.setValue(text);
     });
@@ -491,7 +492,7 @@ function insertSnippet(text, parent, key, options) {
     }
   }
 
-  var container = document.createElement('pre');
+  const container = document.createElement('pre');
   snippet.appendChild(container);
   if (typeof CodeMirror !== 'undefined') {
     CodeMirror.runMode(text, 'logo', container);
@@ -502,7 +503,7 @@ function insertSnippet(text, parent, key, options) {
   if (!options.noScroll) {
     if (parent.scrollTimeoutId)
       clearTimeout(parent.scrollTimeoutId);
-    parent.scrollTimeoutId = setTimeout(function() {
+    parent.scrollTimeoutId = setTimeout(() => {
       parent.scrollTimeoutId = null;
       parent.scrollTop = snippet.offsetTop;
     }, 100);
@@ -512,7 +513,7 @@ function insertSnippet(text, parent, key, options) {
     parent.appendChild(snippet);
 }
 function removeSnippet(parent, key) {
-  var snippet;
+  let snippet;
   if (!key || !snippets.has(key))
     return;
   snippet = snippets.get(key);
@@ -524,21 +525,22 @@ function removeSnippet(parent, key) {
 //
 // Main page logic
 //
-window.addEventListener('DOMContentLoaded', function() {
+window.addEventListener('DOMContentLoaded', async () => {
 
   // Parse query string
-  var queryParams = {}, queryRest;
-  (function() {
+  const queryParams = {};
+  let queryRest;
+  {
     if (document.location.search) {
-      document.location.search.substring(1).split('&').forEach(function(entry) {
-        var match = /^(\w+)=(.*)$/.exec(entry);
+      document.location.search.substring(1).split('&').forEach(entry => {
+        const match = /^(\w+)=(.*)$/.exec(entry);
         if (match)
           queryParams[decodeURIComponent(match[1])] = decodeURIComponent(match[2]);
         else
           queryRest = '?' + entry;
       });
     }
-  }());
+  }
 
 
   $('#overlay').style.fontSize = '13px';
@@ -546,30 +548,30 @@ window.addEventListener('DOMContentLoaded', function() {
   $('#overlay').style.color = 'black';
 
   function asyncResult(value) {
-    return new Promise(function(resolve) {
-      setTimeout(function() { resolve(value); }, 0);
+    return new Promise(resolve => {
+      setTimeout(() => { resolve(value); }, 0);
     });
   }
 
-  var stream = {
-    read: function(s) {
+  const stream = {
+    read(s) {
       return Dialog.prompt(s ? s : "");
     },
-    write: function() {
-      var div = $('#overlay');
-      for (var i = 0; i < arguments.length; i += 1) {
-        div.innerHTML += escapeHTML(arguments[i]);
+    write(...args) {
+      const div = $('#overlay');
+      for (let i = 0; i < args.length; i += 1) {
+        div.innerHTML += escapeHTML(args[i]);
       }
       div.scrollTop = div.scrollHeight;
       return asyncResult();
     },
-    clear: function() {
-      var div = $('#overlay');
+    clear() {
+      const div = $('#overlay');
       div.innerHTML = "";
       return asyncResult();
     },
-    readback: function() {
-      var div = $('#overlay');
+    readback() {
+      const div = $('#overlay');
       return asyncResult(div.innerHTML);
     },
     get textsize() {
@@ -594,227 +596,207 @@ window.addEventListener('DOMContentLoaded', function() {
     }
   };
 
-  var canvas_element = $("#sandbox"), canvas_ctx = canvas_element.getContext('2d'),
-      turtle_element = $("#turtle"), turtle_ctx = turtle_element.getContext('2d');
+  const canvas_element = $("#sandbox"), canvas_ctx = canvas_element.getContext('2d'),
+        turtle_element = $("#turtle"), turtle_ctx = turtle_element.getContext('2d');
   turtle = new CanvasTurtle(
     canvas_ctx,
     turtle_ctx,
     canvas_element.width, canvas_element.height, $('#overlay'));
 
-  logo = new LogoInterpreter(
-    turtle, stream,
-    function (name, def) {
-      if (savehook) {
-        savehook(name, def);
-      }
-    });
+  logo = new LogoInterpreter(turtle, stream, (name, def) => {
+    if (savehook) {
+      savehook(name, def);
+    }
+  });
   logo.run('cs');
-  initStorage(function (def) {
+  initStorage(def => {
     logo.run(def);
   });
+
+  // Default translation replacement function is a no-op.
+  let __ = s => s;
 
   function saveDataAs(dataURL, filename) {
     if (!('download' in document.createElement('a')))
       return false;
-    var anchor = document.createElement('a');
+    const anchor = document.createElement('a');
     anchor.href = dataURL;
     anchor.download = filename;
-    var event = document.createEvent('MouseEvents');
-    event.initMouseEvent('click', true, true, window, null,
-                         0, 0, 0, 0, false, false, false, false, 0, null);
-    anchor.dispatchEvent(event);
+    anchor.click();
     return true;
   }
 
-  $('#savelibrary').addEventListener('click', function() {
-    var library = logo.procdefs().replace('\n', '\r\n');
-    var url = 'data:text/plain,' + encodeURIComponent(library);
+  $('#savelibrary').addEventListener('click', () => {
+    const library = logo.procdefs().replace('\n', '\r\n');
+    const url = 'data:text/plain,' + encodeURIComponent(library);
     if (!saveDataAs(url, 'logo_library.txt'))
       Dialog.alert("Sorry, not supported by your browser");
   });
-  $('#screenshot').addEventListener('click', function() {
-    var canvas = document.querySelector('#sandbox');
-    var url = canvas.toDataURL('image/png');
+  $('#screenshot').addEventListener('click', () => {
+    const canvas = document.querySelector('#sandbox');
+    const url = canvas.toDataURL('image/png');
     if (!saveDataAs(url, 'logo_drawing.png'))
       Dialog.alert("Sorry, not supported by your browser");
   });
-  $('#clearhistory').addEventListener('click', function() {
+  $('#clearhistory').addEventListener('click', () => {
     if (!confirm(__('Clear history: Are you sure?'))) return;
     clearhistoryhook();
   });
-  $('#clearlibrary').addEventListener('click', function() {
+  $('#clearlibrary').addEventListener('click', () => {
     if (!confirm(__('Clear library: Are you sure?'))) return;
     logo.run('erall');
   });
 
-  // Default translation replacement function is a no-op.
-  var __ = function(s) { return s; };
-
   //
   // Localization
   //
-  var localizationComplete = (function() {
-    function localize(data) {
-      if ('page' in data) {
-        if ('dir' in data.page)
-          document.body.dir = data.page.dir;
-        if ('examples' in data.page)
-          examples = data.page.examples;
+  function localize(data) {
+    if ('page' in data) {
+      if ('dir' in data.page)
+        document.body.dir = data.page.dir;
+      if ('examples' in data.page)
+        examples = data.page.examples;
 
-        if ('translations' in data.page) {
-          (function(translation) {
-            var ids = new Set();
-            Object.keys(translation).forEach(function(key) {
-              var parts = key.split('.'), id = parts[0], attr = parts[1], s = translation[key];
-              ids.add(id);
-              var elem = document.querySelector('[data-l10n-id="'+id+'"]');
-              if (!elem)
-                console.warn('Unused translation: ' + id);
-              else if (attr)
-                elem.setAttribute(attr, s);
-              else
-                elem.textContent = s;
-            });
-            Array.from(document.querySelectorAll('[data-l10n-id]'))
-              .map(function(element) { return element.getAttribute('data-l10n-id'); })
-              .filter(function(id) { return !ids.has(id); })
-              .forEach(function(id) { console.warn('Missing translation: ' + id); });
-          }(data.page.translations));
-        }
-        if ('messages' in data.page) {
-          // Actual string translation replacement function.
-          __ = function(s) { return data.page.messages[s] || s; };
-        }
+      if ('translations' in data.page) {
+        (translation => {
+          const ids = new Set();
+          Object.keys(translation).forEach(key => {
+            const parts = key.split('.'), id = parts[0], attr = parts[1], s = translation[key];
+            ids.add(id);
+            const elem = document.querySelector('[data-l10n-id="'+id+'"]');
+            if (!elem)
+              console.warn('Unused translation: ' + id);
+            else if (attr)
+              elem.setAttribute(attr, s);
+            else
+              elem.textContent = s;
+          });
+          Array.from(document.querySelectorAll('[data-l10n-id]'))
+            .map(element => element.getAttribute('data-l10n-id'))
+            .filter(id => !ids.has(id))
+            .forEach(id => { console.warn('Missing translation: ' + id); });
+        })(data.page.translations);
       }
-
-      if ('interpreter' in data) {
-        if ('messages' in data.interpreter) {
-          logo.localize = function(s) {
-            return data.interpreter.messages[s];
-          };
-        }
-
-        if ('keywords' in data.interpreter) {
-          logo.keywordAlias = function(s) {
-            return data.interpreter.keywords[s];
-          };
-        }
-
-        if ('procedures' in data.interpreter) {
-          (function(aliases) {
-            Object.keys(aliases).forEach(function(alias) {
-              logo.copydef(alias, aliases[alias]);
-            });
-          }(data.interpreter.procedures));
-        }
-      }
-
-      if ('graphics' in data) {
-        if ('colors' in data.graphics) {
-          turtle.colorAlias = function(s) {
-            return data.graphics.colors[s];
-          };
-        }
+      if ('messages' in data.page) {
+        // Actual string translation replacement function.
+        __ = s => data.page.messages[s] || s;
       }
     }
 
-    var lang = queryParams.lang || navigator.language || navigator.userLanguage;
-    if (!lang) return Promise.resolve();
+    if ('interpreter' in data) {
+      if ('messages' in data.interpreter) {
+        logo.localize = s => data.interpreter.messages[s];
+      }
 
+      if ('keywords' in data.interpreter) {
+        logo.keywordAlias = s => data.interpreter.keywords[s];
+      }
+
+      if ('procedures' in data.interpreter) {
+        (aliases => {
+          Object.keys(aliases).forEach(alias => {
+            logo.copydef(alias, aliases[alias]);
+          });
+        })(data.interpreter.procedures);
+      }
+    }
+
+    if ('graphics' in data) {
+      if ('colors' in data.graphics) {
+        turtle.colorAlias = s => data.graphics.colors[s];
+      }
+    }
+  }
+
+  let lang = queryParams.lang || navigator.language || navigator.userLanguage;
+  if (lang) {
     // TODO: Support locale/fallback
     lang = lang.split('-')[0];
     document.body.lang = lang;
 
-    if (lang === 'en') return Promise.resolve();
-    return fetch('l10n/lang-' + lang + '.json')
-      .then(function(response) {
+    if (lang !== 'en') {
+      try {
+        const response = await fetch('l10n/lang-' + lang + '.json');
         if (!response.ok) throw Error(response.statusText);
-        return response.text();
-      })
-      .then(function(text) {
+        const text = await response.text();
         window.json = text;
         localize(JSON.parse(text));
-      })
-      .catch(function(reason) {
+      } catch(reason) {
         console.warn('Error loading localization file for "' +
                      lang + '": ' + reason.message);
         document.body.lang = 'en';
-      });
-  }());
+      }
+    }
+  }
 
   // Populate languages selection list
-  fetch('l10n/languages.txt')
-    .then(function(response) {
-      if (!response.ok) throw Error(response.statusText);
-      return response.text();
-    })
-    .then(function(text) {
-      var select = $('#select-lang');
-      text.split(/\r?\n/g).forEach(function(entry) {
-        var match = /^(\w+)\s+(.*)$/.exec(entry);
-        if (!match) return;
-        var opt = document.createElement('option');
-        opt.value = match[1];
-        opt.textContent = match[2];
-        select.appendChild(opt);
-      });
-      select.value = document.body.lang;
-      select.addEventListener('change', function() {
-        var url = String(document.location);
-        url = url.replace(/[?#].*/, '');
-        document.location = url + '?lang=' + select.value;
-      });
+  {
+    const response = await fetch('l10n/languages.txt');
+    if (!response.ok) throw Error(response.statusText);
+    const text = await response.text();
+    const select = $('#select-lang');
+    text.split(/\r?\n/g).forEach(entry => {
+      const match = /^(\w+)\s+(.*)$/.exec(entry);
+      if (!match) return;
+      const opt = document.createElement('option');
+      opt.value = match[1];
+      opt.textContent = match[2];
+      select.appendChild(opt);
     });
+    select.value = document.body.lang;
+    select.addEventListener('change', () => {
+      let url = String(document.location);
+      url = url.replace(/[?#].*/, '');
+      document.location = url + '?lang=' + select.value;
+    });
+  }
 
-  localizationComplete.then(initInput);
+  initInput();
 
   //
   // Populate "Examples" sidebar
   // (URL may be overwritten by localization file)
   //
-  localizationComplete.then(function() {
-    fetch(examples)
-      .then(function(response) {
-        if (!response.ok) throw Error(response.statusText);
-        return response.text();
-      })
-      .then(function(text) {
-        var parent = $('#examples');
-        text.split(/\n\n/g).forEach(function(line) {
-          insertSnippet(line, parent, undefined, {
-            noScroll: true
-          });
-        });
+  {
+    const response = await fetch(examples);
+    if (!response.ok) throw Error(response.statusText);
+    const text = await response.text();
+    const parent = $('#examples');
+    text.split(/\n\n/g).forEach(line => {
+      insertSnippet(line, parent, undefined, {
+        noScroll: true
       });
-  });
+    });
+  }
 
   //
   // Demo
   //
 
-  function demo(param) {
+  async function demo(param) {
     param = String(param);
     if (param.length > 0) {
       param = decodeURIComponent(param.substring(1).replace(/_/g, ' '));
       input.setValue(param);
-      logo.run(param).catch(function (e) {
+      try {
+        await logo.run(param);
+      } catch(e) {
         Dialog.alert("Error: " + e.message);
-      });
+      }
     }
   }
 
   // Look for a program to run in the query string / hash
-  var param = queryRest || document.location.hash;
+  const param = queryRest || document.location.hash;
   demo(param);
-  window.addEventListener('hashchange', function() { demo(document.location.hash); } );
-
+  window.addEventListener('hashchange', () => { demo(document.location.hash); } );
 });
 
 window.TogetherJSConfig ={
 
   hub_on: {
-    "togetherjs.hello": function () {
-      var visible = turtle.isturtlevisible();
+    "togetherjs.hello": () => {
+      const visible = turtle.isturtlevisible();
       TogetherJS.send({
         type: "init",
         image: $("#sandbox").toDataURL("image/png"),
@@ -823,19 +805,19 @@ window.TogetherJSConfig ={
     },
 
     // FIXME: we don't align the height/width of the canvases
-    "init": function (msg) {
-      var context = $("#sandbox").getContext("2d");
-      var image = document.createElement('image');
+    init(msg) {
+      const context = $("#sandbox").getContext("2d");
+      const image = document.createElement('image');
       image.src = msg.image;
       context.drawImage(image, 0, 0);
       turtle.setstate(msg.turtle);
     },
 
-    run: function (msg) {
+    run(msg) {
       input.run(true);
     },
 
-    clear: function (msg) {
+    clear(msg) {
       input.clear(true);
     }
   }
