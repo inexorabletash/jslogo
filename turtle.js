@@ -471,6 +471,38 @@
       }
     }},
 
+    ellipse: {value: function(width, height) {
+      var self = this; 
+      var x = self.x ;
+      var y = self.y ;
+      x = x || 0;
+      y = y || 0;
+
+      if (width <= 0 && height <= 0) {
+        return;
+      }
+
+      if (width === height) {
+        this.canvas_ctx.beginPath();
+        this.canvas_ctx.arc(x, y, width / 2, 0, 2 * Math.PI, false);
+        this.canvas_ctx.stroke();
+
+      } else {
+        this.canvas_ctx.beginPath();
+        this.canvas_ctx.moveTo(x, y - height/2); // A
+        this.canvas_ctx.bezierCurveTo(
+          x + width/2, y - height/2, // C1
+          x + width/2, y + height/2, // C2
+          x, y + height/2);
+        this.canvas_ctx.bezierCurveTo(
+            x - width/2, y + height/2, // C3
+            x - width/2, y - height/2, // C4
+            x, y - height/2);
+        this.canvas_ctx.stroke();
+        this.canvas_ctx.closePath();        
+      }
+    }},
+
     getstate: {value: function() {
       return {
         isturtlestate: true,
