@@ -3737,4 +3737,52 @@ function LogoInterpreter(turtle, stream, savehook)
       throw new Error("Internal error: Unbound procedure");
     return value;
   });
+
+  //----------------------------------------------------------------------
+  //
+  // Sound supports: basic sound / basic music / web speech
+  //
+  //----------------------------------------------------------------------
+
+  if ('AudioContext' in window) {
+    var audioCtx = new window.AudioContext();
+    var soundqueue = [];
+
+    function oscillate(frequency, duration) {
+      soundqueue.push([frequency, duration]);
+    }
+
+    function soundgo() {
+      if (soundqueue.length > 0) {
+        var sound = soundqueue.shift();
+        var frequency = sound[0], duration = sound[1];
+        var oscillator = audioCtx.createOscillator();
+        oscillator.type = 'sine';
+        oscillator.frequency.value = frequency; // value in hertz
+        oscillator.connect(audioCtx.destination);
+        oscillator.onended = function() {
+          oscillator.disconnect();
+          if (soundqueue.length > 0) {
+            var next = soundqueue.shift();
+            oscillate(next[0], next[1]);
+          }
+        }
+        oscillator.start();
+        setTimeout(
+          function() {
+            oscillator.stop();
+            if (soundqueue.length > 0) {
+              soundgo();
+            }
+          }, duration);
+      }
+    }
+
+    // Play sound with a frequency and a time interval
+    def("beep", function(frequency, duration) {
+      oscillate(aexpr(frequency), aexpr(duration));
+      soundgo();
+    });
+
+  }
 }
