@@ -711,7 +711,7 @@ window.addEventListener('DOMContentLoaded', function() {
 
       if ('graphics' in data) {
         if ('colors' in data.graphics) {
-          turtle.colorAlias = function(s) {
+          logo.colorAlias = function(s) {
             return data.graphics.colors[s];
           };
         }
