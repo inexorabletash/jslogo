@@ -1,0 +1,1263 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <title>Guide du langage Logo</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <script src="https://cdn.rawgit.com/inexorabletash/polyfill/v0.1.29/polyfill.min.js"></script>
+  <link rel="stylesheet" href="ref.min.css">
+</head>
+
+<body>
+<p>Les numéros de sections sont conformes au <a target="_blank" href="https://www.cs.berkeley.edu/~bh/v2ch14/manual.html" lang="en">manuel de référence du Logo Berkeley</a> dans le livre <cite>Computer Science Logo Style volume 2: Advanced Techniques</cite> de Brian Harvey afin de faciliter la comparaison.</p>
+<h2>Sommaire</h2>
+<ul>
+  <li><a href="#types">1. Types de données et syntaxe</a></li>
+  <li>
+    <a href="#sec2">2. Structure des données des primitives</a>
+    <ul>
+      <li><a href="#sec21">2.1 Constructeurs</a></li>
+      <li><a href="#sec22">2.2 Sélecteurs de donnée</a></li>
+      <li><a href="#sec23">2.3 Transformateurs de données</a></li>
+      <li><a href="#sec24">2.4 Prédicats</a></li>
+      <li><a href="#sec25">2.5 Requêtes</a></li>
+    </ul>
+  </li>
+  <li>
+    <a href="#sec3">3. Communication</a>
+    <ul>
+      <li><a href="#sec31">3.1 Transmetteurs</a></li>
+      <li><a href="#sec32">3.2 Récepteurs</a></li>
+      <li><a href="#sec34">3.4 Accès au terminal</a></li>
+    </ul>
+  </li>
+  <li><a href="#sec4">4. Arithmétique</a>
+    <ul>
+      <li><a href="#sec41">4.1 Opérations numériques</a></li>
+      <li><a href="#sec42">4.2 Prédicats numériques</a></li>
+      <li><a href="#sec43">4.3 Nombres aléatoires</a></li>
+      <li><a href="#sec44">4.4 Formatage de l'affichage</a></li>
+      <li><a href="#sec45">4.5 Opérations binaires</a></li>
+    </ul>
+  </li>
+  <li><a href="#sec5">5. Opérations Logiques</a></li>
+  <li>
+    <a href="#sec6">6. Graphisme</a>
+    <ul>
+      <li><a href="#sec61">6.1 Déplacement de la tortue</a></li>
+      <li><a href="#sec62">6.2 Requêtes sur le déplacement de la tortue</a></li>
+      <li><a href="#sec63">6.3 Contrôle de la tortue et de la fenêtre</a></li>
+      <li><a href="#sec64">6.4 Requêtes pour tortue et fenêtre</a></li>
+      <li><a href="#sec65">6.5 Contrôle du crayon et de l'arrière-plan</a></li>
+      <li><a href="#sec66">6.6 Requêtes pour le crayon</a></li>
+      <li><a href="#sec67">6.7 Opérations images bitmap</a></li>
+      <li><a href="#sec68">6.8 Requêtes souris/touch</a></li>
+    </ul>
+  </li>
+  <li>
+    <a href="#sec7">7. Gestion de l'espace de travail</a>
+    <ul>
+      <li><a href="#sec71">7.1 Définition de procédure</a></li>
+      <li><a href="#sec72">7.2 Définition de variable</a></li>
+      <li><a href="#sec73">7.3 Listes de propriétés</a></li>
+      <li><a href="#sec74">7.4 Prédicats de l'espace de tavail</a></li>
+      <li><a href="#sec75">7.5 Requêtes dans l'espace de travail</a></li>
+      <li><a href="#sec77">7.7 Contrôle de l'espace de travail</a></li>
+    </ul>
+  </li>
+  <li>
+    <a href="#sec8">8. Structures de controle</a>
+    <ul>
+      <li><a href="#sec81">8.1 Contrôle</a></li>
+      <li><a href="#sec82">8.2 Itération basée sur template</a></li>
+    </ul>
+  </li>
+</ul>
+
+<h2>Référentiel</h2>
+<h3 id="types">Types de données et syntaxe</h3>
+<dl>
+  <dt><code>"<var>mot</var></code>
+  <br><code>'<var>mot</var></code>
+  <br><code><var>nombre</var></code></dt>
+  <dd>Mot. (Les mots avec guillemet se terminent par [](){} ou un espace, \ pour échapper.)
+  <dd class="example">montre "salut</dd>
+  <dd class="example">montre "salut\ logo</dd>
+  <dd class="example">montre 12.34</dd>
+
+  <dt><code>:<var>variable</var></code></dt>
+  <dd>Référence à une définition/variable</dd>
+  <dd class="example">montre :nom</dd>
+
+  <dt><code>[ <var>Mot &hellip;</var> ]</code></dt>
+  <dd>Liste de mots ou listes séparés par des espaces</dd>
+  <dd class="example">montre [1 2 3]</dd>
+
+  <dt><code>{ <var>mot &hellip;</var> }</code>
+  <br><code>{ <var>mot &hellip;</var> }@<var>origine</var></code></dt>
+  <dd>Tableau de mots, séparés par des espaces</dd>
+  <dd class="example">montre {1 2 3}</dd>
+
+  <dt><code> ( <var>expression</var> )</code></dt>
+  <dd>Les parenthèses peuvent servir à grouper des expressions</dd>
+  <dd class="example">montre ( 1 + 2 ) * 3</dd>
+
+  <dt><code><var>procédure</var> <var>donnée</var> &hellip;</code></dt>
+  <dd>Appelle la procédure avec les données par défaut</dd>
+  <dd class="example">montre "salut</dd>
+
+  <dt><code>( <var>procédure</var> <var>donnée</var> &hellip; )</code></dt>
+  <dd>Appelle la procédure avec un nombre arbitraire de données</dd>
+  <dd class="example">(montre "salut :nom)</dd>
+</dl>
+
+<h3 id="sec2">2. Structure des données des primitives</h3>
+<h4 id="sec21">2.1 Constructeurs</h4>
+
+<dl>
+  <dt><code>mot <var>expr</var> <var>expr</var></code>
+  <br><code>(mot <var>expr</var> <var>&hellip;</var>)</code></dt>
+  <dd>Concatène deux (ou plusieurs) mots en un seul</dd>
+  <dd class="example">montre (mot "a "b "c)</dd>
+
+  <dt><code>liste <var>chose1</var> <var>chose2</var></code>
+  <br><code>(list <var>chose1</var> <var>chose2</var> &hellip;)</code></dt>
+  <dd>Crée une nouvelle liste à partir des données indiquées</dd>
+  <dd class="example">montre (liste 1+2 2+3 3+4)</dd>
+
+  <dt><code>phrase chose1 chose2</code>
+  <br><code>(phrase chose1 chose2 &hellip;)</code>
+  <br><code>ph chose1 chose2</code>
+  <br><code>(ph chose1 chose2 &hellip;)</code></dt>
+  <dd>Crée une nouvelle liste à partir des données (si ce ne sont pas des listes) ou des éléments de listes</dd>
+  <dd class="example">montre phrase [1 2 3] [et ainsi de suite]</dd>
+
+  <dt><code>pajoute <var>chose</var> <var>liste</var></code>
+  <br><code>dajoute <var>chose</var> <var>liste</var></code></dt>
+  <dd>Donne la liste avec ajout de chose comme premier/dernier élément ; si liste est un mot, concatène (fusionne).</dd>
+  <dd class="example">montre pajoute 0 [ 1 2 3 ]</dd>
+  <dd class="example">montre pajoute "a "bcd</dd>
+  <dd class="example">montre dajoute 4 [ 1 2 3 ]</dd>
+  <dd class="example">montre dajoute "e "bcd</dd>
+
+  <dt><code>tableau <var>taille</var></code>
+  <br><code>(tableau <var>taille</var> <var>origine</var>)</code></dt>
+  <dd>Crée un nouveau tableau. L'origine par défaut est 1.</dd>
+  <dd class="example">montre tableau 10</dd>
+
+  <dt><code>tableaumd [<var>dimensions</var> &hellip;]</code>
+  <br><code>(tableaumd [<var>dimensions</var> &hellip;] <var>origine</var>)</code></dt>
+  <dd>Crée un nouveau tableau multidimensionnel. L'origine par défaut est 1.</dd>
+  <dd class="example">montre tableaumd [2 2]</dd>
+
+  <dt><code>listeentableau <var>liste</var></code>
+  <br><code>(listeentableau <var>liste</var> <var>origine</var>)</code></dt>
+  <dd>Crée un nouveau tableau à partir d'éléments d'une liste</dd>
+  <dd class="example">montre listeentableau [ 1 3 5 7 ]</dd>
+
+  <dt><code>tableauenliste <var>tableau</var></code></dt>
+  <dd>Crée une nouvelle liste à partir d'éléments d'un tableau</dd>
+  <dd class="example">montre tableauenliste { 2 4 6 8 }</dd>
+
+  <dt><code>combine chose1 chose2</code></dt>
+  <dd>Si chose2 est un mot, comme <code>mot</code>; sinon, comme <code>pajout</code></dd>
+  <dd class="example">montre combine "a [b c]</dd>
+
+  <dt><code>inverse <var>liste</var></code></dt>
+  <dd>Donne une liste avec l'ordre inversé des éléments ; si la donnée est un mot, inverse les carctères</dd>
+  <dd class="example">montre inverse [ 1 2 3 ]</dd>
+  <dd class="example">montre inverse "abc</dd>
+
+  <dt><code>symgen</code></dt>
+  <dd>Donne une chaîne unique, par exemple <samp>G1</samp>, <samp>G2</samp>, etc&hellip;</dd>
+  <dd class="example">montre symgen</dd>
+</dl>
+
+<h4 id="sec22">2.2 Sélecteurs de données</h4>
+<dl>
+  <dt><code>premier <var>liste</var></code>
+  <br><code>dernier <var>liste</var></code></dt>
+  <dd>Donne respectivement le premier ou dernier élément (ou caractère) de la liste (ou mot)</dd>
+  <dd class="example">montre premier [ 1 2 3 ]</dd>
+  <dd class="example">montre premier "abc</dd>
+  <dd class="example">montre dernier [ 1 2 3 ]</dd>
+  <dd class="example">montre dernier "abc</dd>
+
+  <dt><code>premiers <var>listedelistes</var></code></dt>
+  <dd>Donne une liste du premier élément (ou caractère) de chaque sous-liste (ou mot)</dd>
+  <dd class="example">montre premiers [ [1 2 3] [a b c] ]</dd>
+  <dd class="example">montre premiers [ abc def ]</dd>
+
+  <dt><code>saufpremier <var>liste</var></code>
+  <br><code>sp <var>liste</var></code>
+  <br><code>saufdernier <var>liste</var></code>
+  <br><code>sd <var>liste</var></code></dt>
+  <dd>Donne la liste (ou le mot) sans le premier/dernier élément (ou caractère)</dd>
+  <dd class="example">montre saufpremier [ 1 2 3 ]</dd>
+  <dd class="example">montre saufpremier "abc</dd>
+  <dd class="example">montre saufdernier [ 1 2 3 ]</dd>
+  <dd class="example">montre saufdernier "abc</dd>
+
+  <dt><code>saufpremiers <var>listedelistes</var></code>
+  <br><code>sps <var>listedelistes</var></code></dt>
+  <dd>Donne une liste de sous-listes (ou mots) sans le premier élément (ou caractère)</dd>
+  <dd class="example">montre saufpremiers [ [ 1 2 3 ] [ a b c ] ]</dd>
+  <dd class="example">montre saufpremiers [ abc def ]</dd>
+
+  <dt><code>element <var>position</var> <var>chose</var></code></dt>
+  <dd>Donne l'élément à la position indiquée d'une liste, d'un tableau ou d'un mot</dd>
+  <dd class="example">montre element 2 [ 1 2 3 ]</dd>
+  <dd class="example">montre element 2 "abc</dd>
+
+  <dt><code>elementmd [<var>position</var> &hellip;] <var>chose</var></code></dt>
+  <dd>Donne un élément d'un tableau multidimensionnel</dd>
+  <dd class="example">montre elementmd [2 1] {{a b} {c d}}</dd>
+
+  <dt><code>choix <var>liste</var></code></dt>
+  <dd>Donne aléatoirement un élément de la liste (ou mot)</dd>
+  <dd class="example">montre choix [ 1 2 3 ]</dd>
+  <dd class="example">montre choix "abc</dd>
+
+  <dt><code>retire <var>chose</var> <var>liste</var></code></dt>
+  <dd>Donne la liste (ou le mot) avec toutes les occurrences de chose supprimées</dd>
+  <dd class="example">montre retire "b [ a b c ]</dd>
+  <dd class="example">montre retire "a "banana</dd>
+
+  <dt><code>retdoub <var>liste</var></code></dt>
+  <dd>Donne la <var>liste</var> (ou le mot) après avoir retiré les doublons</dd>
+  <dd class="example">montre retdoub [ 1 2 3 2 3 4 3 4 5 ]</dd>
+  <dd class="example">montre retdoub "banana</dd>
+
+  <dt><code>guillemet <var>chose</var></code></dt>
+  <dd>Donne <var>chose</var> précédé d'un " si c'est un mot ou juste chose das le cas contraire.</dd>
+  <dd class="example">montre guillemet "abc</dd>
+
+  <dt><code>separe <var>chose</var> <var>liste</var></code></dt>
+  <dd>Donne la liste divisée en listes de listes (ou liste de mots) là où apparait <var>chose</var>.</dd>
+  <dd class="example">montre separe "a "banana</dd>
+  <dd class="example">montre separe 3 [1 2 3 4 1 2 3 4]</dd>
+
+</dl>
+
+<h4 id="sec23">2.3 Transformateurs de données</h4>
+<dl>
+  <dt><code>defelement <var>position</var> <var>tableau</var> <var>valeur</var></code></dt>
+  <dd>Défini la valeur de l'élément à la position dans le tableau (refus des tableaux circulaires)</dd>
+  <dd class="example">fais "a { 1 2 3 }  defelement 2 :a "x  montre :a</dd>
+
+  <dt><code>defelementmd [<var>position</var>&hellip;] <var>tableau</var> <var>valeur</var></code></dt>
+  <dd>Défini la valeur d'un élément dasn un tableau multidimensionnel (refus des tableaux circulaires)</dd>
+  <dd class="example">fais "a {{1 2} {3 4}}  defelementmd [2 1] :a "x  montre :a</dd>
+
+  <dt><code>.defpremier <var>liste</var> <var>valeur</var></code></dt>
+  <dd>Défini la valeur du premier élément de la liste</dd>
+  <dd class="example">fais "a [ 1 2 3 ]  .defpremier :a "7  montre :a</dd>
+
+  <dt><code>.defsp <var>liste</var> <var>valeur</var></code></dt>
+  <dd>Défini les valeurs (une liste) de la liste sauf pour le premier élément</dd>
+  <dd class="example">fais "a [ 1 2 3 ]  .sefsp :a [ 4 9 ]  montre :a</dd>
+
+  <dt><code>.defelement <var>position</var> <var>tableau</var> <var>valeur</var></code></dt>
+  <dd>Défini la valeur de l'élément à la position dans le tableau (tableaux circulaires acceptés)</dd>
+  <dd class="example">fais "a { 1 2 3 }  .defelement 2 :a "x  montre :a</dd>
+
+  <dt><code>ajoutedebut <var>nomdepile</var> <var>chose</var></code>
+  <br><code>prendsdebut <var>nomdepile</var></code></dt>
+  <dd>Ajoute au début/prends au début d'une pile. Ex.&nbsp;: variable de liste. La pile augmente par le début. Fonctionne avec des mots.</dd>
+  <dd class="example">fais "s [ 2 1 ]  ajoutedebut "s 3  montre :s  montre prendsdebut "s</dd>
+  <dd class="example">fais "s "ba  ajoutedebut "s "c  montre :s  montre prendsdebut "s</dd>
+
+  <dt><code>ajoutefin <var>nomdepile</var> <var>chose</var></code>
+  <br><code>prendsfin <var>nomdepile</var></code></dt>
+  <dd>Ajoute/supprime d'une file. Ex.&nbsp;: variable de liste, la file augmente par la fin. Fonctionne avec des mots.</dd>
+  <dd class="example">fais "q [ 1 2 ]  ajoutefin "q 3  montre :q  montre prendsfin "q</dd>
+  <dd class="example">fais "q "ab  ajoutefin "q "c  montre :q  montre prendsfin "q</dd>
+
+</dl>
+
+<h4 id="sec24">2.4 Prédicats</h4>
+<p>Les prédicats indiquent 1 (vrai) ou 0 (faux) </p>
+<dl>
+  <dt><code>motp <var>chose</var></code>
+  <br><code>mot? <var>chose</var></code>
+  <br><code>listep <var>chose</var></code>
+  <br><code>liste? <var>chose</var></code>
+  <br><code>tableaup <var>chose</var></code>
+  <br><code>tableau? <var>chose</var></code>
+  <br><code>nombrep <var>chose</var></code>
+  <br><code>nombre? <var>chose</var></code></dt>
+  <dd>Teste si chose est respectivement un mot, une liste, un tableau ou un nombre.</dd>
+
+  <dt><code>videp <var>expr</var></code>
+  <br><code>vide? <var>expr</var></code></dt>
+  <dd>Teste si chose est une liste ou une chaine vide.</dd>
+
+  <dt><code>egalp <var>expr</var> <var>expr</var></code>
+  <br><code>egal? <var>expr</var> <var>expr</var></code>
+  <br><code><var>expr</var> = <var>expr</var></code>
+  <br><code>pasegalp <var>expr</var> <var>expr</var></code>
+  <br><code>pasegal? <var>expr</var> <var>expr</var></code>
+  <br><code><var>expr</var> &lt;&gt; <var>expr</var></code></dt>
+  <dd>Test d'égalité ou d'inégalité. Compare des chaines, des nombres ou des listes (égales si le nombre d'éléments et les éléments sont égaux).</dd>
+
+  <dt><code>avantp <var>chose1</var> <var>chose2</var></code>
+  <br><code>avant? <var>chose1</var> <var>chose2</var></code></dt>
+  <dd>Teste l'ordre de classement de la chaine.</dd>
+
+  <dt><code>.id <var>chose1</var> <var>chose2</var></code></dt>
+  <dd>Teste si les choses ont la même identité.</dd>
+
+  <dt><code>membrep <var>chose</var> <var>liste</var></code>
+  <br><code>membre? <var>chose</var> <var>liste</var></code></dt>
+  <dd>Teste si chose est égal à un des éléments de la liste.</dd>
+
+  <dt><code>souschainep <var>chose1</var> <var>chose2</var></code>
+  <br><code>souschaine? <var>chose1</var> <var>chose2</var></code></dt>
+  <dd>Teste si chose1 est une sous-chaine de chose2.</dd>
+</dl>
+
+<h4 id="sec25">2.5 Requêtes</h4>
+<dl>
+  <dt><code>compte <var>chose</var></code></dt>
+  <dd>Donne le nombre d'éléments d'une liste ou le nombre de caractères dans une chaine de texte</dd>
+  <dd class="example">montre compte [ 1 2 3 ]</dd>
+  <dd class="example">montre compte "salut</dd>
+
+  <dt><code>ascii <var>expr</var></code></dt>
+  <dd>Donne le code ASCII (en réalité, unicode) du premier caractère de la chaine</dd>
+  <dd class="example">montre ascii "abc</dd>
+
+  <dt><code>caruni <var>expr</var></code></dt>
+  <dd>Donne le caractère unicode au point de code spécifié</dd>
+  <dd class="example">montre caruni 97</dd>
+
+  <dt><code>membre <var>chose</var> <var>liste</var></code></dt>
+  <dd>Donne la liste (ou le mot) de la première occurrence de chose jusqu'à la fin ou une liste (ou mot) vide</dd>
+  <dd class="example">montre membre "a "banana</dd>
+  <dd class="example">montre membre 2 [1 2 3 4]</dd>
+
+  <dt><code>majuscule <var>expr</var></code>
+  <br><code>minuscule <var>expr</var></code></dt>
+  <dd>Donne la chaine en majuscule/minuscule</dd>
+  <dd class="example">montre majuscule "abc</dd>
+  <dd class="example">montre minuscule "ABC</dd>
+
+  <dt><code>marque <var>expr</var></code></dt>
+  <dd>Donne la chaine avec caractères alphanumériques en gras</dd>
+  <dd class="example">montre marque "ABCabc123</dd>
+
+  <dt><code>analyse <var>mot</var></code></dt>
+  <dd>Donne le mot converti en liste.</dd>
+  <dd class="example">montre analyse "1+2</dd>
+
+  <dt><code>lanceanalyse <var>mot</var></code></dt>
+  <dd>Donne le mot converti en instructions.</dd>
+  <dd class="example">montre lanceanalyse "1+2</dd>
+
+</dl>
+
+
+<h3 id="sec3">3. Communication</h3>
+<h4 id="sec31">3.1 Transmetteurs</h4>
+<dl>
+  <dt><code>affiche <var>chose</var></code>
+  <br><code>af <var>chose</var></code>
+  <br>(<code>affiche <var>chose1</var> <var>chose2</var> &hellip;)</code>
+  <br>(<code>af <var>chose1</var> <var>chose2</var> &hellip;)</code></dt>
+  <dd>Affiche les données sur l'écran texte, séparées par des espaces et suivies par un retour à la ligne.<br />
+  Des crochets sont placés uniquement autour des sous-listes.</dd>
+  <dd class="example">print "hello</dd>
+
+  <dt><code>saisis <var>chose</var></code>
+  <br>(<code>saisis <var>chose1</var> <var>chose2</var> &hellip;)</code></dt>
+  <dd>Comme <code>affiche</code> mais sans retour à la ligne.</dd>
+  <dd class="example">saisis "sa  saisis "lut</dd>
+
+  <dt><code>montre <var>chose</var></code>
+  <br>(<code>montre <var>chose1</var> <var>chose2</var> &hellip;)</code></dt>
+  <dd>Comme <code>affiche</code> mais avec des crochets autour des listes.</dd>
+  <dd class="example">montre "hello</dd>
+</dl>
+
+
+<h4 id="sec32">3.2 Récepteurs</h4>
+<dl>
+  <dt><code>demandeliste</code>
+  <br><code>(demandeliste <var>textedepopup</var>)</code></dt>
+  <dd>Affiche une popup demandant une ligne de données. Le résultat est une liste de mots.
+  <dd class="example">montre demandeliste</dd>
+  <dd class="example">fais "couleurs (demandeliste [Saisis quelques couleurs :])  montre :couleurs</dd>
+
+  <dt><code>demandemot</code>
+  <br><code>(demandemot <var>textedepopup</var>)</code></dt>
+  <dd>Affiche une popup demandant une ligne de données. Le résultat (incluant les espaces) est le mot simple.</dd>
+  <dd class="example">montre demandemot</dd>
+  <dd class="example">fais "nom (demandemot [Quel est ton nom ?])  montre :nom</dd>
+</dl>
+
+<!--
+<h4>3.3 Accès fichier</h4>
+<dl>
+</dl>
+-->
+
+<h4 id="sec34">3.4 Accès au terminal</h4>
+<dl>
+  <dt><code>effacetexte</code>
+  <br><code>eft</code></dt>
+  <dd>Efface le texte à l'écran.</dd>
+
+  <dt><code>defcouleurtexte <var>couleur</var></code></dt>
+  <dd>Modifie la couleur du texte.</dd>
+
+  <dt><code>couleurtexte</code></dt>
+  <dd>Donne la couleur actuelle du texte.</dd>
+
+  <dt><code>augmentepolice</code>
+  <br><code>reduitpolice</code></dt>
+  <dd>Augmente/réduit la taille du texte.</dd>
+
+  <dt><code>deftailletexte <var>hauteur</var></code></dt>
+  <dd>Modifie la taille du texte (en pixels).</dd>
+
+  <dt><code>tailletexte</code></dt>
+  <dd>Donne la taille actuelle du texte (en pixels).</dd>
+
+  <dt><code>defpolice <var>nom</var></code></dt>
+  <dd>Modifie la police de caractères.</dd>
+
+  <dt><code>police</code></dt>
+  <dd>Donne la police actuelle du texte.</dd>
+</dl>
+
+<h3 id="sec4">4. Arithmétique</h3>
+<h4 id="sec41">4.1 Opérations numériques</h4>
+<p>Les données entrées sont des nombres ou des expressions numériques, la donnée en sortie est un nombre.</p>
+
+<dl>
+  <dt><code>somme <var>expr</var> <var>expr</var></code>
+  <br><code>(somme <var>expr</var> <var>&hellip;</var>)</code>
+  <br><code><var>expr</var> + <var>expr</var></code>
+  <br><code>difference <var>expr</var> <var>expr</var></code>
+  <br><code><var>expr</var> - <var>expr</var></code>
+  <br><code>produit <var>expr</var> <var>expr</var></code>
+  <br><code>(produit <var>expr</var> <var>&hellip;</var>)</code>
+  <br><code><var>expr</var> * <var>expr</var></code>
+  <br><code>quotient <var>expr</var> <var>expr</var></code>
+  <br><code>(quotient <var>expr</var>)</code>
+  <br><code><var>expr</var> / <var>expr</var></code>
+  <br><code>puissance <var>expr</var> <var>expr</var></code>
+  <br><code><var>expr</var> ^ <var>expr</var></code></dt>
+  <dd>Respectivement, ajoute, soustrait, multiplie, divise et mets à la puissance de. Une entrée seule à quotient donne le réciproque.</dd>
+
+  <dt><code>reste <var>expr</var> <var>expr</var></code>
+  <br><code><var>expr</var> % <var>expr</var></code>
+  <br><code>modulo <var>expr</var> <var>expr</var></code></dt>
+  <dd>
+    Donne le reste (modulus). Pour <code>reste</code> et <code>%</code>, le résultat a le même signe que la première donnée ; pour <code>modulo</code> le résultat a le même signe que la seconde donnée.</dd>
+
+  <dt><code>moins <var>expr</var></code>
+  <br><code>- <var>expr</var></code></dt>
+  <dd>Le signe moins unaré doit débuter une expression de niveau supérieur, suivre un opérateur infixé ou être préfixé d'un espace et pas d'espace à la fin.</dd>
+
+  <dt><code>abs <var>num</var></code></dt>
+  <dd>Valeur absolue</dd>
+
+  <dt><code>entier <var>nombre</var></code>
+  <br><code>arrondi <var>nombre</var></code></dt>
+  <dd>Respectivement, tronque ou arrondi un nombre.</dd>
+
+  <dt><code>racinecarre <var>expr</var></code>
+  <br><code>exp <var>expr</var></code>
+  <br><code>log10 <var>expr</var></code>
+  <br><code>ln <var>expr</var></code></dt>
+  <dd>Respectivement, racine carrée, <i>e</i> puissance expr, logarithme commun et logarithme népérien.</dd>
+
+  <dt><code>arctan <var>expr</var></code>
+  <br><code>(arctan <var>x</var> <var>y</var>)</code>
+  <br><code>sin <var>expr</var></code>
+  <br><code>cos <var>expr</var></code>
+  <br><code>tan <var>expr</var></code></dt>
+  <dd>Les fonctions trigonométriques usuelles. Les angles sont exprimés en degrés.</dd>
+
+  <dt><code>radarctan <var>expr</var></code>
+  <br><code>(radarctan <var>x</var> <var>y</var>)</code>
+  <br><code>radsin <var>expr</var></code>
+  <br><code>radcos <var>expr</var></code>
+  <br><code>radtan <var>expr</var></code></dt>
+  <dd>Les fonctions trigonométriques usuelles. Les angles sont exprimés en radians.</dd>
+
+  <dt><code>iseq <var>premier</var> <var>dernier</var></code></dt>
+  <dd>Donne une liste d'entiers du <var>premier</var> au <var>dernier</var>, les deux inclus.</dd>
+  <dd class="example">montre iseq 1 10</dd>
+
+  <dt><code>rseq <var>premier</var> <var>dernier</var> <var>nombre</var></code></dt>
+  <dd>Donne une liste de <var>nombre</var> nombres du <var>premie</var> au <var>dernier</var>, les deux inclus.</dd>
+  <dd class="example">montre rseq 1 9 5</dd>
+</dl>
+
+<h4 id="sec42">4.2 Prédicats numériques</h4>
+<dl>
+  <dt><code>pluspetitp <var>expr</var> <var>expr</var></code>
+  <br><code>pluspetit? <var>expr</var> <var>expr</var></code>
+  <br><code><var>expr</var> &lt; <var>expr</var></code></dt>
+  <br><code>plusgrandp <var>expr</var> <var>expr</var></code>
+  <br><code>plusgrand? <var>expr</var> <var>expr</var></code>
+  <br><code><var>expr</var> &gt; <var>expr</var></code>
+  <br><code>pluspetitegalp <var>expr</var> <var>expr</var></code>
+  <br><code>pluspetitegal? <var>expr</var> <var>expr</var></code>
+  <br><code><var>expr</var> &lt;= <var>expr</var></code>
+  <br><code>plusgrandegalp <var>expr</var> <var>expr</var></code>
+  <br><code>plusgrandegal? <var>expr</var> <var>expr</var></code>
+  <br><code><var>expr</var> &gt;= <var>expr</var></code></dt>
+  <dd>Respectivement, plus petit que, plus grand que, plus petit ou égal à, plus grand ou égal à. Les données entrées sont des nombres ou des expressions numériques, les données de sortie sont 1 (vrai) ou 0 (faux).</dd>
+</dl>
+
+<h4 id="sec43">4.3 Nombres aléatoires</h4>
+<dl>
+  <dt><code>aleatoire <var>expr</var></code>
+  <br><code>(aleatoire <var>début</var> <var>fin</var>)</code></dt>
+  <dd>Donne un nombre aléatoire compris entre 0 et <var>expr</var> (<var>expr</var>var</var> exclu) ou compris entre début et fin (les deux inclus).</dd>
+  <dd class="example">montre aleatoire 10</dd>
+  <dd class="example">montre (aleatoire 1 6)</dd>
+
+
+  <dt><code>realeatoire</code>
+  <br>(<code>realeatoire <var>expr</var>)</code></dt>
+  <dd>Réinitialise le générateur de nombre aléatoire, soit à une valeur fixe, soit à la valeur spécifiée.</dd>
+</dl>
+
+<h4 id="sec44">4.4 Formatage de l'affichage</h4>
+<dl>
+  <dt><code>form <var>expr</var> <var>longueur</var> <var>précision</var></code></dt>
+  <dd>Donne une chaine formatée avec le résultat d'une expression numérique de <var>precision</var> décimales et complétée à gauche avec des espaces (si nécessaires) afin d'avoir au moins <var>longueur</var> caractères de long.</dd>
+  <dd class="example">montre form 1/3 10 3</dd>
+</dl>
+
+<h4 id="sec45">4.5 Opérations binaires</h4>
+<dl>
+  <dt><code>binet <var>expr</var> <var>expr</var></code>
+  <br><code>(binet <var>expr</var> &hellip;)</code>
+  <br><code>binou <var>expr</var> <var>expr</var></code>
+  <br><code>(binou <var>expr</var> &hellip;)</code>
+  <br><code>binxou <var>expr</var> <var>expr</var></code>
+  <br><code>(binxou <var>expr</var> &hellip;)</code>
+  <br><code>binpas <var>expr</var></code></dt>
+  <dd>Respectivement, et, ou, ou exclusif et pas.</dd>
+
+  <dt><code>decalarith <var>expr</var> <var>nbrbit</var></code></dt>
+  <dd>Décalage binaire arithmétique. si <var>nbrbit</var> est négatif, le décalage se fait vers la droite en préservant le signe.</dd>
+
+  <dt><code>decallogic <var>expr</var> <var>nbrbit</var></code></dt>
+  <dd>Décalage binaire logique. si <var>nbrbit</var> est négatif, le décalage se fait vers la droite, remplissage par des zéros.</dd>
+</dl>
+
+<h3 id="sec5">5. Opérations Logiques</h3>
+<dl>
+  <dt><code>vrai</code></dt>
+  <dd>Donne 1</dd>
+  
+  <dt><code>false</code></dt>
+  <dd>Donne 0</dd>
+
+  <dt><code>et <var>expr</var> <var>expr</var></code>
+  <br><code>(et <var>expr</var> <var>&hellip;</var>)</code>
+  <br><code>ou  <var>expr</var> <var>expr</var></code>
+  <br><code>(ou <var>expr</var> <var>&hellip;</var>)</code>
+  <br><code>xou <var>expr</var> <var>expr</var></code>
+  <br><code>(xou <var>expr</var> <var>&hellip;</var>)</code>
+  <br><code>pas <var>expr</var></code></dt>
+  <dd>Respectivement, opérateurs logiques "et", "ou", "ou exclusif" et "pas". Les données entrées sont des nombres ou des expressions numériques, les données de sortie sont 1 (vrai) ou 0 (faux).</dd>
+</dl>
+
+<h3 id="sec6">6. Graphisme</h3>
+
+<p>Une introduction à la <a target="_blank" href="https://www.cs.berkeley.edu/~bh/v1ch10/turtle.html" lang="en">géométrie tortue</a> (en anglais).</p>
+
+<h4 id="sec61">6.1 Déplacement de la tortue</h4>
+<dl>
+  <dt><code>avance <var>expr</var></code>
+  <br><code>av <var>expr</var></code></dt>
+  <dd>Fait avancer la tortue de <var>expr</var> pixels.</dd>
+  <dd class="example">av 100</dd>
+
+  <dt><code>recule <var>expr</var></code>
+  <br><code>re <var>expr</var></code></dt>
+  <dd>Fait reculer la tortue de <var>expr</var> pixels.</dd>
+  <dd class="example">re 100</dd>
+
+  <dt><code>gauche <var>expr</var></code>
+  <br><code>tg <var>expr</var></code></dt>
+  <dd>Rotation de <var>expr</var> degrés dans le sens inverse des aiguilles d'une montre.</dd>
+  <dd class="example">tg 90</dd>
+
+  <dt><code>droite <var>expr</var></code>
+  <br><code>td <var>expr</var></code></dt>
+  <dd></dd>Rotation de <var>expr</var> degrés dans le sens des aiguilles d'une montre.</dt>
+  <dd class="example">td 90</dd>
+
+  <dt><code>defpos [ <var>expr</var> <var>expr</var> ]</code>
+  <br><code>defxy <var>expr</var> <var>expr</var></code>
+  <br><code>defx <var>expr</var></code>
+  <br><code>defy <var>expr</var></code></dt>
+  <dd>Déplace la tortue à la position spécifiée.</dd>
+  <dd class="example">defpos [ 100 -100 ]</dd>
+  <dd class="example">defxy -100 100</dd>
+
+  <dt><code>deforientation <var>expr</var></code>
+  <br><code>defor <var>expr</var></code></dt>
+  <dd>Oriente la tortue vers la direction spécifiée en degrés.</dd>
+  <dd class="example">deforientation 45</dd>
+
+  <dt><code>origine</code></dt>
+  <dd>Déplace la tortue vers le centre et l'oriente vers le haut.</dd>
+
+  <dt><code>arc <var>angle</var> <var>rayon</var></code></dt>
+  <dd>Sans déplacer la tortue, dessine un arc de cercle centré sur la tortue à partir de son orientation.</dd>
+  <dd class="example">arc 180 100</dd>
+</dl>
+
+<h4 id="sec62">6.2 Requêtes sur le déplacement de la tortue</h4>
+<dl>
+  <dt><code>pos</code>
+  <br><code>posx</code>
+  <br><code>posy</code></dt>
+  <dd>Respectivement, donne la postion actuelle de la tortue au format [ x y ], x ou y.</dd>
+  <dd class="example">montre pos</dd>
+
+  <dt><code>orientation</code></dt>
+  <dd>Donne l'orientation actuelle de la tortue.</dd>
+  <dd class="example">montre orientation</dd>
+
+  <dt><code>vers [ <var>expr</var> <var>expr</var> ]</code></dt>
+  <dd>Donne l'orientation vers les coordonnées [ x y ] spécifiées.</dd>
+  <dd class="example">montre vers [ 0 0 ]</dd>
+
+  <dt><code>echelle</code></dt>
+  <dd>Donne les facteurs d'échelle actuels</dd>
+  <dd class="example">montre echelle</dd>
+
+  <dt><code>limites</code></dt>
+  <dd>Donne les limites actuelles de l'écran [ xmin xmax ymin ymax ]</dd>
+  <dd class="example">montre limites</dd>
+</dl>
+
+<h4 id="sec63">6.3 Contrôle de la tortue et de la fenêtre</h4>
+<dl>
+  <dt><code>montretortue</code>
+  <br><code>mt</code></dt>
+  <dd>Montre la tortue</dd>
+
+  <dt><code>cachetortue</code>
+  <br><code>ct</code></dt>
+  <dd>Cache la tortue</dd>
+
+  <dt><code>efface</code></dt>
+  <dd>Efface la zone de dessin</dd>
+
+  <dt><code>effaceecran</code>
+  <br><code>efe</code></dt>
+  <dd>Efface la zone de dessin et place la tortue au centre orientée vers le haut.</dd>
+
+  <dt><code>circulaire</code></dt>
+  <dd>Si la tortue sort de la zone de dessin, elle continuera de l'autre côté (mode par défaut).</dd>
+
+  <dt><code>fenêtre</code></dt>
+  <dd>La tortue pourra sortir de la zone de dessin et continuer ses déplacement hors zone.</dd>
+
+  <dt><code>barriere</code></dt>
+  <dd>Si la tortue tente de dépasser les limites de la zone de dessin, elle sera stoppée.</dd>
+
+  <dt><code>remplis</code></dt>
+  <dd>Remplis la zone autour de la tortue.</dd>
+  <dd class="example">arc 360 100 remplis</dd>
+
+  <dt><code>remplisdessin <var>couleurderemplissage</var> [ <var>déclarations &hellip;</var> ]</code></dt>
+  <dd>Exécute les <var>déclarations</var> sans remplir dans un premier temps mais en conservant les mouvements de la tortue. Dans un deuxième temps, remplis la figure tracée par la tortue avec <var>couleurderemplissage</var> et délimite la figure avec le style de crayon actuel.</dd>
+  <dd class="example">remplisdessin "rouge [ repete 5 [ av 100  td 144 ] ]</dd>
+
+  <dt><code>ecrit <var>expr</var></code></dt>
+  <dd>Dessine un mot (même logique que <code>affiche</code>) dans la zone de dessin là où se trouve la tortue.</dd>
+  <dd class="example">repete 8 [ ecrit "Logo td 45 ]</dd>
+
+  <dt><code>defhauteurecrit <var>expr</var></code></dt>
+  <dd>Défini la hauteur du texte dessiné par <code>ecrit</code> en pixels.</dd>
+  <dd class="example">setlabelheight 100  label "Logo</dd>
+
+  <dt><code>defpoliceecrit <var>expr</var></code></dt>
+  <dd>Défini la police pour le texte dessiné par <code>ecrit</code></dd>
+  <dd class="example">defpoliceecrit "Times\ New\ Roman  ecrit "Logo</dd>
+
+  <dt><code>defechelle <var>sx</var> <var>sy</var></code></dt>
+  <dd>Défini les facteurs d'échelle.</dd>
+  <dd class="example">defechelle 1 2 arc 360 100</dd>
+
+  <dt><code>deftortue <var>ind</var></code></dt>
+  <dd>Passe à la tortue numéro <var>ind</var> (en commençant par 1 pour la tortue présente au démarrage).
+    Si la tortue n'a pas encore été utilisée, elle sera créée au centre, orientée vers le haut, le crayon étant baissé.</dd>
+  <dd class="example">deftortue 2 td 90 av 100</dd>
+
+  <dt><code>demande <var>numtortue</var> [ <var>déclarations &hellip;</var> ]</code></dt>
+  <dd>Exécute les <var>déclarations</var> pour la tortue numéro <var>numtortue</var>.</dd>
+  <dd class="example">demande 2 [ td 90 av 100 ]</dd>
+
+  <dt><code>effacetortues</code></dt>
+  <dd>Supprime toutes les tortues sauf la tortue utilisée actuellement qui devient la tortue 1.</dd>
+  <dd class="example">fd 50 setturtle 2 rt 90 fd 100 clearturtles </dd>
+</dl>
+
+<h4 id="sec64">6.4 Requêtes pour tortue et fenêtre</h4>
+<dl>
+  <dt><code>visiblep</code>
+  <br><code>visible?</code></dt>
+  <dd>Donne 1 si la tortue est visible, 0 si elle est cachée.</dd>
+
+  <dt><code>modetortue</code></dt>
+  <dd>Donne <code>WRAP</code> (<code>circulaire</code>), <code>WINDOW</code> (<code>fenetre</code>) ou <code>FENCE</code> (<code>barriere</code>)</dd>
+
+  <dt><code>tailleecrit</code></dt>
+  <dd>Donne la hauteur du texte dessiné par <code>ecrit</code> en pixels.</dd>
+
+  <dt><code>policeecrit</code></dt>
+  <dd>Donne le nom de la police dessinée par <code>ecrit</code></dd>
+
+  <dt><code>tortue</code></dt>
+  <dd>Donne le numéro de la tortue active.</dd>
+
+  <dt><code>tortues</code></dt>
+  <dd>Donne le plus grand nombre indiqué dans <code>deftortue</code></dd>
+</dl>
+
+<h4 id="sec65">6.5 Contrôle du crayon et de l'arrière-plan</h4>
+<dl>
+  <dt><code>baissecrayon</code>
+  <br><code>bc</code></dt>
+  <dd>La tortue laissera un tracé.</dd>
+
+  <dt><code>levecrayon</code>
+  <br><code>lc</code></dt>
+  <dd>La tortue ne laissera pas de tracé.</dd>
+
+  <dt><code>crayondessine</code>
+  <br><code>cd</code>
+  <br><code>crayonefface</code>
+  <br><code>ce</code>
+  <br><code>crayoninverse</code>
+  <br><code>ci</code></dt>
+  <dd>Modifie le modifie de dessin de la tortue. <em>dessine</em> (par défaut) laisse un tracé coloré, <em>efface</em> rétabli l'arrière-plan,  <em>inverse</em> inverse l'arrière-plan.</dd>
+  <dd class="example">defec 10 ci repete 5 [ av 100 td 144 ]</dd>
+
+  <dt><code>defcouleurcrayon <var>couleurlogo</var></code>
+  <br><code>defcouleurcrayon <var>couleurcss</var></code>
+  <br><code>defcouleurcrayon [<var>r</var> <var>v</var> <var>b</var>]</code>
+  <br><code>defcc <var>couleur</var></code></dt>
+  <dd>Défini la couleur du crayon/texte. La couleur peut être un numéro (0-15) de couleur logo standard, un nom de couleur CSS (<a target="_blank" href="https://www.w3.org/TR/css3-color/#svg-color" lang="en">noms de couleurs CSS ou #rrvvbb</a>) ou sous forme de liste de trois valeurs (r/v/b) comprises entre 0 et 99.</dd>
+  <dd>Les couleurs Logo standards sont&nbsp;:
+  <table id="colortable">
+    <tr>
+      <td style="background-color: black;">0<br>noir
+      <td style="background-color: blue;">1<br>bleu
+      <td style="background-color: lime; color: #000;">2<br>citron
+      <td style="background-color: cyan; color: #000;">3<br>cyan
+    <tr>
+      <td style="background-color: red;">4<br>rouge
+      <td style="background-color: magenta;">5<br>magenta
+      <td style="background-color: yellow; color: #000;">6<br>jaune
+      <td style="background-color: white; color: #000;">7<br>blanc
+    <tr>
+      <td style="background-color: brown;">8<br>brun
+      <td style="background-color: tan; color: #000;">9<br>beige
+      <td style="background-color: green;">10<br>vert
+      <td style="background-color: aquamarine; color: #000;">11<br>mer
+    <tr>
+      <td style="background-color: salmon;">12<br>saumon
+      <td style="background-color: purple;">13<br>violet
+      <td style="background-color: orange;">14<br>orange
+      <td style="background-color: gray;">15<br>gris
+  </table>
+  <dd class="example">defcouleurcrayon 4</dd>
+  <dd class="example">defcouleurcrayon "rouge</dd>
+  <dd class="example">defcouleurcrayon "#ff0000</dd>
+  <dd class="example">defcouleurcrayon [ 99 0 0 ]</dd>
+
+  <dt><code>defpalette <var>numerocouleur</var> <var>couleurcss</var></code>
+  <br><code>defpalette <var>numerocouleur</var> [<var>r</var> <var>v</var> <var>b</var>]</code></dt>
+  <dd>Modifie une des couleurs standard (8 et supérieur) en la couleur indiquée.</dd>
+  <dd class="example">defpalette 8 "pink deffd 8</dd>
+  <dd class="example">setpalette 8 "#ff4f00 deffd 8</dd>
+  <dd class="example">setpalette 8 [ 99 31 0 ] deffd 8</dd>
+
+  <dt><code>defepaisseurcrayon <var>expr</var></code></dt>
+  <dd>Défini l'épaisseur du crayon en pixels. Si <var>expr</var> est une liste, le premier élément est utilisé.</dd>
+
+  <dt><code>deffond <var>couleur</var></code>
+  <br><code>deffd <var>couleur</var></code>
+  <br><code>defcouleurecran <var>couleur</var></code>
+  <br><code>defce <var>couleur</var></code></dt>
+  <dd>Défini la couleur d'arrière-plan ; mêmes options que pour <code>defcouleurcrayon</code></dd>
+  <dd class="example">deffond "rouge</dd>
+</dl>
+
+<h4 id="sec66">6.6 Requêtes pour le crayon</h4>
+<dl>
+  <dt><code>baissecrayonp</code>
+  <br><code>baissecrayon?</code></dt>
+  <dd>Donne 1 si le crayon est baissé, 0 sinon.</dd>
+  <dd class="example">montre baissecrayon?</dd>
+
+  <dt><code>modecrayon</code></dt>
+  <dd>Donne <code>PAINT</code> (<code>dessine</code>), <code>ERASE</code>(<code>efface</code>) ou <code>REVERSE</code> (<code>inverse</code>)
+  <dd class="example">montre modecrayon</dd>
+
+  <dt><code>couleurcrayon</code>
+  <br><code>cc</code></dt>
+  <dd>Donne la couler de crayon actuelle. Ce sera un nom de couleur CSS, pas nécessairement la valeur indiquée à l'origine.
+  <dd class="example">montre couleurcrayon</dd>
+
+  <dt><code>palette <var>numerocouleur</var></code></dt>
+  <dd>Donne la couleur correspondante. Ce sera un nom de couleur CSS, pas nécessairement la valeur indiquée à l'origine.</dd>
+  <dd class="example">montre palette 8</dd>
+
+  <dt><code>epaisseurcrayon</code></dt>
+  <dd>Donne une liste composée de 2 éléments indiquant la largeur et la hauteur (habituellement les mêmes).</dd>
+  <dd class="example">montre epaisseurcrayon</dd>
+
+  <dt><code>fond</code>
+  <br><code>ap</code>
+  <br><code>obtenircouleurecran</code>
+  <br><code>ocec</code></dt>
+  <dd>Donne la couleur d'arrière-plan. Ce sera un nom de couleur CSS, pas nécessairement la valeur indiquée à l'origine.
+  <dd class="example">montre fond</dd>
+</dl>
+
+<!--
+<h4>6.7 Saving and Loading Pictures</h4>
+-->
+<h4 id="sec67">6.7 Opérations images bitmap</h4>
+<dl>
+  <dt><code>coupeimage <var>largeur</var> <var>hauteur</var></code></dt>
+  <dd>Copie un bitmap (image) à partir de la position de la tortue de <var>largeur</var> par <var>hauteur</var> pixels.</dd>
+
+  <dt><code>colleimage</code></dt>
+  <dd>Colle le bitmap copié précédemment à la position actuelle de la tortue.</dd>
+  <dd class="example">repete 4 [ td 90 av 40 ] coupeimage 50 50 lc av 100 colleimage</dd>
+</dl>
+
+
+
+<h4 id="sec68">6.8 Requêtes souris/touch</h4>
+<dl>
+  <dt><code>possouris</code></dt>
+  <dd>Donne une liste des coordonnées x, y de la dernière position de la souris.</dd>
+  <dd class="example">boucle [defpos possouris]</dd>
+
+  <dt><code>posclic</code></dt>
+  <dd>Donne une liste des coordonnées x, y de la dernière position du clic de souris.</dd>
+  <dd class="example">boucle [defpos posclic]</dd>
+
+  <dt><code>boutonp</code>
+  <br><code>bouton?</code></dt>
+  <dd>Donne 1 si un bouton de la souris a été actionné, 0 sinon.</dd>
+  <dd class="example">boucle [sisinon bouton? [bc] [lc] defpos possouris]</dd>
+
+  <dt><code>bouton</code></dt>
+  <dd>Donne un nombre indiquant le bouton de souris actionné
+    (<code>1</code> = gauche, 2 = droite, etc&hellip;) ou 0 aucun n'a été actionné.</dd>
+
+  <dt><code>doigts</code></dt>
+  <dd>Donne une liste des coordonnées du touch.</dd>
+  <dd class="example">boucle [sisinon compte doigts [defpos premier doigts baissecrayon] [levecrayon]]</dd>
+</dl>
+
+<h3 id="sec7">7. Gestion de l'espace de travail</h3>
+<h4 id="sec71">7.1 Définition de procédure</h4>
+<dl>
+  <dt><code>cree <var>nomproc</var> <var>données &hellip;</var> <var>déclarations &hellip;</var> fin</code>/
+  <dd>Définie une nouvelle procédure nommée. Les données peuvent être :
+    <ul>
+      <li>Requis&nbsp;: <code>:a :b</code></li>
+      <li>Facultatif (avec valeurs par défaut)&nbsp;: <code>[:c 5] [:d 7]</code></li>
+      <li>Reste (données restantes comme liste)&nbsp;: <code>[:r]</code></li>
+      <li>Nombre de données par défaut&nbsp;: <code>3</code>
+    </ul>
+  <dd class="example">cree étoile :n  repete 5 [ av :n td 144 ] fin</dd>
+
+  <dt><code>definis <var>nomproc</var> [[<var>données</var> &hellip;][<var>déclarations</var> &hellip;]]</code></dt>
+  <dd>Défini une nouvelle procédure nommée avec des données facultatives.</dd>
+  <dd class="example">definis "étoile [[n][repete 5 [av :n  td 144]]]</dd>
+
+  <dt><code>def <var>nomproc</var></code></dt>
+  <dd>Donne la définition d'une procédure nommée comme une chaine.</dd>
+  <dd class="example">montre def "étoile</dd>
+
+  <dt><code>texte <var>nomproc</var></code></dt>
+  <dd>Donne la définition d'une procédure nommée comme une liste pratique pour utiliser avec <code>DEFINIS</code></dd>
+  <dd class="example">montre texte "étoile</dd>
+
+  <dt><code>copiedef <var>nouveaunom</var> <var>anciennom</var></code></dt>
+  <dd>Copie une procédure. Si <var>nouveaunom</var> existe déjà, il sera écrasé. Les procédures primitives ne peuvent être écrasées à moins que <code>REDEFP</code> est <code>VRAI</code>.</dd>
+  <dd class="example">copiedef "nouveau "ancien</dd>
+</dl>
+
+<h4 id="sec72">7.2 Définition de variable</h4>
+<dl>
+  <dt><code>fais <var>nomvar</var> <var>expr</var></code></dt>
+  <dd>Mes à jour une variable ou défini une nouvelle variable globale. Le nom de la variable doit être précédé d'un guillemet.</dd>
+  <dd class="example">fais "mavar 5</dd>
+
+  <dt><code>nom <var>expr</var> <var>nomvar</var></code></dt>
+  <dd>Comme <code>fais</code> mais avec les données inversées.</dd>
+  <dd class="example">nom 5 "mavar</dd>
+
+  <dt><code>locale <var>nomvar</var></code>
+  <br><code>(locale <var>nomvar</var> &hellip;)</code></dt>
+  <dd>le <code>fais</code> suivant créera la variable dans le domaine local au lieu du domaine global.</dd>
+  <dd class="example">locale "mavar</dd>
+
+  <dt><code>faislocale <var>nomvar</var> <var>expr</var></code></dt>
+  <dd>Défini une variable dans le domaine local (raccourci pour <code>locale</code> puis <code>fais</code>)</dd>
+  <dd class="example">faislocale "mavar 5</dd>
+
+  <dt><code>chose <var>nomvar</var></code></dt>
+  <dd>Donne la valeur d'une variable. <code>:foo</code> est un raccourci pour <code>chose "foo</code>.</dd>
+  <dd class="example">montre chose "mavar</dd>
+
+  <dt><code>globale <var>nomvar</var></code></dt>
+  <dd>Prévoit la variable dans le domaine global. Ceci ne fait rien de bien utile.</dd>
+  <dd class="example">globale "mavar</dd>
+</dl>
+
+<h4 id="sec73">7.3 Listes de propriétés</h4>
+<dl>
+  <dt><code>ajprop <var>nomlistep</var> <var>nomprop</var> <var>valeur</var></code></dt>
+  <dd>Défini la propriété <var>nomprop</var> dans la liste de propriétés <var>nomlistep</var> et lui attribue la <var>valeur</var>.</dd>
+
+  <dt><code>obprop <var>nomlistep</var> <var>nomprop</var></code></dt>
+  <dd>Obtiens la valeur de la propriété <var>nomprop</var> dans la liste de propriétés <var>plistname</var> ou la liste vide si la propriété n'existe pas.</dd>
+
+  <dt><code>supprprop <var>nomlistep</var> <var>nomprop</var></code></dt>
+  <dd>Supprime la propriété <var>nomprop</var> dans la liste de propriétés <var>plistname</var>.</dd>
+
+  <dt><code>propliste <var>nomlistep</var></code></dt>
+  <dd>Donne une liste de propriétés dans la liste de propriétés <var>nomlistep</var>, en alternant nom de propriété et valeur de la propriété.</dd>
+</dl>
+
+<h4 id="sec74">7.4 Prédicats de l'espace de tavail</h4>
+<p>Les prédicats donnent 1 (vrai) ou 0 (faux) </p>
+<dl>
+  <dt><code>procedurep <var>nom</var></code>
+  <br><code>procedure? <var>nom</var></code></dt>
+  <dd>Vérifie si la procédure portant le nom indiqué existe.</dd>
+
+  <dt><code>primitivep <var>nom</var></code>
+  <br><code>primitive? <var>nom</var></code></dt>
+  <dd>Vérifie s'il existe une procédure native (primitive) portant le nom indiqué.</dd>
+
+  <dt><code>definiep <var>nom</var></code>
+  <br><code>definie? <var>nom</var></code></dt>
+  <dd>Vérifie s'il existe une procédure définie par l'utilisateur portant le nom indiqué.</dd>
+
+  <dt><code>nomp <var>nom</var></code>
+  <br><code>nom? <var>nom</var></code></dt>
+  <dd>Vérifie s'il existe une variable portant le nom indiqué.</dd>
+
+  <dt><code>proplistep <var>nom</var></code>
+  <br><code>propliste? <var>nom</var></code></dt>
+  <dd>Vérifie s'il existe une liste de propriétés portant le nom indiqué.</dd>
+</dl>
+
+
+<h4 id="sec75">7.5 Requêtes dans l'espace de travail</h4>
+<dl>
+  <dt><code>contenus</code></dt>
+  <dd>Donne une liste comportant 3 éléments. Le premier est une liste de noms de procédures créées par l'utilisateur. Le second est une liste de variables définies. Le troisième est une liste de nom de Listes non-vides. Seules les procédures non désactivées, les variables et les listes de propriétés sont incluses.</dd>
+
+  <dt><code>desactivees</code></dt>
+  <dd>Donne une liste comportant 3 éléments. Le premier est une liste de noms de procédures créées par l'utilisateur. Le second est une liste de variables définies. Le troisième est une liste de nom de Listes non-vides. Seules les procédures désactivées, les variables et les listes de propriétés sont incluses.</dd>
+
+  <dt><code>procedures</code></dt>
+  <dd>Donne une liste de noms de procédures créées par l'utilisateur non désactivées.</dd>
+
+  <dt><code>primitives</code></dt>
+  <dd>Donne une liste de noms de primitives créées par l'utilisateur non désactivées.</dd>
+
+  <dt><code>globales</code></dt>
+  <dd>Donne une liste de variables globales non désactivées.</dd>
+
+  <dt><code>noms</code></dt>
+  <dd>Donne une liste avec 2 éléments. Le premier est une liste vide. Le second est une liste de variables non désactivées.</dd>
+
+  <dt><code>proplistes</code></dt>
+  <dd>Donne une liste avec 3 éléments. Le premier est une liste vide. Le second est une liste vide. le troisième est une liste de noms de propriétés de liste non-vides et non désactivées.</dd>
+
+  <dt><code>nomliste <var>nom</var></code>
+  <br><code>nomliste <var>nomliste</var></code></dt>
+  <dd>Donne une liste du type <code>contenus</code> avec les noms de variables indiquées.</dd>
+
+  <dt><code>lproplistes <var>nompl</var></code>
+  <br><code>lproplistes <var>listenompl</var></code></dt>
+  <dd>Donne une liste de type <code>contenus</code> avec les listes de propriétés indiquées.</dd>
+
+  <dt><code>arite <var>nomproc</var></code></dt>
+  <dd>Donne une liste avec le nombre de données minimum, par défaut, maximum de la procédure ; le maximum est -1 si illimité.</dd>
+</dl>
+
+<!--
+<h4>7.6 Workspace Inspection</h4>
+<dl>
+</dl>
+
+-->
+
+<h4 id="sec77">7.7 Contrôle de l'espace de travail</h4>
+<dl>
+  <dt><code>supprime <var>listecontenus</var></code></dt>
+  <dd>Prends une liste à trois éléments, où le premier est une liste de noms de procédures définies par l'utilisateur à supprimer, le second est une liste de variables définies à supprimer et le troisième est une liste de listes de propriétés à supprimer.
+  Les procédures primitives ne peuvent être supprimées sauf si <code>REDEFP</code> est <code>VRAI</code>.</dd>
+  <dd class="example">supprime [ [maproc] [mavar] [] ]</dd>
+
+  <dt><code>supprtout</code></dt>
+  <dd>Supprime toutes les procédures définies par l'utilisateur non désactivées, les variables et les listes de propriétés.</dd>
+
+  <dt><code>supprps</code></dt>
+  <dd>Supprime toutes les procédures définies par l'utilisateur non désactivées.</dd>
+
+  <dt><code>supprns</code></dt>
+  <dd>Supprime toutes les variables non désactivées.</dd>
+
+  <dt><code>supprpropls</code></dt>
+  <dd>Supprime toutes les listes de propriétés non désactivées.</dd>
+
+  <dt><code>supprn <var>varname</var></code>
+  <br><code>supprn <var>varnameliste</var></code></dt>
+  <dd>Supprime les variables nommées.</dd>
+
+  <dt><code>supprlprop <var>plname</var></code>
+  <br><code>supprlprop <var>plnameliste</var></code></dt>
+  <dd>Supprime les listes de propriétés nommées.</dd>
+
+  <dt><code>desactive <var>listecontenus</var></code></dt>
+  <dd>Prends une liste de trois éléments, où le premier est une liste de noms de procédures définies par l'utilisateur à désactiver, le second est une liste de variables définies à désactiver et le troisième est une liste de listes de propriétés à désactiver.</dd>
+
+  <dt><code>desactivetout</code></dt>
+  <dd>Désactive toutes les procédures, variables et listes de propriétés définies par l'utilisateur.</dd>
+
+  <dt><code>desactivenom <var>nomvar</var></code>
+  <br><code>desactivenom <var>listenomvar</var></code></dt>
+  <dd>Désactive la variable indiquée (ou la liste de variables).</dd>
+
+  <dt><code>reactive <var>listecontenus</var></code></dt>
+  <dd>Prends une liste de trois éléments, où le premier est une liste de noms de procédures définies par l'utilisateur à réactiver, le second est une liste de variables définies à réactiver et le troisième est une liste de listes de propriétés à réactiver.</dd>
+
+  <dt><code>reactivetout</code></dt>
+  <dd>Réactive toutes les procédures, variables et listes de propriétés définies par l'utilisateur.</dd>
+
+  <dt><code>reactivenom <var>nomvar</var></code>
+  <br><code>reactivenom <var>listenomvar</var></code></dt>
+  <dd>Réactive la variale indiquée (ou la liste de variables).
+
+  <dt><code>desactiveep <var>listecontenus</var></code>
+  <br><code>desactivee? <var>listecontenus</var></code></dt>
+  <dd>Donne 1 si la première procédure, variable ou liste de propriétés définie par l'utilisateur existe et est désactivée, sinon 0.</dd>
+
+</dl>
+
+<h3 id="sec8">8. Structures de contrôle</h3>
+<h4 id="sec81">8.1 Contrôle</h4>
+<dl>
+  <dt><code>execute [ <var>déclarations &hellip;</var> ]</code></dt>
+  <dd>Exécute les déclarations spécifiées une fois.</dd>
+  <dd class="example">exécute [ av 100 td 90 ]</dd>
+
+  <dt><code>executeresultat [ <var>déclarations &hellip;</var> ]</code></dt>
+  <dd>Exécute les déclarations spécifiées une fois. Si les déclarations sortent ue valeur, le résultat est une liste comportant la valeur comme seul élément. Sinon, le résultat est une liste vide.</dd>
+
+  <dt><code>repete <var>expr</var> [ <var>déclarations &hellip;</var> ]</code></dt>
+  <dd>Repète les déclarations <var>expr</var> fois.</dd>
+  <dd class="example">repete 4 [ av 100 td 90 ]</dd>
+
+  <dt><code>boucle [ <var>déclarations &hellip;</var> ]</code></dt>
+  <dd>Repète les déclarations en boucle. Utilisé dans une procédure définie par l'utilisateur qui se termine par  <code>sortie</code>, <code>stop</code> ou <code>salut</code></dd>
+  <dd class="example">boucle [ fais "n aleatoire 100 montre :n  si :n == 0 [ salut ] ]</dd>
+
+  <dt><code>nombrerep</code>
+  <br><code>#</code></dt>
+  <dd>Donne l'itération actuelle de <code>repete</code> ou <code>boucle</code></dd>
+  <dd class="example">repete 10 [ montre nombrerep ]</dd>
+  <dd class="example">repete 10 [ montre # ]</dd>
+
+  <dt><code>si <var>expr</var> [ <var>déclarations &hellip;</var> ]</code>
+  <br><code>si [<var>expr</var>] [ <var>déclarations &hellip;</var> ]</code></dt>
+  <dd>Exécute les déclarations si l'expression est non-nulle.</dd>
+  <dd class="example">si 2 > 1 [ montre "ouaip ]</dd>
+
+  <dt><code>sisinon <var>expr</var> [ <var>déclarations &hellip;</var> ] [ <var>déclarations &hellip;</var> ]</code>
+  <br><code>sisinon [<var>expr</var>] [ <var>déclarations &hellip;</var> ] [ <var>déclarations &hellip;</var> ]</code></dt>
+  <dd>Exécute le premier jeu de déclarations si l'expression est non-nulle, sinon, exécute le deuxième jeu de déclarations.</dd>
+  <dd class="example">sisinon 1 > 2 [ montre "ouaip ] [ montre "nop ]</dd>
+
+  <dt><code>teste <var>expr</var></code>
+  <br><code>teste [<var>expr</var>]</code></dt>
+  <dd>Teste l'expression spécifiée, enregistre le résultat dans le domaine local pour utilisation ultérieur par <code>sivrai</code> ou <code>sifaux</code></dd>
+
+  <dt><code>sivrai [ <var>déclarations &hellip;</var>]</code>
+  <br><code>siv [ <var>déclarations &hellip;</var>]</code>
+  <br><code>sifaux [ <var>déclarations &hellip;</var>]</code>
+  <br><code>sif [ <var>déclarations &hellip;</var>]</code></dt>
+  <dd>Exécute les déclarations si le résultat de la dernière procédure <code>teste</code> locale était non-nulle (vrai) ou nulle (faux), respectivement.</dd>
+  <dd class="example">teste 1 > 2  sivrai [ montre "ouaip ]  sifaux [ montre "nop ]</dd>
+
+  <dt><code>stop</code></dt>
+  <dd>Interrompt l'exécution de la procédure sans valeur en sortie.</dd>
+
+  <dt><code>sortie <var>expr</var></code>
+  <br><code>so <var>expr</var></code></dt>
+  <dd>Interrompt la procédure lancée et donne la valeur spécifiée.</dd>
+
+  <dt><code>intercepte <var>motcle</var> <var>listeinstructions</var></code></dt>
+  <dd>Exécute les instructions mais si une erreur avec <var>motcle</var> correspondant survient, donner la valeur (s'il y en a une).
+    Utiliser <code>"ERROR</code> pour intercepter les erreurs des procédures habituelles.
+  </dd>
+  <dd class="example">intercepte "t [ montre "avant indique "t montre "apres ]</dd>
+  <dd class="example">intercepte "erreur [ montre 1 / 0 ] montre erreur</dd>
+
+  <dt><code>indique <var>motcle</var></code>
+  <br><code>(indique <var>motcle</var> <var>valeur</var>)</code></dt>
+  <dd>Indique une erreur avec le mot-clé indiqué qui peut-être interceptée. Une valeur de sortie facultative peut être donnée.</dd>
+  <dd class="example">montre intercepte "t [ montre "hello (indique "t "mot) ]</dd>
+
+  <dt><code>erreur</code></dt>
+  <dd>Donne une liste décrivant la dernière erreur interceptée :
+    un numéro d'erreur, un message d'erreur et un nom de procédure où l'erreur s'est produite.
+  </dd>
+  <dd class="example">intercepte "erreur [ montre 1 / 0 ] montre erreur</dd>
+
+  <dt><code>attends <var>duree</var></code></dt>
+  <dd>Suspend l'exécution. <var>duree</var> est en 60<sup>e</sup> de secondes.</dd>
+
+  <dt><code>salut</code></dt>
+  <dd>Interrompt le programme.</dd>
+
+  <dt><code>.sortieconditionnelle <var>expr</var></code></dt>
+  <dd>Comme <code>sortie</code> si <var>expr</var> donne une valeur, sinon comme <code>stop</code>.</dd>
+
+  <dt><code>ignore <var>expr</var></code></dt>
+  <dd>Evalue et ignore les résultats de l'expression.</dd>
+  <dd class="example">fais "q [ 1 2 3 ]  ignore prendsfin "q</dd>
+
+  <dt><code>` <var>liste</var></code></dt>
+  <dd>Donne la liste avec substitutions&nbsp;:
+    <ul>
+      <li><code>, <var>listeinstructions</var></code> remplacé par la sortie</li>
+      <li><code>,@ <var>listeinstructions</var></code> remplacé par les éléments de liste donnés</li>
+      <li><code>",<var>instruction</var></code> remplacé par la sortie prefixée par "</li>
+      <li><code>,@<var>instruction</var></code> remplacé par la sortie prefixée par :</li>
+    </ul>
+  </dd>
+  <dd class="example">montre `[a b ,[sp [c d e]] f ,@[sp [g h i]]]</dd>
+  <dd class="example">fais "v "x montre `[",:v :,:v]</dd>
+
+  <dt><code>pour <var>listedecontrole</var> [ <var>déclarations &hellip;</var>]</code></dt>
+  <dd>Boucle <code>for</code> typique. La <var>listedecontrole</var> spécifie trois de quatre éléments&nbsp;:
+  le nom de la variable locale, la valeur de <var>debut</var>,  la valeur <var>limite</var> et la taille d'<var>incrementation</var> facultativement.</dd>
+  <dd class="example">pour [ a 1 10 ] [ montre :a ]</dd>
+  <dd class="example">pour [ a 0 20 2 ] [ montre :a ]</dd>
+
+  <dt><code>faisxfois [<var>nomvar</var> <var>nbfois</var>] [ <var>déclarations &hellip;</var></code></dt>
+  <dd>Exécute les déclarations le nombre de fois spécifié dans  <var>nbfois</var>. Le <var>nomvar</var> est défini à l'actuel nombre d'itération.</dd>
+  <dd class="example">faisxfois [ i 5 ] [ montre :i * :i ]</dd>
+
+  <dt><code>fais.tantque [ <var>déclarations &hellip;</var>] <var>expr</var></code>
+  <br><code>fais.tantque [ <var>déclarations &hellip;</var>] [<var>expr</var>]</code></dt>
+  <dd>Exécute les déclarations spécifiées au moins une fois et les répète tant que l'expression est non-nulle (vrai).</dd>
+  <dd class="example">fais.tantque [ fais "a aleatoire 10 montre :a ] :a < 8</dd>
+
+  <dt><code>tantque <var>expr</var> [ <var>déclarations &hellip;</var>]</code>
+  <br><code>tantque [<var>expr</var>] [ <var>déclarations &hellip;</var>]</code></dt>
+  <dd>Exécute les déclarations spécifiées seulement tant que l'expression reste non-nulle (vrai).</dd>
+  <dd class="example">tantque (aleatoire 2) = 0 [ montre "zéro ] montre "un</dd>
+
+  <dt><code>fais.jusque [ <var>déclarations &hellip;</var>] <var>expr</var></code>
+  <br><code>fais.jusque [ <var>déclarations &hellip;</var>] [<var>expr</var>]</code></dt>
+  <dd>Exécute les déclarations spécifiées au moins une fois et les répète tant que l'expression est nulle (faux).</dd>
+  <dd class="example">fais.jusque [ fais "a aleatoire 10 montre :a ] :a < 8</dd>
+
+  <dt><code>jusque <var>expr</var> [ <var>déclarations &hellip;</var>]</code>
+  <br><code>jusque [<var>expr</var>] [ <var>déclarations &hellip;</var>]</code></dt>
+  <dd>Exécute les déclarations spécifiées uniquement tant que l'expression reste nulle (faux).</dd>
+  <dd class="example">jusque (aleatoire 2) = 0 [ montre "un ] montre "zéro</dd>
+
+  <dt><code>cas <var>valeur</var> [ <var>propositions &hellip;</var> ] </code></dt>
+  <dd>Pour chaque proposition dans l'ordre&nbsp;:
+    Si la proposition est de la forme <code>[ SINON <var>expr</var> ]</code> alors <var>expr</var> est évaluée et donnée.
+    Sinon, Si la proposition est de la forme <code>[ [ <var>correspondances</var> ] <var>expr</var> ]</code>
+    et <var>valeur</var> est un élément de <var>correspondances</var> alors <var>expr</var> est évaluée et donnée.</dd>
+  <dd class="example">montre cas :var [ [ ["a] "AAA ] [ ["b] "BBB ] [ sinon "autre ] ]</dd>
+
+  <dt><code>cond [ <var>propositions &hellip;</var> ] </code></dt>
+  <dd>Pour chaque proposition dans l'ordre&nbsp;:
+    Si la proposition est de la forme <code>[ SINON <var>expr</var> ]</code> alors <var>expr</var> est évaluée et donnée.
+    Sinon, Si la proposition est de la forme <code>[ [ <var>expr1</var> ] <var>expr2</var> ]</code>
+    et <var>expr1</var> est évaluée comme étant non-nulle (vrai) alors <var>expr2</var> est évaluée et donnée.</dd>
+  <dd class="example">montre cond [ [ [:var = 1] "un] [ [:var = 2] "deux] [ sinon "autre ] ]</dd>
+</dl>
+
+<h4 id="sec82">8.2 Itération basée sur template</h4>
+
+<p>Ces procédures de niveau supérieur sont uniquement compatible avec la forme des <em>procédures nommées</em>.
+La première donnée est le nom d'une procédure à appeler.</p>
+
+<dl>
+  <dt><code>applique <var>nomproc</var> <var>liste</var></code></dt>
+  <dd>Appelle <var>nomproc</var> avec comme données les éléments de <var>liste</var>.</dd>
+
+  <dt><code>invoque <var>nomproc</var> <var>entree1</var></code>
+  <br><code>(invoque <var>nomproc</var> <var>entree1</var> &hellip;)</code></dt>
+  <dd>Appelle <var>nomproc</var> avec les données spécifiées.</dd>
+  <dd class="example">invoque "montre "salut</dd>
+
+  <dt><code>pourchaque <var>liste</var> <var>nomproc</var></code></dt>
+  <dd>Appelle <var>nomproc</var> pour chaque élément de la liste.</dd>
+  <dd class="example">pourchaque [1 2 3] "montre</dd>
+
+  <dt><code>appliqueliste <var>nomproc</var> <var>liste</var></code></dt>
+  <dd>Donne une liste composée des résultats de l'appel de  <var>nomproc</var> pour chaque élément de la liste.</dd>
+  <dd class="example">pour double :n sortie :n * 2 fin montre appliqueliste "double [1 2 3]</dd>
+
+  <dt><code>filtre <var>nomproc</var> <var>liste</var></code></dt>
+  <dd>Donne une liste composée de la liste indiquée où l'application de <var>nomproc</var> sur l'élément donne un résultat non-nul (vrai).</dd>
+  <dd class="example">pour oddp :n sortie binet :n 1 fin montre filtre "oddp [ 1 2 3 4 5 ]</dd>
+
+  <dt><code>recherche <var>nomproc</var> <var>liste</var></code></dt>
+  <dd>Donne le premier élément dans <var>liste</var> pour lequel l'application de <var>nomproc</var> donne un résultat non-nul (vrai). Si rien n'est trouvé, la liste vide est donnée.</dd>
+  <dd class="example">pour oddp :n sortie binet :n 1 fin montre recherche "oddp [ 2 8 4 7 10 9 ]</dd>
+
+  <dt><code>reduis <var>nomproc</var> <var>liste</var></code>
+  <br><code>(reduis <var>nomproc</var> <var>liste</var> <var>initial</var>)</code></dt>
+  <dd>Appelle <var>nomproc</var> de manière répétée avec deux données - la valeur actuelle et l'élément de liste suivant. Si <var>initial</var> n'est pas spécifié, le premier élément de liste sera utilisé à la place.</dd>
+  <dd class="example">montre reduis "somme [ 1 2 3 4 5 ]</dd>
+
+  <dt><code>appliquecroiseliste <var>nomproc</var> <var>listeliste</var></code>
+  <br><code>(appliquecroiseliste <var>nomproc</var> <var>liste</var> <var>liste</var> &hellip;)</code></dt>
+  <dd>Appelle <var>nomproc</var> de manière répétée avec les données des listes dans toutes les combinaisons possibles.</dd>
+  <dd class="example">montre appliquecroiseliste "mot [[a b] [x y]]</dd>
+  <dd class="example">montre (appliquecroiseliste "mot [a b c] [1 2 3 4])</dd>
+</dl>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    Array.from(document.querySelectorAll('.example')).forEach(function(e) {
+      e.title = 'Clique pour essayer cet exemple';
+      e.addEventListener('click', function() {
+        if (!window.parent) return;
+        var text = this.textContent || this.innerText;
+        window.parent.postMessage({
+          example: text
+        }, '*');
+      });
+    });
+  });
+</script>
+</body>
+</html>
