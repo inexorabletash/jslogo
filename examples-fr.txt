@@ -1,0 +1,61 @@
+cree étoile
+  repete 5 [ av 100 td 144 ]
+fin
+effaceecran
+étoile
+
+cree carré :longueur
+  repete 4 [ av :longueur td 90 ]
+fin
+cree couleuraleatoire
+  defcouleur choix [ rouge orange jaune vert bleu violet ]
+fin
+effaceecran
+repete 36 [ couleuraleatoire carré aleatoire 200 td 10 ]
+
+effaceecran fenetre cachetortue
+repete 144 [
+  defhauteurecrit nombrerep
+  levecrayon
+  av nombrerep * nombrerep / 30
+  ecrit "Logo
+  re nombrerep * nombrerep / 30
+  baissecrayon
+  td 10
+  attends 5
+]
+montretortue
+
+cree arbre :taille
+   si :taille < 5 [avance :taille recule :taille stop]
+   avance :taille/3
+   gauche 30 arbre :taille*2/3 droite 30
+   avance :taille/6
+   droite 25 arbre :taille/2 gauche 25
+   avance :taille/3
+   droite 25 arbre :taille/2 gauche 25
+   avance :taille/6
+   recule :taille
+fin
+effaceecran
+arbre 150
+
+cree fougère :taille :signe
+  si :taille < 1 [ stop ]
+  av :taille
+  td 70 * :signe fougère :taille * 0.5 :signe * -1 tg 70 * :signe
+  av :taille
+  tg 70 * :signe fougère :taille * 0.5 :signe td 70 * :signe
+  td 7 * :signe fougère :taille - 1 :signe tg 7 * :signe
+  re :taille * 2
+fin
+fenetre effaceecran lc re 150 bc
+fougère 25 1
+
+effaceecran
+deftortue 2 levecrayon droite 90 avance 100 gauche 90 baissecrayon
+repete 100 [
+  deftortue 1 avance aleatoire 4
+  deftortue 2 avance aleatoire 4
+  attends 2
+]
