@@ -699,6 +699,15 @@ window.addEventListener('DOMContentLoaded', async () => {
           });
         })(data.interpreter.procedures);
       }
+
+      // Update CodeMirror syntax highlighting for localized TO/END keywords
+      if (typeof window.logoSetKeywords === 'function') {
+        const procs = data.interpreter.procedures || {};
+        const kws = data.interpreter.keywords || {};
+        const toAlias = Object.keys(procs).find(k => procs[k] === 'to');
+        const endAlias = Object.keys(kws).find(k => kws[k] === 'END');
+        if (toAlias || endAlias) window.logoSetKeywords(toAlias, endAlias);
+      }
     }
 
     if ('graphics' in data) {

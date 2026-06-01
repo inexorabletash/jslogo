@@ -2,6 +2,15 @@
 
 // Really just a lexer
 
+// Mutable keyword patterns - updated by logoSetKeywords() for i18n
+var logoToPattern = /^TO\b/i;
+var logoEndPattern = /^END\b/i;
+window.logoSetKeywords = function(toAlias, endAlias) {
+  var esc = function(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); };
+  logoToPattern = toAlias ? new RegExp('^(?:TO|' + esc(toAlias) + ')\\b', 'i') : /^TO\b/i;
+  logoEndPattern = endAlias ? new RegExp('^(?:END|' + esc(endAlias) + ')\\b', 'i') : /^END\b/i;
+};
+
 if (typeof CodeMirror !== 'undefined') {
   CodeMirror.defineMode('logo', function(config, parserConfig) {
 
@@ -36,7 +45,7 @@ if (typeof CodeMirror !== 'undefined') {
           return (indent + 1 ) * size;
         case 'defn-vars':
         case 'defn-body':
-          if (/^END\b/i.test(textAfter))
+          if (logoEndPattern.test(textAfter))
             return indent * size;
           return (indent + 1 ) * size;
         default:
@@ -57,11 +66,11 @@ if (typeof CodeMirror !== 'undefined') {
         }
 
         if (state.state === 'normal') {
-          if (stream.match(/^TO\b/i, true)) {
+          if (stream.match(logoToPattern, true)) {
             state.state = 'defn-name';
             return 'logo-defn-start';
           }
-          if (stream.match(/^END\b/i, true)) {
+          if (stream.match(logoEndPattern, true)) {
             return 'logo-error';
           }
         }
@@ -86,7 +95,7 @@ if (typeof CodeMirror !== 'undefined') {
 
         if (state.state === 'defn-body') {
 
-          if (stream.match(/^END\b/i, true)) {
+          if (stream.match(logoEndPattern, true)) {
             state.state = 'normal';
             return 'logo-defn-end';
           }
