@@ -1,0 +1,61 @@
+aprenda estrela
+  repita 5 [ frente 100 direita 144 ]
+fim
+limpartela
+estrela
+
+aprenda quadrado :comprimento
+  repita 4 [ frente :comprimento direita 90 ]
+fim
+aprenda corialeatoria
+  definircor escolher [ vermelho laranja amarelo verde azul violeta ]
+fim
+limpartela
+repita 36 [ corialeatoria quadrado aleatorio 200 direita 10 ]
+
+limpartela janela ocultartartaruga
+repita 144 [
+  alturarotulo contrepeticao
+  levantarlapis
+  frente contrepeticao * contrepeticao / 30
+  rotulo "Logo
+  recuar contrepeticao * contrepeticao / 30
+  abaixarlapis
+  direita 10
+  esperar 5
+]
+mostrartartaruga
+
+aprenda arvore :tamanho
+  se :tamanho < 5 [ frente :tamanho recuar :tamanho parar ]
+  frente :tamanho / 3
+  esquerda 30 arvore :tamanho * 2 / 3 direita 30
+  frente :tamanho / 6
+  direita 25 arvore :tamanho / 2 esquerda 25
+  frente :tamanho / 3
+  direita 25 arvore :tamanho / 2 esquerda 25
+  frente :tamanho / 6
+  recuar :tamanho
+fim
+limpartela
+arvore 150
+
+aprenda samambaia :tamanho :sinal
+  se :tamanho < 1 [ parar ]
+  frente :tamanho
+  direita 70 * :sinal samambaia :tamanho * 0.5 :sinal * -1 esquerda 70 * :sinal
+  frente :tamanho
+  esquerda 70 * :sinal samambaia :tamanho * 0.5 :sinal direita 70 * :sinal
+  direita 7 * :sinal samambaia :tamanho - 1 :sinal esquerda 7 * :sinal
+  recuar :tamanho * 2
+fim
+janela limpartela levantarlapis recuar 150 abaixarlapis
+samambaia 25 1
+
+aprenda opcoes :menu [:ateso []]
+se vaziolista :menu [ escrever :ateso parar ]
+paracada primeiro :menu [(opcoes semprimeiro :menu frase :ateso ?)]
+fim
+opcoes [[pequeno medio grande]
+        [baunilha [chocolate intenso] lichia [uva passa] gengibre]
+        [casquinha copinho]]

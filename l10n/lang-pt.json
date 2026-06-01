@@ -1,5 +1,6 @@
 {
   "page": {
+    "examples": "l10n/examples.pt.txt",
     "translations": {
       "title": "Interpretador Logo",
       "tl-title": "Interpretador Logo",
@@ -214,6 +215,9 @@
       "janela": "window",
       "palavra": "word",
       "envolver": "wrap",
+      "esperar": "wait",
+      "vaziolista": "emptyp",
+      "definircor": "setcolor",
       "xcor": "xcor",
       "xou": "xor",
       "ycor": "ycor"
