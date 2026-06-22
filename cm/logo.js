@@ -2,16 +2,18 @@
 
 // Really just a lexer
 
-// Mutable keyword patterns - updated by logoSetKeywords() for i18n
-var logoToPattern = /^TO\b/i;
-var logoEndPattern = /^END\b/i;
-window.logoSetKeywords = function(toAlias, endAlias) {
-  var esc = function(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); };
-  logoToPattern = toAlias ? new RegExp('^(?:TO|' + esc(toAlias) + ')\\b', 'i') : /^TO\b/i;
-  logoEndPattern = endAlias ? new RegExp('^(?:END|' + esc(endAlias) + ')\\b', 'i') : /^END\b/i;
-};
-
 if (typeof CodeMirror !== 'undefined') {
+
+  // Mutable keyword patterns - updated by logoSetKeywords() for i18n
+  let logoToPattern = /^TO\b/i;
+  let logoEndPattern = /^END\b/i;
+  window.logoSetKeywords = function(toAlias, endAlias) {
+    // TODO: Replace with `RegExp.escape()` when widely available.
+    const esc = s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    logoToPattern = toAlias ? new RegExp('^(?:TO|' + esc(toAlias) + ')\\b', 'i') : /^TO\b/i;
+    logoEndPattern = endAlias ? new RegExp('^(?:END|' + esc(endAlias) + ')\\b', 'i') : /^END\b/i;
+  };
+  
   CodeMirror.defineMode('logo', function(config, parserConfig) {
 
     // states are 'normal', 'defn-name', 'defn-args', 'defn-body'
