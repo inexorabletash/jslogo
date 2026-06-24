@@ -2046,7 +2046,6 @@ function LogoInterpreter(turtle, stream, savehook) {
 
   async function booleanReduce(args, test, value) {
     while (args.length) {
-      console.log("calling bexpr");
       const result = bexpr(await args.shift()());
       if (!test(result))
         return result ? 1 : 0;
