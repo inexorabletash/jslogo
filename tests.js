@@ -3061,6 +3061,7 @@ QUnit.test("Arity of Primitives", async function(t) {
     ['ask', [2, 2, 2]],
     ['back', [1, 1, 1]],
     ['background', [0, 0, 0]],
+    ['beep', [2, 2, 2]],
     ['before?', [2, 2, 2]],
     ['beforep', [2, 2, 2]],
     ['bf', [1, 1, 1]],
@@ -3388,4 +3389,11 @@ QUnit.test("Arity of Primitives", async function(t) {
     const arity = pair[1];
     await this.assert_equals(`arity "` + proc, arity);
   });
+});
+
+QUnit.test("Sound API", function(t) {
+  //
+  // Sound API
+  //
+  this.assert_equals('beep 220 1', undefined);
 });
