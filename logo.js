@@ -1670,7 +1670,7 @@ function LogoInterpreter(turtle, stream, savehook) {
   def("dequeue", stackname => {
     const got = getvar(stackname);
     const queue = lexpr(got);
-    const atom = queue.pop();
+    const atom = queue.shift();
     setvar(stackname, sifw(got, queue));
     return atom;
   });

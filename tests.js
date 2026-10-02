@@ -572,16 +572,16 @@ QUnit.test("Data Structure Primitives", async function(t) {
                             :q`, '012345');
 
   await this.assert_equals(`make "q [ a b c ]
-                            (list dequeue "q dequeue "q dequeue "q)`, ["c", "b", "a"]);
+                            (list dequeue "q dequeue "q dequeue "q)`, ["a", "b", "c"]);
   await this.assert_equals(`make "q [ a b c ]
                             dequeue "q
                             dequeue "q
-                            :q`, ["a"]);
+                            :q`, ["c"]);
   await this.assert_equals(`make "q "abc
-                            (list dequeue "q dequeue "q dequeue "q)`, ["c", "b", "a"]);
+                            (list dequeue "q dequeue "q dequeue "q)`, ["a", "b", "c"]);
   await this.assert_equals(`make "q "abc
                             dequeue "q
-                            :q`, "ab");
+                            :q`, "bc");
 
   await this.assert_equals(`make "a { 1 }
                             make "b :a
