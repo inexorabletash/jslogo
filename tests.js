@@ -2275,7 +2275,7 @@ QUnit.test("Workspace Management", async function(t) {
 });
 
 QUnit.test("Control Structures", async function(t) {
-  t.expect(217);
+  t.expect(219);
   //
   // 8.1 Control
   //
@@ -2606,6 +2606,15 @@ QUnit.test("Control Structures", async function(t) {
   await this.assert_equals(`cond [ [ [2>3] "yep ] [ else "nope ]]`, 'nope');
   await this.assert_equals(`cond [ [ [2<3] 1+1 ] [ else 2+2 ]]`, 2);
   await this.assert_equals(`cond [ [ [2>3] 1+1 ] [ else 2+2 ]]`, 4);
+  await this.assert_equals(`to tailcount :n
+                              if :n > 200000 [output "done]
+                              output tailcount :n + 1
+                            end
+                            tailcount 0`, 'done');
+  await this.assert_equals(`to tailbounce :n
+                              output ifelse :n > 100000 ["done] [tailbounce :n + 1]
+                            end
+                            tailbounce 0`, 'done');
   //
   // 8.2 Template-based Iteration
   //

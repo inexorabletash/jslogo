@@ -146,6 +146,22 @@ function LogoInterpreter(turtle, stream, savehook) {
     });
   }
 
+  async function withTailValueContext(tailValue, callback) {
+    const previous = self.tailValueContext;
+    self.tailValueContext = Boolean(tailValue);
+    try {
+      return await callback();
+    } finally {
+      self.tailValueContext = previous;
+    }
+  }
+
+  function invokeProcedure(procedure, args) {
+    if (self.tailValueContext && procedure.userDefined)
+      return new TailCall(procedure, args);
+    return procedure.apply(self, args);
+  }
+
   // Based on: https://www.jbouchard.net/chris/blog/2008/01/currying-in-javascript-fun-for-whole.html
   // Argument is `$$func$$` to avoid issue if passed function is named `func`.
   function to_arity($$func$$, arity) {
@@ -329,6 +345,7 @@ function LogoInterpreter(turtle, stream, savehook) {
   self.plists = new StringMap(true);
   self.prng = new PRNG(Math.random() * 0x7fffffff);
   self.forceBye = false;
+  self.tailValueContext = false;
 
   //----------------------------------------------------------------------
   //
@@ -345,6 +362,13 @@ function LogoInterpreter(turtle, stream, savehook) {
 
   // Used to stop processing cleanly
   class Bye { }
+
+  class TailCall {
+    constructor(procedure, args) {
+      this.procedure = procedure;
+      this.args = args;
+    }
+  }
 
   function Type(atom) {
     if (atom === undefined) {
@@ -743,13 +767,19 @@ function LogoInterpreter(turtle, stream, savehook) {
         const rhs = additiveExpression(list);
 
         switch (op) {
-        case "<": return async () => (aexpr(await lhs()) < aexpr(await rhs())) ? 1 : 0;
-        case ">": return async () => (aexpr(await lhs()) > aexpr(await rhs())) ? 1 : 0;
-        case "=": return async () => equal(await lhs(), await rhs()) ? 1 : 0;
+        case "<": return async () => (aexpr(await withTailValueContext(false, () => lhs())) <
+                                      aexpr(await withTailValueContext(false, () => rhs()))) ? 1 : 0;
+        case ">": return async () => (aexpr(await withTailValueContext(false, () => lhs())) >
+                                      aexpr(await withTailValueContext(false, () => rhs()))) ? 1 : 0;
+        case "=": return async () => equal(await withTailValueContext(false, () => lhs()),
+                                           await withTailValueContext(false, () => rhs())) ? 1 : 0;
 
-        case "<=": return async () => (aexpr(await lhs()) <= aexpr(await rhs())) ? 1 : 0;
-        case ">=": return async () => (aexpr(await lhs()) >= aexpr(await rhs())) ? 1 : 0;
-        case "<>": return async () => !equal(await lhs(), await rhs()) ? 1 : 0;
+        case "<=": return async () => (aexpr(await withTailValueContext(false, () => lhs())) <=
+                                       aexpr(await withTailValueContext(false, () => rhs()))) ? 1 : 0;
+        case ">=": return async () => (aexpr(await withTailValueContext(false, () => lhs())) >=
+                                       aexpr(await withTailValueContext(false, () => rhs()))) ? 1 : 0;
+        case "<>": return async () => !equal(await withTailValueContext(false, () => lhs()),
+                                             await withTailValueContext(false, () => rhs())) ? 1 : 0;
         default: throw new Error("Internal error in expression parser");
         }
       })(lhs);
@@ -766,8 +796,10 @@ function LogoInterpreter(turtle, stream, savehook) {
         const rhs = multiplicativeExpression(list);
 
         switch (op) {
-        case "+": return async () => aexpr(await lhs()) + aexpr(await rhs());
-        case "-": return async () => aexpr(await lhs()) - aexpr(await rhs());
+        case "+": return async () => aexpr(await withTailValueContext(false, () => lhs())) +
+                                     aexpr(await withTailValueContext(false, () => rhs()));
+        case "-": return async () => aexpr(await withTailValueContext(false, () => lhs())) -
+                                     aexpr(await withTailValueContext(false, () => rhs()));
         default: throw new Error("Internal error in expression parser");
         }
       })(lhs);
@@ -784,14 +816,17 @@ function LogoInterpreter(turtle, stream, savehook) {
         const rhs = powerExpression(list);
 
         switch (op) {
-        case "*": return async () => aexpr(await lhs()) * aexpr(await rhs());
+        case "*": return async () => aexpr(await withTailValueContext(false, () => lhs())) *
+                                     aexpr(await withTailValueContext(false, () => rhs()));
         case "/": return async () => {
-          const n = aexpr(await lhs()), d = aexpr(await rhs());
+          const n = aexpr(await withTailValueContext(false, () => lhs()));
+          const d = aexpr(await withTailValueContext(false, () => rhs()));
           if (d === 0) { throw err("Division by zero", ERRORS.BAD_INPUT); }
           return n / d;
         };
         case "%": return async () => {
-          const n = aexpr(await lhs()), d = aexpr(await rhs());
+          const n = aexpr(await withTailValueContext(false, () => lhs()));
+          const d = aexpr(await withTailValueContext(false, () => rhs()));
           if (d === 0) { throw err("Division by zero", ERRORS.BAD_INPUT); }
           return n % d;
         };
@@ -810,7 +845,8 @@ function LogoInterpreter(turtle, stream, savehook) {
       lhs = (lhs => {
         const rhs = unaryExpression(list);
 
-        return async () => Math.pow(aexpr(await lhs()), aexpr(await rhs()));
+        return async () => Math.pow(aexpr(await withTailValueContext(false, () => lhs())),
+                                    aexpr(await withTailValueContext(false, () => rhs())));
       })(lhs);
     }
 
@@ -821,7 +857,7 @@ function LogoInterpreter(turtle, stream, savehook) {
     if (peek(list, [UNARY_MINUS])) {
       const op = list.shift();
       const rhs = unaryExpression(list);
-      return async () => -aexpr(await rhs());
+      return async () => -aexpr(await withTailValueContext(false, () => rhs()));
     } else {
       return finalExpression(list);
     }
@@ -943,7 +979,7 @@ function LogoInterpreter(turtle, stream, savehook) {
       return async () => {
         self.stack.push(name);
         try {
-          return procedure.apply(self, args);
+          return await withTailValueContext(self.tailValueContext, () => procedure.apply(self, args));
         } finally {
           self.stack.pop();
         }
@@ -954,10 +990,13 @@ function LogoInterpreter(turtle, stream, savehook) {
       self.stack.push(name);
       try {
         const a = [];
-        for (const proc of args) {
-          a.push(await proc());
+        for (let i = 0; i < args.length; ++i) {
+          const proc = args[i];
+          a.push(await withTailValueContext(Boolean(procedure.tailValueInputs &&
+                                                   procedure.tailValueInputs.includes(i)),
+                                            () => proc()));
         }
-        return await procedure.apply(self, a);
+        return await withTailValueContext(self.tailValueContext, () => invokeProcedure(procedure, a));
       } finally {
         self.stack.pop();
       }
@@ -1095,7 +1134,8 @@ function LogoInterpreter(turtle, stream, savehook) {
         self.forceBye = false;
         throw new Bye;
       }
-      const result = await evaluateExpression(statements);
+      const result = await withTailValueContext(options.tailValue && statements.length === 1,
+                                                () => evaluateExpression(statements));
       if (result !== undefined && !options.returnResult) {
         throw err("Don't know what to do with {result}", {result: result},
                   ERRORS.BAD_OUTPUT);
@@ -1351,38 +1391,71 @@ function LogoInterpreter(turtle, stream, savehook) {
 
     const length = (def === undefined) ? inputs.length : def;
 
-    // Closure over inputs and block to handle scopes, arguments and outputs
-    return to_arity(async (...args) => {
-      // Define a new scope
-      const scope = new StringMap(true);
-      self.scopes.push(scope);
-
+    function bindScope(proc, scope, args) {
       let i = 0;
-      for (; i < inputs.length && i < args.length; ++i)
-        scope.set(inputs[i], {value: args[i]});
-      for (; i < inputs.length + optional_inputs.length && i < args.length; ++i) {
-        const op = optional_inputs[i - inputs.length];
+      for (; i < proc.inputs.length && i < args.length; ++i)
+        scope.set(proc.inputs[i], {value: args[i]});
+      for (; i < proc.inputs.length + proc.optional_inputs.length && i < args.length; ++i) {
+        const op = proc.optional_inputs[i - proc.inputs.length];
         scope.set(op[0], {value: args[i]});
       }
-      for (; i < inputs.length + optional_inputs.length; ++i) {
-        const op = optional_inputs[i - inputs.length];
+      for (; i < proc.inputs.length + proc.optional_inputs.length; ++i) {
+        const op = proc.optional_inputs[i - proc.inputs.length];
         scope.set(op[0], {value: evaluateExpression(reparse(op[1]))});
       }
-      if (rest)
-        scope.set(rest, {value: args.slice(i)});
+      if (proc.rest)
+        scope.set(proc.rest, {value: args.slice(i)});
+    }
 
-      try {
-        await self.execute(block);
+    const proc = to_arity(async (...initialArgs) => {
+      let currentProc = proc;
+      let currentArgs = initialArgs;
+
+      while (true) {
+        const activeProc = currentProc;
+        const activeArgs = currentArgs;
+        const scope = new StringMap(true);
+        let nextCall;
+
+        self.scopes.push(scope);
+        if (activeProc.procName !== undefined)
+          self.stack.push(activeProc.procName);
+
+        try {
+          bindScope(activeProc, scope, activeArgs);
+          await self.execute(activeProc.block);
+          await yieldIfNeeded();
+          return undefined;
+        } catch (err) {
+          if (err instanceof Output) {
+            if (err.output instanceof TailCall) {
+              nextCall = err.output;
+            } else {
+              return err.output;
+            }
+          } else {
+            throw err;
+          }
+        } finally {
+          if (activeProc.procName !== undefined)
+            self.stack.pop();
+          self.scopes.pop();
+        }
+
         await yieldIfNeeded();
-        return undefined;
-      } catch (err) {
-        if (err instanceof Output)
-          return err.output;
-        throw err;
-      } finally {
-        self.scopes.pop();
+        currentProc = nextCall.procedure;
+        currentArgs = nextCall.args;
       }
     }, length);
+
+    proc.userDefined = true;
+    proc.procName = name === undefined ? undefined : String(name).toUpperCase();
+    proc.block = block;
+    proc.inputs = inputs;
+    proc.optional_inputs = optional_inputs;
+    proc.rest = rest;
+
+    return proc;
   }
 
 
@@ -2921,8 +2994,11 @@ function LogoInterpreter(turtle, stream, savehook) {
   // 8.1 Control
   //
 
-  function run(statements) {
-    return self.execute(reparse(statements), {returnResult: true});
+  function run(statements, options = {}) {
+    return self.execute(reparse(statements), {
+      returnResult: true,
+      tailValue: Boolean(options.tailValue)
+    });
   }
 
   function runNoResult(statements) {
@@ -2978,28 +3054,28 @@ function LogoInterpreter(turtle, stream, savehook) {
 
   def("if", async (tf, statements, statements2=undefined) => {
     if (Type(tf) === 'list')
-      tf = evaluateExpression(reparse(tf));
+      tf = withTailValueContext(false, () => evaluateExpression(reparse(tf)));
 
     tf = bexpr(await tf);
     if (!statements2) {
-      return tf ? run(statements) : undefined;
+      return tf ? run(statements, {tailValue: self.tailValueContext}) : undefined;
     } else {
-      return run(tf ? statements : statements2);
+      return run(tf ? statements : statements2, {tailValue: self.tailValueContext});
     }
   }, {maximum: 3});
 
   def("ifelse", async (tf, statements1, statements2) => {
     if (Type(tf) === 'list')
-      tf = evaluateExpression(reparse(tf));
+      tf = withTailValueContext(false, () => evaluateExpression(reparse(tf)));
 
     tf = bexpr(await tf);
 
-    return run(tf ? statements1 : statements2);
+    return run(tf ? statements1 : statements2, {tailValue: self.tailValueContext});
   });
 
   def("test", async tf => {
     if (Type(tf) === 'list')
-      tf = evaluateExpression(reparse(tf));
+      tf = withTailValueContext(false, () => evaluateExpression(reparse(tf)));
 
     tf = bexpr(await tf);
     // NOTE: A property on the scope, not within the scope
@@ -3026,14 +3102,14 @@ function LogoInterpreter(turtle, stream, savehook) {
 
   def(["output", "op"], atom => {
     throw new Output(atom);
-  });
+  }, {tailValueInputs: [0]});
 
   this.last_error = undefined;
 
   def("catch", async (tag, instructionlist) => {
     tag = sexpr(tag).toUpperCase();
     try {
-      return await run(instructionlist);
+      return await run(instructionlist, {tailValue: self.tailValueContext});
     } catch(error) {
       if (!(error instanceof LogoError) || error.tag !== tag)
         throw error;
@@ -3121,12 +3197,13 @@ function LogoInterpreter(turtle, stream, savehook) {
 
     const varname = sexpr(control[0]);
 
-    let start = await evaluateExpression(reparse(control[1]));
+    let start = await withTailValueContext(false, () => evaluateExpression(reparse(control[1])));
     let current = start;
 
-    let limit = await evaluateExpression(reparse(control[2]));
+    let limit = await withTailValueContext(false, () => evaluateExpression(reparse(control[2])));
 
-    let step = control.length === 4 ? await evaluateExpression(reparse(control[3]))
+    let step = control.length === 4 ? await withTailValueContext(false,
+                                                                  () => evaluateExpression(reparse(control[3])))
         : (limit < start ? -1 : 1);
 
     while (sign(current - limit) !== sign(step)) {
@@ -3141,7 +3218,7 @@ function LogoInterpreter(turtle, stream, savehook) {
     control = reparse(lexpr(control));
 
     const varname = sexpr(control.shift());
-    const times = aexpr(await evaluateExpression(control));
+    const times = aexpr(await withTailValueContext(false, () => evaluateExpression(control)));
     for (let current = 1; current <= times; ++current) {
       setlocal(varname, current);
       await runNoResult(statements);
@@ -3161,7 +3238,7 @@ function LogoInterpreter(turtle, stream, savehook) {
       await runNoResult(block);
       let tf = await tfexpression();
       if (Type(tf) === 'list')
-        tf = await evaluateExpression(reparse(tf));
+        tf = await withTailValueContext(false, () => evaluateExpression(reparse(tf)));
       if (!tf)
         break;
       await yieldIfNeeded();
@@ -3173,7 +3250,7 @@ function LogoInterpreter(turtle, stream, savehook) {
     for (;;) {
       let tf = await tfexpression();
       if (Type(tf) === 'list')
-        tf = await evaluateExpression(reparse(tf));
+        tf = await withTailValueContext(false, () => evaluateExpression(reparse(tf)));
       if (!tf)
         break;
       await runNoResult(block);
@@ -3187,7 +3264,7 @@ function LogoInterpreter(turtle, stream, savehook) {
       await runNoResult(block);
       let tf = await tfexpression();
       if (Type(tf) === 'list')
-        tf = await evaluateExpression(reparse(tf));
+        tf = await withTailValueContext(false, () => evaluateExpression(reparse(tf)));
       if (tf)
         break;
       await yieldIfNeeded();
@@ -3199,7 +3276,7 @@ function LogoInterpreter(turtle, stream, savehook) {
     for (;;) {
       let tf = await tfexpression();
       if (Type(tf) === 'list')
-        tf = await evaluateExpression(reparse(tf));
+        tf = await withTailValueContext(false, () => evaluateExpression(reparse(tf)));
       if (tf)
         break;
       await runNoResult(block);
@@ -3214,9 +3291,9 @@ function LogoInterpreter(turtle, stream, savehook) {
       const clause = lexpr(clauses[i]);
       const first = clause.shift();
       if (isKeyword(first, 'ELSE'))
-        return evaluateExpression(reparse(clause));
+        return withTailValueContext(self.tailValueContext, () => evaluateExpression(reparse(clause)));
       if (lexpr(first).some(x => equal(x, value)))
-        return evaluateExpression(reparse(clause));
+        return withTailValueContext(self.tailValueContext, () => evaluateExpression(reparse(clause)));
     }
     return undefined;
   });
@@ -3227,10 +3304,12 @@ function LogoInterpreter(turtle, stream, savehook) {
       const clause = lexpr(clauses.shift());
       const first = clause.shift();
       if (isKeyword(first, 'ELSE'))
-        return await evaluateExpression(reparse(clause));
-      const result = await evaluateExpression(reparse(lexpr(first)));
+        return await withTailValueContext(self.tailValueContext,
+                                          () => evaluateExpression(reparse(clause)));
+      const result = await withTailValueContext(false, () => evaluateExpression(reparse(lexpr(first))));
       if (result)
-        return await evaluateExpression(reparse(clause));
+        return await withTailValueContext(self.tailValueContext,
+                                          () => evaluateExpression(reparse(clause)));
     }
     return undefined;
   });
@@ -3249,14 +3328,18 @@ function LogoInterpreter(turtle, stream, savehook) {
         const vars = template.shift();
         return async function(...args) {
           vars.forEach((name, index) => { setlocal(name, args[index]); });
-          return await (options.returnResult ? run(template) : runNoResult(template));
+          return await (options.returnResult
+                        ? run(template, {tailValue: self.tailValueContext})
+                        : runNoResult(template));
         };
       } else {
         // 'explicit-slot' form
         return async function(...args) {
           self.slots = (name) => args[name === '' ? 0 : name - 1];
           try {
-            return await (options.returnResult ? run(template) : runNoResult(template));
+            return await (options.returnResult
+                          ? run(template, {tailValue: self.tailValueContext})
+                          : runNoResult(template));
           } finally {
             self.slots = undefined;
           }
@@ -3281,12 +3364,12 @@ function LogoInterpreter(turtle, stream, savehook) {
 
   def("apply", (template, list) => {
     const routine = processTemplate(template, {returnResult: true});
-    return routine.apply(this, lexpr(list));
+    return invokeProcedure(routine, lexpr(list));
   });
 
   def("invoke", (template, ...args) => {
     const routine = processTemplate(template, {returnResult: true});
-    return routine.apply(this, args);
+    return invokeProcedure(routine, args);
   }, {minimum: 1, default: 2, maximum: -1});
 
 
