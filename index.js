@@ -712,6 +712,9 @@ window.addEventListener('DOMContentLoaded', async () => {
   if (lang) {
     // TODO: Support locale/fallback
     lang = lang.split('-')[0];
+    if (!/^[a-zA-Z]+$/.test(lang)) {
+      lang = 'en';
+    }
     document.body.lang = lang;
 
     if (lang !== 'en') {
