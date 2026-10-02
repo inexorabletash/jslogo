@@ -7,6 +7,8 @@ This is hosted at https://inexorabletash.github.io/jslogo/ for playing with live
 this attempts to implement a subset of [UCBLogo](https://www.cs.berkeley.edu/~bh/v2ch14/manual.html)
 defined in in *Brian Harvey's Computer Science Logo Style*
 
+See [Deviations from UCBLogo](DEVIATIONS.md) for documented differences from the Berkeley reference implementation.
+
 Logo Examples
 -------------
     to star repeat 5 [ fd 100 rt 144 ] end
@@ -30,5 +32,4 @@ Logo Links
 
 To Do
 -----
-* Document deviations from UCB Logo standard
 * Tail-call optimization
