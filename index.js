@@ -650,64 +650,78 @@ window.addEventListener('DOMContentLoaded', async () => {
   //
   // Localization
   //
-  function localize(data) {
-    if ('page' in data) {
-      if ('dir' in data.page)
-        document.body.dir = data.page.dir;
-      if ('examples' in data.page)
-        examples = data.page.examples;
+  // Apply only page-level translations (UI text, dir, examples path).
+  function localizePageSection(data) {
+    if (!('page' in data)) return;
+    const page = data.page;
 
-      if ('translations' in data.page) {
-        (translation => {
-          const ids = new Set();
-          Object.keys(translation).forEach(key => {
-            const parts = key.split('.'), id = parts[0], attr = parts[1], s = translation[key];
-            ids.add(id);
-            const elem = $('[data-l10n-id="'+id+'"]');
-            if (!elem)
-              console.warn('Unused translation: ' + id);
-            else if (attr)
-              elem.setAttribute(attr, s);
-            else
-              elem.textContent = s;
-          });
-          Array.from($$('[data-l10n-id]'))
-            .map(element => element.getAttribute('data-l10n-id'))
-            .filter(id => !ids.has(id))
-            .forEach(id => { console.warn('Missing translation: ' + id); });
-        })(data.page.translations);
-      }
-      if ('messages' in data.page) {
-        // Actual string translation replacement function.
-        __ = s => data.page.messages[s] || s;
-      }
+    if ('dir' in page)
+      document.body.dir = page.dir;
+
+    if ('translations' in page) {
+      (translation => {
+        const ids = new Set();
+        Object.keys(translation).forEach(key => {
+          const parts = key.split('.'), id = parts[0], attr = parts[1], s = translation[key];
+          ids.add(id);
+          const elem = $('[data-l10n-id="'+id+'"]');
+          if (!elem)
+            console.warn('Unused translation: ' + id);
+          else if (attr)
+            elem.setAttribute(attr, s);
+          else
+            elem.textContent = s;
+        });
+        Array.from($$('[data-l10n-id]'))
+          .map(element => element.getAttribute('data-l10n-id'))
+          .filter(id => !ids.has(id))
+          .forEach(id => { console.warn('Missing translation: ' + id); });
+      })(page.translations);
     }
+    if ('messages' in page) {
+      // Actual string translation replacement function.
+      __ = s => page.messages[s] || s;
+    }
+  }
+
+  // Apply only interpreter/graphics aliases (Logo command dialect).
+  // Examples path also lives here since examples are written in the dialect language.
+  function localizeDialectSection(data) {
+    if ('page' in data && 'examples' in data.page)
+      examples = data.page.examples;
 
     if ('interpreter' in data) {
-      if ('messages' in data.interpreter) {
-        logo.localize = s => data.interpreter.messages[s];
+      const interp = data.interpreter;
+
+      if ('messages' in interp)
+        logo.localize = s => interp.messages[s];
+
+      if ('keywords' in interp)
+        logo.keywordAlias = s => interp.keywords[s];
+
+      if ('procedures' in interp) {
+        Object.keys(interp.procedures).forEach(alias => {
+          logo.copydef(alias, interp.procedures[alias]);
+        });
       }
 
-      if ('keywords' in data.interpreter) {
-        logo.keywordAlias = s => data.interpreter.keywords[s];
-      }
-
-      if ('procedures' in data.interpreter) {
-        (aliases => {
-          Object.keys(aliases).forEach(alias => {
-            logo.copydef(alias, aliases[alias]);
-          });
-        })(data.interpreter.procedures);
+      // Update CodeMirror syntax highlighting for localized TO/END keywords
+      if (typeof window.logoSetKeywords === 'function') {
+        const procs = interp.procedures || {};
+        const kws = interp.keywords || {};
+        const toAlias = Object.keys(procs).find(k => procs[k] === 'to');
+        const endAlias = Object.keys(kws).find(k => kws[k] === 'END');
+        if (toAlias || endAlias) window.logoSetKeywords(toAlias, endAlias);
       }
     }
 
     if ('graphics' in data) {
-      if ('colors' in data.graphics) {
+      if ('colors' in data.graphics)
         turtle.colorAlias = s => data.graphics.colors[s];
-      }
     }
   }
 
+  // Load UI language (page section only — no interpreter aliases)
   let lang = queryParams.lang || navigator.language || navigator.userLanguage;
   if (lang) {
     // TODO: Support locale/fallback
@@ -720,34 +734,66 @@ window.addEventListener('DOMContentLoaded', async () => {
         if (!response.ok) throw Error(response.statusText);
         const text = await response.text();
         window.json = text;
-        localize(JSON.parse(text));
+        localizePageSection(JSON.parse(text));
       } catch(reason) {
-        console.warn('Error loading localization file for "' +
-                     lang + '": ' + reason.message);
+        console.warn('Error loading UI language "' + lang + '": ' + reason.message);
         document.body.lang = 'en';
       }
     }
   }
 
-  // Populate languages selection list
+  // Load Logo command dialect (interpreter section only — no UI text)
+  let dialect = (queryParams.dialect || 'en').split('-')[0];
+  if (dialect !== 'en') {
+    try {
+      const response = await fetch('l10n/lang-' + dialect + '.json');
+      if (!response.ok) throw Error(response.statusText);
+      localizeDialectSection(JSON.parse(await response.text()));
+    } catch(reason) {
+      console.warn('Error loading Logo dialect "' + dialect + '": ' + reason.message);
+      dialect = 'en';
+    }
+  }
+
+  // Populate UI language and Logo dialect selection lists
   {
     const response = await fetch('l10n/languages.txt');
     if (!response.ok) throw Error(response.statusText);
-    const text = await response.text();
-    const select = $('#select-lang');
-    text.split(/\r?\n/g).forEach(entry => {
-      const match = /^(\w+)\s+(.*)$/.exec(entry);
-      if (!match) return;
-      const opt = document.createElement('option');
-      opt.value = match[1];
-      opt.textContent = match[2];
-      select.appendChild(opt);
+    const entries = (await response.text())
+      .split(/\r?\n/g)
+      .map(entry => /^(\w+)\s+(.*)$/.exec(entry))
+      .filter(Boolean);
+
+    function buildSelect(selectEl, currentValue) {
+      entries.forEach(match => {
+        const opt = document.createElement('option');
+        opt.value = match[1];
+        opt.textContent = match[2];
+        selectEl.appendChild(opt);
+      });
+      selectEl.value = currentValue || 'en';
+    }
+
+    function currentUrl() {
+      return String(document.location).replace(/[?#].*/, '');
+    }
+
+    const langSelect = $('#select-lang');
+    const dialectSelect = $('#select-dialect');
+
+    buildSelect(langSelect, document.body.lang || 'en');
+    buildSelect(dialectSelect, dialect);
+
+    langSelect.addEventListener('change', () => {
+      let params = '?lang=' + langSelect.value;
+      if (dialectSelect.value !== 'en') params += '&dialect=' + dialectSelect.value;
+      document.location = currentUrl() + params;
     });
-    select.value = document.body.lang;
-    select.addEventListener('change', () => {
-      let url = String(document.location);
-      url = url.replace(/[?#].*/, '');
-      document.location = url + '?lang=' + select.value;
+
+    dialectSelect.addEventListener('change', () => {
+      let params = '?lang=' + (langSelect.value || 'en');
+      if (dialectSelect.value !== 'en') params += '&dialect=' + dialectSelect.value;
+      document.location = currentUrl() + params;
     });
   }
 

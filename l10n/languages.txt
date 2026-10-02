@@ -7,6 +7,7 @@ he עברית
 it Italiano
 ja 日本語
 pl Polski
+pt Português
 ru Русский
 ua Українська
 zh 中文
