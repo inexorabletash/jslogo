@@ -31,4 +31,3 @@ Logo Links
 To Do
 -----
 * Document deviations from UCB Logo standard
-* Tail-call optimization
